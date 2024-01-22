@@ -46,6 +46,12 @@ struct Trip
     int isAvailable;
 };
 
+struct RouteSequencePair
+{
+    long routeId;
+    int stopSequence;
+};
+
 class Importer {
     public:
         explicit Importer(){};
@@ -56,6 +62,11 @@ class Importer {
         vector<Stop> stops;
         vector<StopTime> stopTimes;
         vector<Trip> trips;
+
+        vector<long> stopTimesOfATrip;
+        vector<vector<long>> tripsOfARoute;
+        vector<vector<long>> stopsOfARoute;
+        vector<vector<RouteSequencePair>> routesOfAStop;
 
         void import(string folderName, bool cleanData, bool extendedGtfsVersion);
 

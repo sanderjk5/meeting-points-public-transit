@@ -1,5 +1,6 @@
 #include <importer.h>
 #include <converter.h>
+#include <comparator.h>
 
 #include <iostream>
 #include <algorithm>
@@ -263,7 +264,7 @@ void Importer::importTrips(string folderPath) {
     Combine stops with the same name and update the stop times accordingly.
 */
 void Importer::combineStops() {
-    map<long, long> stopIdOldToNew = map<long, long>();
+    map<long, long> stopIdOldToCombined = map<long, long>();
     map<string, long> stopNameToId = map<string, long>();
 
     vector<Stop> newStops;
@@ -272,34 +273,116 @@ void Importer::combineStops() {
     for (Stop stop : stops) {
         if (stopNameToId.find(stop.name) == stopNameToId.end()) {
             stopNameToId[stop.name] = id;
-            stopIdOldToNew[stop.id] = id;
+            stopIdOldToCombined[stop.id] = id;
             stop.id = id;
             newStops.push_back(stop);
             id++;
         } else {
             long newId = stopNameToId[stop.name];
-            stopIdOldToNew[stop.id] = newId;
+            stopIdOldToCombined[stop.id] = newId;
             stop.id = newId;
         }
     }
 
     stops = newStops;
 
-    for (StopTime stopTime : stopTimes) {
-        stopTime.stopId = stopIdOldToNew[stopTime.stopId];
+    for (long i = 0; i < stopTimes.size(); i++) {
+        stopTimes[i].stopId = stopIdOldToCombined[stopTimes[i].stopId];
     }
 
     cout << "Combined " << stops.size() << " stops." << endl;
 }
 
+/*
+    Generate valid routes that satisfy the following condition of the raptor algorithms:
+    All trips of a route must have the same sequence of stops.
+
+    Fill the following variables:
+        - stopTimesOfATrip
+        - tripsOfARoute
+        - stopsOfARoute
+        - routesOfAStop
+*/
 void Importer::generateValidRoutes() {
-    // Import the data
-    cout << "Generating valid routes..." << endl;
+    vector<Route> newRoutes;
+    sort(stopTimes.begin(), stopTimes.end(), StopTimesComparator::compareByTripIdAndSequence);
+
+    stopTimesOfATrip = vector<long>(trips.size());
+    tripsOfARoute = vector<vector<long>>(0);
+    stopsOfARoute = vector<vector<long>>(0);
+    routesOfAStop = vector<vector<RouteSequencePair>>(stops.size());
+    for (int i = 0; i < stops.size(); i++) {
+        routesOfAStop[i] = vector<RouteSequencePair>(0);
+    }
+
+    map<string, long> routeIdMapping = map<string, long>();
+    long lastTripId = stopTimes[0].tripId;
+    string stopIdString = "";
+    vector<long> stopIds = vector<long>(0);
+    int stopSequence = 0;
+    stopTimesOfATrip[lastTripId] = 0;
+
+    for (int i = 0; i < stopTimes.size(); i++) {
+        StopTime stopTime = stopTimes[i];
+
+        if (stopTime.tripId != lastTripId) {
+            if(routeIdMapping.find(stopIdString) == routeIdMapping.end()) {
+                Route newRoute;
+                long newRouteId = newRoutes.size();
+                newRoute.id = newRouteId;
+                routeIdMapping[stopIdString] = newRouteId;
+                newRoutes.push_back(newRoute);
+                stopsOfARoute.push_back(stopIds);
+                for(int j = 0; j < stopIds.size(); j++) {
+                    RouteSequencePair routeSequencePair;
+                    routeSequencePair.routeId = newRouteId;
+                    routeSequencePair.stopSequence = j;
+                    routesOfAStop[stopIds[j]].push_back(routeSequencePair);
+                }
+                tripsOfARoute.push_back(vector<long>(0));
+                tripsOfARoute[newRouteId].push_back(lastTripId);
+            } else {
+                long routeId = routeIdMapping[stopIdString];
+                tripsOfARoute[routeId].push_back(lastTripId);
+            }
+            trips[lastTripId].routeId = routeIdMapping[stopIdString];
+            stopIdString = "";
+            stopIds = vector<long>(0);
+            stopSequence = 0;
+            stopTimesOfATrip[stopTime.tripId] = i;
+        } 
+        stopIdString += to_string(stopTime.stopId) + ",";
+        stopIds.push_back(stopTime.stopId);
+        stopSequence++;
+        lastTripId = stopTime.tripId;
+    }
+
+    routes = newRoutes;
+
+    cout << "Generated " << routes.size() << " valid routes." << endl;
 }
 
+/*
+    Set the isAvailable variable of each trip using the calendar data.
+*/
 void Importer::setIsAvailableOfTrips() {
-    // Import the data
-    cout << "Setting isAvailable of trips..." << endl;
+    map<long, long> serviceIdToCalendarId = map<long, long>();
+    for (Calendar calendar : calendars) {
+        int bit = 1;
+        int binaryNumber = 0;
+        for (int i = 6; i >= 0; i--){
+            if (calendar.isAvailable[i]){
+                binaryNumber += bit;
+            }
+            bit *= 2;
+        }
+        serviceIdToCalendarId[calendar.serviceId] = binaryNumber;
+    }
+    for (int i = 0; i < trips.size(); i++) {
+        trips[i].isAvailable = serviceIdToCalendarId[trips[i].serviceId];
+    }
+
+    cout << "Set isAvailable variable of " << trips.size() << " trips." << endl;
 }
 
 void Importer::clearAndSortTrips() {

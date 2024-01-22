@@ -6,6 +6,8 @@ set(SOURCE_FILES
     importer.cpp
     converter.h
     converter.cpp
+    comparator.h
+    comparator.cpp
 )
 
 add_library(data-handling SHARED STATIC ${SOURCE_FILES})
