@@ -11,10 +11,11 @@ int main(int argc, const char *argv[]) {
   cout << HEADER;
   cout << USAGE;
 
-  string folderName = "gtfs_s_bahn_stuttgart";
+  // string folderName = "gtfs_s_bahn_stuttgart";
+  string folderName = "vvs_gtfs_j24";
 
   Importer importer = Importer();
-  importer.import(folderName, true);
+  importer.import(folderName, true, false);
 
   return 0;
 }

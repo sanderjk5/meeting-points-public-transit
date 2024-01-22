@@ -2,6 +2,7 @@
 #include <converter.h>
 
 #include <iostream>
+#include <algorithm>
 #include <chrono>
 
 #include <fstream>
@@ -9,10 +10,11 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <regex>
 
 using namespace std;
 
-void Importer::import(string folderName, bool cleanData) {
+void Importer::import(string folderName, bool cleanData, bool extendedGtfsVersion) {
     // Start the timer
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -22,7 +24,7 @@ void Importer::import(string folderName, bool cleanData) {
     cout << "Importing data..." << endl;
     importCalendars(folderPath);
     importRoutes(folderPath);
-    importStops(folderPath);
+    importStops(folderPath, extendedGtfsVersion);
     importTrips(folderPath);
     importStopTimes(folderPath);
 
@@ -41,6 +43,33 @@ void Importer::import(string folderName, bool cleanData) {
     cout << "Import time: " << duration << " milliseconds" << endl;
 }
 
+vector<string> Importer::splitCsvLine(string &line) {
+    vector<string> fields;
+    string field;
+    bool inQuotes = false;
+
+    for (char c : line) {
+        if (c == '\"') {
+            inQuotes = !inQuotes;
+        } else if (c == ',' && !inQuotes) {
+            fields.push_back(field);
+            field.clear();
+        } else {
+            field.push_back(c);
+        }
+    }
+    fields.push_back(field); // add last field
+
+    // Remove enclosing double quotes from fields, if present
+    for (auto& field : fields) {
+        if (field.front() == '"' && field.back() == '"') {
+            field = field.substr(1, field.size() - 2);
+        }
+    }
+
+    return fields;
+}
+
 void Importer::importCalendars(string folderPath) {
     // Import the data
     std::string filePath = folderPath + "calendar.txt";
@@ -56,26 +85,20 @@ void Importer::importCalendars(string folderPath) {
     long id = 0;
 
     while (std::getline(file, line)) {
-        std::istringstream iss(line);
-        std::string field;
+        vector<string> fields = splitCsvLine(line);
 
         Calendar calendar;
 
         // Read each field and assign it to the calendar variable
-        std::getline(iss, field, ',');
         calendar.serviceId = id;
-        serviceIdOldToNew[field] = id;
+        serviceIdOldToNew[fields[0]] = id;
 
-        for (int i = 0; i < 7; i++) {
-            std::getline(iss, field, ',');
-            calendar.isAvailable.push_back(field == "1");
+        for (int i = 1; i < 8; i++) {
+            calendar.isAvailable.push_back(fields[i] == "1");
         }
 
-        std::getline(iss, field, ',');
-        calendar.startDate = field;
-
-        std::getline(iss, field, ',');
-        calendar.endDate = field;
+        calendar.startDate = fields[8];
+        calendar.endDate = fields[9];
 
         calendars.push_back(calendar);
         id++;
@@ -103,15 +126,13 @@ void Importer::importRoutes(string folderPath) {
     long id = 0;
 
     while (std::getline(file, line)) {
-        std::istringstream iss(line);
-        std::string field;
+        vector<string> fields = splitCsvLine(line);
 
         Route route;
 
         // Read each field and assign it to the routes variable
-        std::getline(iss, field, ',');
         route.id = id;
-        routeIdOldToNew[field] = id;
+        routeIdOldToNew[fields[0]] = id;
 
         routes.push_back(route);
         id++;
@@ -122,7 +143,7 @@ void Importer::importRoutes(string folderPath) {
     cout << "Imported " << routes.size() << " routes." << endl;
 }
 
-void Importer::importStops(string folderPath) {
+void Importer::importStops(string folderPath, bool extendedGtfsVersion) {
     // Import the data
 
     std::string filePath = folderPath + "stops.txt";
@@ -138,28 +159,23 @@ void Importer::importStops(string folderPath) {
     long id = 0;
 
     while (std::getline(file, line)) {
-        std::istringstream iss(line);
-        std::string field;
+        vector<string> fields = splitCsvLine(line);
 
         Stop stop;
 
         // Read each field and assign it to the stop variable
-        std::getline(iss, field, ',');
         stop.id = id;
-        stopIdOldToNew[field] = id;
+        stopIdOldToNew[fields[0]] = id;
 
-        std::getline(iss, field, ',');
-
-        std::getline(iss, field, ',');
-        stop.name = field;
-
-        std::getline(iss, field, ',');
-
-        std::getline(iss, field, ',');
-        stop.lat = std::stod(field);
-
-        std::getline(iss, field, ',');
-        stop.lon = std::stod(field);
+        if (extendedGtfsVersion){
+            stop.name = fields[2];
+            stop.lat = std::stod(fields[4]);
+            stop.lon = std::stod(fields[5]);
+        } else {
+            stop.name = fields[1];
+            stop.lat = std::stod(fields[2]);
+            stop.lon = std::stod(fields[3]);
+        }
 
         stops.push_back(stop);
         id++;
@@ -186,26 +202,16 @@ void Importer::importStopTimes(string folderPath) {
     long id = 0;
 
     while (std::getline(file, line)) {
-        std::istringstream iss(line);
-        std::string field;
+        vector<string> fields = splitCsvLine(line);
 
         StopTime stopTime;
 
         // Read each field and assign it to the stop time variable
-        std::getline(iss, field, ',');
-        stopTime.tripId = tripIdOldToNew[field];
-
-        std::getline(iss, field, ',');
-        stopTime.arrivalTime = TimeConverter::convertTimeToSeconds(field);
-
-        std::getline(iss, field, ',');
-        stopTime.departureTime = TimeConverter::convertTimeToSeconds(field);
-
-        std::getline(iss, field, ',');
-        stopTime.stopId = stopIdOldToNew[field];
-
-        std::getline(iss, field, ',');
-        stopTime.stopSequence = std::stoi(field);
+        stopTime.tripId = tripIdOldToNew[fields[0]];
+        stopTime.arrivalTime = TimeConverter::convertTimeToSeconds(fields[1]);
+        stopTime.departureTime = TimeConverter::convertTimeToSeconds(fields[2]);
+        stopTime.stopId = stopIdOldToNew[fields[3]];
+        stopTime.stopSequence = std::stoi(fields[4]);
 
         stopTimes.push_back(stopTime);
         id++;
@@ -232,25 +238,15 @@ void Importer::importTrips(string folderPath) {
     long id = 0;
 
     while (std::getline(file, line)) {
-        std::istringstream iss(line);
-        std::string field;
+        vector<string> fields = splitCsvLine(line);
 
         Trip trip;
 
         // Read each field and assign it to the trip variable
-        std::getline(iss, field, ',');
-        trip.routeId = routeIdOldToNew[field];
-
-        std::getline(iss, field, ',');
-        trip.serviceId = serviceIdOldToNew[field];
-
-        std::getline(iss, field, ',');
+        trip.routeId = routeIdOldToNew[fields[0]];
+        trip.serviceId = serviceIdOldToNew[fields[1]];
         trip.id = id;
-        tripIdOldToNew[field] = id;
-
-        std::getline(iss, field, ',');
-
-        std::getline(iss, field, ',');
+        tripIdOldToNew[fields[2]] = id;
 
         trip.isAvailable = 1111111;
 
@@ -263,9 +259,37 @@ void Importer::importTrips(string folderPath) {
     cout << "Imported " << trips.size() << " trips." << endl;
 }
 
+/*
+    Combine stops with the same name and update the stop times accordingly.
+*/
 void Importer::combineStops() {
-    // Import the data
-    cout << "Combining stops..." << endl;
+    map<long, long> stopIdOldToNew = map<long, long>();
+    map<string, long> stopNameToId = map<string, long>();
+
+    vector<Stop> newStops;
+    long id = 0;
+
+    for (Stop stop : stops) {
+        if (stopNameToId.find(stop.name) == stopNameToId.end()) {
+            stopNameToId[stop.name] = id;
+            stopIdOldToNew[stop.id] = id;
+            stop.id = id;
+            newStops.push_back(stop);
+            id++;
+        } else {
+            long newId = stopNameToId[stop.name];
+            stopIdOldToNew[stop.id] = newId;
+            stop.id = newId;
+        }
+    }
+
+    stops = newStops;
+
+    for (StopTime stopTime : stopTimes) {
+        stopTime.stopId = stopIdOldToNew[stopTime.stopId];
+    }
+
+    cout << "Combined " << stops.size() << " stops." << endl;
 }
 
 void Importer::generateValidRoutes() {

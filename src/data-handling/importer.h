@@ -57,7 +57,7 @@ class Importer {
         vector<StopTime> stopTimes;
         vector<Trip> trips;
 
-        void import(string folderName, bool cleanData);
+        void import(string folderName, bool cleanData, bool extendedGtfsVersion);
 
     private:
         map<string, long> serviceIdOldToNew;
@@ -65,9 +65,11 @@ class Importer {
         map<string, long> stopIdOldToNew;
         map<string, long> tripIdOldToNew;
 
+        vector<string> splitCsvLine(string &line);
+
         void importCalendars(string folderPath);
         void importRoutes(string folderPath);
-        void importStops(string folderPath);
+        void importStops(string folderPath, bool extendedGtfsVersion);
         void importStopTimes(string folderPath);
         void importTrips(string folderPath);
 
