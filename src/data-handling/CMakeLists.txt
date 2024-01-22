@@ -4,6 +4,8 @@ project(data-handling)
 set(SOURCE_FILES
     importer.h
     importer.cpp
+    converter.h
+    converter.cpp
 )
 
 add_library(data-handling SHARED STATIC ${SOURCE_FILES})

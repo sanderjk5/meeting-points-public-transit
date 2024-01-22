@@ -1,4 +1,5 @@
-#include "importer.h"
+#include <importer.h>
+#include <converter.h>
 
 #include <iostream>
 #include <chrono>
@@ -42,8 +43,6 @@ void Importer::import(string folderName, bool cleanData) {
 
 void Importer::importCalendars(string folderPath) {
     // Import the data
-    cout << "Importing calendars..." << endl;
-
     std::string filePath = folderPath + "calendar.txt";
 
     std::ifstream file(filePath);
@@ -89,7 +88,6 @@ void Importer::importCalendars(string folderPath) {
 
 void Importer::importRoutes(string folderPath) {
     // Import the data
-    cout << "Importing routes..." << endl;
 
     // combine folder path with file name
     std::string filePath = folderPath + "routes.txt";
@@ -126,7 +124,6 @@ void Importer::importRoutes(string folderPath) {
 
 void Importer::importStops(string folderPath) {
     // Import the data
-    cout << "Importing stops..." << endl;
 
     std::string filePath = folderPath + "stops.txt";
 
@@ -175,7 +172,6 @@ void Importer::importStops(string folderPath) {
 
 void Importer::importStopTimes(string folderPath) {
     // Import the data
-    cout << "Importing stop times..." << endl;
 
     std::string filePath = folderPath + "stop_times.txt";
 
@@ -200,10 +196,10 @@ void Importer::importStopTimes(string folderPath) {
         stopTime.tripId = tripIdOldToNew[field];
 
         std::getline(iss, field, ',');
-        stopTime.arrivalTime = field;
+        stopTime.arrivalTime = TimeConverter::convertTimeToSeconds(field);
 
         std::getline(iss, field, ',');
-        stopTime.departureTime = field;
+        stopTime.departureTime = TimeConverter::convertTimeToSeconds(field);
 
         std::getline(iss, field, ',');
         stopTime.stopId = stopIdOldToNew[field];
@@ -222,7 +218,6 @@ void Importer::importStopTimes(string folderPath) {
 
 void Importer::importTrips(string folderPath) {
     // Import the data
-    cout << "Importing trips..." << endl;
 
     std::string filePath = folderPath + "trips.txt";
 

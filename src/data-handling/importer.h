@@ -32,8 +32,8 @@ struct Stop
 struct StopTime
 {
     long tripId;
-    string arrivalTime;
-    string departureTime;
+    int arrivalTime;
+    int departureTime;
     long stopId;
     int stopSequence;
 };

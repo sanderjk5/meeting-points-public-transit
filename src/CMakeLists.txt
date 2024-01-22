@@ -4,6 +4,7 @@ project(main-project)
 add_subdirectory(data-handling)
 set(SOURCE_FILES 
     main.cpp
+    header.h
 )
 
 add_executable(main-project ${SOURCE_FILES})
