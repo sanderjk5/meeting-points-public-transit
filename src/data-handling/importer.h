@@ -46,6 +46,17 @@ struct Trip
     int isAvailable;
 };
 
+struct Connection
+{
+    long id;
+    long departureStopId;
+    int departureTime;
+    long arrivalStopId;
+    int arrivalTime;
+    long tripId;
+    int stopSequence;
+};
+
 struct RouteSequencePair
 {
     long routeId;
@@ -68,6 +79,8 @@ class Importer {
         vector<Stop> stops;
         vector<StopTime> stopTimes;
         vector<Trip> trips;
+
+        vector<Connection> connections;
 
         vector<long> indexOfFirstStopTimeOfATrip;
         vector<vector<long>> tripsOfARoute;
@@ -96,6 +109,7 @@ class Importer {
         void generateValidRoutes();
         void setIsAvailableOfTrips();
         void clearAndSortTrips();
+        void generateSortedConnections();
 };
 
 #endif //CMAKE_IMPORTER_H

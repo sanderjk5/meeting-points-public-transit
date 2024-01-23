@@ -36,6 +36,8 @@ void Importer::import(string folderName, bool cleanData, bool extendedGtfsVersio
         clearAndSortTrips();
     }
 
+    generateSortedConnections();
+
     // Stop the timer and calculate the duration
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
@@ -323,7 +325,7 @@ void Importer::combineStops() {
 */
 void Importer::generateValidRoutes() {
     vector<Route> newRoutes;
-    sort(stopTimes.begin(), stopTimes.end(), StopTimesComparator::compareByTripIdAndSequence);
+    sort(stopTimes.begin(), stopTimes.end(), StopTimeComparator::compareByTripIdAndSequence);
 
     indexOfFirstStopTimeOfATrip = vector<long>(trips.size());
     tripsOfARoute = vector<vector<long>>(0);
@@ -416,7 +418,7 @@ void Importer::clearAndSortTrips() {
             tripDepartureTimePair.departureTime = stopTimes[indexOfFirstStopTimeOfATrip[tripsOfARoute[i][j]]].departureTime;
             tripDepartureTimePairs.push_back(tripDepartureTimePair);
         }
-        sort(tripDepartureTimePairs.begin(), tripDepartureTimePairs.end(), TripDepartureTimePairComparator::compareByDeparture);
+        sort(tripDepartureTimePairs.begin(), tripDepartureTimePairs.end(), TripDepartureTimePairComparator::compareByDepartureTime);
         
         vector<vector<StopTime>> lastStopTimePerDay = vector<vector<StopTime>>(7);
         for (int j = 0; j < 7; j++){
@@ -450,4 +452,39 @@ void Importer::clearAndSortTrips() {
         tripsOfARoute[i] = sortedTripsOfARoute;
     }
     cout << "Sorted and cleared " << trips.size() << " trips." << endl;
+}
+
+/*
+    Use the stop times to generate connections so that they can be used by the CSA. 
+    Store them sorted by their departure time.
+*/
+void Importer::generateSortedConnections() {
+    for(int i = 0; i < trips.size(); i++){
+        long tripId = trips[i].id;
+        long indexOfFirstStopTime = indexOfFirstStopTimeOfATrip[tripId];
+
+        StopTime previousStopTime = stopTimes[indexOfFirstStopTime];
+        for (int j = indexOfFirstStopTime + 1; j < stopTimes.size(); j ++){
+            StopTime currentStopTime = stopTimes[j];
+            if (currentStopTime.tripId != tripId) {
+                break;
+            }
+            Connection connection;
+            connection.departureStopId = previousStopTime.stopId;
+            connection.departureTime = previousStopTime.departureTime;
+            connection.arrivalStopId = currentStopTime.stopId;
+            connection.arrivalTime = currentStopTime.arrivalTime;
+
+            connections.push_back(connection);
+            previousStopTime = currentStopTime;
+        }
+    }
+
+    sort(connections.begin(), connections.end(), ConnectionComparator::compareByDepartureTime);
+
+    for (int i = 0; i < connections.size(); i++){
+        connections[i].id = i;
+    }
+
+    cout << "Generated " << connections.size() << " connections." << endl;
 }

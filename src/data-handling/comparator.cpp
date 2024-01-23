@@ -4,11 +4,11 @@
 
 using namespace std;
 
-bool StopTimesComparator::compareByDeparture(StopTime stopTime1, StopTime stopTime2) {
+bool StopTimeComparator::compareByDepartureTime(StopTime stopTime1, StopTime stopTime2) {
     return stopTime1.departureTime < stopTime2.departureTime;
 }
 
-bool StopTimesComparator::compareByTripIdAndSequence(StopTime stopTime1, StopTime stopTime2) {
+bool StopTimeComparator::compareByTripIdAndSequence(StopTime stopTime1, StopTime stopTime2) {
     if (stopTime1.tripId == stopTime2.tripId) {
         return stopTime1.stopSequence < stopTime2.stopSequence;
     }
@@ -16,6 +16,10 @@ bool StopTimesComparator::compareByTripIdAndSequence(StopTime stopTime1, StopTim
     return stopTime1.tripId < stopTime2.tripId;
 }
 
-bool TripDepartureTimePairComparator::compareByDeparture(TripDepartureTimePair tripDepartureTimePair1, TripDepartureTimePair tripDepartureTimePair2) {
+bool ConnectionComparator::compareByDepartureTime(Connection connection1, Connection connection2) {
+    return connection1.departureTime < connection2.departureTime;
+}
+
+bool TripDepartureTimePairComparator::compareByDepartureTime(TripDepartureTimePair tripDepartureTimePair1, TripDepartureTimePair tripDepartureTimePair2) {
     return tripDepartureTimePair1.departureTime < tripDepartureTimePair2.departureTime;
 }

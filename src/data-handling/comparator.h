@@ -6,13 +6,21 @@
 
 using namespace std;
 
-class StopTimesComparator {
+class StopTimeComparator {
     public:
-        explicit StopTimesComparator(){};
-        ~StopTimesComparator(){};
+        explicit StopTimeComparator(){};
+        ~StopTimeComparator(){};
 
-        static bool compareByDeparture(StopTime stopTime1, StopTime stopTime2);
+        static bool compareByDepartureTime(StopTime stopTime1, StopTime stopTime2);
         static bool compareByTripIdAndSequence(StopTime stopTime1, StopTime stopTime2);
+};
+
+class ConnectionComparator {
+    public:
+        explicit ConnectionComparator(){};
+        ~ConnectionComparator(){};
+
+        static bool compareByDepartureTime(Connection connection1, Connection connection2);
 };
 
 class TripDepartureTimePairComparator {
@@ -20,7 +28,7 @@ class TripDepartureTimePairComparator {
         explicit TripDepartureTimePairComparator(){};
         ~TripDepartureTimePairComparator(){};
 
-        static bool compareByDeparture(TripDepartureTimePair tripDepartureTimePair1, TripDepartureTimePair tripDepartureTimePair2);
+        static bool compareByDepartureTime(TripDepartureTimePair tripDepartureTimePair1, TripDepartureTimePair tripDepartureTimePair2);
 };
 
 
