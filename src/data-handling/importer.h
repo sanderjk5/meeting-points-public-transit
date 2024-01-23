@@ -10,7 +10,7 @@ using namespace std;
 
 struct Calendar
 {
-    long serviceId;
+    int serviceId;
     string startDate;
     string endDate;
     vector <bool> isAvailable; // list of days of the week
@@ -18,12 +18,12 @@ struct Calendar
 
 struct Route
 {
-    long id;
+    int id;
 };
 
 struct Stop
 {
-    long id;
+    int id;
     string name;
     double lat;
     double lon;
@@ -31,41 +31,41 @@ struct Stop
 
 struct StopTime
 {
-    long tripId;
+    int tripId;
     int arrivalTime;
     int departureTime;
-    long stopId;
+    int stopId;
     int stopSequence;
 };
 
 struct Trip
 {
-    long routeId;
-    long serviceId;
-    long id;
+    int routeId;
+    int serviceId;
+    int id;
     int isAvailable;
 };
 
 struct Connection
 {
-    long id;
-    long departureStopId;
+    int id;
+    int departureStopId;
     int departureTime;
-    long arrivalStopId;
+    int arrivalStopId;
     int arrivalTime;
-    long tripId;
+    int tripId;
     int stopSequence;
 };
 
 struct RouteSequencePair
 {
-    long routeId;
+    int routeId;
     int stopSequence;
 };
 
 struct TripDepartureTimePair
 {
-    long tripId;
+    int tripId;
     int departureTime;
 };
 
@@ -82,20 +82,20 @@ class Importer {
 
         vector<Connection> connections;
 
-        vector<long> indexOfFirstStopTimeOfATrip;
-        vector<vector<long>> tripsOfARoute;
-        vector<vector<long>> stopsOfARoute;
+        vector<int> indexOfFirstStopTimeOfATrip;
+        vector<vector<int>> tripsOfARoute;
+        vector<vector<int>> stopsOfARoute;
         vector<vector<RouteSequencePair>> routesOfAStop;
 
         void import(string folderName, bool cleanData, bool extendedGtfsVersion);
-        vector<StopTime> getStopTimesOfATrip(long tripId);
-        bool isTripAvailable(long tripId, int dayOfWeek);
+        vector<StopTime> getStopTimesOfATrip(int tripId);
+        bool isTripAvailable(int tripId, int dayOfWeek);
 
     private:
-        map<string, long> serviceIdOldToNew;
-        map<string, long> routeIdOldToNew;
-        map<string, long> stopIdOldToNew;
-        map<string, long> tripIdOldToNew;
+        map<string, int> serviceIdOldToNew;
+        map<string, int> routeIdOldToNew;
+        map<string, int> stopIdOldToNew;
+        map<string, int> tripIdOldToNew;
 
         vector<string> splitCsvLine(string &line);
 

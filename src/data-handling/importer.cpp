@@ -46,11 +46,11 @@ void Importer::import(string folderName, bool cleanData, bool extendedGtfsVersio
     cout << "Import time: " << duration << " milliseconds" << endl;
 }
 
-vector<StopTime> Importer::getStopTimesOfATrip(long tripId) {
+vector<StopTime> Importer::getStopTimesOfATrip(int tripId) {
     vector<StopTime> stopTimesOfATrip = vector<StopTime>(0);
-    long indexOfFirstStopTime = indexOfFirstStopTimeOfATrip[tripId];
-    long indexOfLastStopTime = stopTimes.size() - 1;
-    for(long i = indexOfFirstStopTime; i < indexOfLastStopTime; i++) {
+    int indexOfFirstStopTime = indexOfFirstStopTimeOfATrip[tripId];
+    int indexOfLastStopTime = stopTimes.size() - 1;
+    for(int i = indexOfFirstStopTime; i < indexOfLastStopTime; i++) {
         if (stopTimes[i].tripId == tripId) {
             stopTimesOfATrip.push_back(stopTimes[i]);
         } else {
@@ -60,7 +60,7 @@ vector<StopTime> Importer::getStopTimesOfATrip(long tripId) {
     return stopTimesOfATrip;
 }
 
-bool Importer::isTripAvailable(long tripId, int dayOfWeek) {
+bool Importer::isTripAvailable(int tripId, int dayOfWeek) {
     return (trips[tripId].isAvailable >> dayOfWeek) & 1;
 }
 
@@ -103,7 +103,7 @@ void Importer::importCalendars(string folderPath) {
     std::string line;
     std::getline(file, line); // Skip the header line
 
-    long id = 0;
+    int id = 0;
 
     while (std::getline(file, line)) {
         vector<string> fields = splitCsvLine(line);
@@ -144,7 +144,7 @@ void Importer::importRoutes(string folderPath) {
     std::string line;
     std::getline(file, line); // Skip the header line
 
-    long id = 0;
+    int id = 0;
 
     while (std::getline(file, line)) {
         vector<string> fields = splitCsvLine(line);
@@ -177,7 +177,7 @@ void Importer::importStops(string folderPath, bool extendedGtfsVersion) {
     std::string line;
     std::getline(file, line); // Skip the header line
 
-    long id = 0;
+    int id = 0;
 
     while (std::getline(file, line)) {
         vector<string> fields = splitCsvLine(line);
@@ -220,7 +220,7 @@ void Importer::importStopTimes(string folderPath) {
     std::string line;
     std::getline(file, line); // Skip the header line
 
-    long id = 0;
+    int id = 0;
 
     while (std::getline(file, line)) {
         vector<string> fields = splitCsvLine(line);
@@ -256,7 +256,7 @@ void Importer::importTrips(string folderPath) {
     std::string line;
     std::getline(file, line); // Skip the header line
 
-    long id = 0;
+    int id = 0;
 
     while (std::getline(file, line)) {
         vector<string> fields = splitCsvLine(line);
@@ -284,11 +284,11 @@ void Importer::importTrips(string folderPath) {
     Combine stops with the same name and update the stop times accordingly.
 */
 void Importer::combineStops() {
-    map<long, long> stopIdOldToCombined = map<long, long>();
-    map<string, long> stopNameToId = map<string, long>();
+    map<int, int> stopIdOldToCombined = map<int, int>();
+    map<string, int> stopNameToId = map<string, int>();
 
     vector<Stop> newStops;
-    long id = 0;
+    int id = 0;
 
     for (Stop stop : stops) {
         if (stopNameToId.find(stop.name) == stopNameToId.end()) {
@@ -298,7 +298,7 @@ void Importer::combineStops() {
             newStops.push_back(stop);
             id++;
         } else {
-            long newId = stopNameToId[stop.name];
+            int newId = stopNameToId[stop.name];
             stopIdOldToCombined[stop.id] = newId;
             stop.id = newId;
         }
@@ -306,7 +306,7 @@ void Importer::combineStops() {
 
     stops = newStops;
 
-    for (long i = 0; i < stopTimes.size(); i++) {
+    for (int i = 0; i < stopTimes.size(); i++) {
         stopTimes[i].stopId = stopIdOldToCombined[stopTimes[i].stopId];
     }
 
@@ -327,18 +327,18 @@ void Importer::generateValidRoutes() {
     vector<Route> newRoutes;
     sort(stopTimes.begin(), stopTimes.end(), StopTimeComparator::compareByTripIdAndSequence);
 
-    indexOfFirstStopTimeOfATrip = vector<long>(trips.size());
-    tripsOfARoute = vector<vector<long>>(0);
-    stopsOfARoute = vector<vector<long>>(0);
+    indexOfFirstStopTimeOfATrip = vector<int>(trips.size());
+    tripsOfARoute = vector<vector<int>>(0);
+    stopsOfARoute = vector<vector<int>>(0);
     routesOfAStop = vector<vector<RouteSequencePair>>(stops.size());
     for (int i = 0; i < stops.size(); i++) {
         routesOfAStop[i] = vector<RouteSequencePair>(0);
     }
 
-    map<string, long> routeIdMapping = map<string, long>();
-    long lastTripId = stopTimes[0].tripId;
+    map<string, int> routeIdMapping = map<string, int>();
+    int lastTripId = stopTimes[0].tripId;
     string stopIdString = "";
-    vector<long> stopIds = vector<long>(0);
+    vector<int> stopIds = vector<int>(0);
     int stopSequence = 0;
     indexOfFirstStopTimeOfATrip[lastTripId] = 0;
 
@@ -348,7 +348,7 @@ void Importer::generateValidRoutes() {
         if (stopTime.tripId != lastTripId) {
             if(routeIdMapping.find(stopIdString) == routeIdMapping.end()) {
                 Route newRoute;
-                long newRouteId = newRoutes.size();
+                int newRouteId = newRoutes.size();
                 newRoute.id = newRouteId;
                 routeIdMapping[stopIdString] = newRouteId;
                 newRoutes.push_back(newRoute);
@@ -359,15 +359,15 @@ void Importer::generateValidRoutes() {
                     routeSequencePair.stopSequence = j;
                     routesOfAStop[stopIds[j]].push_back(routeSequencePair);
                 }
-                tripsOfARoute.push_back(vector<long>(0));
+                tripsOfARoute.push_back(vector<int>(0));
                 tripsOfARoute[newRouteId].push_back(lastTripId);
             } else {
-                long routeId = routeIdMapping[stopIdString];
+                int routeId = routeIdMapping[stopIdString];
                 tripsOfARoute[routeId].push_back(lastTripId);
             }
             trips[lastTripId].routeId = routeIdMapping[stopIdString];
             stopIdString = "";
-            stopIds = vector<long>(0);
+            stopIds = vector<int>(0);
             stopSequence = 0;
             indexOfFirstStopTimeOfATrip[stopTime.tripId] = i;
         } 
@@ -386,7 +386,7 @@ void Importer::generateValidRoutes() {
     Set the isAvailable variable of each trip using the calendar data.
 */
 void Importer::setIsAvailableOfTrips() {
-    map<long, long> serviceIdToCalendarId = map<long, long>();
+    map<int, int> serviceIdToCalendarId = map<int, int>();
     for (Calendar calendar : calendars) {
         int bit = 1;
         int binaryNumber = 0;
@@ -410,7 +410,7 @@ void Importer::setIsAvailableOfTrips() {
 */
 void Importer::clearAndSortTrips() {
     for (int i = 0; i < tripsOfARoute.size(); i++) {
-        vector<long> sortedTripsOfARoute = vector<long>(0);
+        vector<int> sortedTripsOfARoute = vector<int>(0);
         vector<TripDepartureTimePair> tripDepartureTimePairs = vector<TripDepartureTimePair>(0);
         for (int j = 0; j < tripsOfARoute[i].size(); j++) {
             TripDepartureTimePair tripDepartureTimePair;
@@ -426,7 +426,7 @@ void Importer::clearAndSortTrips() {
         }
 
         for (int j = 0; j < tripDepartureTimePairs.size(); j++){
-            long tripId = tripDepartureTimePairs[j].tripId;
+            int tripId = tripDepartureTimePairs[j].tripId;
             vector<StopTime> stopTimesOfTrip = getStopTimesOfATrip(tripId);
 
             int bit = 1;
@@ -460,8 +460,8 @@ void Importer::clearAndSortTrips() {
 */
 void Importer::generateSortedConnections() {
     for(int i = 0; i < trips.size(); i++){
-        long tripId = trips[i].id;
-        long indexOfFirstStopTime = indexOfFirstStopTimeOfATrip[tripId];
+        int tripId = trips[i].id;
+        int indexOfFirstStopTime = indexOfFirstStopTimeOfATrip[tripId];
 
         StopTime previousStopTime = stopTimes[indexOfFirstStopTime];
         for (int j = indexOfFirstStopTime + 1; j < stopTimes.size(); j ++){
