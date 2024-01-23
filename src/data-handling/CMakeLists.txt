@@ -1,16 +1,3 @@
-cmake_minimum_required(VERSION 3.2)
-project(data-handling)
-
-set(SOURCE_FILES
-    importer.h
-    importer.cpp
-    converter.h
-    converter.cpp
-    comparator.h
-    comparator.cpp
-)
-
-add_library(data-handling SHARED STATIC ${SOURCE_FILES})
-
-install(TARGETS data-handling DESTINATION ${INSTALL_LIB_DIR})
-install(FILES division.h DESTINATION ${INSTALL_INCLUDE_DIR})
+version https://git-lfs.github.com/spec/v1
+oid sha256:44364ac4d9a34206b79a3653998e3c51fb40e4697e7869603654da0f0b1ca813
+size 377

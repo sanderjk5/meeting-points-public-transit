@@ -1,9 +1,3 @@
-trans_id,lang,translation
-http://www.bahn.de,de,http://www.bahn.de
-http://www.bahn.de,en,http://www.bahn.com/en/view/index.shtml
-http://www.bahn.de,es,http://www.bahn.com/es/view/index.shtml
-http://www.bahn.de,fr,http://www.bahn.com/fr/view/index.shtml
-http://www.bahn.de,it,http://www.bahn.com/it/view/index.shtml
-http://www.bahn.de,nl,http://www.bahn.com/nl/view/index.shtml
-http://www.bahn.de,pl,http://www.bahn.com/pl/view/index.shtml
-http://www.bahn.de,da,http://www.bahn.com/da/view/index.shtml
+version https://git-lfs.github.com/spec/v1
+oid sha256:b0c9a64b460a480174271d7df6835564e3abfa23e64f9f6f2654eff09b0cc437
+size 510

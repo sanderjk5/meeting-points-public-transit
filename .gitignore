@@ -56,4 +56,4 @@ test/test_runner
 
 
 # large data files
-data/vvs_gtfs_j24/*
+#data/vvs_gtfs_j24/*
