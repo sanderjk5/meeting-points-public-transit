@@ -1,0 +1,9 @@
+route_id,agency_id,route_short_name,route_long_name,route_desc,route_type,route_url,route_color,route_text_color
+1,800643,S6,,,109,,,
+2,800643,S3,,,109,,,
+3,800643,S1,,,109,,,
+4,800643,S2,,,109,,,
+5,800643,S4,,,109,,,
+6,800643,S5,,,109,,,
+7,800643,S60,,,109,,,
+8,800643,S11,,,109,,,

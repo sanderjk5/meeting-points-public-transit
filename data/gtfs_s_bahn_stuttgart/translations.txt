@@ -1,0 +1,9 @@
+trans_id,lang,translation
+http://www.bahn.de,de,http://www.bahn.de
+http://www.bahn.de,en,http://www.bahn.com/en/view/index.shtml
+http://www.bahn.de,es,http://www.bahn.com/es/view/index.shtml
+http://www.bahn.de,fr,http://www.bahn.com/fr/view/index.shtml
+http://www.bahn.de,it,http://www.bahn.com/it/view/index.shtml
+http://www.bahn.de,nl,http://www.bahn.com/nl/view/index.shtml
+http://www.bahn.de,pl,http://www.bahn.com/pl/view/index.shtml
+http://www.bahn.de,da,http://www.bahn.com/da/view/index.shtml

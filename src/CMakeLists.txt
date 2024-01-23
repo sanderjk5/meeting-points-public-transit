@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 3.2)
-project(meeting-points-public-transit)
+project(main-project)
 
 add_subdirectory(data-handling)
 set(SOURCE_FILES 
     main.cpp
+    header.h
 )
 
-add_executable(meeting-points-public-transit ${SOURCE_FILES})
-install(TARGETS meeting-points-public-transit DESTINATION ${INSTALL_BIN_DIR})
+add_executable(main-project ${SOURCE_FILES})
+target_link_libraries(main-project data-handling)
+install(TARGETS main-project DESTINATION ${INSTALL_BIN_DIR})
