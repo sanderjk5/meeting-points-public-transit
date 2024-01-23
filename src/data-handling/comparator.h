@@ -15,5 +15,13 @@ class StopTimesComparator {
         static bool compareByTripIdAndSequence(StopTime stopTime1, StopTime stopTime2);
 };
 
+class TripDepartureTimePairComparator {
+    public:
+        explicit TripDepartureTimePairComparator(){};
+        ~TripDepartureTimePairComparator(){};
+
+        static bool compareByDeparture(TripDepartureTimePair tripDepartureTimePair1, TripDepartureTimePair tripDepartureTimePair2);
+};
+
 
 #endif //CMAKE_COMPARATOR_H

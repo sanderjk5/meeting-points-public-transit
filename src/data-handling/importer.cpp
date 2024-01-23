@@ -44,6 +44,24 @@ void Importer::import(string folderName, bool cleanData, bool extendedGtfsVersio
     cout << "Import time: " << duration << " milliseconds" << endl;
 }
 
+vector<StopTime> Importer::getStopTimesOfATrip(long tripId) {
+    vector<StopTime> stopTimesOfATrip = vector<StopTime>(0);
+    long indexOfFirstStopTime = indexOfFirstStopTimeOfATrip[tripId];
+    long indexOfLastStopTime = stopTimes.size() - 1;
+    for(long i = indexOfFirstStopTime; i < indexOfLastStopTime; i++) {
+        if (stopTimes[i].tripId == tripId) {
+            stopTimesOfATrip.push_back(stopTimes[i]);
+        } else {
+            break;
+        }
+    }
+    return stopTimesOfATrip;
+}
+
+bool Importer::isTripAvailable(long tripId, int dayOfWeek) {
+    return (trips[tripId].isAvailable >> dayOfWeek) & 1;
+}
+
 vector<string> Importer::splitCsvLine(string &line) {
     vector<string> fields;
     string field;
@@ -249,7 +267,7 @@ void Importer::importTrips(string folderPath) {
         trip.id = id;
         tripIdOldToNew[fields[2]] = id;
 
-        trip.isAvailable = 1111111;
+        trip.isAvailable = 127;
 
         trips.push_back(trip);
         id++;
@@ -298,7 +316,7 @@ void Importer::combineStops() {
     All trips of a route must have the same sequence of stops.
 
     Fill the following variables:
-        - stopTimesOfATrip
+        - indexOfFirstStopTimeOfATrip
         - tripsOfARoute
         - stopsOfARoute
         - routesOfAStop
@@ -307,7 +325,7 @@ void Importer::generateValidRoutes() {
     vector<Route> newRoutes;
     sort(stopTimes.begin(), stopTimes.end(), StopTimesComparator::compareByTripIdAndSequence);
 
-    stopTimesOfATrip = vector<long>(trips.size());
+    indexOfFirstStopTimeOfATrip = vector<long>(trips.size());
     tripsOfARoute = vector<vector<long>>(0);
     stopsOfARoute = vector<vector<long>>(0);
     routesOfAStop = vector<vector<RouteSequencePair>>(stops.size());
@@ -320,7 +338,7 @@ void Importer::generateValidRoutes() {
     string stopIdString = "";
     vector<long> stopIds = vector<long>(0);
     int stopSequence = 0;
-    stopTimesOfATrip[lastTripId] = 0;
+    indexOfFirstStopTimeOfATrip[lastTripId] = 0;
 
     for (int i = 0; i < stopTimes.size(); i++) {
         StopTime stopTime = stopTimes[i];
@@ -349,7 +367,7 @@ void Importer::generateValidRoutes() {
             stopIdString = "";
             stopIds = vector<long>(0);
             stopSequence = 0;
-            stopTimesOfATrip[stopTime.tripId] = i;
+            indexOfFirstStopTimeOfATrip[stopTime.tripId] = i;
         } 
         stopIdString += to_string(stopTime.stopId) + ",";
         stopIds.push_back(stopTime.stopId);
@@ -370,7 +388,7 @@ void Importer::setIsAvailableOfTrips() {
     for (Calendar calendar : calendars) {
         int bit = 1;
         int binaryNumber = 0;
-        for (int i = 6; i >= 0; i--){
+        for (int i = 0; i < 7; i++){
             if (calendar.isAvailable[i]){
                 binaryNumber += bit;
             }
@@ -385,7 +403,51 @@ void Importer::setIsAvailableOfTrips() {
     cout << "Set isAvailable variable of " << trips.size() << " trips." << endl;
 }
 
+/*
+    Sort the trips of a route by departure time. Make trips unavailable if they overtake another trip.
+*/
 void Importer::clearAndSortTrips() {
-    // Import the data
-    cout << "Clearing and sorting trips..." << endl;
+    for (int i = 0; i < tripsOfARoute.size(); i++) {
+        vector<long> sortedTripsOfARoute = vector<long>(0);
+        vector<TripDepartureTimePair> tripDepartureTimePairs = vector<TripDepartureTimePair>(0);
+        for (int j = 0; j < tripsOfARoute[i].size(); j++) {
+            TripDepartureTimePair tripDepartureTimePair;
+            tripDepartureTimePair.tripId = tripsOfARoute[i][j];
+            tripDepartureTimePair.departureTime = stopTimes[indexOfFirstStopTimeOfATrip[tripsOfARoute[i][j]]].departureTime;
+            tripDepartureTimePairs.push_back(tripDepartureTimePair);
+        }
+        sort(tripDepartureTimePairs.begin(), tripDepartureTimePairs.end(), TripDepartureTimePairComparator::compareByDeparture);
+        
+        vector<vector<StopTime>> lastStopTimePerDay = vector<vector<StopTime>>(7);
+        for (int j = 0; j < 7; j++){
+            lastStopTimePerDay[j] = vector<StopTime>(0);
+        }
+
+        for (int j = 0; j < tripDepartureTimePairs.size(); j++){
+            long tripId = tripDepartureTimePairs[j].tripId;
+            vector<StopTime> stopTimesOfTrip = getStopTimesOfATrip(tripId);
+
+            int bit = 1;
+            for (int l = 0; l < 7; l++){
+                if (isTripAvailable(tripId, l)){
+                    bool removeStopTimesOfWeekday = false;
+                    for (int k = 0; k < lastStopTimePerDay[l].size(); k++){
+                        if(lastStopTimePerDay[l][k].departureTime >= stopTimesOfTrip[k].departureTime){
+                            removeStopTimesOfWeekday = true;
+                            break;
+                        }
+                    }
+                    if (removeStopTimesOfWeekday) {
+                        trips[tripId].isAvailable - bit;
+                    } else {
+                        lastStopTimePerDay[l] = stopTimesOfTrip;
+                    }
+                }
+                bit *= 2;
+            }
+            sortedTripsOfARoute.push_back(tripId);
+        }
+        tripsOfARoute[i] = sortedTripsOfARoute;
+    }
+    cout << "Sorted and cleared " << trips.size() << " trips." << endl;
 }

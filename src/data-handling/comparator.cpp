@@ -15,3 +15,7 @@ bool StopTimesComparator::compareByTripIdAndSequence(StopTime stopTime1, StopTim
 
     return stopTime1.tripId < stopTime2.tripId;
 }
+
+bool TripDepartureTimePairComparator::compareByDeparture(TripDepartureTimePair tripDepartureTimePair1, TripDepartureTimePair tripDepartureTimePair2) {
+    return tripDepartureTimePair1.departureTime < tripDepartureTimePair2.departureTime;
+}

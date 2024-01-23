@@ -52,6 +52,12 @@ struct RouteSequencePair
     int stopSequence;
 };
 
+struct TripDepartureTimePair
+{
+    long tripId;
+    int departureTime;
+};
+
 class Importer {
     public:
         explicit Importer(){};
@@ -63,12 +69,14 @@ class Importer {
         vector<StopTime> stopTimes;
         vector<Trip> trips;
 
-        vector<long> stopTimesOfATrip;
+        vector<long> indexOfFirstStopTimeOfATrip;
         vector<vector<long>> tripsOfARoute;
         vector<vector<long>> stopsOfARoute;
         vector<vector<RouteSequencePair>> routesOfAStop;
 
         void import(string folderName, bool cleanData, bool extendedGtfsVersion);
+        vector<StopTime> getStopTimesOfATrip(long tripId);
+        bool isTripAvailable(long tripId, int dayOfWeek);
 
     private:
         map<string, long> serviceIdOldToNew;
