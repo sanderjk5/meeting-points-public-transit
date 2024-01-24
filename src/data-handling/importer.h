@@ -74,42 +74,42 @@ class Importer {
         explicit Importer(){};
         ~Importer(){};
 
-        vector<Calendar> calendars;
-        vector<Route> routes;
-        vector<Stop> stops;
-        vector<StopTime> stopTimes;
-        vector<Trip> trips;
+        static vector<Calendar> calendars;
+        static vector<Route> routes;
+        static vector<Stop> stops;
+        static vector<StopTime> stopTimes;
+        static vector<Trip> trips;
 
-        vector<Connection> connections;
+        static vector<Connection> connections;
 
-        vector<int> indexOfFirstStopTimeOfATrip;
-        vector<vector<int>> tripsOfARoute;
-        vector<vector<int>> stopsOfARoute;
-        vector<vector<RouteSequencePair>> routesOfAStop;
+        static vector<int> indexOfFirstStopTimeOfATrip;
+        static vector<vector<int>> tripsOfARoute;
+        static vector<vector<int>> stopsOfARoute;
+        static vector<vector<RouteSequencePair>> routesOfAStop;
 
-        void import(string folderName, bool cleanData, bool extendedGtfsVersion);
-        vector<StopTime> getStopTimesOfATrip(int tripId);
-        bool isTripAvailable(int tripId, int dayOfWeek);
+        static void import(string folderName, bool cleanData, bool extendedGtfsVersion);
+        static vector<StopTime> getStopTimesOfATrip(int tripId);
+        static bool isTripAvailable(int tripId, int dayOfWeek);
 
     private:
-        map<string, int> serviceIdOldToNew;
-        map<string, int> routeIdOldToNew;
-        map<string, int> stopIdOldToNew;
-        map<string, int> tripIdOldToNew;
+        static map<string, int> serviceIdOldToNew;
+        static map<string, int> routeIdOldToNew;
+        static map<string, int> stopIdOldToNew;
+        static map<string, int> tripIdOldToNew;
 
-        vector<string> splitCsvLine(string &line);
+        static vector<string> splitCsvLine(string &line);
 
-        void importCalendars(string folderPath);
-        void importRoutes(string folderPath);
-        void importStops(string folderPath, bool extendedGtfsVersion);
-        void importStopTimes(string folderPath);
-        void importTrips(string folderPath);
+        static void importCalendars(string folderPath);
+        static void importRoutes(string folderPath);
+        static void importStops(string folderPath, bool extendedGtfsVersion);
+        static void importStopTimes(string folderPath);
+        static void importTrips(string folderPath);
 
-        void combineStops();
-        void generateValidRoutes();
-        void setIsAvailableOfTrips();
-        void clearAndSortTrips();
-        void generateSortedConnections();
+        static void combineStops();
+        static void generateValidRoutes();
+        static void setIsAvailableOfTrips();
+        static void clearAndSortTrips();
+        static void generateSortedConnections();
 };
 
 #endif //CMAKE_IMPORTER_H

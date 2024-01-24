@@ -15,6 +15,21 @@
 
 using namespace std;
 
+vector<Calendar> Importer::calendars = vector<Calendar>(0);
+map<string, int> Importer::serviceIdOldToNew = map<string, int>();
+vector<Route> Importer::routes = vector<Route>(0);
+map<string, int> Importer::routeIdOldToNew = map<string, int>();    
+vector<Stop> Importer::stops = vector<Stop>(0);
+map<string, int> Importer::stopIdOldToNew = map<string, int>();
+vector<StopTime> Importer::stopTimes = vector<StopTime>(0);
+vector<Trip> Importer::trips = vector<Trip>(0);
+map<string, int> Importer::tripIdOldToNew = map<string, int>();
+vector<int> Importer::indexOfFirstStopTimeOfATrip = vector<int>(0);
+vector<vector<int>> Importer::tripsOfARoute = vector<vector<int>>(0);
+vector<vector<int>> Importer::stopsOfARoute = vector<vector<int>>(0);
+vector<vector<RouteSequencePair>> Importer::routesOfAStop = vector<vector<RouteSequencePair>>(0);
+vector<Connection> Importer::connections = vector<Connection>(0);
+
 void Importer::import(string folderName, bool cleanData, bool extendedGtfsVersion) {
     // Start the timer
     auto start = std::chrono::high_resolution_clock::now();
@@ -46,53 +61,7 @@ void Importer::import(string folderName, bool cleanData, bool extendedGtfsVersio
     cout << "Import time: " << duration << " milliseconds" << endl;
 }
 
-vector<StopTime> Importer::getStopTimesOfATrip(int tripId) {
-    vector<StopTime> stopTimesOfATrip = vector<StopTime>(0);
-    int indexOfFirstStopTime = indexOfFirstStopTimeOfATrip[tripId];
-    int indexOfLastStopTime = stopTimes.size() - 1;
-    for(int i = indexOfFirstStopTime; i < indexOfLastStopTime; i++) {
-        if (stopTimes[i].tripId == tripId) {
-            stopTimesOfATrip.push_back(stopTimes[i]);
-        } else {
-            break;
-        }
-    }
-    return stopTimesOfATrip;
-}
-
-bool Importer::isTripAvailable(int tripId, int dayOfWeek) {
-    return (trips[tripId].isAvailable >> dayOfWeek) & 1;
-}
-
-vector<string> Importer::splitCsvLine(string &line) {
-    vector<string> fields;
-    string field;
-    bool inQuotes = false;
-
-    for (char c : line) {
-        if (c == '\"') {
-            inQuotes = !inQuotes;
-        } else if (c == ',' && !inQuotes) {
-            fields.push_back(field);
-            field.clear();
-        } else {
-            field.push_back(c);
-        }
-    }
-    fields.push_back(field); // add last field
-
-    // Remove enclosing double quotes from fields, if present
-    for (auto& field : fields) {
-        if (field.front() == '"' && field.back() == '"') {
-            field = field.substr(1, field.size() - 2);
-        }
-    }
-
-    return fields;
-}
-
 void Importer::importCalendars(string folderPath) {
-    // Import the data
     std::string filePath = folderPath + "calendar.txt";
 
     std::ifstream file(filePath);
@@ -131,8 +100,6 @@ void Importer::importCalendars(string folderPath) {
 }
 
 void Importer::importRoutes(string folderPath) {
-    // Import the data
-
     // combine folder path with file name
     std::string filePath = folderPath + "routes.txt";
 
@@ -165,8 +132,6 @@ void Importer::importRoutes(string folderPath) {
 }
 
 void Importer::importStops(string folderPath, bool extendedGtfsVersion) {
-    // Import the data
-
     std::string filePath = folderPath + "stops.txt";
 
     std::ifstream file(filePath);
@@ -208,8 +173,6 @@ void Importer::importStops(string folderPath, bool extendedGtfsVersion) {
 }
 
 void Importer::importStopTimes(string folderPath) {
-    // Import the data
-
     std::string filePath = folderPath + "stop_times.txt";
 
     std::ifstream file(filePath);
@@ -244,8 +207,6 @@ void Importer::importStopTimes(string folderPath) {
 }
 
 void Importer::importTrips(string folderPath) {
-    // Import the data
-
     std::string filePath = folderPath + "trips.txt";
 
     std::ifstream file(filePath);
@@ -328,8 +289,6 @@ void Importer::generateValidRoutes() {
     sort(stopTimes.begin(), stopTimes.end(), StopTimeComparator::compareByTripIdAndSequence);
 
     indexOfFirstStopTimeOfATrip = vector<int>(trips.size());
-    tripsOfARoute = vector<vector<int>>(0);
-    stopsOfARoute = vector<vector<int>>(0);
     routesOfAStop = vector<vector<RouteSequencePair>>(stops.size());
     for (int i = 0; i < stops.size(); i++) {
         routesOfAStop[i] = vector<RouteSequencePair>(0);
@@ -487,4 +446,49 @@ void Importer::generateSortedConnections() {
     }
 
     cout << "Generated " << connections.size() << " connections." << endl;
+}
+
+vector<StopTime> Importer::getStopTimesOfATrip(int tripId) {
+    vector<StopTime> stopTimesOfATrip = vector<StopTime>(0);
+    int indexOfFirstStopTime = indexOfFirstStopTimeOfATrip[tripId];
+    int indexOfLastStopTime = stopTimes.size() - 1;
+    for(int i = indexOfFirstStopTime; i < indexOfLastStopTime; i++) {
+        if (stopTimes[i].tripId == tripId) {
+            stopTimesOfATrip.push_back(stopTimes[i]);
+        } else {
+            break;
+        }
+    }
+    return stopTimesOfATrip;
+}
+
+bool Importer::isTripAvailable(int tripId, int dayOfWeek) {
+    return (trips[tripId].isAvailable >> dayOfWeek) & 1;
+}
+
+vector<string> Importer::splitCsvLine(string &line) {
+    vector<string> fields;
+    string field;
+    bool inQuotes = false;
+
+    for (char c : line) {
+        if (c == '\"') {
+            inQuotes = !inQuotes;
+        } else if (c == ',' && !inQuotes) {
+            fields.push_back(field);
+            field.clear();
+        } else {
+            field.push_back(c);
+        }
+    }
+    fields.push_back(field); // add last field
+
+    // Remove enclosing double quotes from fields, if present
+    for (auto& field : fields) {
+        if (field.front() == '"' && field.back() == '"') {
+            field = field.substr(1, field.size() - 2);
+        }
+    }
+
+    return fields;
 }
