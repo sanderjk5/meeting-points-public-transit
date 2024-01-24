@@ -6,7 +6,21 @@
 
 #include <vector>
 
-vector<Journey> CSA::processCSAQuery(Query query) {
-    vector<Journey> journeys;
-    return journeys;
+using namespace std;
+
+
+void CSA::processCSA() {
+    // TODO: Implement CSA algorithm
+}
+
+Journey CSA::createJourney() {
+    // TODO: Implement journey creation
+}
+
+vector<int>* CSA::getEarliestArrivalTimes() {
+    return &s;
+}
+
+int CSA::getEarliestArrivalTime(int stopId) {
+    return s[stopId];
 }

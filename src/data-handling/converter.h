@@ -16,4 +16,13 @@ class TimeConverter {
         static int getDayDifference(int seconds);
 };
 
+class WeekdayConverter {
+    public:
+        explicit WeekdayConverter(){};
+        ~WeekdayConverter(){};
+
+        static int convertWeekdayToInt(string weekday);
+        static string convertIntToWeekday(int weekday);
+};
+
 #endif //CMAKE_CONVERTER_H

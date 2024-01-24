@@ -6,10 +6,17 @@
 #include <vector>
 #include <string>
 
-struct Query {
+struct CSAQuery {
     int sourceStopId;
-    int targetStopId;
+    vector<int> targetStopIds;
     int sourceTime;
+    int weekday;
+};
+
+struct MeetingPointQuery {
+    vector<int> sourceStopIds;
+    int sourceTime;
+    int weekday;
 };
 
 struct Leg {
@@ -29,11 +36,11 @@ class QueryProcessor {
         explicit QueryProcessor(){};
         ~QueryProcessor(){};
 
-        static vector<Journey> processNaiveQuery(string sourceStopName, string targetStopName, string sourceTime);
+        string processNaiveQuery(MeetingPointQuery meetingPointQuery);
     
     private:
-        static Query createQuery(string sourceStopName, string targetStopName, string sourceTime);
+        static CSAQuery createCSAQuery(string sourceStopName, string sourceTime, string weekday);
+        static CSAQuery createCSAQueryWithTargetStop(string sourceStopName, string targetStopName, string sourceTime, string weekday);
 };
-
 
 #endif //CMAKE_QUERY_PROCESSOR_H

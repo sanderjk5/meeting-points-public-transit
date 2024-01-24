@@ -8,13 +8,17 @@
 
 using namespace std;
 
-vector<Journey> QueryProcessor::processNaiveQuery(string sourceStopName, string targetStopName, string sourceTime) {
-    Query query = createQuery(sourceStopName, targetStopName, sourceTime);
-    vector<Journey> journeys = CSA::processCSAQuery(query);
-    return journeys;
+string QueryProcessor::processNaiveQuery(MeetingPointQuery meetingPointQuery) {
+    string meetingPoint;
+    return meetingPoint;
 }
 
-Query QueryProcessor::createQuery(string sourceStopName, string targetStopName, string sourceTime) {
-    Query query;
+CSAQuery QueryProcessor::createCSAQuery(string sourceStopName, string sourceTime, string weekday) {
+    CSAQuery query;
+    return query;
+}
+
+CSAQuery QueryProcessor::createCSAQueryWithTargetStop(string sourceStopName, string targetStopName, string sourceTime, string weekday) {
+    CSAQuery query;
     return query;
 }

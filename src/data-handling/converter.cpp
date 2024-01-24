@@ -2,6 +2,9 @@
 # include <string>
 # include <../constants.h>
 
+#include <algorithm>
+#include <cctype>
+
 using namespace std;
 
 int TimeConverter::convertTimeToSeconds(string time) {
@@ -43,4 +46,46 @@ int TimeConverter::getDayOffset(int seconds) {
 
 int TimeConverter::getDayDifference(int seconds) {
     return seconds % SECONDSPERDAY;
+}
+
+int WeekdayConverter::convertWeekdayToInt(string weekday) {
+    transform(weekday.begin(), weekday.end(), weekday.begin(), [](unsigned char c){ return tolower(c); });
+
+    if (weekday == "monday") {
+        return 0;
+    } else if (weekday == "tuesday") {
+        return 1;
+    } else if (weekday == "wednesday") {
+        return 2;
+    } else if (weekday == "thursday") {
+        return 3;
+    } else if (weekday == "friday") {
+        return 4;
+    } else if (weekday == "saturday") {
+        return 5;
+    } else if (weekday == "sunday") {
+        return 6;
+    } else {
+        return -1;
+    }
+}
+
+string WeekdayConverter::convertIntToWeekday(int weekday) {
+    if (weekday == 0) {
+        return "monday";
+    } else if (weekday == 1) {
+        return "tuesday";
+    } else if (weekday == 2) {
+        return "wednesday";
+    } else if (weekday == 3) {
+        return "thursday";
+    } else if (weekday == 4) {
+        return "friday";
+    } else if (weekday == 5) {
+        return "saturday";
+    } else if (weekday == 6) {
+        return "sunday";
+    } else {
+        return "invalid";
+    }
 }
