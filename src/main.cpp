@@ -1,6 +1,9 @@
 #include<iostream>
 #include<importer.h>
 #include<string>
+#include"meeting-point-algorithms/algorithm-tester.h"
+#include"data-handling/converter.h"
+
 
 using namespace std;
 
@@ -14,8 +17,9 @@ int main(int argc, const char *argv[]) {
   // string folderName = "gtfs_s_bahn_stuttgart";
   string folderName = "vvs_gtfs_j24";
 
-  Importer importer = Importer();
-  importer.import(folderName, true, false);
+  Importer::import(folderName, true, false);
+
+  NaiveAlgorithmTester::testNaiveAlgorithm(10, 3, false);
 
   return 0;
 }
