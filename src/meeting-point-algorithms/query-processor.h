@@ -11,12 +11,14 @@ struct CSAQuery {
     vector<int> targetStopIds;
     int sourceTime;
     int weekday;
+    int numberOfDays;
 };
 
 struct MeetingPointQuery {
     vector<int> sourceStopIds;
     int sourceTime;
     int weekday;
+    int numberOfDays;
 };
 
 struct MeetingPointQueryResult {
@@ -47,7 +49,8 @@ class QueryProcessor {
         ~QueryProcessor(){};
 
         static MeetingPointQueryResult processNaiveQuery(MeetingPointQuery meetingPointQuery, bool printTime = false);
-        static MeetingPointQuery generateRandomMeetingPointQuery(int numberOfSources);
+        static MeetingPointQuery generateRandomMeetingPointQuery(int numberOfSources, int numberOfDays = 1);
+        static MeetingPointQuery generateMeetingPointQuery(vector<string> sourceStopNames, string sourceTime, string weekday, int numberOfDays = 1);
     
     private:
         static CSAQuery createCSAQuery(string sourceStopName, string sourceTime, string weekday);

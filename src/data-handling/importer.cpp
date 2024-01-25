@@ -31,7 +31,7 @@ vector<vector<int>> Importer::stopsOfARoute = vector<vector<int>>(0);
 vector<vector<RouteSequencePair>> Importer::routesOfAStop = vector<vector<RouteSequencePair>>(0);
 vector<Connection> Importer::connections = vector<Connection>(0);
 
-void Importer::import(string folderName, bool cleanData, bool extendedGtfsVersion) {
+void Importer::import(string folderName, bool prepareData, DataType dataType) {
     // Start the timer
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -39,22 +39,21 @@ void Importer::import(string folderName, bool cleanData, bool extendedGtfsVersio
 
     // Import the data
     cout << "Importing data..." << endl;
-    importCalendars(folderPath);
-    importRoutes(folderPath);
-    importStops(folderPath, extendedGtfsVersion);
-    importTrips(folderPath);
-    importStopTimes(folderPath);
+    importCalendars(folderPath, dataType);
+    importRoutes(folderPath, dataType);
+    importStops(folderPath, dataType);
+    importTrips(folderPath, dataType);
+    importStopTimes(folderPath, dataType);
 
-    if (cleanData) {
+    if (prepareData) {
         combineStops();
         generateValidRoutes();
-        if(!extendedGtfsVersion) {
+        if(dataType != s_bahn_stuttgart) {
             setIsAvailableOfTrips();
         }
         clearAndSortTrips();
+        generateSortedConnections();
     }
-
-    generateSortedConnections();
 
     // Stop the timer and calculate the duration
     auto end = std::chrono::high_resolution_clock::now();
@@ -64,7 +63,7 @@ void Importer::import(string folderName, bool cleanData, bool extendedGtfsVersio
     cout << "Import duration: " << duration << " milliseconds\n" << endl;
 }
 
-void Importer::importCalendars(string folderPath) {
+void Importer::importCalendars(string folderPath, DataType dataType) {
     std::string filePath = folderPath + "calendar.txt";
 
     std::ifstream file(filePath);
@@ -75,7 +74,7 @@ void Importer::importCalendars(string folderPath) {
     std::string line;
     std::getline(file, line); // Skip the header line
 
-    int id = 0;
+    int id = calendars.size();
 
     while (std::getline(file, line)) {
         vector<string> fields = splitCsvLine(line);
@@ -83,15 +82,32 @@ void Importer::importCalendars(string folderPath) {
         Calendar calendar;
 
         // Read each field and assign it to the calendar variable
-        calendar.serviceId = id;
-        serviceIdOldToNew[fields[0]] = id;
+        if (dataType == s_bahn_stuttgart || dataType == vvs_j24){
+            calendar.serviceId = id;
+            serviceIdOldToNew[fields[0]] = id;
 
-        for (int i = 1; i < 8; i++) {
-            calendar.isAvailable.push_back(fields[i] == "1");
+            for (int i = 1; i < 8; i++) {
+                calendar.isAvailable.push_back(fields[i] == "1");
+            }
+
+            calendar.startDate = fields[8];
+            calendar.endDate = fields[9];
+        } else {
+            calendar.serviceId = id;
+            if (dataType == schienenregionalverkehr_de){
+                serviceIdOldToNew["re-" + fields[9]] = id;
+            } else {
+                serviceIdOldToNew["fe-" + fields[9]] = id;
+            }
+
+            for (int i = 0; i < 7; i++) {
+                calendar.isAvailable.push_back(fields[i] == "1");
+            }
+
+            calendar.startDate = fields[7];
+            calendar.endDate = fields[8];
         }
-
-        calendar.startDate = fields[8];
-        calendar.endDate = fields[9];
+        
 
         calendars.push_back(calendar);
         id++;
@@ -102,7 +118,7 @@ void Importer::importCalendars(string folderPath) {
     cout << "Imported " << calendars.size() << " calendars." << endl;
 }
 
-void Importer::importRoutes(string folderPath) {
+void Importer::importRoutes(string folderPath, DataType dataType) {
     // combine folder path with file name
     std::string filePath = folderPath + "routes.txt";
 
@@ -114,7 +130,7 @@ void Importer::importRoutes(string folderPath) {
     std::string line;
     std::getline(file, line); // Skip the header line
 
-    int id = 0;
+    int id = routes.size();
 
     while (std::getline(file, line)) {
         vector<string> fields = splitCsvLine(line);
@@ -123,7 +139,13 @@ void Importer::importRoutes(string folderPath) {
 
         // Read each field and assign it to the routes variable
         route.id = id;
-        routeIdOldToNew[fields[0]] = id;
+        if (dataType == schienenregionalverkehr_de){
+            serviceIdOldToNew["re-" + fields[4]] = id;
+        } else if (dataType == schienenfernverkehr_de) {
+            serviceIdOldToNew["fe-" + fields[4]] = id;
+        } else {
+            routeIdOldToNew[fields[0]] = id;
+        }
 
         routes.push_back(route);
         id++;
@@ -134,7 +156,7 @@ void Importer::importRoutes(string folderPath) {
     cout << "Imported " << routes.size() << " routes." << endl;
 }
 
-void Importer::importStops(string folderPath, bool extendedGtfsVersion) {
+void Importer::importStops(string folderPath, DataType dataType) {
     std::string filePath = folderPath + "stops.txt";
 
     std::ifstream file(filePath);
@@ -145,7 +167,7 @@ void Importer::importStops(string folderPath, bool extendedGtfsVersion) {
     std::string line;
     std::getline(file, line); // Skip the header line
 
-    int id = 0;
+    int id = stops.size();
 
     while (std::getline(file, line)) {
         vector<string> fields = splitCsvLine(line);
@@ -153,17 +175,30 @@ void Importer::importStops(string folderPath, bool extendedGtfsVersion) {
         Stop stop;
 
         // Read each field and assign it to the stop variable
-        stop.id = id;
-        stopIdOldToNew[fields[0]] = id;
+        if (dataType == s_bahn_stuttgart || dataType == vvs_j24){
+            stop.id = id;
+            stopIdOldToNew[fields[0]] = id;
 
-        if (extendedGtfsVersion){
+            if (dataType == s_bahn_stuttgart){
             stop.name = fields[2];
             stop.lat = std::stod(fields[4]);
             stop.lon = std::stod(fields[5]);
+            } else {
+                stop.name = fields[1];
+                stop.lat = std::stod(fields[2]);
+                stop.lon = std::stod(fields[3]);
+            }
         } else {
-            stop.name = fields[1];
-            stop.lat = std::stod(fields[2]);
-            stop.lon = std::stod(fields[3]);
+            stop.id = id;
+            if (dataType == schienenregionalverkehr_de){
+                stopIdOldToNew["re-" + fields[2]] = id;
+            } else {
+                stopIdOldToNew["fe-" + fields[2]] = id;
+            }
+
+            stop.name = fields[0];
+            stop.lat = std::stod(fields[3]);
+            stop.lon = std::stod(fields[4]);
         }
 
         stops.push_back(stop);
@@ -175,7 +210,7 @@ void Importer::importStops(string folderPath, bool extendedGtfsVersion) {
     cout << "Imported " << stops.size() << " stops." << endl;
 }
 
-void Importer::importStopTimes(string folderPath) {
+void Importer::importStopTimes(string folderPath, DataType dataType) {
     std::string filePath = folderPath + "stop_times.txt";
 
     std::ifstream file(filePath);
@@ -186,7 +221,7 @@ void Importer::importStopTimes(string folderPath) {
     std::string line;
     std::getline(file, line); // Skip the header line
 
-    int id = 0;
+    int id = stopTimes.size();
 
     while (std::getline(file, line)) {
         vector<string> fields = splitCsvLine(line);
@@ -194,10 +229,18 @@ void Importer::importStopTimes(string folderPath) {
         StopTime stopTime;
 
         // Read each field and assign it to the stop time variable
-        stopTime.tripId = tripIdOldToNew[fields[0]];
+        if (dataType == schienenregionalverkehr_de){
+            stopTime.tripId = tripIdOldToNew["re-" + fields[0]];
+            stopTime.stopId = stopIdOldToNew["re-" + fields[3]];
+        } else if (dataType == schienenfernverkehr_de) {
+            stopTime.tripId = tripIdOldToNew["fe-" + fields[0]];
+            stopTime.stopId = stopIdOldToNew["fe-" + fields[3]];
+        } else {
+            stopTime.tripId = tripIdOldToNew[fields[0]];
+            stopTime.stopId = stopIdOldToNew[fields[3]];
+        }
         stopTime.arrivalTime = TimeConverter::convertTimeToSeconds(fields[1]);
         stopTime.departureTime = TimeConverter::convertTimeToSeconds(fields[2]);
-        stopTime.stopId = stopIdOldToNew[fields[3]];
         stopTime.stopSequence = std::stoi(fields[4]);
 
         stopTimes.push_back(stopTime);
@@ -209,7 +252,7 @@ void Importer::importStopTimes(string folderPath) {
     cout << "Imported " << stopTimes.size() << " stop times." << endl;
 }
 
-void Importer::importTrips(string folderPath) {
+void Importer::importTrips(string folderPath, DataType dataType) {
     std::string filePath = folderPath + "trips.txt";
 
     std::ifstream file(filePath);
@@ -220,18 +263,29 @@ void Importer::importTrips(string folderPath) {
     std::string line;
     std::getline(file, line); // Skip the header line
 
-    int id = 0;
+    int id = trips.size();
 
     while (std::getline(file, line)) {
         vector<string> fields = splitCsvLine(line);
 
         Trip trip;
 
-        // Read each field and assign it to the trip variable
-        trip.routeId = routeIdOldToNew[fields[0]];
-        trip.serviceId = serviceIdOldToNew[fields[1]];
         trip.id = id;
-        tripIdOldToNew[fields[2]] = id;
+
+        // Read each field and assign it to the trip variable
+        if (dataType == schienenregionalverkehr_de){
+            trip.routeId = routeIdOldToNew["re-" + fields[0]];
+            trip.serviceId = serviceIdOldToNew["re-" + fields[1]];
+            tripIdOldToNew["re-" + fields[2]] = id;
+        } else if (dataType == schienenfernverkehr_de){
+            trip.routeId = routeIdOldToNew["fe-" + fields[0]];
+            trip.serviceId = serviceIdOldToNew["fe-" + fields[1]];
+            tripIdOldToNew["fe-" + fields[2]] = id;
+        } else {
+            trip.routeId = routeIdOldToNew[fields[0]];
+            trip.serviceId = serviceIdOldToNew[fields[1]];
+            tripIdOldToNew[fields[2]] = id;
+        }
 
         trip.isAvailable = 127;
 

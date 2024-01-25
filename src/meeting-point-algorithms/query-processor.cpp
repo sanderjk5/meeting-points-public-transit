@@ -3,6 +3,7 @@
 #include "csa.h"
 #include <../data-handling/importer.h>
 #include <../data-handling/converter.h>
+#include <../constants.h>
 #include <limits.h>
 
 #include <iostream>
@@ -25,6 +26,7 @@ MeetingPointQueryResult QueryProcessor::processNaiveQuery(MeetingPointQuery meet
         query.sourceStopId = meetingPointQuery.sourceStopIds[i];
         query.sourceTime = meetingPointQuery.sourceTime;
         query.weekday = meetingPointQuery.weekday;
+        query.numberOfDays = meetingPointQuery.numberOfDays;
         CSA* csa = new CSA(query);
         csa->processCSA(printTime);
         csas.push_back(csa);
@@ -44,6 +46,7 @@ MeetingPointQueryResult QueryProcessor::processNaiveQuery(MeetingPointQuery meet
                 max = INT_MAX;
                 break;
             }
+
             int duration = earliestArrivalTime - meetingPointQuery.sourceTime;
             sum += duration;
             if (duration > max) {
@@ -85,13 +88,25 @@ MeetingPointQueryResult QueryProcessor::processNaiveQuery(MeetingPointQuery meet
     return meetingPointQueryResult;
 }
 
-MeetingPointQuery QueryProcessor::generateRandomMeetingPointQuery(int numberOfSources) {
+MeetingPointQuery QueryProcessor::generateRandomMeetingPointQuery(int numberOfSources, int numberOfDays) {
     MeetingPointQuery meetingPointQuery;
     for (int i = 0; i < numberOfSources; i++) {
         meetingPointQuery.sourceStopIds.push_back(rand() % Importer::stops.size());
     }
-    meetingPointQuery.sourceTime = rand() % 86400;
+    meetingPointQuery.sourceTime = rand() % SECONDSPERDAY;
     meetingPointQuery.weekday = rand() % 7;
+    meetingPointQuery.numberOfDays = numberOfDays;
+    return meetingPointQuery;
+}
+
+MeetingPointQuery QueryProcessor::generateMeetingPointQuery(vector<string> sourceStopNames, string sourceTime, string weekday, int numberOfDays) {
+    MeetingPointQuery meetingPointQuery;
+    for (string sourceStopName : sourceStopNames) {
+        meetingPointQuery.sourceStopIds.push_back(Importer::getStopId(sourceStopName));
+    }
+    meetingPointQuery.sourceTime = TimeConverter::convertTimeToSeconds(sourceTime);
+    meetingPointQuery.weekday = WeekdayConverter::convertWeekdayToInt(weekday);
+    meetingPointQuery.numberOfDays = numberOfDays;
     return meetingPointQuery;
 }
 
