@@ -19,6 +19,16 @@ struct MeetingPointQuery {
     int weekday;
 };
 
+struct MeetingPointQueryResult {
+    string meetingPointMinSum;
+    string meetingTimeMinSum;
+    string minSumDuration;
+    string meetingPointMinMax;
+    string meetingTimeMinMax;
+    string minMaxDuration;
+    string queryTime;
+};
+
 struct Leg {
     string departureStopName;
     string arrivalStopName;
@@ -36,11 +46,12 @@ class QueryProcessor {
         explicit QueryProcessor(){};
         ~QueryProcessor(){};
 
-        string processNaiveQuery(MeetingPointQuery meetingPointQuery);
+        static MeetingPointQueryResult processNaiveQuery(MeetingPointQuery meetingPointQuery, bool printTime = false);
+        static MeetingPointQuery generateRandomMeetingPointQuery(int numberOfSources);
     
     private:
         static CSAQuery createCSAQuery(string sourceStopName, string sourceTime, string weekday);
-        static CSAQuery createCSAQueryWithTargetStop(string sourceStopName, string targetStopName, string sourceTime, string weekday);
+        static CSAQuery createCSAQueryWithTargetStops(string sourceStopName, vector<string> targetStopNames, string sourceTime, string weekday);
 };
 
 #endif //CMAKE_QUERY_PROCESSOR_H

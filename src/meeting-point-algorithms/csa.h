@@ -19,7 +19,7 @@ class CSA {
         };
         ~CSA(){};
 
-        void processCSA();
+        void processCSA(bool printTime = false);
         Journey createJourney();
 
         vector<int>* getEarliestArrivalTimes();
@@ -30,6 +30,8 @@ class CSA {
         vector<JourneyPointer> journeyPointers;
         vector<int> s;
         vector<int> t;
+
+        static int findFirstConnectionAfterTime(int departureTime);
 };
 
 #endif //CMAKE_CSA_H

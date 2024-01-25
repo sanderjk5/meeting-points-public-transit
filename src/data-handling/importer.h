@@ -91,6 +91,9 @@ class Importer {
         static vector<StopTime> getStopTimesOfATrip(int tripId);
         static bool isTripAvailable(int tripId, int dayOfWeek);
 
+        static string getStopName(int stopId);
+        static int getStopId(string stopName);
+
     private:
         static map<string, int> serviceIdOldToNew;
         static map<string, int> routeIdOldToNew;

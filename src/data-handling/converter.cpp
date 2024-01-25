@@ -15,7 +15,11 @@ int TimeConverter::convertTimeToSeconds(string time) {
     return hours * 3600 + minutes * 60 + seconds;
 }
 
-string TimeConverter::convertSecondsToTime(int seconds) {
+string TimeConverter::convertSecondsToTime(int seconds, bool removeDays) {
+    if (removeDays) {
+        seconds = seconds % SECONDSPERDAY;
+    }
+
     int hours = seconds / 3600;
     int minutes = (seconds % 3600) / 60;
     int secondsLeft = seconds % 60;

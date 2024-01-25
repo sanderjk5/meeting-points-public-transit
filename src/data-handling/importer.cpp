@@ -5,6 +5,7 @@
 #include <iostream>
 #include <algorithm>
 #include <chrono>
+#include <cctype>
 
 #include <fstream>
 #include <sstream>
@@ -47,7 +48,9 @@ void Importer::import(string folderName, bool cleanData, bool extendedGtfsVersio
     if (cleanData) {
         combineStops();
         generateValidRoutes();
-        setIsAvailableOfTrips();
+        if(!extendedGtfsVersion) {
+            setIsAvailableOfTrips();
+        }
         clearAndSortTrips();
     }
 
@@ -58,7 +61,7 @@ void Importer::import(string folderName, bool cleanData, bool extendedGtfsVersio
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
     // Print the duration
-    cout << "Import time: " << duration << " milliseconds" << endl;
+    cout << "Import duration: " << duration << " milliseconds\n" << endl;
 }
 
 void Importer::importCalendars(string folderPath) {
@@ -433,6 +436,7 @@ void Importer::generateSortedConnections() {
             connection.departureTime = previousStopTime.departureTime;
             connection.arrivalStopId = currentStopTime.stopId;
             connection.arrivalTime = currentStopTime.arrivalTime;
+            connection.tripId = tripId;
 
             connections.push_back(connection);
             previousStopTime = currentStopTime;
@@ -491,4 +495,17 @@ vector<string> Importer::splitCsvLine(string &line) {
     }
 
     return fields;
+}
+
+string Importer::getStopName(int stopId) {
+    return stops[stopId].name;
+}
+
+int Importer::getStopId(string stopName) {
+    for (int i = 0; i < stops.size(); i++) {
+        if (stops[i].name == stopName) {
+            return stops[i].id;
+        }
+    }
+    return -1;
 }
