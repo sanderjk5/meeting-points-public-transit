@@ -35,9 +35,20 @@ void CSA::processCSA(bool printTime) {
         t[i] = -1;
     }
 
-    for (int i = 0; i < Importer::connections.size(); i++) {
+    int previousDepartureTime = query.sourceTime;
+    int dayOffset = 0;
+
+    int maxNumberOfConnections = Importer::connections.size() * query.numberOfDays;
+
+    for (int i = 0; i < maxNumberOfConnections; i++) {
         Connection* connection = &Importer::connections[currentConnectionIndex];
-        int weekdayOfTrip = query.weekday;
+
+        if (previousDepartureTime > connection->departureTime) {
+            dayOffset++;
+        }
+        previousDepartureTime = connection->departureTime;
+
+        int weekdayOfTrip = (query.weekday + dayOffset) % 7;
 
         int firstDepartureTimeOfTrip = Importer::stopTimes[Importer::indexOfFirstStopTimeOfATrip[connection->tripId]].departureTime;
 
@@ -50,15 +61,10 @@ void CSA::processCSA(bool printTime) {
             continue;
         }
 
-        int connectionDepartureTime = connection->departureTime;
-        int connectionArrivalTime = connection->arrivalTime;
-    
-        if (connectionDepartureTime < query.sourceTime) {
-            connectionDepartureTime += SECONDSPERDAY;
-            connectionArrivalTime += SECONDSPERDAY;
-        }
+        int connectionDepartureTime = connection->departureTime + dayOffset * SECONDSPERDAY;
+        int connectionArrivalTime = connection->arrivalTime + dayOffset * SECONDSPERDAY;
 
-        if (connectionArrivalTime < query.sourceTime) {
+        if (connectionArrivalTime < connectionDepartureTime) {
             connectionArrivalTime += SECONDSPERDAY;
         }
 

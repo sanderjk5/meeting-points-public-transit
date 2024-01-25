@@ -69,6 +69,13 @@ struct TripDepartureTimePair
     int departureTime;
 };
 
+enum DataType {
+    s_bahn_stuttgart,
+    vvs_j24,
+    schienenregionalverkehr_de,
+    schienenfernverkehr_de
+};
+
 class Importer {
     public:
         explicit Importer(){};
@@ -87,7 +94,7 @@ class Importer {
         static vector<vector<int>> stopsOfARoute;
         static vector<vector<RouteSequencePair>> routesOfAStop;
 
-        static void import(string folderName, bool cleanData, bool extendedGtfsVersion);
+        static void import(string folderName, bool prepareData, DataType dataType);
         static vector<StopTime> getStopTimesOfATrip(int tripId);
         static bool isTripAvailable(int tripId, int dayOfWeek);
 
@@ -102,11 +109,11 @@ class Importer {
 
         static vector<string> splitCsvLine(string &line);
 
-        static void importCalendars(string folderPath);
-        static void importRoutes(string folderPath);
-        static void importStops(string folderPath, bool extendedGtfsVersion);
-        static void importStopTimes(string folderPath);
-        static void importTrips(string folderPath);
+        static void importCalendars(string folderPath, DataType dataType);
+        static void importRoutes(string folderPath, DataType dataType);
+        static void importStops(string folderPath, DataType dataType);
+        static void importStopTimes(string folderPath, DataType dataType);
+        static void importTrips(string folderPath, DataType dataType);
 
         static void combineStops();
         static void generateValidRoutes();
