@@ -2,17 +2,12 @@
 #define CMAKE_QUERY_PROCESSOR_H
 
 #include <../data-handling/importer.h>
+#include "csa.h" 
+#include "journey.h"
 
 #include <vector>
 #include <string>
 
-struct CSAQuery {
-    int sourceStopId;
-    vector<int> targetStopIds;
-    int sourceTime;
-    int weekday;
-    int numberOfDays;
-};
 
 struct MeetingPointQuery {
     vector<int> sourceStopIds;
@@ -31,16 +26,26 @@ struct MeetingPointQueryResult {
     string queryTime;
 };
 
-struct Leg {
-    string departureStopName;
-    string arrivalStopName;
-    int departureTime;
-    int arrivalTime;
+enum Optimization {
+    min_sum,
+    min_max
 };
 
-struct Journey {
-    vector<Leg> legs;
-    int duration;
+class NaiveQueryProcessor {
+    public:
+        explicit NaiveQueryProcessor(MeetingPointQuery meetingPointQuery){
+            this->meetingPointQuery = meetingPointQuery;
+        };
+        ~NaiveQueryProcessor(){};
+
+        void processNaiveQuery(bool printTime = false);
+        MeetingPointQueryResult getMeetingPointQueryResult();
+        vector<Journey> getJourneys(Optimization optimization);
+    
+    private:
+        MeetingPointQuery meetingPointQuery;
+        MeetingPointQueryResult meetingPointQueryResult;
+        vector<CSA*> csas;
 };
 
 class QueryProcessor {
@@ -48,13 +53,12 @@ class QueryProcessor {
         explicit QueryProcessor(){};
         ~QueryProcessor(){};
 
-        static MeetingPointQueryResult processNaiveQuery(MeetingPointQuery meetingPointQuery, bool printTime = false);
         static MeetingPointQuery generateRandomMeetingPointQuery(int numberOfSources, int numberOfDays = 1);
         static MeetingPointQuery generateMeetingPointQuery(vector<string> sourceStopNames, string sourceTime, string weekday, int numberOfDays = 1);
-    
-    private:
         static CSAQuery createCSAQuery(string sourceStopName, string sourceTime, string weekday);
         static CSAQuery createCSAQueryWithTargetStops(string sourceStopName, vector<string> targetStopNames, string sourceTime, string weekday);
 };
+
+
 
 #endif //CMAKE_QUERY_PROCESSOR_H

@@ -27,11 +27,11 @@ int main(int argc, const char *argv[]) {
   Importer::import(folderName0, false, schienenfernverkehr_de);
   Importer::import(folderName1, true, schienenregionalverkehr_de);
 
-  NaiveAlgorithmTester::testNaiveAlgorithmRandom(500, 10, 3, false, true);
+  // NaiveAlgorithmTester::testNaiveAlgorithmRandom(500, 10, 3, false, true);
 
-  // vector<string> sourceStopNames = {"Berlin Hbf", "Stuttgart Hbf"};
-  // MeetingPointQuery meetingPointQuery = QueryProcessor::generateMeetingPointQuery(sourceStopNames, "09:00:00", "monday", 7);
-  // NaiveAlgorithmTester::testNaiveAlgorithm(meetingPointQuery, false);
+  vector<string> sourceStopNames = {"Falkensee", "Stuttgart-Rohr"};
+  MeetingPointQuery meetingPointQuery = QueryProcessor::generateMeetingPointQuery(sourceStopNames, "09:00:00", "monday", 1);
+  NaiveAlgorithmTester::testNaiveAlgorithm(meetingPointQuery, false, false);
 
   return 0;
 }
