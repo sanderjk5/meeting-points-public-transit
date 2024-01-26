@@ -1,6 +1,6 @@
 #include "csa.h"
 
-#include "query-processor.h"
+#include "journey.h"
 #include <../data-handling/importer.h>
 #include "../data-handling/converter.h"
 #include <../constants.h>
@@ -108,8 +108,35 @@ void CSA::processCSA(bool printTime) {
     }
 }
 
-Journey CSA::createJourney() {
-    // TODO: Implement journey creation
+/* 
+    Use the journey pointers to create a journey from the target stop to the source stop.
+*/
+Journey CSA::createJourney(int targetStopId) {
+    Journey journey;
+    journey.duration = s[targetStopId] - query.sourceTime;
+
+    vector<Leg> legs;
+
+    int currentStopId = targetStopId;
+    while (currentStopId != query.sourceStopId) {
+        JourneyPointer journeyPointer = journeyPointers[currentStopId];
+
+        Leg leg;
+        leg.departureStopName = Importer::stops[journeyPointer.enterConnection->departureStopId].name;
+        leg.arrivalStopName = Importer::stops[journeyPointer.exitConnection->arrivalStopId].name;
+        leg.departureTime = journeyPointer.enterConnection->departureTime;
+        leg.arrivalTime = journeyPointer.exitConnection->arrivalTime;
+
+        legs.push_back(leg);
+
+        currentStopId = journeyPointer.enterConnection->departureStopId;
+    }
+
+    for (int i = legs.size() - 1; i >= 0; i--) {
+        journey.legs.push_back(legs[i]);
+    }
+
+    return journey;
 }
 
 vector<int>* CSA::getEarliestArrivalTimes() {

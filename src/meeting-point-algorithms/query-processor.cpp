@@ -14,12 +14,13 @@
 
 using namespace std;
 
-MeetingPointQueryResult QueryProcessor::processNaiveQuery(MeetingPointQuery meetingPointQuery, bool printTime) {
+void NaiveQueryProcessor::processNaiveQuery(bool printTime) {
+    for (CSA* csa : csas) {
+        delete csa;
+    }
+    csas.clear();
+
     auto start = std::chrono::high_resolution_clock::now();
-
-    MeetingPointQueryResult meetingPointQueryResult;
-
-    vector<CSA*> csas;
 
     for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
         CSAQuery query;
@@ -69,11 +70,6 @@ MeetingPointQueryResult QueryProcessor::processNaiveQuery(MeetingPointQuery meet
         }
     }
 
-    for (CSA* csa : csas) {
-        delete csa;
-    }
-    csas.clear();
-
     // Stop the timer and calculate the duration
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
@@ -84,8 +80,25 @@ MeetingPointQueryResult QueryProcessor::processNaiveQuery(MeetingPointQuery meet
     }
 
     meetingPointQueryResult.queryTime = to_string(duration);
-    
+}
+
+MeetingPointQueryResult NaiveQueryProcessor::getMeetingPointQueryResult() {
     return meetingPointQueryResult;
+}
+
+vector<Journey> NaiveQueryProcessor::getJourneys(Optimization optimization) {
+    vector<Journey> journeys;
+    int targetStopId;
+    if (optimization == min_sum) {
+        targetStopId = Importer::getStopId(meetingPointQueryResult.meetingPointMinSum);
+    } else {
+        targetStopId = Importer::getStopId(meetingPointQueryResult.meetingPointMinMax);
+    }
+    for (int i = 0; i < csas.size(); i++) {
+        Journey journey = csas[i]->createJourney(targetStopId);
+        journeys.push_back(journey);
+    }
+    return journeys;
 }
 
 MeetingPointQuery QueryProcessor::generateRandomMeetingPointQuery(int numberOfSources, int numberOfDays) {

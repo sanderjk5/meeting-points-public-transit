@@ -2,7 +2,15 @@
 #define CMAKE_CSA_H
 
 #include <../data-handling/importer.h>
-#include "query-processor.h"
+#include "journey.h"
+
+struct CSAQuery {
+    int sourceStopId;
+    vector<int> targetStopIds;
+    int sourceTime;
+    int weekday;
+    int numberOfDays;
+};
 
 struct JourneyPointer {
     Connection* enterConnection;
@@ -20,7 +28,7 @@ class CSA {
         ~CSA(){};
 
         void processCSA(bool printTime = false);
-        Journey createJourney();
+        Journey createJourney(int targetStopId);
 
         vector<int>* getEarliestArrivalTimes();
         int getEarliestArrivalTime(int stopId);
