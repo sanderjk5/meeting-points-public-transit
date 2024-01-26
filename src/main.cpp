@@ -8,13 +8,11 @@
 
 using namespace std;
 
-static const char *const HEADER = "\nMeeting points - Public Transit\n\n";
-static const char *const USAGE = "\nExecute meeting-points-public-transit\n\n";
+static const char *const HEADER = "\nMeeting points - Public Transit\n";
 
 int main(int argc, const char *argv[]) {
   srand(time(0));
   cout << HEADER;
-  cout << USAGE;
 
   // string folderName = "gtfs_s_bahn_stuttgart";
   // Importer::import(folderName, true, s_bahn_stuttgart);
