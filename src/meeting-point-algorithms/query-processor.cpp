@@ -5,6 +5,7 @@
 #include <../data-handling/converter.h>
 #include <../constants.h>
 #include <limits.h>
+#include <omp.h>
 
 #include <iostream>
 #include <chrono>
@@ -29,8 +30,12 @@ void NaiveQueryProcessor::processNaiveQuery(bool printTime) {
         query.weekday = meetingPointQuery.weekday;
         query.numberOfDays = meetingPointQuery.numberOfDays;
         CSA* csa = new CSA(query);
-        csa->processCSA(printTime);
         csas.push_back(csa);
+    }
+
+    #pragma omp parallel for
+    for (int i = 0; i < csas.size(); i++) {
+        csas[i]->processCSA(printTime);
     }
 
     int minSum = INT_MAX;

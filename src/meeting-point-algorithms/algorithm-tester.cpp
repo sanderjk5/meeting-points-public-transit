@@ -28,7 +28,9 @@ void NaiveAlgorithmTester::testNaiveAlgorithmRandom(int numberOfQueries, int num
         PrintHelper::printMeetingPointQueryResult(meetingPointQueryResult);
     }
 
-    cout << "Number of successful queries: " << successfulQueries << endl;
+    double rateOfSuccessfulQueries = (double) successfulQueries / numberOfQueries;
+
+    cout << "Rate of successful queries: " << rateOfSuccessfulQueries << endl;
 }
 
 void NaiveAlgorithmTester::testNaiveAlgorithm(MeetingPointQuery meetingPointQuery, bool printTime, bool printJourneys) {
