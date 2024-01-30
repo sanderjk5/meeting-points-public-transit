@@ -61,11 +61,11 @@ void CSA::processCSA(bool printTime) {
             continue;
         }
 
-        int connectionDepartureTime = connection->departureTime + dayOffset * SECONDSPERDAY;
-        int connectionArrivalTime = connection->arrivalTime + dayOffset * SECONDSPERDAY;
+        int connectionDepartureTime = connection->departureTime + dayOffset * SECONDS_PER_DAY;
+        int connectionArrivalTime = connection->arrivalTime + dayOffset * SECONDS_PER_DAY;
 
         if (connectionArrivalTime < connectionDepartureTime) {
-            connectionArrivalTime += SECONDSPERDAY;
+            connectionArrivalTime += SECONDS_PER_DAY;
         }
 
         if (t[connection->tripId] != -1 || s[connection->departureStopId] < connectionDepartureTime) {

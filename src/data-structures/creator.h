@@ -17,7 +17,7 @@ class Creator {
         static void createNetworkGTree(int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf);
 
     private:
-        static vector<Graph> partitionateGraph(Graph graph, int numberOfPartitions, int maxNumberOfVerticesInGraph, int klIterations);
+        static vector<Graph> partitionateGraph(Graph graph, int numberOfPartitions, int maxNumberOfVerticesInGraph);
         static vector<Graph> coarseGraph(Graph &graph, int maxNumberOfVerticesInGraph);
         static void partitionateCoarsedGraph(Graph &graph, int klIterations);
         static void refineGraphs(vector<Graph> &graphs);

@@ -28,7 +28,7 @@ void Creator::createNetworkGraph() {
         Connection connection = Importer::connections[i];
         int connectionArrivalTime = connection.arrivalTime;
         if (connectionArrivalTime < connection.departureTime) {
-            connectionArrivalTime += SECONDSPERDAY;
+            connectionArrivalTime += SECONDS_PER_DAY;
         }
 
         Edge edge;
@@ -87,7 +87,7 @@ void Creator::createNetworkGTree(int numberOfChildrenPerNode, int maxNumberOfVer
     int depth = (log(leafs) / log(numberOfChildrenPerNode)) + 1;
     leafs = pow(numberOfChildrenPerNode, depth);
 
-    vector<Graph> graphs = partitionateGraph(networkGraph, leafs, maxNumberOfVerticesPerLeaf, 5);
+    vector<Graph> graphs = partitionateGraph(networkGraph, leafs, maxNumberOfVerticesPerLeaf);
     networkGTree = createGTree(networkGraph, graphs, numberOfChildrenPerNode, depth);
 
     // Stop the timer and calculate the duration
@@ -98,7 +98,7 @@ void Creator::createNetworkGTree(int numberOfChildrenPerNode, int maxNumberOfVer
     cout << "Network g-tree creation duration: " << duration << " milliseconds\n" << endl;
 }
 
-vector<Graph> Creator::partitionateGraph(Graph graph, int numberOfPartitions, int maxNumberOfVerticesInGraph, int klIterations) {
+vector<Graph> Creator::partitionateGraph(Graph graph, int numberOfPartitions, int maxNumberOfVerticesInGraph) {
     vector<Graph> previousGraphs = vector<Graph>(0);
     previousGraphs.push_back(graph);
 
@@ -107,7 +107,7 @@ vector<Graph> Creator::partitionateGraph(Graph graph, int numberOfPartitions, in
 
         for (int j = 0; j < previousGraphs.size(); j++) {
             vector<Graph> coarsedGraphs = coarseGraph(previousGraphs[j], maxNumberOfVerticesInGraph);
-            partitionateCoarsedGraph(coarsedGraphs[coarsedGraphs.size()-1], klIterations);
+            partitionateCoarsedGraph(coarsedGraphs[coarsedGraphs.size()-1], KL_ITERATIONS);
             refineGraphs(coarsedGraphs);
             vector<Graph> partitionatedGraphs = splitPartitionatedGraph(coarsedGraphs[0]);
             for(int k = 0; k < partitionatedGraphs.size(); k++) {
@@ -248,8 +248,6 @@ vector<Graph> Creator::coarseGraph(Graph &graph, int maxNumberOfVerticesInGraph)
 }
 
 void Creator::partitionateCoarsedGraph(Graph &graph, int klIterations) {
-    int maxNumberOfUnusedSwaps = 50;
-
     vector<vector<int>> partitions = vector<vector<int>>(0);
     vector<int> edgeCutOfPartitions = vector<int>(0);
 
@@ -276,7 +274,7 @@ void Creator::partitionateCoarsedGraph(Graph &graph, int klIterations) {
 
         vector<bool> swappedVertex = vector<bool>(graph.vertices.size(), false);
 
-        while(numberOfUnusedSwaps < maxNumberOfUnusedSwaps && swaps < graph.vertices.size()) {
+        while(numberOfUnusedSwaps < KL_MAX_UNUSED_SWAPS && swaps < graph.vertices.size()) {
             // calculate edge cut for each vertex and find max gain vertex
             vector<int> externalDegree = vector<int>(graph.vertices.size(), 0);
             vector<int> internalDegree = vector<int>(graph.vertices.size(), 0);

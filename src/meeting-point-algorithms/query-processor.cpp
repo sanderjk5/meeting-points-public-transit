@@ -111,7 +111,7 @@ MeetingPointQuery QueryProcessor::generateRandomMeetingPointQuery(int numberOfSo
     for (int i = 0; i < numberOfSources; i++) {
         meetingPointQuery.sourceStopIds.push_back(rand() % Importer::stops.size());
     }
-    meetingPointQuery.sourceTime = rand() % SECONDSPERDAY;
+    meetingPointQuery.sourceTime = rand() % SECONDS_PER_DAY;
     meetingPointQuery.weekday = rand() % 7;
     meetingPointQuery.numberOfDays = numberOfDays;
     return meetingPointQuery;
