@@ -9,7 +9,6 @@
 #include <map>
 #include <string>
 
-
 struct MeetingPointQuery {
     vector<int> sourceStopIds;
     int sourceTime;

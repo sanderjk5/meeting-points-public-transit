@@ -22,7 +22,11 @@ class GNode {
 
 class GTree {
     public:
-        explicit GTree() {};
+        explicit GTree() {
+            this->root = new GNode();
+            this->nodeOfStopId = vector<GNode*>(0);
+            this->nodeOfNodeId = vector<GNode*>(0);
+        };
         ~GTree(){};
 
         GNode* root;

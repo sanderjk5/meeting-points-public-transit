@@ -57,6 +57,43 @@ void NaiveAlgorithmTester::testNaiveAlgorithm(MeetingPointQuery meetingPointQuer
     }
 }
 
+void GTreeAlgorithmTester::testGTreeAlgorithmRandom(int numberOfQueries, int numberOfSources, int numberOfDays, bool printTime, bool printOnlySuccessful) {
+    int successfulQueries = 0;
+    for (int i = 0; i < numberOfQueries; i++) {
+        MeetingPointQuery meetingPointQuery = QueryProcessor::generateRandomMeetingPointQuery(numberOfSources, numberOfDays);
+        
+        GTreeQueryProcessor gTreeQueryProcessor = GTreeQueryProcessor(meetingPointQuery);
+        gTreeQueryProcessor.processGTreeQuery(printTime);
+        MeetingPointQueryResult meetingPointQueryResult = gTreeQueryProcessor.getMeetingPointQueryResult();
+
+        if (meetingPointQueryResult.meetingPointMinSum == "" || meetingPointQueryResult.meetingPointMinMax == "") {
+            if(printOnlySuccessful) {
+                continue;
+            }
+        } else {
+            successfulQueries++;
+        }
+
+        PrintHelper::printMeetingPointQuery(meetingPointQuery);
+        PrintHelper::printMeetingPointQueryResult(meetingPointQueryResult);
+    }
+
+    double rateOfSuccessfulQueries = (double) successfulQueries / numberOfQueries;
+
+    cout << "Rate of successful queries: " << rateOfSuccessfulQueries << endl;
+}
+
+void GTreeAlgorithmTester::testGTreeAlgorithm(MeetingPointQuery meetingPointQuery, bool printTime) {
+    PrintHelper::printMeetingPointQuery(meetingPointQuery);
+
+    GTreeQueryProcessor gTreeQueryProcessor = GTreeQueryProcessor(meetingPointQuery);
+    gTreeQueryProcessor.processGTreeQuery(printTime);
+    MeetingPointQueryResult meetingPointQueryResult = gTreeQueryProcessor.getMeetingPointQueryResult();
+    
+    PrintHelper::printMeetingPointQueryResult(meetingPointQueryResult);
+}
+
+
 void PrintHelper::printMeetingPointQuery(MeetingPointQuery meetingPointQuery) {
     cout << "Source stops: ";
     for (int j = 0; j < meetingPointQuery.sourceStopIds.size()-1; j++) {

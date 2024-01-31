@@ -1,8 +1,8 @@
 #include "creator.h"
 
+#include "g-tree.h"
 #include <../data-handling/importer.h>
 #include <../constants.h>
-#include "g-tree.h"
 
 #include <vector>
 #include <map>

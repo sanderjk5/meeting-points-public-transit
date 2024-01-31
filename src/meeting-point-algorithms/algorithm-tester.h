@@ -13,6 +13,15 @@ class NaiveAlgorithmTester {
         static void testNaiveAlgorithm(MeetingPointQuery meetingPointQuery, bool printTime = false, bool printJourneys = false);
 };
 
+class GTreeAlgorithmTester {
+    public:
+        explicit GTreeAlgorithmTester(){};
+        ~GTreeAlgorithmTester(){};
+
+        static void testGTreeAlgorithmRandom(int numberOfQueries, int numberOfSources, int numberOfDays = 1, bool printTime = false, bool printOnlySuccessful = false);
+        static void testGTreeAlgorithm(MeetingPointQuery meetingPointQuery, bool printTime = false);
+};
+
 class PrintHelper {
     public:
         explicit PrintHelper(){};
