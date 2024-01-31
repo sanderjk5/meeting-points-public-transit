@@ -2,7 +2,7 @@
 #define CMAKE_CREATOR_H
 
 #include "graph.h"
-#include "gtree.h"
+#include "g-tree.h"
 
 #include <vector>
 

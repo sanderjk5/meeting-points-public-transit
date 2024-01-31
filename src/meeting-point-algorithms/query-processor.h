@@ -6,6 +6,7 @@
 #include "journey.h"
 
 #include <vector>
+#include <map>
 #include <string>
 
 
@@ -46,6 +47,26 @@ class NaiveQueryProcessor {
         MeetingPointQuery meetingPointQuery;
         MeetingPointQueryResult meetingPointQueryResult;
         vector<CSA*> csas;
+};
+
+class GTreeQueryProcessor {
+    public:
+        explicit GTreeQueryProcessor(MeetingPointQuery meetingPointQuery){
+            this->meetingPointQuery = meetingPointQuery;
+        };
+        ~GTreeQueryProcessor(){};
+
+        void processGTreeQuery(bool printTime = false);
+        MeetingPointQueryResult getMeetingPointQueryResult();
+    
+    private:
+        MeetingPointQuery meetingPointQuery;
+        MeetingPointQueryResult meetingPointQueryResult;
+        map<pair<int, int>, vector<pair<int, int>>> queryPointAndNodeToBorderStopDurations;
+
+        void processGTreeQueryWithOptimization(Optimization optimization);
+        int getLowerBoundToNode(int nodeId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization);
+        int getCostsToStop(int stopId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization);
 };
 
 class QueryProcessor {
