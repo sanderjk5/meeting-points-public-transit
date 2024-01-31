@@ -5,9 +5,9 @@
 #include <vector>
 #include <queue>
 
-
 vector<int> Graph::getDistances(int sourceStopId, vector<int> targetStopIds) {
     vector<int> distances = vector<int>(this->vertices.size(), INT_MAX);
+    vector<bool> visited = vector<bool>(this->vertices.size(), false);
     
     distances[sourceStopId] = 0;
     priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
@@ -20,6 +20,10 @@ vector<int> Graph::getDistances(int sourceStopId, vector<int> targetStopIds) {
     while(!pq.empty()) {
         int u = pq.top().second;
         pq.pop();
+
+        if (visited[u]) {
+            continue;
+        }
 
         for (int i = 0; i < targetStopIds.size(); i++) {
             if (targetStopIds[i] == u) {

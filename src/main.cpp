@@ -18,16 +18,16 @@ int main(int argc, const char *argv[]) {
   // string folderName = "gtfs_s_bahn_stuttgart";
   // Importer::import(folderName, true, s_bahn_stuttgart);
 
-  // string folderName = "vvs_gtfs_j24";
-  // Importer::import(folderName, true, vvs_j24);
+  string folderName = "vvs_gtfs_j24";
+  Importer::import(folderName, true, vvs_j24);
 
-  string folderName0 = "schienenfernverkehr_de";
-  string folderName1 = "schienenregionalverkehr_de";
-  Importer::import(folderName0, false, schienenfernverkehr_de);
-  Importer::import(folderName1, true, schienenregionalverkehr_de);
+  // string folderName0 = "schienenfernverkehr_de";
+  // string folderName1 = "schienenregionalverkehr_de";
+  // Importer::import(folderName0, false, schienenfernverkehr_de);
+  // Importer::import(folderName1, true, schienenregionalverkehr_de);
 
   Creator::createNetworkGraph();
-  Creator::createNetworkGTree(4, 512);
+  Creator::createNetworkGTree(4, 256);
 
   cout << "Border stops of root node: " << Creator::networkGTree.root->borderStopIds.size() << endl;
 

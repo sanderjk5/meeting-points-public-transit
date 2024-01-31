@@ -238,7 +238,7 @@ vector<Graph> Creator::coarseGraph(Graph &graph, int maxNumberOfVerticesInGraph)
             }
         }
 
-        if(coarsedGraph.vertices.size() == previousGraph->vertices.size()){
+        if(coarsedGraph.vertices.size() > previousGraph->vertices.size() - MIN_COARSE_GRAPH_VERTEX_DIFF){
             break;
         }
         coarsedGraphs.push_back(coarsedGraph);
@@ -278,7 +278,7 @@ void Creator::partitionateCoarsedGraph(Graph &graph, int klIterations) {
             // calculate edge cut for each vertex and find max gain vertex
             vector<int> externalDegree = vector<int>(graph.vertices.size(), 0);
             vector<int> internalDegree = vector<int>(graph.vertices.size(), 0);
-            int partSize = 0;
+            vector<int> partSizes = vector<int>(2, 0);
             vector<int> maxGain = vector<int>(2, 0);
             vector<int> maxGainVertex = vector<int>(2, -1);
             for (int j = 0; j < graph.vertices.size(); j++) {
@@ -292,18 +292,21 @@ void Creator::partitionateCoarsedGraph(Graph &graph, int klIterations) {
                         internalDegree[j] += graph.adjacencyList[j][k].ewgt;
                     }
                 }
+                internalDegree[j] += graph.vertices[j].cewgt;
                 int gain = externalDegree[j] - internalDegree[j];
                 if (gain > maxGain[partition[j]]) {
                     maxGain[partition[j]] = gain;
                     maxGainVertex[partition[j]] = j;
                 }
                 if (partition[j] == 0) {
-                    partSize++;
+                    partSizes[0] += graph.vertices[j].vwgt;
+                } else {
+                    partSizes[1] += graph.vertices[j].vwgt;
                 }
             }
 
             int largerPart = 0;
-            if (partSize < graph.vertices.size() / 2) {
+            if (partSizes[1] > partSizes[0]) {
                 largerPart = 1;
             }
 
@@ -419,6 +422,10 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
 
     vector<GNode*> previousLevelNodes = vector<GNode*>(0);
 
+    for (int i = 0; i < graphs.size(); i++) {
+        cout << "Graph " << i << " has " << graphs[i].vertices.size() << " vertices" << endl;
+    }
+
     // create leaf nodes using the graphs
     for (int i = 0;  i < graphs.size(); i++){
         GNode* node = new GNode();
@@ -457,6 +464,7 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
     }
 
     // create the rest of the nodes
+    int depthCounter = 0;
     while(previousLevelNodes.size() > 1){
         vector<GNode*> currentLevelNodes = vector<GNode*>(0);
 
@@ -475,6 +483,9 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
                 }
             }
 
+            cout << "Creating border durations for node " << j << " of depth " << depthCounter << endl;
+            cout << "Number of border stops: " << node->borderStopIds.size() << endl;
+
             for(int k = 0; k < node->borderStopIds.size(); k++) {
                 vector<int> distances = originalGraph.getDistances(node->borderStopIds[k], node->borderStopIds);
                 for (int l = 0; l < node->borderStopIds.size(); l++) {
@@ -486,6 +497,8 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
         }
 
         previousLevelNodes = currentLevelNodes;
+
+        depthCounter++;
     }
 
     gTree.root = previousLevelNodes[0];
