@@ -279,16 +279,16 @@ int GTreeQueryProcessor::getLowerBoundToNode(int nodeId, map<pair<int, int>, vec
 
 int GTreeQueryProcessor::getCostsToStop(int stopId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization) {
     int costs = 0;
-    // for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
-    //     int duration = Creator::networkGTree.getMinimalDurationToStop(meetingPointQuery.sourceStopIds[i], stopId, queryPointAndNodeToBorderStopDurations);
-    //     if (optimization == min_sum) {
-    //         costs += duration;
-    //     } else {
-    //         if (duration > costs) {
-    //             costs = duration;
-    //         }
-    //     }
-    // }
+    for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
+        int duration = Creator::networkGTree.getMinimalDurationToStop(meetingPointQuery.sourceStopIds[i], stopId, queryPointAndNodeToBorderStopDurations);
+        if (optimization == min_sum) {
+            costs += duration;
+        } else {
+            if (duration > costs) {
+                costs = duration;
+            }
+        }
+    }
     return costs;
 }
 
