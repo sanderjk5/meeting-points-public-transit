@@ -2,6 +2,7 @@
 #define CMAKE_ALGORITHM_TESTER_H
 
 #include "query-processor.h"
+#include <../data-structures/g-tree.h>
 #include "journey.h"
 
 class NaiveAlgorithmTester {
@@ -18,8 +19,8 @@ class GTreeAlgorithmTester {
         explicit GTreeAlgorithmTester(){};
         ~GTreeAlgorithmTester(){};
 
-        static void testGTreeAlgorithmRandom(int numberOfQueries, int numberOfSources, int numberOfDays = 1, bool printTime = false, bool printOnlySuccessful = false);
-        static void testGTreeAlgorithm(MeetingPointQuery meetingPointQuery, bool printTime = false);
+        static void testGTreeAlgorithmRandom(GTree* gTree, int numberOfQueries, int numberOfSources, int numberOfDays = 1, bool printTime = false, bool printOnlySuccessful = false);
+        static void testGTreeAlgorithm(GTree* gTree, MeetingPointQuery meetingPointQuery, bool printTime = false);
 };
 
 class PrintHelper {

@@ -13,9 +13,8 @@ class Creator {
         ~Creator(){};
 
         static Graph networkGraph;
-        static GTree networkGTree;
         static void createNetworkGraph();
-        static void createNetworkGTree(int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf);
+        static GTree createNetworkGTree(int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf);
 
     private:
         static vector<Graph> partitionateGraph(Graph graph, int numberOfPartitions, int maxNumberOfVerticesInGraph);

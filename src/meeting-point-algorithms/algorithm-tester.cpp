@@ -4,6 +4,7 @@
 #include "journey.h"
 #include <../data-handling/importer.h>
 #include <../data-handling/converter.h>
+#include <../data-structures/g-tree.h>
 
 #include <iostream>
 
@@ -57,12 +58,12 @@ void NaiveAlgorithmTester::testNaiveAlgorithm(MeetingPointQuery meetingPointQuer
     }
 }
 
-void GTreeAlgorithmTester::testGTreeAlgorithmRandom(int numberOfQueries, int numberOfSources, int numberOfDays, bool printTime, bool printOnlySuccessful) {
+void GTreeAlgorithmTester::testGTreeAlgorithmRandom(GTree* gTree, int numberOfQueries, int numberOfSources, int numberOfDays, bool printTime, bool printOnlySuccessful) {
     int successfulQueries = 0;
     for (int i = 0; i < numberOfQueries; i++) {
         MeetingPointQuery meetingPointQuery = QueryProcessor::generateRandomMeetingPointQuery(numberOfSources, numberOfDays);
         
-        GTreeQueryProcessor gTreeQueryProcessor = GTreeQueryProcessor(meetingPointQuery);
+        GTreeQueryProcessor gTreeQueryProcessor = GTreeQueryProcessor(meetingPointQuery, gTree);
         gTreeQueryProcessor.processGTreeQuery(printTime);
         MeetingPointQueryResult meetingPointQueryResult = gTreeQueryProcessor.getMeetingPointQueryResult();
 
@@ -83,10 +84,10 @@ void GTreeAlgorithmTester::testGTreeAlgorithmRandom(int numberOfQueries, int num
     cout << "Rate of successful queries: " << rateOfSuccessfulQueries << endl;
 }
 
-void GTreeAlgorithmTester::testGTreeAlgorithm(MeetingPointQuery meetingPointQuery, bool printTime) {
+void GTreeAlgorithmTester::testGTreeAlgorithm(GTree* gTree, MeetingPointQuery meetingPointQuery, bool printTime) {
     PrintHelper::printMeetingPointQuery(meetingPointQuery);
 
-    GTreeQueryProcessor gTreeQueryProcessor = GTreeQueryProcessor(meetingPointQuery);
+    GTreeQueryProcessor gTreeQueryProcessor = GTreeQueryProcessor(meetingPointQuery, gTree);
     gTreeQueryProcessor.processGTreeQuery(printTime);
     MeetingPointQueryResult meetingPointQueryResult = gTreeQueryProcessor.getMeetingPointQueryResult();
     

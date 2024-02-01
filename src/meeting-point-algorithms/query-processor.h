@@ -2,6 +2,7 @@
 #define CMAKE_QUERY_PROCESSOR_H
 
 #include <../data-handling/importer.h>
+#include <../data-structures/g-tree.h>
 #include "csa.h" 
 #include "journey.h"
 
@@ -50,8 +51,9 @@ class NaiveQueryProcessor {
 
 class GTreeQueryProcessor {
     public:
-        explicit GTreeQueryProcessor(MeetingPointQuery meetingPointQuery){
+        explicit GTreeQueryProcessor(MeetingPointQuery meetingPointQuery, GTree* gTree){
             this->meetingPointQuery = meetingPointQuery;
+            this->gTree = gTree;
         };
         ~GTreeQueryProcessor(){};
 
@@ -59,6 +61,7 @@ class GTreeQueryProcessor {
         MeetingPointQueryResult getMeetingPointQueryResult();
     
     private:
+        GTree* gTree;
         MeetingPointQuery meetingPointQuery;
         MeetingPointQueryResult meetingPointQueryResult;
         map<pair<int, int>, vector<pair<int, int>>> queryPointAndNodeToBorderStopDurations;

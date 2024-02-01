@@ -14,7 +14,6 @@
 using namespace std;
 
 Graph Creator::networkGraph = Graph();
-GTree Creator::networkGTree = GTree();
 
 void Creator::createNetworkGraph() {
     cout << "Creating network graph..." << endl;
@@ -76,7 +75,7 @@ void Creator::createNetworkGraph() {
 }
 
 
-void Creator::createNetworkGTree(int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf) {
+GTree Creator::createNetworkGTree(int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf) {
     cout << "Creating network g-tree..." << endl;
 
     // Start the timer
@@ -88,7 +87,7 @@ void Creator::createNetworkGTree(int numberOfChildrenPerNode, int maxNumberOfVer
     leafs = pow(numberOfChildrenPerNode, depth);
 
     vector<Graph> graphs = partitionateGraph(networkGraph, leafs, maxNumberOfVerticesPerLeaf);
-    networkGTree = createGTree(networkGraph, graphs, numberOfChildrenPerNode, depth);
+    GTree networkGTree = createGTree(networkGraph, graphs, numberOfChildrenPerNode, depth);
 
     // Stop the timer and calculate the duration
     auto end = std::chrono::high_resolution_clock::now();
@@ -96,6 +95,8 @@ void Creator::createNetworkGTree(int numberOfChildrenPerNode, int maxNumberOfVer
 
     // Print the duration
     cout << "Network g-tree creation duration: " << duration << " milliseconds\n" << endl;
+
+    return networkGTree;
 }
 
 vector<Graph> Creator::partitionateGraph(Graph graph, int numberOfPartitions, int maxNumberOfVerticesInGraph) {

@@ -2,6 +2,7 @@
 
 #include "csa.h"
 #include <../data-structures/creator.h>
+#include <../data-structures/g-tree.h>
 #include <../constants.h>
 #include <../data-handling/importer.h>
 #include <../data-handling/converter.h>
@@ -220,8 +221,8 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
     int optimalMeetingPointStopId = -1;
     int currentBest = INT_MAX;
 
-    int l = getLowerBoundToNode(Creator::networkGTree.root->nodeId, queryPointAndNodeToBorderStopDurations, optimization);
-    pq.push(make_pair(l, Creator::networkGTree.root->nodeId));
+    int l = getLowerBoundToNode(gTree->root->nodeId, queryPointAndNodeToBorderStopDurations, optimization);
+    pq.push(make_pair(l, gTree->root->nodeId));
 
     while(!pq.empty()){
         pair<int, int> current = pq.top();
@@ -233,7 +234,7 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
             continue;
         }
 
-        GNode* currentNode = Creator::networkGTree.nodeOfNodeId[currentNodeId];
+        GNode* currentNode = gTree->nodeOfNodeId[currentNodeId];
         if(currentNode->children.size() > 0){
             for(int i = 0; i < currentNode->children.size(); i++){
                 GNode* childNode = currentNode->children[i];
@@ -265,7 +266,7 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
 int GTreeQueryProcessor::getLowerBoundToNode(int nodeId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization) {
     int lowerBound = 0;
     for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
-        int duration = Creator::networkGTree.getMinimalDurationToNode(meetingPointQuery.sourceStopIds[i], nodeId, queryPointAndNodeToBorderStopDurations);
+        int duration = gTree->getMinimalDurationToNode(meetingPointQuery.sourceStopIds[i], nodeId, queryPointAndNodeToBorderStopDurations);
         if (optimization == min_sum) {
             lowerBound += duration;
         } else {
@@ -280,7 +281,7 @@ int GTreeQueryProcessor::getLowerBoundToNode(int nodeId, map<pair<int, int>, vec
 int GTreeQueryProcessor::getCostsToStop(int stopId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization) {
     int costs = 0;
     for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
-        int duration = Creator::networkGTree.getMinimalDurationToStop(meetingPointQuery.sourceStopIds[i], stopId, queryPointAndNodeToBorderStopDurations);
+        int duration = gTree->getMinimalDurationToStop(meetingPointQuery.sourceStopIds[i], stopId, queryPointAndNodeToBorderStopDurations);
         if (optimization == min_sum) {
             costs += duration;
         } else {

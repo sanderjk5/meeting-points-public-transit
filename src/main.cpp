@@ -6,6 +6,7 @@
 #include"data-structures/g-tree.h"
 #include"data-structures/creator.h"
 #include"data-handling/converter.h"
+#include"data-structures/graph.h"
 
 
 using namespace std;
@@ -28,9 +29,10 @@ int main(int argc, const char *argv[]) {
   Importer::import(folderName1, true, schienenregionalverkehr_de);
 
   Creator::createNetworkGraph();
-  Creator::createNetworkGTree(4, 256);
+  GTree networkGTree = Creator::createNetworkGTree(4, 256);
 
-  cout << "Border stops of root node: " << Creator::networkGTree.root->stopIds.size() << endl;
+  cout << "Border stops of root node: " << networkGTree.root->stopIds.size() << endl;
+  cout << endl;
 
   // NaiveAlgorithmTester::testNaiveAlgorithmRandom(10, 10, 3, false, true);
 
@@ -38,7 +40,7 @@ int main(int argc, const char *argv[]) {
   MeetingPointQuery meetingPointQuery = QueryProcessor::generateMeetingPointQuery(sourceStopNames, "09:00:00", "monday", 1);
   NaiveAlgorithmTester::testNaiveAlgorithm(meetingPointQuery, false, false);
 
-  GTreeAlgorithmTester::testGTreeAlgorithm(meetingPointQuery, true);
+  GTreeAlgorithmTester::testGTreeAlgorithm(&networkGTree, meetingPointQuery, true);
 
   return 0;
 }
