@@ -35,9 +35,11 @@ class GTree {
 
         int getMinimalDurationToNode(int sourceStopId, int targetNodeId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations);
         int getMinimalDurationToStop(int sourceStopId, int targetStopId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations);
+        void initializeGTree();
 
     private:
         vector<int> getNodePath(int stopId, int nodeId);
+        bool isVertexInNode(int stopId, int nodeId);
 };
 
 #endif //CMAKE_G_TREE_H

@@ -48,6 +48,8 @@ vector<int> Graph::getDistances(int sourceStopId, vector<int> targetStopIds) {
                 pq.push(make_pair(distances[v], v));
             }
         }
+
+        visited[u] = true;
     }
 
     return distances;

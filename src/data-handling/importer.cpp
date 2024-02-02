@@ -490,6 +490,9 @@ void Importer::generateSortedConnections() {
             connection.departureTime = previousStopTime.departureTime;
             connection.arrivalStopId = currentStopTime.stopId;
             connection.arrivalTime = currentStopTime.arrivalTime;
+            if (currentStopTime.arrivalTime == previousStopTime.departureTime){
+                connection.arrivalTime += 30;
+            }
             connection.tripId = tripId;
 
             connections.push_back(connection);

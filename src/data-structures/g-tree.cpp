@@ -8,34 +8,39 @@
 
 using namespace std;
 
+void GTree::initializeGTree() {
+    cout << "GTree initializeGTree" << endl;
+}
+
 int GTree::getMinimalDurationToNode(int sourceStopId, int targetNodeId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations) {
     int minDuration = INT_MAX;
     
     vector<int> path = getNodePath(sourceStopId, targetNodeId);
 
-    if (path.size() == 0) {
+    if(isVertexInNode(sourceStopId, targetNodeId)) {
         return 0;
     }
 
     // fill the map with the border stop durations of the first node if it is not already filled
     pair<int, int> queryPointAndNode = make_pair(sourceStopId, path[0]);
-    if (queryPointAndNodeToBorderStopDurations.find(queryPointAndNode) != queryPointAndNodeToBorderStopDurations.end()) {
-        vector<pair<int, int>> distancesToBorderStops;
+    if (queryPointAndNodeToBorderStopDurations.find(queryPointAndNode) == queryPointAndNodeToBorderStopDurations.end()) {
+        vector<pair<int, int>> distancesToBorderStops = vector<pair<int, int>>(0);
         for (int i = 0; i < nodeOfNodeId[path[0]]->borderStopIds.size(); i++) {
             int borderStopId = nodeOfNodeId[path[0]]->borderStopIds[i];
             int distanceToBorderStop = nodeOfStopId[sourceStopId]->borderDurations[make_pair(sourceStopId, borderStopId)];
             distancesToBorderStops.push_back(make_pair(distanceToBorderStop, borderStopId));
         }
+        queryPointAndNodeToBorderStopDurations[queryPointAndNode] = distancesToBorderStops;
     }
 
     // fill the map with the border stop durations of the other nodes on the path if they are not already filled
     int previousNodeId = path[0];
-    for(int i = 1; i < path.size() - 1; i++) {
+    for(int i = 1; i < path.size(); i++) {
         int currentNodeId = path[i];
-        pair<int, int> queryPointAndNode = make_pair(sourceStopId, currentNodeId);
-        if (queryPointAndNodeToBorderStopDurations.find(queryPointAndNode) != queryPointAndNodeToBorderStopDurations.end()) {
+        queryPointAndNode = make_pair(sourceStopId, currentNodeId);
+        if (queryPointAndNodeToBorderStopDurations.find(queryPointAndNode) == queryPointAndNodeToBorderStopDurations.end()) {
             vector<pair<int, int>> distancesToBorderStopsOfPreviousNode = queryPointAndNodeToBorderStopDurations[make_pair(sourceStopId, previousNodeId)];
-            vector<pair<int, int>> distancesToBorderStopsOfCurrentNode;
+            vector<pair<int, int>> distancesToBorderStopsOfCurrentNode = vector<pair<int, int>>(0);
             int parentNodeId;
             // case 1: the node is a parent of the previous node
             if (nodeOfNodeId[previousNodeId]->parent->nodeId == currentNodeId) {
@@ -43,11 +48,11 @@ int GTree::getMinimalDurationToNode(int sourceStopId, int targetNodeId, map<pair
             }
             // case 2: the node is a sibling of the previous node
             else if (nodeOfNodeId[previousNodeId]->parent->nodeId == nodeOfNodeId[currentNodeId]->parent->nodeId) {
-                int parentNodeId = nodeOfNodeId[currentNodeId]->parent->nodeId;
+                parentNodeId = nodeOfNodeId[currentNodeId]->parent->nodeId;
             }
             // case 3: the node is a child of the previous node
             else {
-                int parentNodeId = previousNodeId;
+                parentNodeId = previousNodeId;
             }
 
             for (int j = 0; j < nodeOfNodeId[currentNodeId]->borderStopIds.size(); j++) {
@@ -57,6 +62,9 @@ int GTree::getMinimalDurationToNode(int sourceStopId, int targetNodeId, map<pair
                     int distanceToPreviousBorderStop = distancesToBorderStopsOfPreviousNode[k].first;
                     int previousBorderStopId = distancesToBorderStopsOfPreviousNode[k].second;
                     int distanceBetweenBorderStops = nodeOfNodeId[parentNodeId]->borderDurations[make_pair(previousBorderStopId, borderStopId)];
+                    if (distanceToPreviousBorderStop == INT_MAX || distanceBetweenBorderStops == INT_MAX) {
+                        continue;
+                    }
                     int distanceToBorderStopOfCurrentNode = distanceToPreviousBorderStop + distanceBetweenBorderStops;
                     if (distanceToBorderStopOfCurrentNode < minDistanceToCurrentBorderStop) {
                         minDistanceToCurrentBorderStop = distanceToBorderStopOfCurrentNode;
@@ -67,6 +75,7 @@ int GTree::getMinimalDurationToNode(int sourceStopId, int targetNodeId, map<pair
 
             queryPointAndNodeToBorderStopDurations[queryPointAndNode] = distancesToBorderStopsOfCurrentNode;
         }
+        previousNodeId = currentNodeId;
     }
 
     queryPointAndNode = make_pair(sourceStopId, path.back());
@@ -100,6 +109,9 @@ int GTree::getMinimalDurationToStop(int sourceStopId, int targetStopId, map<pair
         int distanceToBorderStop = distancesToBorderStops[i].first;
         int borderStopId = distancesToBorderStops[i].second;
         int distanceToTargetStop = nodeOfStopId[targetStopId]->borderDurations[make_pair(borderStopId, targetStopId)];
+        if (distanceToBorderStop == INT_MAX || distanceToTargetStop == INT_MAX) {
+            continue;
+        }
         int duration = distanceToBorderStop + distanceToTargetStop;
 
         if (duration < minDuration) {
@@ -111,6 +123,7 @@ int GTree::getMinimalDurationToStop(int sourceStopId, int targetStopId, map<pair
 }
 
 vector<int> GTree::getNodePath(int stopId, int nodeId) {
+    int rootId = root->nodeId;
     vector<int> path;
     vector<int> upwardPath;
     vector<int> downwardPath;
@@ -119,20 +132,50 @@ vector<int> GTree::getNodePath(int stopId, int nodeId) {
     downwardPath.push_back(nodeId);
 
     while (upwardPath.back() != downwardPath.back()) {
-        if(upwardPath.size() < downwardPath.size()) {
-            downwardPath.push_back(nodeOfNodeId[downwardPath.back()]->parent->nodeId);
+        int upwardPathLastNodeId = upwardPath.back();
+        int downwardPathLastNodeId = downwardPath.back();
+        if(upwardPathLastNodeId != rootId && 
+            downwardPathLastNodeId != rootId && 
+            nodeOfNodeId[upwardPathLastNodeId]->parent->nodeId == nodeOfNodeId[downwardPathLastNodeId]->parent->nodeId) {
+            break;
+        } 
+        if(upwardPathLastNodeId < downwardPathLastNodeId) {
+            downwardPath.push_back(nodeOfNodeId[downwardPathLastNodeId]->parent->nodeId);
         } else {
-            upwardPath.push_back(nodeOfNodeId[upwardPath.back()]->parent->nodeId);
+            upwardPath.push_back(nodeOfNodeId[upwardPathLastNodeId]->parent->nodeId);
         }
     }
 
-    for (int i = 0; i < upwardPath.size() - 1; i++) {
+    for (int i = 0; i < upwardPath.size(); i++) {
         path.push_back(upwardPath[i]);
     }
 
-    for (int i = downwardPath.size() - 2; i >= 0; i--) {
+    for (int i = downwardPath.size() - 1; i >= 0; i--) {
+        if (path.back() == downwardPath[i]) {  
+            continue;
+        }
         path.push_back(downwardPath[i]);
     }
 
     return path;
+}
+
+bool GTree::isVertexInNode(int stopId, int nodeId) {
+    if (nodeOfStopId[stopId]->nodeId == nodeId || nodeId == root->nodeId) {
+        return true;
+    }
+
+    vector<int> upwardPath;
+
+    upwardPath.push_back(nodeOfStopId[stopId]->nodeId);
+
+    while (upwardPath.back() != root->nodeId) {
+        int upwardPathLastNodeId = upwardPath.back();
+        if (upwardPathLastNodeId == nodeId) {
+            return true;
+        }
+        upwardPath.push_back(nodeOfNodeId[upwardPathLastNodeId]->parent->nodeId);
+    }
+
+    return false;
 }

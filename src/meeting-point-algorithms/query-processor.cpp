@@ -192,7 +192,7 @@ void GTreeQueryProcessor::processGTreeQuery(bool printTime) {
         CSA csa(query);
         csa.processCSA(false);
 
-        meetingPointMinSumDuration += csa.getEarliestArrivalTime(meetingPointMinSumStopId) - meetingPointQuery.sourceTime;
+        meetingPointMinSumDuration += (csa.getEarliestArrivalTime(meetingPointMinSumStopId) - meetingPointQuery.sourceTime);
         if (meetingPointMinSumArrivalTime < csa.getEarliestArrivalTime(meetingPointMinSumStopId)) {
             meetingPointMinSumArrivalTime = csa.getEarliestArrivalTime(meetingPointMinSumStopId);
         }
@@ -204,9 +204,11 @@ void GTreeQueryProcessor::processGTreeQuery(bool printTime) {
         }
     }
 
+    cout << "meetingPointMinSumArrivalTime: " << meetingPointMinSumArrivalTime << endl;
     meetingPointQueryResult.minSumDuration = TimeConverter::convertSecondsToTime(meetingPointMinSumDuration, false);
     meetingPointQueryResult.meetingTimeMinSum = TimeConverter::convertSecondsToTime(meetingPointMinSumArrivalTime, true);
 
+    cout << "meetingPointMinMaxArrivalTime: " << meetingPointMinMaxArrivalTime << endl;
     meetingPointQueryResult.minMaxDuration = TimeConverter::convertSecondsToTime(meetingPointMinMaxDuration, false);
     meetingPointQueryResult.meetingTimeMinMax = TimeConverter::convertSecondsToTime(meetingPointMinMaxArrivalTime, true);
 
@@ -231,7 +233,7 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
         int currentNodeId = current.second;
 
         if(currentLowerBound >= currentBest){
-            continue;
+            break;
         }
 
         GNode* currentNode = gTree->nodeOfNodeId[currentNodeId];
@@ -267,6 +269,9 @@ int GTreeQueryProcessor::getLowerBoundToNode(int nodeId, map<pair<int, int>, vec
     int lowerBound = 0;
     for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
         int duration = gTree->getMinimalDurationToNode(meetingPointQuery.sourceStopIds[i], nodeId, queryPointAndNodeToBorderStopDurations);
+        if (duration == INT_MAX) {
+            return INT_MAX;
+        }
         if (optimization == min_sum) {
             lowerBound += duration;
         } else {
@@ -282,6 +287,9 @@ int GTreeQueryProcessor::getCostsToStop(int stopId, map<pair<int, int>, vector<p
     int costs = 0;
     for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
         int duration = gTree->getMinimalDurationToStop(meetingPointQuery.sourceStopIds[i], stopId, queryPointAndNodeToBorderStopDurations);
+        if (duration == INT_MAX) {
+            return INT_MAX;
+        }
         if (optimization == min_sum) {
             costs += duration;
         } else {

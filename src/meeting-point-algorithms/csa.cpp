@@ -22,6 +22,8 @@ using namespace std;
 void CSA::processCSA(bool printTime) {
     auto start = std::chrono::high_resolution_clock::now();
 
+    vector<bool> isStopReached(Importer::stops.size(), false);
+
     // Find first connection after the source time
     int currentConnectionIndex = CSA::findFirstConnectionAfterTime(query.sourceTime);
 
@@ -30,6 +32,7 @@ void CSA::processCSA(bool printTime) {
     }
 
     s[query.sourceStopId] = query.sourceTime;
+    isStopReached[query.sourceStopId] = true;
 
     for(int i = 0; i < Importer::trips.size(); i++) {
         t[i] = -1;
@@ -76,19 +79,22 @@ void CSA::processCSA(bool printTime) {
             if(connectionArrivalTime < s[connection->arrivalStopId]) {
                 int arrivalStopId = connection->arrivalStopId;
                 int tripId = connection->tripId;
+
                 s[connection->arrivalStopId] = connectionArrivalTime;
+                isStopReached[connection->arrivalStopId] = true;
+
                 journeyPointers[connection->arrivalStopId].enterConnection = &Importer::connections[t[connection->tripId]];
                 journeyPointers[connection->arrivalStopId].exitConnection = connection;
 
                 if (query.targetStopIds.size() > 0){
-                    bool reachedTargetStop = false;
+                    bool reachedAllTargetStops = true;
                     for (int j = 0; j < query.targetStopIds.size(); j++) {
-                        if (connection->arrivalStopId == query.targetStopIds[j]) {
-                            reachedTargetStop = true;
+                        if (!isStopReached[query.targetStopIds[j]]) {
+                            reachedAllTargetStops = false;
                             break;
                         }
                     }
-                    if(reachedTargetStop) {
+                    if(reachedAllTargetStops) {
                         break;
                     }
                 }

@@ -34,6 +34,11 @@ void Creator::createNetworkGraph() {
         edge.targetStopId = connection.arrivalStopId;
         edge.ewgt = connectionArrivalTime - connection.departureTime;
 
+        if (edge.ewgt == 0){
+            edge.ewgt = 1;
+            cout << "Edge weight is 0, departure stop id: " << Importer::getStopName(connection.departureStopId) << ", arrival stop id: " << Importer::getStopName(connection.arrivalStopId) << endl;
+        }
+
         bool addEdge = true;
 
         for (int j = 0; j < networkGraph.adjacencyList[connection.departureStopId].size(); j++) {
@@ -427,6 +432,9 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
         cout << "Graph " << i << " has " << graphs[i].vertices.size() << " vertices" << endl;
     }
 
+    int stopCounter = 0;
+    int borderStopCounter = 0;
+
     // create leaf nodes using the graphs
     for (int i = 0;  i < graphs.size(); i++){
         GNode* node = new GNode();
@@ -441,11 +449,17 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
             for (int k = 0; k < originalGraph.adjacencyList[stopId].size(); k++) {
                 int targetStopId = originalGraph.adjacencyList[stopId][k].targetStopId;
                 if(find(node->stopIds.begin(), node->stopIds.end(), targetStopId) == node->stopIds.end()){
+                    if (node->borderStopIds.size() > 0 && stopId == node->borderStopIds.back()){
+                        cout << "insert duplicate 1" << endl;
+                    }
                     node->borderStopIds.push_back(stopId);
                     break;
                 }
             }
         }
+
+        stopCounter += node->stopIds.size();
+        borderStopCounter += node->borderStopIds.size();
 
         for (int j = 0; j < node->stopIds.size(); j++) {
             vector<int> distances = originalGraph.getDistances(node->stopIds[j], node->stopIds);
@@ -457,10 +471,16 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
         previousLevelNodes.push_back(node);
     }
 
+    cout << "Number of stops in leaf nodes: " << stopCounter << endl;
+    cout << "Number of border stops in leaf nodes: " << borderStopCounter << endl;
+
     // create the rest of the nodes
     int depthCounter = 0;
     while(previousLevelNodes.size() > 1){
         vector<GNode*> currentLevelNodes = vector<GNode*>(0);
+
+        stopCounter = 0;
+        borderStopCounter = 0;
 
         for (int j = 0; j < previousLevelNodes.size()/numberOfChildrenPerNode; j++) {
             GNode* node = new GNode();
@@ -478,13 +498,18 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
                 }
             }
 
-            cout << "Creating border durations for node " << j << " of depth " << depthCounter << endl;
-            cout << "Number of border stops of previous level: " << node->stopIds.size() << endl;
+            stopCounter += node->stopIds.size();
+
+            // cout << "Creating border durations for node " << j << " of depth " << depthCounter << endl;
+            // cout << "Number of border stops of previous level: " << node->stopIds.size() << endl;
 
             for(int k = 0; k < node->stopIds.size(); k++) {
                 vector<int> distances = originalGraph.getDistances(node->stopIds[k], node->stopIds);
                 for (int l = 0; l < node->stopIds.size(); l++) {
                     node->borderDurations[make_pair(node->stopIds[k], node->stopIds[l])] = distances[node->stopIds[l]];
+                    if (distances[node->stopIds[l]] == 0 && node->stopIds[k] != node->stopIds[l]){
+                        cout << "distance: " << distances[node->stopIds[l]] << ", source stop: " << Importer::getStopName(node->stopIds[k]) << ", target stop: " << Importer::getStopName(node->stopIds[l]) << endl;
+                    }
                 }
             }
 
@@ -506,7 +531,8 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
                             }
                             GNode* otherNode = currentLevelNodes[m];
                             if (find(otherNode->stopIds.begin(), otherNode->stopIds.end(), targetStopId) != otherNode->stopIds.end()){
-                                node->borderStopIds.push_back(targetStopId);
+                                node->borderStopIds.push_back(stopId);
+                                
                                 foundBorderStop = true;
                                 break;
                             }
@@ -516,11 +542,15 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
                         }
                     }
                 }
-                cout << "Number of border stops of node " << j << " of depth " << depthCounter << ": " << node->borderStopIds.size() << endl;
+                borderStopCounter += node->borderStopIds.size();
+                // cout << "Number of border stops of node " << j << " of depth " << depthCounter << ": " << node->borderStopIds.size() << endl;
             }
         }
 
         previousLevelNodes = currentLevelNodes;
+
+        cout << "Number of stops in nodes of depth " << depthCounter << ": " << stopCounter << endl;
+        cout << "Number of border stops in nodes of depth " << depthCounter << ": " << borderStopCounter << endl;
 
         depthCounter++;
     }
