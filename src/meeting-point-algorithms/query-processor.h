@@ -21,10 +21,12 @@ struct MeetingPointQueryResult {
     string meetingPointMinSum;
     string meetingTimeMinSum;
     string minSumDuration;
+    int minSumDurationInSeconds;
     string meetingPointMinMax;
     string meetingTimeMinMax;
     string minMaxDuration;
-    string queryTime;
+    int minMaxDurationInSeconds;
+    double queryTime;
 };
 
 enum Optimization {
@@ -59,12 +61,14 @@ class GTreeQueryProcessor {
 
         void processGTreeQuery(bool printTime = false);
         MeetingPointQueryResult getMeetingPointQueryResult();
+        vector<Journey> getJourneys(Optimization optimization);
     
     private:
         GTree* gTree;
         MeetingPointQuery meetingPointQuery;
         MeetingPointQueryResult meetingPointQueryResult;
         map<pair<int, int>, vector<pair<int, int>>> queryPointAndNodeToBorderStopDurations;
+        vector<CSA*> csas;
 
         void processGTreeQueryWithOptimization(Optimization optimization);
         int getLowerBoundToNode(int nodeId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization);
