@@ -20,6 +20,9 @@ class GNode {
         map<pair<int, int>, int> borderDurations;
 };
 
+/*
+    A G-Tree that represents the public transit network.
+*/
 class GTree {
     public:
         explicit GTree() {

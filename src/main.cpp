@@ -40,14 +40,14 @@ int main(int argc, const char *argv[]) {
   // NaiveAlgorithmTester::testNaiveAlgorithmRandom(10, 10, 3, false, true);
   // GTreeAlgorithmTester::testGTreeAlgorithmRandom(networkGTreePointer, 20, 3, 3, false, true);
 
-  MeetingPointQuery meetingPointQuery = QueryProcessor::generateMeetingPointQuery(sourceStopNames, "09:00:00", "monday", 7);
+  MeetingPointQuery meetingPointQuery = QueryGenerator::generateMeetingPointQuery(sourceStopNames, "09:00:00", "monday", 7);
 
   // NaiveAlgorithmTester::testNaiveAlgorithm(meetingPointQuery, false, false);
   // GTreeAlgorithmTester::testGTreeAlgorithm(networkGTreePointer, meetingPointQuery, true, false);
 
   // AlgorithmComparer::compareAlgorithms(networkGTreePointer, meetingPointQuery, false);
 
-  AlgorithmComparer::compareAlgorithmsRandom(networkGTreePointer, 20, 5, 7, false, false);
+  AlgorithmComparer::compareAlgorithmsRandom(networkGTreePointer, 10, 5, 7, false, false);
 
   return 0;
 }

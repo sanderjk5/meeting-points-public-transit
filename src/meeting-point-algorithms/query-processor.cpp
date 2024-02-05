@@ -131,7 +131,7 @@ vector<Journey> NaiveQueryProcessor::getJourneys(Optimization optimization) {
 /*
     Generate a random meeting point query.
 */
-MeetingPointQuery QueryProcessor::generateRandomMeetingPointQuery(int numberOfSources, int numberOfDays) {
+MeetingPointQuery QueryGenerator::generateRandomMeetingPointQuery(int numberOfSources, int numberOfDays) {
     MeetingPointQuery meetingPointQuery;
     for (int i = 0; i < numberOfSources; i++) {
         meetingPointQuery.sourceStopIds.push_back(rand() % Importer::stops.size());
@@ -145,7 +145,7 @@ MeetingPointQuery QueryProcessor::generateRandomMeetingPointQuery(int numberOfSo
 /*
     Generate a meeting point query.
 */
-MeetingPointQuery QueryProcessor::generateMeetingPointQuery(vector<string> sourceStopNames, string sourceTime, string weekday, int numberOfDays) {
+MeetingPointQuery QueryGenerator::generateMeetingPointQuery(vector<string> sourceStopNames, string sourceTime, string weekday, int numberOfDays) {
     MeetingPointQuery meetingPointQuery;
     for (string sourceStopName : sourceStopNames) {
         meetingPointQuery.sourceStopIds.push_back(Importer::getStopId(sourceStopName));
@@ -159,7 +159,7 @@ MeetingPointQuery QueryProcessor::generateMeetingPointQuery(vector<string> sourc
 /*
     Create a CSA query.
 */
-CSAQuery QueryProcessor::createCSAQuery(string sourceStopName, string sourceTime, string weekday) {
+CSAQuery QueryGenerator::createCSAQuery(string sourceStopName, string sourceTime, string weekday) {
     CSAQuery query;
     query.sourceStopId = Importer::getStopId(sourceStopName);
     query.sourceTime = TimeConverter::convertTimeToSeconds(sourceTime);
@@ -170,7 +170,7 @@ CSAQuery QueryProcessor::createCSAQuery(string sourceStopName, string sourceTime
 /*
     Create a CSA query with target stops.
 */
-CSAQuery QueryProcessor::createCSAQueryWithTargetStops(string sourceStopName, vector<string> targetStopNames, string sourceTime, string weekday) {
+CSAQuery QueryGenerator::createCSAQueryWithTargetStops(string sourceStopName, vector<string> targetStopNames, string sourceTime, string weekday) {
     CSAQuery query;
     query.sourceStopId = Importer::getStopId(sourceStopName);
     for (string targetStopName : targetStopNames) {

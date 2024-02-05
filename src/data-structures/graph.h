@@ -19,6 +19,9 @@ struct Edge {
     int ewgt; // the weight of the edge
 };
 
+/*
+    A graph that represents the public transit network.
+*/
 class Graph {
     public:
         explicit Graph() {};

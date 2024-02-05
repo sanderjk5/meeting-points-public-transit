@@ -17,6 +17,9 @@ struct JourneyPointer {
     Connection* exitConnection;
 };
 
+/*
+    A CSA algorithm that calculates the earliest arrival times for all stops.
+*/
 class CSA {
     public:
         explicit CSA(CSAQuery query){

@@ -34,6 +34,9 @@ enum Optimization {
     min_max
 };
 
+/*
+    A class that processes the naive algorithm.
+*/
 class NaiveQueryProcessor {
     public:
         explicit NaiveQueryProcessor(MeetingPointQuery meetingPointQuery){
@@ -51,6 +54,9 @@ class NaiveQueryProcessor {
         vector<CSA*> csas;
 };
 
+/*
+    A class that processes the G-Tree algorithm.
+*/
 class GTreeQueryProcessor {
     public:
         explicit GTreeQueryProcessor(MeetingPointQuery meetingPointQuery, GTree* gTree){
@@ -76,10 +82,13 @@ class GTreeQueryProcessor {
         void processCSAToTargetStops(vector<int> targetStopIds, int currentBest);
 };
 
-class QueryProcessor {
+/*
+    A class that generates queries for the meeting point algorithms.
+*/
+class QueryGenerator {
     public:
-        explicit QueryProcessor(){};
-        ~QueryProcessor(){};
+        explicit QueryGenerator(){};
+        ~QueryGenerator(){};
 
         static MeetingPointQuery generateRandomMeetingPointQuery(int numberOfSources, int numberOfDays = 1);
         static MeetingPointQuery generateMeetingPointQuery(vector<string> sourceStopNames, string sourceTime, string weekday, int numberOfDays = 1);

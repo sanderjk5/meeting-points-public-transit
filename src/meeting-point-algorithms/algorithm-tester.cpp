@@ -12,7 +12,7 @@
 void NaiveAlgorithmTester::testNaiveAlgorithmRandom(int numberOfQueries, int numberOfSources, int numberOfDays, bool printTime, bool printOnlySuccessful) {
     int successfulQueries = 0;
     for (int i = 0; i < numberOfQueries; i++) {
-        MeetingPointQuery meetingPointQuery = QueryProcessor::generateRandomMeetingPointQuery(numberOfSources, numberOfDays);
+        MeetingPointQuery meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSources, numberOfDays);
         
         NaiveQueryProcessor naiveQueryProcessor = NaiveQueryProcessor(meetingPointQuery);
         naiveQueryProcessor.processNaiveQuery(printTime);
@@ -62,7 +62,7 @@ void NaiveAlgorithmTester::testNaiveAlgorithm(MeetingPointQuery meetingPointQuer
 void GTreeAlgorithmTester::testGTreeAlgorithmRandom(GTree* gTree, int numberOfQueries, int numberOfSources, int numberOfDays, bool printTime, bool printOnlySuccessful) {
     int successfulQueries = 0;
     for (int i = 0; i < numberOfQueries; i++) {
-        MeetingPointQuery meetingPointQuery = QueryProcessor::generateRandomMeetingPointQuery(numberOfSources, numberOfDays);
+        MeetingPointQuery meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSources, numberOfDays);
         
         GTreeQueryProcessor gTreeQueryProcessorApproximation = GTreeQueryProcessor(meetingPointQuery, gTree);
         gTreeQueryProcessorApproximation.processGTreeQuery(printTime);
@@ -122,11 +122,11 @@ void AlgorithmComparer::compareAlgorithmsRandom(GTree* gTree, int numberOfQuerie
     vector<double> absolutDifferenceMinSum;
     vector<double> absolutDifferenceMinMax;
 
-    vector<double> relativeDifferenceMinSum;
-    vector<double> relativeDifferenceMinMax;
+    vector<double> accuracyMinSum;
+    vector<double> accuracyMinMax;
 
     for (int i = 0; i < numberOfQueries; i++) {
-        MeetingPointQuery meetingPointQuery = QueryProcessor::generateRandomMeetingPointQuery(numberOfSources, numberOfDays);
+        MeetingPointQuery meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSources, numberOfDays);
         
         NaiveQueryProcessor naiveQueryProcessor = NaiveQueryProcessor(meetingPointQuery);
         naiveQueryProcessor.processNaiveQuery(printTime);
@@ -172,8 +172,11 @@ void AlgorithmComparer::compareAlgorithmsRandom(GTree* gTree, int numberOfQuerie
         absolutDifferenceMinSum.push_back((double) differenceMinSum);
         absolutDifferenceMinMax.push_back((double) differenceMinMax);
 
-        relativeDifferenceMinSum.push_back((double) differenceMinSum / meetingPointQueryResultNaive.minSumDurationInSeconds);
-        relativeDifferenceMinMax.push_back((double) differenceMinMax / meetingPointQueryResultNaive.minMaxDurationInSeconds);
+        double relativeDifferenceMinSum = (double) differenceMinSum / meetingPointQueryResultNaive.minSumDurationInSeconds;
+        double relativeDifferenceMinMax = (double) differenceMinMax / meetingPointQueryResultNaive.minMaxDurationInSeconds;
+
+        accuracyMinSum.push_back(1 - relativeDifferenceMinSum);
+        accuracyMinMax.push_back(1 - relativeDifferenceMinMax);
 
 
         if (printEveryResult) {
@@ -225,14 +228,14 @@ void AlgorithmComparer::compareAlgorithmsRandom(GTree* gTree, int numberOfQuerie
     cout << "Minimum absolut difference min max: " << Calculator::getMinimum(absolutDifferenceMinMax) / 60 << " minutes" << endl;
 
     cout << "\nRelative result differences:" << endl;
-    cout << "Average relative difference min sum: " << Calculator::getAverage(relativeDifferenceMinSum) << endl;
-    cout << "Average relative difference min max: " << Calculator::getAverage(relativeDifferenceMinMax) << endl;
-    cout << "Median relative difference min sum: " << Calculator::getMedian(relativeDifferenceMinSum) << endl;
-    cout << "Median relative difference min max: " << Calculator::getMedian(relativeDifferenceMinMax) << endl;
-    cout << "Maximum relative difference min sum: " << Calculator::getMaximum(relativeDifferenceMinSum) << endl;
-    cout << "Maximum relative difference min max: " << Calculator::getMaximum(relativeDifferenceMinMax) << endl;
-    cout << "Minimum relative difference min sum: " << Calculator::getMinimum(relativeDifferenceMinSum) << endl;
-    cout << "Minimum relative difference min max: " << Calculator::getMinimum(relativeDifferenceMinMax) << endl;
+    cout << "Average accuracy min sum: " << Calculator::getAverage(accuracyMinSum) << endl;
+    cout << "Average accuracy min max: " << Calculator::getAverage(accuracyMinMax) << endl;
+    cout << "Median accuracy min sum: " << Calculator::getMedian(accuracyMinSum) << endl;
+    cout << "Median accuracy min max: " << Calculator::getMedian(accuracyMinMax) << endl;
+    cout << "Maximum accuracy min sum: " << Calculator::getMaximum(accuracyMinSum) << endl;
+    cout << "Maximum accuracy min max: " << Calculator::getMaximum(accuracyMinMax) << endl;
+    cout << "Minimum accuracy min sum: " << Calculator::getMinimum(accuracyMinSum) << endl;
+    cout << "Minimum accuracy min max: " << Calculator::getMinimum(accuracyMinMax) << endl;
 }
 
 void AlgorithmComparer::compareAlgorithms(GTree* gTree, MeetingPointQuery meetingPointQuery, bool printTime){
@@ -262,17 +265,17 @@ void AlgorithmComparer::compareAlgorithms(GTree* gTree, MeetingPointQuery meetin
     bool gTreeApproximationQuerySuccessful = meetingPointQueryResultGTreeApproximation.meetingPointMinSum != "" && meetingPointQueryResultGTreeApproximation.meetingPointMinMax != "";
 
     if(naiveQuerySuccessful && gTreeApproximationQuerySuccessful) {
-        double absolutDifferenceMinSum = (double) (meetingPointQueryResultGTreeApproximation.minSumDurationInSeconds - meetingPointQueryResultNaive.minSumDurationInSeconds) / 60;
-        double absolutDifferenceMinMax = (double) (meetingPointQueryResultGTreeApproximation.minMaxDurationInSeconds - meetingPointQueryResultNaive.minMaxDurationInSeconds) / 60;
+        double absolutDifferenceMinSum = (double) (meetingPointQueryResultGTreeApproximation.minSumDurationInSeconds - meetingPointQueryResultNaive.minSumDurationInSeconds);
+        double absolutDifferenceMinMax = (double) (meetingPointQueryResultGTreeApproximation.minMaxDurationInSeconds - meetingPointQueryResultNaive.minMaxDurationInSeconds);
 
-        double relativeDifferenceMinSum = (double) absolutDifferenceMinSum / meetingPointQueryResultNaive.minSumDurationInSeconds;
-        double relativeDifferenceMinMax = (double) absolutDifferenceMinMax / meetingPointQueryResultNaive.minMaxDurationInSeconds;
+        double accuracyMinSum = (double) 1 - (absolutDifferenceMinSum / meetingPointQueryResultNaive.minSumDurationInSeconds);
+        double accuracyMinMax = (double) 1 - (absolutDifferenceMinMax / meetingPointQueryResultNaive.minMaxDurationInSeconds);
 
         cout << "Result differences:" << endl;
-        cout << "Absolut difference min sum: " << absolutDifferenceMinSum << " minutes" << endl;
-        cout << "Absolut difference min max: " << absolutDifferenceMinMax << " minutes" << endl;
-        cout << "Relative difference min sum: " << relativeDifferenceMinSum << endl;
-        cout << "Relative difference min max: " << relativeDifferenceMinMax << endl;
+        cout << "Absolut difference min sum: " << absolutDifferenceMinSum / 60 << " minutes" << endl;
+        cout << "Absolut difference min max: " << absolutDifferenceMinMax / 60 << " minutes" << endl;
+        cout << "Accuracy min sum: " << accuracyMinSum << endl;
+        cout << "Accuracy min max: " << accuracyMinMax << endl;
     }
 }
 
