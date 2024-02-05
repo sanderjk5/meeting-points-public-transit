@@ -22,17 +22,17 @@ int main(int argc, const char *argv[]) {
 
   string folderName = "vvs_gtfs_j24";
   Importer::import(folderName, true, vvs_j24);
-  vector<string> sourceStopNames = {"Rohr", "Waldau", "Göppingen Bahnhofssteg"};
+  vector<string> sourceStopNames = {"Rohr", "Waldau"};
+  // vector<string> sourceStopNames = {"Rohr", "Waldau", "Göppingen Bahnhofssteg"};
 
   // string folderName0 = "schienenfernverkehr_de";
   // string folderName1 = "schienenregionalverkehr_de";
   // Importer::import(folderName0, false, schienenfernverkehr_de);
   // Importer::import(folderName1, true, schienenregionalverkehr_de);
   // vector<string> sourceStopNames = {"Falkensee", "Stuttgart-Rohr"};
-  // vector<string> sourceStopNames = {"Hamburg Hbf", "Stuttgart-Rohr"};
 
   Creator::createNetworkGraph();
-  GTree networkGTree = Creator::createNetworkGTree(2, 128);
+  GTree networkGTree = Creator::createNetworkGTree(2, 16);
 
   GTree* networkGTreePointer = &networkGTree;
   networkGTreePointer->initializeGTree();
@@ -47,7 +47,7 @@ int main(int argc, const char *argv[]) {
 
   // AlgorithmComparer::compareAlgorithms(networkGTreePointer, meetingPointQuery, false);
 
-  AlgorithmComparer::compareAlgorithmsRandom(networkGTreePointer, 50, 20, 7, false, false);
+  AlgorithmComparer::compareAlgorithmsRandom(networkGTreePointer, 20, 5, 7, false, false);
 
   return 0;
 }

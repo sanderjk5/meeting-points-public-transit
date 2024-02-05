@@ -5,6 +5,9 @@
 #include <vector>
 #include <queue>
 
+/*
+    Use Dijkstra's algorithm to calculate the minimal distance to a target node from a source stop.
+*/
 vector<int> Graph::getDistances(int sourceStopId, vector<int> targetStopIds) {
     vector<int> distances = vector<int>(this->vertices.size(), INT_MAX);
     vector<bool> visited = vector<bool>(this->vertices.size(), false);

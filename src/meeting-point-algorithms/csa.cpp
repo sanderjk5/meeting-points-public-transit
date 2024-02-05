@@ -13,37 +13,50 @@
 
 using namespace std;
 
-
 /*
-    Processes the CSA algorithm to calculate the earliest arrival times for all stops.
-    If a target stop is specified, the algorithm will only calculate the earliest arrival time for that stop.
-    Search for a maximum time of 24 hours after the source time.
+    Initialize the CSA algorithm.
 */
-void CSA::processCSA(bool printTime) {
-    auto start = std::chrono::high_resolution_clock::now();
-
-    vector<bool> isStopReached(Importer::stops.size(), false);
+void CSA::initializeCSA() {
+    journeyPointers = vector<JourneyPointer>(Importer::stops.size());
+    s = vector<int>(Importer::stops.size());
+    t = vector<int>(Importer::trips.size());
 
     // Find first connection after the source time
-    int currentConnectionIndex = CSA::findFirstConnectionAfterTime(query.sourceTime);
+    currentConnectionIndex = CSA::findFirstConnectionAfterTime(query.sourceTime);
 
     for (int i = 0; i < Importer::stops.size(); i++) {
         s[i] = INT_MAX;
     }
 
     s[query.sourceStopId] = query.sourceTime;
-    isStopReached[query.sourceStopId] = true;
 
     for(int i = 0; i < Importer::trips.size(); i++) {
         t[i] = -1;
     }
 
-    int previousDepartureTime = query.sourceTime;
-    int dayOffset = 0;
+    previousDepartureTime = query.sourceTime;
+    dayOffset = 0;
 
-    int maxNumberOfConnections = Importer::connections.size() * query.numberOfDays;
+    maxDepartureTime = query.sourceTime + query.numberOfDays * SECONDS_PER_DAY;
+}
 
-    for (int i = 0; i < maxNumberOfConnections; i++) {
+void CSA::setTargetStopIds(vector<int> targetStopIds) {
+    query.targetStopIds = targetStopIds;
+}
+
+void CSA::setMaxDepartureTime(int maxDepartureTime) {
+    this->maxDepartureTime = maxDepartureTime;
+}
+
+/*
+    Processes the CSA algorithm to calculate the earliest arrival times for all stops.
+    If target stops are specified, the algorithm will only calculate the earliest arrival time for these stops.
+    Search for connections until the max departure time is reached.
+*/
+void CSA::processCSA(bool printTime) {
+    auto start = std::chrono::high_resolution_clock::now();
+
+    while(previousDepartureTime + dayOffset * SECONDS_PER_DAY < maxDepartureTime) {
         Connection* connection = &Importer::connections[currentConnectionIndex];
 
         if (previousDepartureTime > connection->departureTime) {
@@ -64,6 +77,7 @@ void CSA::processCSA(bool printTime) {
             continue;
         }
 
+        // Calculate the arrival and departure time of the connection
         int connectionDepartureTime = connection->departureTime + dayOffset * SECONDS_PER_DAY;
         int connectionArrivalTime = connection->arrivalTime + dayOffset * SECONDS_PER_DAY;
 
@@ -71,6 +85,21 @@ void CSA::processCSA(bool printTime) {
             connectionArrivalTime += SECONDS_PER_DAY;
         }
 
+        // check if all target stops are reached
+        if (query.targetStopIds.size() > 0){
+            bool reachedAllTargetStops = true;
+            for (int j = 0; j < query.targetStopIds.size(); j++) {
+                if (s[query.targetStopIds[j]] > connectionDepartureTime) {
+                    reachedAllTargetStops = false;
+                    break;
+                }
+            }
+            if(reachedAllTargetStops) {
+                break;
+            }
+        }
+
+        // Update the earliest arrival time for the arrival stop of the connection
         if (t[connection->tripId] != -1 || s[connection->departureStopId] < connectionDepartureTime) {
             if (t[connection->tripId] == -1) {
                 t[connection->tripId] = connection->id;
@@ -81,23 +110,9 @@ void CSA::processCSA(bool printTime) {
                 int tripId = connection->tripId;
 
                 s[connection->arrivalStopId] = connectionArrivalTime;
-                isStopReached[connection->arrivalStopId] = true;
 
                 journeyPointers[connection->arrivalStopId].enterConnection = &Importer::connections[t[connection->tripId]];
                 journeyPointers[connection->arrivalStopId].exitConnection = connection;
-
-                if (query.targetStopIds.size() > 0){
-                    bool reachedAllTargetStops = true;
-                    for (int j = 0; j < query.targetStopIds.size(); j++) {
-                        if (!isStopReached[query.targetStopIds[j]]) {
-                            reachedAllTargetStops = false;
-                            break;
-                        }
-                    }
-                    if(reachedAllTargetStops) {
-                        break;
-                    }
-                }
             }
         }
 
@@ -145,14 +160,23 @@ Journey CSA::createJourney(int targetStopId) {
     return journey;
 }
 
+/*
+    Get the earliest arrival times for all stops.
+*/
 vector<int>* CSA::getEarliestArrivalTimes() {
     return &s;
 }
 
+/*
+    Get the earliest arrival time for a specific stop.
+*/
 int CSA::getEarliestArrivalTime(int stopId) {
     return s[stopId];
 }
 
+/*
+    Search for the first connection after a specific time using binary search.
+*/
 int CSA::findFirstConnectionAfterTime(int departureTime){
     int left = 0;
     int right = Importer::connections.size() - 1;

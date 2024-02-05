@@ -20,6 +20,13 @@
 
 using namespace std;
 
+/*
+    Process the naive query.
+    For each source stop, calculate the earliest arrival time for all stops.
+    Then calculate the sum of the earliest arrival times for all stops and the maximum earliest arrival time for all stops.
+    The stop with the lowest sum and the stop with the highest maximum earliest arrival time are the meeting points.
+
+*/
 void NaiveQueryProcessor::processNaiveQuery(bool printTime) {
     for (CSA* csa : csas) {
         delete csa;
@@ -38,6 +45,7 @@ void NaiveQueryProcessor::processNaiveQuery(bool printTime) {
         csas.push_back(csa);
     }
 
+    // Process the CSA algorithm for each source stop
     #pragma omp parallel for
     for (int i = 0; i < csas.size(); i++) {
         csas[i]->processCSA(printTime);
@@ -46,6 +54,7 @@ void NaiveQueryProcessor::processNaiveQuery(bool printTime) {
     int minSum = INT_MAX;
     int minMax = INT_MAX;
 
+    // Calculate the sum of the earliest arrival times for all stops and the maximum earliest arrival time for all stops
     for (int i = 0; i < Importer::stops.size(); i++) {
         int sum = 0;
         int max = 0;
@@ -94,10 +103,16 @@ void NaiveQueryProcessor::processNaiveQuery(bool printTime) {
     meetingPointQueryResult.queryTime = duration;
 }
 
+/*
+    Get the meeting point query result.
+*/
 MeetingPointQueryResult NaiveQueryProcessor::getMeetingPointQueryResult() {
     return meetingPointQueryResult;
 }
 
+/*
+    Get the journeys to a meeting point.
+*/
 vector<Journey> NaiveQueryProcessor::getJourneys(Optimization optimization) {
     vector<Journey> journeys;
     int targetStopId;
@@ -113,6 +128,9 @@ vector<Journey> NaiveQueryProcessor::getJourneys(Optimization optimization) {
     return journeys;
 }
 
+/*
+    Generate a random meeting point query.
+*/
 MeetingPointQuery QueryProcessor::generateRandomMeetingPointQuery(int numberOfSources, int numberOfDays) {
     MeetingPointQuery meetingPointQuery;
     for (int i = 0; i < numberOfSources; i++) {
@@ -124,6 +142,9 @@ MeetingPointQuery QueryProcessor::generateRandomMeetingPointQuery(int numberOfSo
     return meetingPointQuery;
 }
 
+/*
+    Generate a meeting point query.
+*/
 MeetingPointQuery QueryProcessor::generateMeetingPointQuery(vector<string> sourceStopNames, string sourceTime, string weekday, int numberOfDays) {
     MeetingPointQuery meetingPointQuery;
     for (string sourceStopName : sourceStopNames) {
@@ -135,6 +156,9 @@ MeetingPointQuery QueryProcessor::generateMeetingPointQuery(vector<string> sourc
     return meetingPointQuery;
 }
 
+/*
+    Create a CSA query.
+*/
 CSAQuery QueryProcessor::createCSAQuery(string sourceStopName, string sourceTime, string weekday) {
     CSAQuery query;
     query.sourceStopId = Importer::getStopId(sourceStopName);
@@ -143,6 +167,9 @@ CSAQuery QueryProcessor::createCSAQuery(string sourceStopName, string sourceTime
     return query;
 }
 
+/*
+    Create a CSA query with target stops.
+*/
 CSAQuery QueryProcessor::createCSAQueryWithTargetStops(string sourceStopName, vector<string> targetStopNames, string sourceTime, string weekday) {
     CSAQuery query;
     query.sourceStopId = Importer::getStopId(sourceStopName);
@@ -152,18 +179,33 @@ CSAQuery QueryProcessor::createCSAQueryWithTargetStops(string sourceStopName, ve
     return query;
 }
 
-void GTreeQueryProcessor::processGTreeQuery(bool printTime) {
+/*
+    Process a G-tree query. If useCSA is true, the CSA algorithm is used to calculate the real durations during the algorithm. 
+    Otherwise, approximate durations are calculated. In this case are the real durations calculated after the algorithm.
+*/
+void GTreeQueryProcessor::processGTreeQuery(bool printTime, bool useCSA) {
     for (CSA* csa : csas) {
         delete csa;
     }
     csas.clear();
 
+    for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
+        CSAQuery query;
+        query.sourceStopId = meetingPointQuery.sourceStopIds[i];
+        query.sourceTime = meetingPointQuery.sourceTime;
+        query.weekday = meetingPointQuery.weekday;
+        query.numberOfDays = meetingPointQuery.numberOfDays;
+        CSA* csa = new CSA(query);
+        csas.push_back(csa);
+    }
+
     queryPointAndNodeToBorderStopDurations = map<pair<int, int>, vector<pair<int, int>>>();
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    processGTreeQueryWithOptimization(min_sum);
-    processGTreeQueryWithOptimization(min_max);
+    // Process the query for both optimizations
+    processGTreeQueryWithOptimization(min_sum, useCSA);
+    processGTreeQueryWithOptimization(min_max, useCSA);
 
     // Stop the timer and calculate the duration
     auto end = std::chrono::high_resolution_clock::now();
@@ -181,26 +223,23 @@ void GTreeQueryProcessor::processGTreeQuery(bool printTime) {
             targetStopIds.push_back(meetingPointMinMaxStopId);
         }
 
-        for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
-            CSAQuery query;
-            query.sourceStopId = meetingPointQuery.sourceStopIds[i];
-            query.sourceTime = meetingPointQuery.sourceTime;
-            query.weekday = meetingPointQuery.weekday;
-            query.numberOfDays = meetingPointQuery.numberOfDays;
-            CSA* csa = new CSA(query);
-            csas.push_back(csa);
-        }
-
         int meetingPointMinSumDuration = 0;
         int meetingPointMinMaxDuration = 0;
 
         int meetingPointMinSumArrivalTime = 0;
         int meetingPointMinMaxArrivalTime = 0;
 
+        // Calculate the real durations
+        if(!useCSA) {
+            for(int i = 0; i < csas.size(); i++){
+                csas[i]->setTargetStopIds(targetStopIds);
+                csas[i]->processCSA(false);
+            }
+        }
+
+        // Set the values of the result
         for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
             int sourceStopId = meetingPointQuery.sourceStopIds[i];
-            
-            csas[i]->processCSA(false);
 
             meetingPointMinSumDuration += (csas[i]->getEarliestArrivalTime(meetingPointMinSumStopId) - meetingPointQuery.sourceTime);
             if (meetingPointMinSumArrivalTime < csas[i]->getEarliestArrivalTime(meetingPointMinSumStopId)) {
@@ -230,14 +269,19 @@ void GTreeQueryProcessor::processGTreeQuery(bool printTime) {
     }
 }
 
-void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimization) {
+/*
+    Process a G-tree query for a given optimization criteria. If useCSA is true, the CSA algorithm is used to calculate the real durations during the algorithm.
+*/
+void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimization, bool useCSA) {
     priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
     int optimalMeetingPointStopId = -1;
     int currentBest = INT_MAX;
 
+    // Calculate the initial lower bound of the root node
     int l = getLowerBoundToNode(gTree->root->nodeId, queryPointAndNodeToBorderStopDurations, optimization);
     pq.push(make_pair(l, gTree->root->nodeId));
 
+    // Process the query until the priority queue is empty or the current lower bound is greater than the current best
     while(!pq.empty()){
         pair<int, int> current = pq.top();
         pq.pop();
@@ -249,6 +293,7 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
         }
 
         GNode* currentNode = gTree->nodeOfNodeId[currentNodeId];
+        // Case 1: The current node is a inner node. Calculate the lower bounds of the children and add them to the priority queue.
         if(currentNode->children.size() > 0){
             for(int i = 0; i < currentNode->children.size(); i++){
                 GNode* childNode = currentNode->children[i];
@@ -258,10 +303,15 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
                     pq.push(make_pair(childLowerBound, childNodeId));
                 }
             }
-        } else {
+        } 
+        // Case 2: The current node is a leaf node. Calculate the costs to the stops and update the current best if necessary.
+        else {
+            if(useCSA) {
+                processCSAToTargetStops(currentNode->stopIds, currentBest);
+            }
             for (int i = 0; i < currentNode->stopIds.size(); i++) {
                 int stopId = currentNode->stopIds[i];
-                int costs = getCostsToStop(stopId, queryPointAndNodeToBorderStopDurations, optimization);
+                int costs = getCostsToStop(stopId, queryPointAndNodeToBorderStopDurations, optimization, useCSA);
                 if (costs < currentBest) {
                     currentBest = costs;
                     optimalMeetingPointStopId = stopId;
@@ -270,6 +320,7 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
         }
     }
     
+    // Set the optimal meeting point stop name
     string optimalMeetingPointStopName = "";
     if(optimalMeetingPointStopId != -1){
         optimalMeetingPointStopName = Importer::getStopName(optimalMeetingPointStopId);
@@ -281,6 +332,9 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
     }
 }
 
+/*
+    Get the lower bound to a node.
+*/
 int GTreeQueryProcessor::getLowerBoundToNode(int nodeId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization) {
     int lowerBound = 0;
     for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
@@ -299,10 +353,21 @@ int GTreeQueryProcessor::getLowerBoundToNode(int nodeId, map<pair<int, int>, vec
     return lowerBound;
 }
 
-int GTreeQueryProcessor::getCostsToStop(int stopId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization) {
+/*
+    Get the costs to a stop.
+*/
+int GTreeQueryProcessor::getCostsToStop(int stopId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization, bool useCSA) {
     int costs = 0;
     for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
-        int duration = gTree->getMinimalDurationToStop(meetingPointQuery.sourceStopIds[i], stopId, queryPointAndNodeToBorderStopDurations);
+        int duration = INT_MAX;
+        if (useCSA) {
+            int earliestArrivalTime = csas[i]->getEarliestArrivalTime(stopId);
+            if (earliestArrivalTime != INT_MAX) {
+                duration = earliestArrivalTime - meetingPointQuery.sourceTime;
+            }
+        } else {
+            duration = gTree->getMinimalDurationToStop(meetingPointQuery.sourceStopIds[i], stopId, queryPointAndNodeToBorderStopDurations);
+        }
         if (duration == INT_MAX) {
             return INT_MAX;
         }
@@ -317,10 +382,30 @@ int GTreeQueryProcessor::getCostsToStop(int stopId, map<pair<int, int>, vector<p
     return costs;
 }
 
+/*
+    Process the CSA algorithm for the target stops.
+*/
+void GTreeQueryProcessor::processCSAToTargetStops(vector<int> targetStopIds, int currentBest) {
+    for (int i = 0; i < csas.size(); i++) {
+        if (currentBest != INT_MAX) {
+            int maxDepartureTime = meetingPointQuery.sourceTime + currentBest;
+            csas[i]->setMaxDepartureTime(maxDepartureTime);
+        }
+        csas[i]->setTargetStopIds(targetStopIds);
+        csas[i]->processCSA(false);
+    }
+}
+
+/*
+    Get the meeting point query result.
+*/
 MeetingPointQueryResult GTreeQueryProcessor::getMeetingPointQueryResult() {
     return meetingPointQueryResult;
 }
 
+/*
+    Get the journeys to the meeting points.
+*/
 vector<Journey> GTreeQueryProcessor::getJourneys(Optimization optimization) {
     vector<Journey> journeys;
     int targetStopId;

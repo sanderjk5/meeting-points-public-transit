@@ -15,6 +15,9 @@ using namespace std;
 
 Graph Creator::networkGraph = Graph();
 
+/*
+    Create the network graph by iterating over the connections and creating the edges.
+*/
 void Creator::createNetworkGraph() {
     cout << "Creating network graph..." << endl;
 
@@ -74,18 +77,22 @@ void Creator::createNetworkGraph() {
     cout << "Network graph creation duration: " << duration << " milliseconds\n" << endl;
 }
 
-
+/*
+    Use the network graph to create the network g-tree.
+*/
 GTree Creator::createNetworkGTree(int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf) {
     cout << "Creating network g-tree..." << endl;
 
     // Start the timer
     auto start = std::chrono::high_resolution_clock::now();
 
+    // Calculate the number of leafs and the depth of the g-tree
     int numberOfVertices = networkGraph.vertices.size();
     int leafs = numberOfVertices / maxNumberOfVerticesPerLeaf;
     int depth = (log(leafs) / log(numberOfChildrenPerNode)) + 1;
     leafs = pow(numberOfChildrenPerNode, depth);
 
+    // Partitionate the network graph and create the network g-tree
     vector<Graph> graphs = partitionateGraph(networkGraph, leafs, maxNumberOfVerticesPerLeaf);
     GTree networkGTree = createGTree(networkGraph, graphs, numberOfChildrenPerNode, depth);
 
@@ -99,6 +106,9 @@ GTree Creator::createNetworkGTree(int numberOfChildrenPerNode, int maxNumberOfVe
     return networkGTree;
 }
 
+/*
+    Partitionate the graph into a number of partitions. Use the multilevel graph partitioning algorithm.
+*/
 vector<Graph> Creator::partitionateGraph(Graph graph, int numberOfPartitions, int maxNumberOfVerticesInGraph) {
     vector<Graph> previousGraphs = vector<Graph>(0);
     previousGraphs.push_back(graph);
@@ -122,6 +132,9 @@ vector<Graph> Creator::partitionateGraph(Graph graph, int numberOfPartitions, in
     return previousGraphs;
 }
 
+/*
+    Coarse the graph by contracting vertices. Use the "Heavy edge matching" algorithm.
+*/
 vector<Graph> Creator::coarseGraph(Graph &graph, int maxNumberOfVerticesInGraph) {
     vector<Graph> coarsedGraphs = vector<Graph>(0);
     coarsedGraphs.push_back(graph);
@@ -183,7 +196,7 @@ vector<Graph> Creator::coarseGraph(Graph &graph, int maxNumberOfVerticesInGraph)
             }
         }
 
-
+        // Create the coarser graph
         coarsedGraph.adjacencyList = vector<vector<Edge>>(indexInCoarsedGraph, vector<Edge>(0));
         for (int i = 0; i < numberOfVerticesInPreviousGraph; i++){
             if (matched[i] != -1){
@@ -239,6 +252,7 @@ vector<Graph> Creator::coarseGraph(Graph &graph, int maxNumberOfVerticesInGraph)
             }
         }
 
+        // Break if the coarsed graph is not coarser than the previous graph
         if(coarsedGraph.vertices.size() > previousGraph->vertices.size() - MIN_COARSE_GRAPH_VERTEX_DIFF){
             break;
         }
@@ -248,6 +262,9 @@ vector<Graph> Creator::coarseGraph(Graph &graph, int maxNumberOfVerticesInGraph)
     return coarsedGraphs;
 }
 
+/*
+    Partitionate the coarsed graph. Use the Kernighan-Lin algorithm.
+*/
 void Creator::partitionateCoarsedGraph(Graph &graph, int klIterations) {
     vector<vector<int>> partitions = vector<vector<int>>(0);
     vector<int> edgeCutOfPartitions = vector<int>(0);
@@ -349,6 +366,9 @@ void Creator::partitionateCoarsedGraph(Graph &graph, int klIterations) {
     graph.partition = partitions[minEdgeCutIndex];
 }
 
+/*
+    Refine the graphs by setting the partition of the coarser graph as initial partition and partitionate the finer graph.
+*/
 void Creator::refineGraphs(vector<Graph> &graphs) {
     for(int i = graphs.size()-2; i>=0; i--){
         Graph* previousGraph = &graphs[i+1];
@@ -366,6 +386,9 @@ void Creator::refineGraphs(vector<Graph> &graphs) {
     }
 }
 
+/*
+    Split the partitionated graph into two graphs.
+*/
 vector<Graph> Creator::splitPartitionatedGraph(Graph &graph) {
     vector<Graph> graphs = vector<Graph>(2, Graph());
 
@@ -406,6 +429,7 @@ vector<Graph> Creator::splitPartitionatedGraph(Graph &graph) {
         }
     }
 
+    // map the target stop ids of the edges
     for (int i = 0; i < graphs.size(); i++) {
         for (int j = 0; j < graphs[i].adjacencyList.size(); j++) {
             for (int k = 0; k < graphs[i].adjacencyList[j].size(); k++) {
@@ -417,14 +441,14 @@ vector<Graph> Creator::splitPartitionatedGraph(Graph &graph) {
     return graphs;
 }
 
+/*
+    Create the g-tree using the partitionated graphs.
+*/
 GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numberOfChildrenPerNode, int depth) {
     GTree gTree = GTree();
     gTree.nodeOfStopId = vector<GNode*>(Importer::stops.size(), nullptr);
 
     vector<GNode*> previousLevelNodes = vector<GNode*>(0);
-
-    int stopCounter = 0;
-    int borderStopCounter = 0;
 
     // create leaf nodes using the graphs
     for (int i = 0;  i < graphs.size(); i++){
@@ -446,9 +470,7 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
             }
         }
 
-        stopCounter += node->stopIds.size();
-        borderStopCounter += node->borderStopIds.size();
-
+        // calculate the durations between the stops of the node
         for (int j = 0; j < node->stopIds.size(); j++) {
             vector<int> distances = originalGraph.getDistances(node->stopIds[j], node->stopIds);
             for (int k = 0; k < node->stopIds.size(); k++) {
@@ -460,12 +482,8 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
     }
 
     // create the rest of the nodes
-    int depthCounter = 0;
     while(previousLevelNodes.size() > 1){
         vector<GNode*> currentLevelNodes = vector<GNode*>(0);
-
-        stopCounter = 0;
-        borderStopCounter = 0;
 
         for (int j = 0; j < previousLevelNodes.size()/numberOfChildrenPerNode; j++) {
             GNode* node = new GNode();
@@ -483,9 +501,7 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
                 }
             }
 
-            stopCounter += node->stopIds.size();
-
-
+            // calculate the border durations of the children
             for(int k = 0; k < node->stopIds.size(); k++) {
                 vector<int> distances = originalGraph.getDistances(node->stopIds[k], node->stopIds);
                 for (int l = 0; l < node->stopIds.size(); l++) {
@@ -522,13 +538,9 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
                         }
                     }
                 }
-                borderStopCounter += node->borderStopIds.size();
             }
         }
-
         previousLevelNodes = currentLevelNodes;
-
-        depthCounter++;
     }
 
     gTree.root = previousLevelNodes[0];

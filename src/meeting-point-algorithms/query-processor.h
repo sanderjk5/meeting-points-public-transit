@@ -59,7 +59,7 @@ class GTreeQueryProcessor {
         };
         ~GTreeQueryProcessor(){};
 
-        void processGTreeQuery(bool printTime = false);
+        void processGTreeQuery(bool printTime = false, bool useCSA = false);
         MeetingPointQueryResult getMeetingPointQueryResult();
         vector<Journey> getJourneys(Optimization optimization);
     
@@ -70,9 +70,10 @@ class GTreeQueryProcessor {
         map<pair<int, int>, vector<pair<int, int>>> queryPointAndNodeToBorderStopDurations;
         vector<CSA*> csas;
 
-        void processGTreeQueryWithOptimization(Optimization optimization);
+        void processGTreeQueryWithOptimization(Optimization optimization, bool useCSA);
         int getLowerBoundToNode(int nodeId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization);
-        int getCostsToStop(int stopId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization);
+        int getCostsToStop(int stopId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization, bool useCSA);
+        void processCSAToTargetStops(vector<int> targetStopIds, int currentBest);
 };
 
 class QueryProcessor {

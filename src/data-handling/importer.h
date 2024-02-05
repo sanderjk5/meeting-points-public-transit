@@ -76,11 +76,16 @@ enum DataType {
     schienenfernverkehr_de
 };
 
+/*
+    * This class is responsible for importing the data from the GTFS files and preparing it for the algorithm.
+    * It also provides some utility functions to access the imported data.
+*/
 class Importer {
     public:
         explicit Importer(){};
         ~Importer(){};
 
+        // The following vectors store the imported data
         static vector<Calendar> calendars;
         static vector<Route> routes;
         static vector<Stop> stops;
@@ -89,6 +94,7 @@ class Importer {
 
         static vector<Connection> connections;
 
+        // The following vectors store the prepared data to make it easier to access the imported data
         static vector<int> indexOfFirstStopTimeOfATrip;
         static vector<vector<int>> tripsOfARoute;
         static vector<vector<int>> stopsOfARoute;
@@ -102,6 +108,7 @@ class Importer {
         static int getStopId(string stopName);
 
     private:
+        // The following maps are used to map the old ids to new ids
         static map<string, int> serviceIdOldToNew;
         static map<string, int> routeIdOldToNew;
         static map<string, int> stopIdOldToNew;
