@@ -32,7 +32,7 @@ int main(int argc, const char *argv[]) {
   // vector<string> sourceStopNames = {"Hamburg Hbf", "Stuttgart-Rohr"};
 
   Creator::createNetworkGraph();
-  GTree networkGTree = Creator::createNetworkGTree(4, 256);
+  GTree networkGTree = Creator::createNetworkGTree(2, 128);
 
   GTree* networkGTreePointer = &networkGTree;
   networkGTreePointer->initializeGTree();
@@ -47,7 +47,7 @@ int main(int argc, const char *argv[]) {
 
   // AlgorithmComparer::compareAlgorithms(networkGTreePointer, meetingPointQuery, false);
 
-  AlgorithmComparer::compareAlgorithmsRandom(networkGTreePointer, 50, 3, 7, false, false);
+  AlgorithmComparer::compareAlgorithmsRandom(networkGTreePointer, 50, 20, 7, false, false);
 
   return 0;
 }

@@ -223,24 +223,29 @@ void AlgorithmComparer::compareAlgorithms(GTree* gTree, MeetingPointQuery meetin
     gTreeQueryProcessor.processGTreeQuery(printTime);
     MeetingPointQueryResult meetingPointQueryResultGTree = gTreeQueryProcessor.getMeetingPointQueryResult();
 
-     PrintHelper::printMeetingPointQuery(meetingPointQuery);
+    PrintHelper::printMeetingPointQuery(meetingPointQuery);
     cout << "Naive: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultNaive);
 
     cout << "GTree: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultGTree);
 
-    double absolutDifferenceMinSum = (double) (meetingPointQueryResultGTree.minSumDurationInSeconds - meetingPointQueryResultNaive.minSumDurationInSeconds) / 60;
-    double absolutDifferenceMinMax = (double) (meetingPointQueryResultGTree.minMaxDurationInSeconds - meetingPointQueryResultNaive.minMaxDurationInSeconds) / 60;
+    bool naiveQuerySuccessful = meetingPointQueryResultNaive.meetingPointMinSum != "" && meetingPointQueryResultNaive.meetingPointMinMax != "";
+    bool gTreeQuerySuccessful = meetingPointQueryResultGTree.meetingPointMinSum != "" && meetingPointQueryResultGTree.meetingPointMinMax != "";
 
-    double relativeDifferenceMinSum = (double) absolutDifferenceMinSum / meetingPointQueryResultNaive.minSumDurationInSeconds;
-    double relativeDifferenceMinMax = (double) absolutDifferenceMinMax / meetingPointQueryResultNaive.minMaxDurationInSeconds;
+    if(naiveQuerySuccessful && gTreeQuerySuccessful) {
+        double absolutDifferenceMinSum = (double) (meetingPointQueryResultGTree.minSumDurationInSeconds - meetingPointQueryResultNaive.minSumDurationInSeconds) / 60;
+        double absolutDifferenceMinMax = (double) (meetingPointQueryResultGTree.minMaxDurationInSeconds - meetingPointQueryResultNaive.minMaxDurationInSeconds) / 60;
 
-    cout << "Result differences:" << endl;
-    cout << "Absolut difference min sum: " << absolutDifferenceMinSum << " minutes" << endl;
-    cout << "Absolut difference min max: " << absolutDifferenceMinMax << " minutes" << endl;
-    cout << "Relative difference min sum: " << relativeDifferenceMinSum << endl;
-    cout << "Relative difference min max: " << relativeDifferenceMinMax << endl;
+        double relativeDifferenceMinSum = (double) absolutDifferenceMinSum / meetingPointQueryResultNaive.minSumDurationInSeconds;
+        double relativeDifferenceMinMax = (double) absolutDifferenceMinMax / meetingPointQueryResultNaive.minMaxDurationInSeconds;
+
+        cout << "Result differences:" << endl;
+        cout << "Absolut difference min sum: " << absolutDifferenceMinSum << " minutes" << endl;
+        cout << "Absolut difference min max: " << absolutDifferenceMinMax << " minutes" << endl;
+        cout << "Relative difference min sum: " << relativeDifferenceMinSum << endl;
+        cout << "Relative difference min max: " << relativeDifferenceMinMax << endl;
+    }
 }
 
 double Calculator::getAverage(vector<double> numbers) {

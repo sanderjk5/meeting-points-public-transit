@@ -171,56 +171,57 @@ void GTreeQueryProcessor::processGTreeQuery(bool printTime) {
 
     meetingPointQueryResult.queryTime = duration;
 
-    // Calculate the real durations to the meeting point
-    int meetingPointMinSumStopId = Importer::getStopId(meetingPointQueryResult.meetingPointMinSum);
-    int meetingPointMinMaxStopId = Importer::getStopId(meetingPointQueryResult.meetingPointMinMax);
+    if (meetingPointQueryResult.meetingPointMinSum != "" || meetingPointQueryResult.meetingPointMinMax != "") {
+        // Calculate the real durations to the meeting point
+        int meetingPointMinSumStopId = Importer::getStopId(meetingPointQueryResult.meetingPointMinSum);
+        int meetingPointMinMaxStopId = Importer::getStopId(meetingPointQueryResult.meetingPointMinMax);
 
-    vector<int> targetStopIds = vector<int>(1, meetingPointMinSumStopId);
-    if (meetingPointMinSumStopId != meetingPointMinMaxStopId){
-        targetStopIds.push_back(meetingPointMinMaxStopId);
-    }
-
-    for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
-        CSAQuery query;
-        query.sourceStopId = meetingPointQuery.sourceStopIds[i];
-        query.sourceTime = meetingPointQuery.sourceTime;
-        query.weekday = meetingPointQuery.weekday;
-        query.numberOfDays = meetingPointQuery.numberOfDays;
-        CSA* csa = new CSA(query);
-        csas.push_back(csa);
-    }
-
-    int meetingPointMinSumDuration = 0;
-    int meetingPointMinMaxDuration = 0;
-
-    int meetingPointMinSumArrivalTime = 0;
-    int meetingPointMinMaxArrivalTime = 0;
-
-    for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
-        int sourceStopId = meetingPointQuery.sourceStopIds[i];
-        
-        csas[i]->processCSA(false);
-
-        meetingPointMinSumDuration += (csas[i]->getEarliestArrivalTime(meetingPointMinSumStopId) - meetingPointQuery.sourceTime);
-        if (meetingPointMinSumArrivalTime < csas[i]->getEarliestArrivalTime(meetingPointMinSumStopId)) {
-            meetingPointMinSumArrivalTime = csas[i]->getEarliestArrivalTime(meetingPointMinSumStopId);
+        vector<int> targetStopIds = vector<int>(1, meetingPointMinSumStopId);
+        if (meetingPointMinSumStopId != meetingPointMinMaxStopId){
+            targetStopIds.push_back(meetingPointMinMaxStopId);
         }
 
-        int minMaxDuration = csas[i]->getEarliestArrivalTime(meetingPointMinMaxStopId) - meetingPointQuery.sourceTime;
-        if (meetingPointMinMaxDuration < minMaxDuration) {
-            meetingPointMinMaxDuration = minMaxDuration;
-            meetingPointMinMaxArrivalTime = csas[i]->getEarliestArrivalTime(meetingPointMinMaxStopId);
+        for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
+            CSAQuery query;
+            query.sourceStopId = meetingPointQuery.sourceStopIds[i];
+            query.sourceTime = meetingPointQuery.sourceTime;
+            query.weekday = meetingPointQuery.weekday;
+            query.numberOfDays = meetingPointQuery.numberOfDays;
+            CSA* csa = new CSA(query);
+            csas.push_back(csa);
         }
+
+        int meetingPointMinSumDuration = 0;
+        int meetingPointMinMaxDuration = 0;
+
+        int meetingPointMinSumArrivalTime = 0;
+        int meetingPointMinMaxArrivalTime = 0;
+
+        for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
+            int sourceStopId = meetingPointQuery.sourceStopIds[i];
+            
+            csas[i]->processCSA(false);
+
+            meetingPointMinSumDuration += (csas[i]->getEarliestArrivalTime(meetingPointMinSumStopId) - meetingPointQuery.sourceTime);
+            if (meetingPointMinSumArrivalTime < csas[i]->getEarliestArrivalTime(meetingPointMinSumStopId)) {
+                meetingPointMinSumArrivalTime = csas[i]->getEarliestArrivalTime(meetingPointMinSumStopId);
+            }
+
+            int minMaxDuration = csas[i]->getEarliestArrivalTime(meetingPointMinMaxStopId) - meetingPointQuery.sourceTime;
+            if (meetingPointMinMaxDuration < minMaxDuration) {
+                meetingPointMinMaxDuration = minMaxDuration;
+                meetingPointMinMaxArrivalTime = csas[i]->getEarliestArrivalTime(meetingPointMinMaxStopId);
+            }
+        }
+
+        meetingPointQueryResult.minSumDuration = TimeConverter::convertSecondsToTime(meetingPointMinSumDuration, false);
+        meetingPointQueryResult.minSumDurationInSeconds = meetingPointMinSumDuration;
+        meetingPointQueryResult.meetingTimeMinSum = TimeConverter::convertSecondsToTime(meetingPointMinSumArrivalTime, true);
+
+        meetingPointQueryResult.minMaxDuration = TimeConverter::convertSecondsToTime(meetingPointMinMaxDuration, false);
+        meetingPointQueryResult.minMaxDurationInSeconds = meetingPointMinMaxDuration;
+        meetingPointQueryResult.meetingTimeMinMax = TimeConverter::convertSecondsToTime(meetingPointMinMaxArrivalTime, true);
     }
-
-    meetingPointQueryResult.minSumDuration = TimeConverter::convertSecondsToTime(meetingPointMinSumDuration, false);
-    meetingPointQueryResult.minSumDurationInSeconds = meetingPointMinSumDuration;
-    meetingPointQueryResult.meetingTimeMinSum = TimeConverter::convertSecondsToTime(meetingPointMinSumArrivalTime, true);
-
-    meetingPointQueryResult.minMaxDuration = TimeConverter::convertSecondsToTime(meetingPointMinMaxDuration, false);
-    meetingPointQueryResult.minMaxDurationInSeconds = meetingPointMinMaxDuration;
-    meetingPointQueryResult.meetingTimeMinMax = TimeConverter::convertSecondsToTime(meetingPointMinMaxArrivalTime, true);
-
     
 
     // Print the duration
@@ -268,11 +269,15 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
             }
         }
     }
-
+    
+    string optimalMeetingPointStopName = "";
+    if(optimalMeetingPointStopId != -1){
+        optimalMeetingPointStopName = Importer::getStopName(optimalMeetingPointStopId);
+    }
     if (optimization == min_sum) {
-        meetingPointQueryResult.meetingPointMinSum = Importer::getStopName(optimalMeetingPointStopId);
+        meetingPointQueryResult.meetingPointMinSum = optimalMeetingPointStopName;
     } else {
-        meetingPointQueryResult.meetingPointMinMax = Importer::getStopName(optimalMeetingPointStopId);
+        meetingPointQueryResult.meetingPointMinMax = optimalMeetingPointStopName;
     }
 }
 
