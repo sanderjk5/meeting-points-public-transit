@@ -18,8 +18,6 @@ void CSA::initializeCSA() {
     s = vector<int>(Importer::stops.size());
     t = vector<int>(Importer::trips.size());
 
-    isStopReached = vector<bool>(Importer::stops.size(), false);
-
     // Find first connection after the source time
     currentConnectionIndex = CSA::findFirstConnectionAfterTime(query.sourceTime);
 
@@ -28,7 +26,6 @@ void CSA::initializeCSA() {
     }
 
     s[query.sourceStopId] = query.sourceTime;
-    isStopReached[query.sourceStopId] = true;
 
     for(int i = 0; i < Importer::trips.size(); i++) {
         t[i] = -1;
@@ -84,6 +81,19 @@ void CSA::processCSA(bool printTime) {
             connectionArrivalTime += SECONDS_PER_DAY;
         }
 
+        if (query.targetStopIds.size() > 0){
+            bool reachedAllTargetStops = true;
+            for (int j = 0; j < query.targetStopIds.size(); j++) {
+                if (s[query.targetStopIds[j]] > connectionDepartureTime) {
+                    reachedAllTargetStops = false;
+                    break;
+                }
+            }
+            if(reachedAllTargetStops) {
+                break;
+            }
+        }
+
         if (t[connection->tripId] != -1 || s[connection->departureStopId] < connectionDepartureTime) {
             if (t[connection->tripId] == -1) {
                 t[connection->tripId] = connection->id;
@@ -94,23 +104,9 @@ void CSA::processCSA(bool printTime) {
                 int tripId = connection->tripId;
 
                 s[connection->arrivalStopId] = connectionArrivalTime;
-                isStopReached[connection->arrivalStopId] = true;
 
                 journeyPointers[connection->arrivalStopId].enterConnection = &Importer::connections[t[connection->tripId]];
                 journeyPointers[connection->arrivalStopId].exitConnection = connection;
-
-                if (query.targetStopIds.size() > 0){
-                    bool reachedAllTargetStops = true;
-                    for (int j = 0; j < query.targetStopIds.size(); j++) {
-                        if (!isStopReached[query.targetStopIds[j]]) {
-                            reachedAllTargetStops = false;
-                            break;
-                        }
-                    }
-                    if(reachedAllTargetStops) {
-                        break;
-                    }
-                }
             }
         }
 

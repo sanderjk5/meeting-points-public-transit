@@ -38,7 +38,6 @@ class CSA {
         vector<JourneyPointer> journeyPointers;
         vector<int> s;
         vector<int> t;
-        vector<bool> isStopReached;
         int currentConnectionIndex;
         int previousDepartureTime;
         int dayOffset;

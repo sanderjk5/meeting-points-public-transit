@@ -30,10 +30,9 @@ int main(int argc, const char *argv[]) {
   // Importer::import(folderName0, false, schienenfernverkehr_de);
   // Importer::import(folderName1, true, schienenregionalverkehr_de);
   // vector<string> sourceStopNames = {"Falkensee", "Stuttgart-Rohr"};
-  // vector<string> sourceStopNames = {"Hamburg Hbf", "Stuttgart-Rohr"};
 
   Creator::createNetworkGraph();
-  GTree networkGTree = Creator::createNetworkGTree(4, 128);
+  GTree networkGTree = Creator::createNetworkGTree(2, 16);
 
   GTree* networkGTreePointer = &networkGTree;
   networkGTreePointer->initializeGTree();
