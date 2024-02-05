@@ -16,6 +16,7 @@
 
 using namespace std;
 
+// Initialize all static variables
 vector<Calendar> Importer::calendars = vector<Calendar>(0);
 map<string, int> Importer::serviceIdOldToNew = map<string, int>();
 vector<Route> Importer::routes = vector<Route>(0);
@@ -31,6 +32,12 @@ vector<vector<int>> Importer::stopsOfARoute = vector<vector<int>>(0);
 vector<vector<RouteSequencePair>> Importer::routesOfAStop = vector<vector<RouteSequencePair>>(0);
 vector<Connection> Importer::connections = vector<Connection>(0);
 
+/*
+    Import the data from the GTFS files and prepare it for the algorithms.
+    The data is imported from the folder with the given name.
+    If prepareData is true, the data is prepared for the algorithms.
+    The dataType parameter is used to determine the format of the GTFS files.
+*/
 void Importer::import(string folderName, bool prepareData, DataType dataType) {
     // Start the timer
     auto start = std::chrono::high_resolution_clock::now();
@@ -45,6 +52,7 @@ void Importer::import(string folderName, bool prepareData, DataType dataType) {
     importTrips(folderPath, dataType);
     importStopTimes(folderPath, dataType);
 
+    // Prepare the data for the algorithms
     if (prepareData) {
         combineStops();
         generateValidRoutes();
@@ -63,6 +71,11 @@ void Importer::import(string folderName, bool prepareData, DataType dataType) {
     cout << "Import duration: " << duration << " milliseconds\n" << endl;
 }
 
+/*
+    Import the calendar data from the GTFS files.
+    The data is imported from the folder with the given name.
+    The dataType parameter is used to determine the format of the GTFS files.
+*/
 void Importer::importCalendars(string folderPath, DataType dataType) {
     std::string filePath = folderPath + "calendar.txt";
 
@@ -118,6 +131,11 @@ void Importer::importCalendars(string folderPath, DataType dataType) {
     cout << "Imported " << calendars.size() << " calendars." << endl;
 }
 
+/*
+    Import the route data from the GTFS files.
+    The data is imported from the folder with the given name.
+    The dataType parameter is used to determine the format of the GTFS files.
+*/
 void Importer::importRoutes(string folderPath, DataType dataType) {
     // combine folder path with file name
     std::string filePath = folderPath + "routes.txt";
@@ -156,6 +174,11 @@ void Importer::importRoutes(string folderPath, DataType dataType) {
     cout << "Imported " << routes.size() << " routes." << endl;
 }
 
+/*
+    Import the stop data from the GTFS files.
+    The data is imported from the folder with the given name.
+    The dataType parameter is used to determine the format of the GTFS files.
+*/
 void Importer::importStops(string folderPath, DataType dataType) {
     std::string filePath = folderPath + "stops.txt";
 
@@ -210,6 +233,11 @@ void Importer::importStops(string folderPath, DataType dataType) {
     cout << "Imported " << stops.size() << " stops." << endl;
 }
 
+/*
+    Import the stop time data from the GTFS files.
+    The data is imported from the folder with the given name.
+    The dataType parameter is used to determine the format of the GTFS files.
+*/
 void Importer::importStopTimes(string folderPath, DataType dataType) {
     std::string filePath = folderPath + "stop_times.txt";
 
@@ -252,6 +280,11 @@ void Importer::importStopTimes(string folderPath, DataType dataType) {
     cout << "Imported " << stopTimes.size() << " stop times." << endl;
 }
 
+/*
+    Import the trip data from the GTFS files.
+    The data is imported from the folder with the given name.
+    The dataType parameter is used to determine the format of the GTFS files.
+*/
 void Importer::importTrips(string folderPath, DataType dataType) {
     std::string filePath = folderPath + "trips.txt";
 
@@ -490,6 +523,7 @@ void Importer::generateSortedConnections() {
             connection.departureTime = previousStopTime.departureTime;
             connection.arrivalStopId = currentStopTime.stopId;
             connection.arrivalTime = currentStopTime.arrivalTime;
+            // If the arrival time is the same as the departure time, the the arrival time is increased by 30 seconds.
             if (currentStopTime.arrivalTime == previousStopTime.departureTime){
                 connection.arrivalTime += 30;
             }
@@ -509,6 +543,9 @@ void Importer::generateSortedConnections() {
     cout << "Generated " << connections.size() << " connections." << endl;
 }
 
+/*
+    Get the stop times of a trip ordered by their sequence.
+*/
 vector<StopTime> Importer::getStopTimesOfATrip(int tripId) {
     vector<StopTime> stopTimesOfATrip = vector<StopTime>(0);
     int indexOfFirstStopTime = indexOfFirstStopTimeOfATrip[tripId];
@@ -523,10 +560,16 @@ vector<StopTime> Importer::getStopTimesOfATrip(int tripId) {
     return stopTimesOfATrip;
 }
 
+/*
+    Check if a trip is available on a specific day of the week.
+*/
 bool Importer::isTripAvailable(int tripId, int dayOfWeek) {
     return (trips[tripId].isAvailable >> dayOfWeek) & 1;
 }
 
+/*
+    Split a line of a CSV file into its fields.
+*/
 vector<string> Importer::splitCsvLine(string &line) {
     vector<string> fields;
     string field;
@@ -554,10 +597,16 @@ vector<string> Importer::splitCsvLine(string &line) {
     return fields;
 }
 
+/*
+    Get the name of a stop by its id.
+*/
 string Importer::getStopName(int stopId) {
     return stops[stopId].name;
 }
 
+/*
+    Get the id of a stop by its name.
+*/
 int Importer::getStopId(string stopName) {
     for (int i = 0; i < stops.size(); i++) {
         if (stops[i].name == stopName) {

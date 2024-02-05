@@ -8,15 +8,23 @@
 
 using namespace std;
 
+/*
+    Dummy method to initialize the GTree.
+*/
 void GTree::initializeGTree() {
     return;
 }
 
+/*
+    Calculate the minimal duration to a target node from a source stop. Fill the map with the border stop durations of the nodes on the path if they are not already filled.
+*/
 int GTree::getMinimalDurationToNode(int sourceStopId, int targetNodeId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations) {
     int minDuration = INT_MAX;
     
+    // get the path from the source stop to the target node in the G-tree
     vector<int> path = getNodePath(sourceStopId, targetNodeId);
 
+    // default case: the source stop is in the target node
     if(isVertexInNode(sourceStopId, targetNodeId)) {
         return 0;
     }
@@ -55,6 +63,7 @@ int GTree::getMinimalDurationToNode(int sourceStopId, int targetNodeId, map<pair
                 parentNodeId = previousNodeId;
             }
 
+            // calculate the duration by adding the border stop durations of the previous node to the border stop durations of the current node
             for (int j = 0; j < nodeOfNodeId[currentNodeId]->borderStopIds.size(); j++) {
                 int borderStopId = nodeOfNodeId[currentNodeId]->borderStopIds[j];
                 int minDistanceToCurrentBorderStop = INT_MAX;
@@ -78,6 +87,7 @@ int GTree::getMinimalDurationToNode(int sourceStopId, int targetNodeId, map<pair
         previousNodeId = currentNodeId;
     }
 
+    // get the minimal duration to the target node
     queryPointAndNode = make_pair(sourceStopId, path.back());
     vector<pair<int, int>> distancesToBorderStops = queryPointAndNodeToBorderStopDurations[queryPointAndNode];
     for (int i = 0; i < distancesToBorderStops.size(); i++) {
@@ -90,21 +100,28 @@ int GTree::getMinimalDurationToNode(int sourceStopId, int targetNodeId, map<pair
     return minDuration;
 }
 
+/*
+    Calculate the minimal duration to a target stop from a source stop. Fill the map with the border stop durations of the nodes on the path if they are not already filled.
+
+*/
 int GTree::getMinimalDurationToStop(int sourceStopId, int targetStopId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations) {
     int minDuration = INT_MAX;
 
+    // default case: the source stop is in the same node as the target stop
     if (nodeOfStopId[sourceStopId]->nodeId == nodeOfStopId[targetStopId]->nodeId) {
         return nodeOfStopId[sourceStopId]->borderDurations[make_pair(sourceStopId, targetStopId)];
     }
 
     pair<int, int> queryPointAndNode = make_pair(sourceStopId, nodeOfStopId[targetStopId]->nodeId);
 
+    // fill the map with the border stop durations of the target node if it is not already filled
     if (queryPointAndNodeToBorderStopDurations.find(queryPointAndNode) != queryPointAndNodeToBorderStopDurations.end()) {
         getMinimalDurationToNode(sourceStopId, nodeOfStopId[targetStopId]->nodeId, queryPointAndNodeToBorderStopDurations);
     }
 
     vector<pair<int, int>> distancesToBorderStops = queryPointAndNodeToBorderStopDurations[queryPointAndNode];
 
+    // get the minimal duration to the target stop
     for (int i = 0; i < distancesToBorderStops.size(); i++) {
         int distanceToBorderStop = distancesToBorderStops[i].first;
         int borderStopId = distancesToBorderStops[i].second;
@@ -122,6 +139,9 @@ int GTree::getMinimalDurationToStop(int sourceStopId, int targetStopId, map<pair
     return minDuration;
 }
 
+/*
+    Get the path from a source stop to a target stop in the G-tree.
+*/
 vector<int> GTree::getNodePath(int stopId, int nodeId) {
     int rootId = root->nodeId;
     vector<int> path;
@@ -160,6 +180,9 @@ vector<int> GTree::getNodePath(int stopId, int nodeId) {
     return path;
 }
 
+/*
+    Check if a stop is in a node.
+*/
 bool GTree::isVertexInNode(int stopId, int nodeId) {
     if (nodeOfStopId[stopId]->nodeId == nodeId || nodeId == root->nodeId) {
         return true;
