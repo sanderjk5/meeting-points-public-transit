@@ -2,12 +2,13 @@
 #define CMAKE_QUERY_PROCESSOR_H
 
 #include <../data-handling/importer.h>
+#include <../data-structures/g-tree.h>
 #include "csa.h" 
 #include "journey.h"
 
 #include <vector>
+#include <map>
 #include <string>
-
 
 struct MeetingPointQuery {
     vector<int> sourceStopIds;
@@ -20,10 +21,12 @@ struct MeetingPointQueryResult {
     string meetingPointMinSum;
     string meetingTimeMinSum;
     string minSumDuration;
+    int minSumDurationInSeconds;
     string meetingPointMinMax;
     string meetingTimeMinMax;
     string minMaxDuration;
-    string queryTime;
+    int minMaxDurationInSeconds;
+    double queryTime;
 };
 
 enum Optimization {
@@ -46,6 +49,30 @@ class NaiveQueryProcessor {
         MeetingPointQuery meetingPointQuery;
         MeetingPointQueryResult meetingPointQueryResult;
         vector<CSA*> csas;
+};
+
+class GTreeQueryProcessor {
+    public:
+        explicit GTreeQueryProcessor(MeetingPointQuery meetingPointQuery, GTree* gTree){
+            this->meetingPointQuery = meetingPointQuery;
+            this->gTree = gTree;
+        };
+        ~GTreeQueryProcessor(){};
+
+        void processGTreeQuery(bool printTime = false);
+        MeetingPointQueryResult getMeetingPointQueryResult();
+        vector<Journey> getJourneys(Optimization optimization);
+    
+    private:
+        GTree* gTree;
+        MeetingPointQuery meetingPointQuery;
+        MeetingPointQueryResult meetingPointQueryResult;
+        map<pair<int, int>, vector<pair<int, int>>> queryPointAndNodeToBorderStopDurations;
+        vector<CSA*> csas;
+
+        void processGTreeQueryWithOptimization(Optimization optimization);
+        int getLowerBoundToNode(int nodeId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization);
+        int getCostsToStop(int stopId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization);
 };
 
 class QueryProcessor {

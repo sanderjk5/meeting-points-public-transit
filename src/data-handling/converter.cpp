@@ -17,7 +17,7 @@ int TimeConverter::convertTimeToSeconds(string time) {
 
 string TimeConverter::convertSecondsToTime(int seconds, bool removeDays) {
     if (removeDays) {
-        seconds = seconds % SECONDSPERDAY;
+        seconds = seconds % SECONDS_PER_DAY;
     }
 
     int hours = seconds / 3600;
@@ -44,12 +44,12 @@ string TimeConverter::convertSecondsToTime(int seconds, bool removeDays) {
 }
 
 int TimeConverter::getDayOffset(int seconds) {
-    int days = seconds / SECONDSPERDAY;
-    return days * SECONDSPERDAY;
+    int days = seconds / SECONDS_PER_DAY;
+    return days * SECONDS_PER_DAY;
 }
 
 int TimeConverter::getDayDifference(int seconds) {
-    return seconds % SECONDSPERDAY;
+    return seconds % SECONDS_PER_DAY;
 }
 
 int WeekdayConverter::convertWeekdayToInt(string weekday) {
