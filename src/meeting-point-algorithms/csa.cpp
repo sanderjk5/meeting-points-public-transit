@@ -13,19 +13,15 @@
 
 using namespace std;
 
+void CSA::initializeCSA() {
+    journeyPointers = vector<JourneyPointer>(Importer::stops.size());
+    s = vector<int>(Importer::stops.size());
+    t = vector<int>(Importer::trips.size());
 
-/*
-    Processes the CSA algorithm to calculate the earliest arrival times for all stops.
-    If a target stop is specified, the algorithm will only calculate the earliest arrival time for that stop.
-    Search for a maximum time of 24 hours after the source time.
-*/
-void CSA::processCSA(bool printTime) {
-    auto start = std::chrono::high_resolution_clock::now();
-
-    vector<bool> isStopReached(Importer::stops.size(), false);
+    isStopReached = vector<bool>(Importer::stops.size(), false);
 
     // Find first connection after the source time
-    int currentConnectionIndex = CSA::findFirstConnectionAfterTime(query.sourceTime);
+    currentConnectionIndex = CSA::findFirstConnectionAfterTime(query.sourceTime);
 
     for (int i = 0; i < Importer::stops.size(); i++) {
         s[i] = INT_MAX;
@@ -38,12 +34,29 @@ void CSA::processCSA(bool printTime) {
         t[i] = -1;
     }
 
-    int previousDepartureTime = query.sourceTime;
-    int dayOffset = 0;
+    previousDepartureTime = query.sourceTime;
+    dayOffset = 0;
 
-    int maxNumberOfConnections = Importer::connections.size() * query.numberOfDays;
+    maxDepartureTime = query.sourceTime + query.numberOfDays * SECONDS_PER_DAY;
+}
 
-    for (int i = 0; i < maxNumberOfConnections; i++) {
+void CSA::setTargetStopIds(vector<int> targetStopIds) {
+    query.targetStopIds = targetStopIds;
+}
+
+void CSA::setMaxDepartureTime(int maxDepartureTime) {
+    this->maxDepartureTime = maxDepartureTime;
+}
+
+/*
+    Processes the CSA algorithm to calculate the earliest arrival times for all stops.
+    If a target stop is specified, the algorithm will only calculate the earliest arrival time for that stop.
+    Search for a maximum time of 24 hours after the source time.
+*/
+void CSA::processCSA(bool printTime) {
+    auto start = std::chrono::high_resolution_clock::now();
+
+    while(previousDepartureTime + dayOffset * SECONDS_PER_DAY < maxDepartureTime) {
         Connection* connection = &Importer::connections[currentConnectionIndex];
 
         if (previousDepartureTime > connection->departureTime) {

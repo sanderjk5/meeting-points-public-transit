@@ -21,12 +21,12 @@ class CSA {
     public:
         explicit CSA(CSAQuery query){
             this->query = query;
-            this->journeyPointers = vector<JourneyPointer>(Importer::stops.size());
-            this->s = vector<int>(Importer::stops.size());
-            this->t = vector<int>(Importer::trips.size());
+            this->initializeCSA();
         };
         ~CSA(){};
 
+        void setTargetStopIds(vector<int> targetStopIds);
+        void setMaxDepartureTime(int maxDepartureTime);
         void processCSA(bool printTime = false);
         Journey createJourney(int targetStopId);
 
@@ -38,6 +38,13 @@ class CSA {
         vector<JourneyPointer> journeyPointers;
         vector<int> s;
         vector<int> t;
+        vector<bool> isStopReached;
+        int currentConnectionIndex;
+        int previousDepartureTime;
+        int dayOffset;
+        int maxDepartureTime;
+
+        void initializeCSA();
 
         static int findFirstConnectionAfterTime(int departureTime);
 };

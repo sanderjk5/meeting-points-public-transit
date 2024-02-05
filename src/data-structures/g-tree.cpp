@@ -9,7 +9,7 @@
 using namespace std;
 
 void GTree::initializeGTree() {
-    cout << "GTree initializeGTree" << endl;
+    return;
 }
 
 int GTree::getMinimalDurationToNode(int sourceStopId, int targetNodeId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations) {
