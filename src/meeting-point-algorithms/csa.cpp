@@ -53,9 +53,7 @@ void CSA::setMaxDepartureTime(int maxDepartureTime) {
     If target stops are specified, the algorithm will only calculate the earliest arrival time for these stops.
     Search for connections until the max departure time is reached.
 */
-void CSA::processCSA(bool printTime) {
-    auto start = std::chrono::high_resolution_clock::now();
-
+void CSA::processCSA() {
     while(previousDepartureTime + dayOffset * SECONDS_PER_DAY < maxDepartureTime) {
         Connection* connection = &Importer::connections[currentConnectionIndex];
 
@@ -117,15 +115,6 @@ void CSA::processCSA(bool printTime) {
         }
 
         currentConnectionIndex = (currentConnectionIndex + 1) % Importer::connections.size();
-    }
-
-    // Stop the timer and calculate the duration
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-
-    // Print the duration
-    if (printTime) {
-        cout << "CSA duration : " << duration << " milliseconds" << endl;
     }
 }
 

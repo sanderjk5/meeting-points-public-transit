@@ -8,14 +8,17 @@
 #include <algorithm>
 
 #include <iostream>
+#include <fstream>
 
-void NaiveAlgorithmTester::testNaiveAlgorithmRandom(int numberOfQueries, int numberOfSources, int numberOfDays, bool printTime, bool printOnlySuccessful) {
-    int successfulQueries = 0;
-    for (int i = 0; i < numberOfQueries; i++) {
+using namespace std;
+
+void NaiveAlgorithmTester::testNaiveAlgorithmRandom(int numberOfSuccessfulQueries, int numberOfSources, int numberOfDays, bool printOnlySuccessful) {
+    int successfulQueryCounter = 0;
+    for (int i = 0; i < numberOfSuccessfulQueries; i++) {
         MeetingPointQuery meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSources, numberOfDays);
         
         NaiveQueryProcessor naiveQueryProcessor = NaiveQueryProcessor(meetingPointQuery);
-        naiveQueryProcessor.processNaiveQuery(printTime);
+        naiveQueryProcessor.processNaiveQuery();
         MeetingPointQueryResult meetingPointQueryResult = naiveQueryProcessor.getMeetingPointQueryResult();
 
         if (meetingPointQueryResult.meetingPointMinSum == "" || meetingPointQueryResult.meetingPointMinMax == "") {
@@ -23,23 +26,23 @@ void NaiveAlgorithmTester::testNaiveAlgorithmRandom(int numberOfQueries, int num
                 continue;
             }
         } else {
-            successfulQueries++;
+            successfulQueryCounter++;
         }
 
         PrintHelper::printMeetingPointQuery(meetingPointQuery);
         PrintHelper::printMeetingPointQueryResult(meetingPointQueryResult);
     }
 
-    double rateOfSuccessfulQueries = (double) successfulQueries / numberOfQueries;
+    double rateOfSuccessfulQueries = (double) successfulQueryCounter / numberOfSuccessfulQueries;
 
     cout << "Rate of successful queries: " << rateOfSuccessfulQueries << endl;
 }
 
-void NaiveAlgorithmTester::testNaiveAlgorithm(MeetingPointQuery meetingPointQuery, bool printTime, bool printJourneys) {
+void NaiveAlgorithmTester::testNaiveAlgorithm(MeetingPointQuery meetingPointQuery, bool printJourneys) {
     PrintHelper::printMeetingPointQuery(meetingPointQuery);
 
     NaiveQueryProcessor naiveQueryProcessor = NaiveQueryProcessor(meetingPointQuery);
-    naiveQueryProcessor.processNaiveQuery(printTime);
+    naiveQueryProcessor.processNaiveQuery();
     MeetingPointQueryResult meetingPointQueryResult = naiveQueryProcessor.getMeetingPointQueryResult();
     
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResult);
@@ -59,13 +62,13 @@ void NaiveAlgorithmTester::testNaiveAlgorithm(MeetingPointQuery meetingPointQuer
     }
 }
 
-void GTreeAlgorithmTester::testGTreeAlgorithmRandom(GTree* gTree, int numberOfQueries, int numberOfSources, int numberOfDays, bool printTime, bool printOnlySuccessful) {
-    int successfulQueries = 0;
-    for (int i = 0; i < numberOfQueries; i++) {
+void GTreeAlgorithmTester::testGTreeAlgorithmRandom(GTree* gTree, int numberOfSuccessfulQueries, int numberOfSources, int numberOfDays, bool printOnlySuccessful) {
+    int successfulQueryCounter = 0;
+    for (int i = 0; i < numberOfSuccessfulQueries; i++) {
         MeetingPointQuery meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSources, numberOfDays);
         
         GTreeQueryProcessor gTreeQueryProcessorApproximation = GTreeQueryProcessor(meetingPointQuery, gTree);
-        gTreeQueryProcessorApproximation.processGTreeQuery(printTime);
+        gTreeQueryProcessorApproximation.processGTreeQuery();
         MeetingPointQueryResult meetingPointQueryResult = gTreeQueryProcessorApproximation.getMeetingPointQueryResult();
 
         if (meetingPointQueryResult.meetingPointMinSum == "" || meetingPointQueryResult.meetingPointMinMax == "") {
@@ -73,23 +76,23 @@ void GTreeAlgorithmTester::testGTreeAlgorithmRandom(GTree* gTree, int numberOfQu
                 continue;
             }
         } else {
-            successfulQueries++;
+            successfulQueryCounter++;
         }
 
         PrintHelper::printMeetingPointQuery(meetingPointQuery);
         PrintHelper::printMeetingPointQueryResult(meetingPointQueryResult);
     }
 
-    double rateOfSuccessfulQueries = (double) successfulQueries / numberOfQueries;
+    double rateOfSuccessfulQueries = (double) successfulQueryCounter / numberOfSuccessfulQueries;
 
     cout << "Rate of successful queries: " << rateOfSuccessfulQueries << endl;
 }
 
-void GTreeAlgorithmTester::testGTreeAlgorithm(GTree* gTree, MeetingPointQuery meetingPointQuery, bool printTime, bool printJourneys) {
+void GTreeAlgorithmTester::testGTreeAlgorithm(GTree* gTree, MeetingPointQuery meetingPointQuery, bool printJourneys) {
     PrintHelper::printMeetingPointQuery(meetingPointQuery);
 
     GTreeQueryProcessor gTreeQueryProcessorApproximation = GTreeQueryProcessor(meetingPointQuery, gTree);
-    gTreeQueryProcessorApproximation.processGTreeQuery(printTime);
+    gTreeQueryProcessorApproximation.processGTreeQuery();
     MeetingPointQueryResult meetingPointQueryResult = gTreeQueryProcessorApproximation.getMeetingPointQueryResult();
     
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResult);
@@ -109,146 +112,185 @@ void GTreeAlgorithmTester::testGTreeAlgorithm(GTree* gTree, MeetingPointQuery me
     }
 }
 
-void AlgorithmComparer::compareAlgorithmsRandom(GTree* gTree, int numberOfQueries, int numberOfSources, int numberOfDays, bool printTime, bool printEveryResult) {
-    int successfulQueriesNaive = 0;
-    int successfulQueriesGTreeCSA = 0;
-    int successfulQueriesGTreeApproximation = 0;
-    int successfulQueries = 0;
+void AlgorithmComparer::compareAlgorithmsRandom(GTree* gTree, int numberOfSuccessfulQueries, vector<int> numberOfSources, int numberOfDays, bool printResults) {
+    string folderPath = "../../results/";
+    // get the current timestamp
+    time_t now = time(0);
+    tm *ltm = localtime(&now);
+    string timestamp = to_string(1900 + ltm->tm_year) + "-" + to_string(1 + ltm->tm_mon) + "-" + to_string(ltm->tm_mday) + "-" + to_string(ltm->tm_hour) + "-" + to_string(ltm->tm_min) + "-" + to_string(ltm->tm_sec);
+    
+    string resultsFileName = folderPath + "results-" + timestamp + ".csv";
+    
+    // Create a csv file to store the results
+    std::ofstream resultsFile (resultsFileName, std::ofstream::out);
+    resultsFile << "numberOfSourceStops,avgQueryTimeNaive,avgQueryTimeGTreeCSA,avgQueryTimeGTreeApprox,medianQueryTimeNaive,medianQueryTimeGTreeCSA,medianQueryTimeGTreeApprox,maxQueryTimeNaive,maxQueryTimeGTreeCSA,maxQueryTimeGTreeApprox,minQueryTimeNaive,minQueryTimeGTreeCSA,minQueryTimeGTreeApprox,avgAbsDiffMinSum,avgAbsDiffMinMax,medianAbsDiffMinSum,medianAbsDiffMinMax,maxAbsDiffMinSum,maxAbsDiffMinMax,minAbsDiffMinSum,minAbsDiffMinMax,avgAccMinSum,avgAccMinMax,medianAccMinSum,medianAccMinMax,maxAccMinSum,maxAccMinMax,minAccMinSum,minAccMinMax\n";
+    
+    for (int i = 0; i < numberOfSources.size(); i++) {
+        int numberOfSourceStops = numberOfSources[i];
 
-    vector<double> queryTimesNaive;
-    vector<double> queryTimesGTreeCSA;
-    vector<double> queryTimesGTreeApproximation;
-
-    vector<double> absolutDifferenceMinSum;
-    vector<double> absolutDifferenceMinMax;
-
-    vector<double> accuracyMinSum;
-    vector<double> accuracyMinMax;
-
-    for (int i = 0; i < numberOfQueries; i++) {
-        MeetingPointQuery meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSources, numberOfDays);
-        
-        NaiveQueryProcessor naiveQueryProcessor = NaiveQueryProcessor(meetingPointQuery);
-        naiveQueryProcessor.processNaiveQuery(printTime);
-        MeetingPointQueryResult meetingPointQueryResultNaive = naiveQueryProcessor.getMeetingPointQueryResult();
-
-        GTreeQueryProcessor gTreeQueryProcessorCSA = GTreeQueryProcessor(meetingPointQuery, gTree);
-        gTreeQueryProcessorCSA.processGTreeQuery(printTime, true);
-        MeetingPointQueryResult meetingPointQueryResultGTreeCSA = gTreeQueryProcessorCSA.getMeetingPointQueryResult();
-
-        GTreeQueryProcessor gTreeQueryProcessorApproximation = GTreeQueryProcessor(meetingPointQuery, gTree);
-        gTreeQueryProcessorApproximation.processGTreeQuery(printTime, false);
-        MeetingPointQueryResult meetingPointQueryResultGTreeApproximation = gTreeQueryProcessorApproximation.getMeetingPointQueryResult();
-
-        bool naiveQuerySuccessful = meetingPointQueryResultNaive.meetingPointMinSum != "" && meetingPointQueryResultNaive.meetingPointMinMax != "";
-        bool gTreeCSAQuerySuccessful = meetingPointQueryResultGTreeCSA.meetingPointMinSum != "" && meetingPointQueryResultGTreeCSA.meetingPointMinMax != "";
-        bool gTreeApproximationQuerySuccessful = meetingPointQueryResultGTreeApproximation.meetingPointMinSum != "" && meetingPointQueryResultGTreeApproximation.meetingPointMinMax != "";
-
-        if(naiveQuerySuccessful){
-            successfulQueriesNaive++;
+        string numberOfSourceStopsString = "";
+        if (numberOfSourceStops < 10) {
+            numberOfSourceStopsString = "00" + to_string(numberOfSourceStops);
+        } else if (numberOfSourceStops < 100) {
+            numberOfSourceStopsString = "0" + to_string(numberOfSourceStops);
+        } else {
+            numberOfSourceStopsString = to_string(numberOfSourceStops);
         }
 
-        if(gTreeCSAQuerySuccessful){
-            successfulQueriesGTreeCSA++;
+        // Create a csv file to store the queries
+        string queriesFileName = folderPath + "queries-" + to_string(numberOfSourceStops) + "-" + timestamp + ".csv";
+        std::ofstream queriesFile (queriesFileName, std::ofstream::out);
+        queriesFile << "sourceStopIds,sourceTime,weekday,queryTimeNaive,queryTimeGTreeCSA,queryTimeGTreeApprox,absolutDifferenceMinSum,absolutDifferenceMinMax,accuracyMinSum,accuracyMinMax\n";
+
+        int successfulQueriesNaive = 0;
+        int successfulQueriesGTreeCSA = 0;
+        int successfulQueriesGTreeApproximation = 0;
+
+        int queryCounter = 0;
+        int successfulQueryCounter = 0;
+
+        vector<double> queryTimesNaive;
+        vector<double> queryTimesGTreeCSA;
+        vector<double> queryTimesGTreeApproximation;
+
+        vector<double> absolutDifferenceMinSum;
+        vector<double> absolutDifferenceMinMax;
+
+        vector<double> accuracyMinSum;
+        vector<double> accuracyMinMax;
+
+        while(successfulQueryCounter < numberOfSuccessfulQueries) {
+            queryCounter++;
+
+            MeetingPointQuery meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSourceStops, numberOfDays);
+            
+            NaiveQueryProcessor naiveQueryProcessor = NaiveQueryProcessor(meetingPointQuery);
+            naiveQueryProcessor.processNaiveQuery();
+            MeetingPointQueryResult meetingPointQueryResultNaive = naiveQueryProcessor.getMeetingPointQueryResult();
+
+            GTreeQueryProcessor gTreeQueryProcessorCSA = GTreeQueryProcessor(meetingPointQuery, gTree);
+            gTreeQueryProcessorCSA.processGTreeQuery(true);
+            MeetingPointQueryResult meetingPointQueryResultGTreeCSA = gTreeQueryProcessorCSA.getMeetingPointQueryResult();
+
+            GTreeQueryProcessor gTreeQueryProcessorApproximation = GTreeQueryProcessor(meetingPointQuery, gTree);
+            gTreeQueryProcessorApproximation.processGTreeQuery(false);
+            MeetingPointQueryResult meetingPointQueryResultGTreeApproximation = gTreeQueryProcessorApproximation.getMeetingPointQueryResult();
+
+            bool naiveQuerySuccessful = meetingPointQueryResultNaive.meetingPointMinSum != "" && meetingPointQueryResultNaive.meetingPointMinMax != "";
+            bool gTreeCSAQuerySuccessful = meetingPointQueryResultGTreeCSA.meetingPointMinSum != "" && meetingPointQueryResultGTreeCSA.meetingPointMinMax != "";
+            bool gTreeApproximationQuerySuccessful = meetingPointQueryResultGTreeApproximation.meetingPointMinSum != "" && meetingPointQueryResultGTreeApproximation.meetingPointMinMax != "";
+
+            if (naiveQuerySuccessful) {
+                successfulQueriesNaive++;
+            }
+
+            if (gTreeCSAQuerySuccessful) {
+                successfulQueriesGTreeCSA++;
+            }
+
+            if (gTreeApproximationQuerySuccessful) {
+                successfulQueriesGTreeApproximation++;
+            }
+
+            if (!naiveQuerySuccessful || !gTreeCSAQuerySuccessful || !gTreeApproximationQuerySuccessful) {
+                continue;
+            }
+
+            successfulQueryCounter++;
+
+            queryTimesNaive.push_back((double) meetingPointQueryResultNaive.queryTime);
+            queryTimesGTreeCSA.push_back((double) meetingPointQueryResultGTreeCSA.queryTime);
+            queryTimesGTreeApproximation.push_back((double) meetingPointQueryResultGTreeApproximation.queryTime);
+
+            int differenceMinSum = meetingPointQueryResultGTreeApproximation.minSumDurationInSeconds - meetingPointQueryResultNaive.minSumDurationInSeconds;
+            int differenceMinMax = meetingPointQueryResultGTreeApproximation.minMaxDurationInSeconds - meetingPointQueryResultNaive.minMaxDurationInSeconds;
+
+            absolutDifferenceMinSum.push_back((double) differenceMinSum / 60);
+            absolutDifferenceMinMax.push_back((double) differenceMinMax / 60);
+
+            double relativeDifferenceMinSum = (double) differenceMinSum / meetingPointQueryResultGTreeApproximation.minSumDurationInSeconds;
+            double relativeDifferenceMinMax = (double) differenceMinMax / meetingPointQueryResultGTreeApproximation.minMaxDurationInSeconds;
+
+            double accuracyMinSumVal = 1 - relativeDifferenceMinSum;
+            double accuracyMinMaxVal = 1 - relativeDifferenceMinMax;
+
+            accuracyMinSum.push_back(accuracyMinSumVal);
+            accuracyMinMax.push_back(accuracyMinMaxVal);
+
+            // Store the query information in a csv file
+            string sourceStopIds = "";
+            for (int j = 0; j < meetingPointQuery.sourceStopIds.size()-1; j++) {
+                sourceStopIds += to_string(meetingPointQuery.sourceStopIds[j]) + "-";
+            }
+            sourceStopIds += to_string(meetingPointQuery.sourceStopIds[meetingPointQuery.sourceStopIds.size()-1]);
+
+            queriesFile << sourceStopIds << "," << meetingPointQuery.sourceTime << "," << meetingPointQuery.weekday << "," << meetingPointQueryResultNaive.queryTime << "," << meetingPointQueryResultGTreeCSA.queryTime << "," << meetingPointQueryResultGTreeApproximation.queryTime << "," << differenceMinSum << "," << differenceMinMax << "," << accuracyMinSumVal << "," << accuracyMinMaxVal << "\n";
         }
 
-        if(gTreeApproximationQuerySuccessful){
-            successfulQueriesGTreeApproximation++;
+        double rateOfSuccessfulQueriesNaive = (double) successfulQueriesNaive / queryCounter;
+        double rateOfSuccessfulCSAQueriesGTree = (double) successfulQueriesGTreeCSA / queryCounter;
+        double rateOfSuccessfulApproximationQueriesGTree = (double) successfulQueriesGTreeApproximation / queryCounter;
+        double rateOfSuccessfulQueries = (double) successfulQueryCounter / queryCounter;
+
+        resultsFile << numberOfSourceStops << "," << Calculator::getAverage(queryTimesNaive) << "," << Calculator::getAverage(queryTimesGTreeCSA) << "," << Calculator::getAverage(queryTimesGTreeApproximation) << "," << Calculator::getMedian(queryTimesNaive) << "," << Calculator::getMedian(queryTimesGTreeCSA) << "," << Calculator::getMedian(queryTimesGTreeApproximation) << "," << Calculator::getMaximum(queryTimesNaive) << "," << Calculator::getMaximum(queryTimesGTreeCSA) << "," << Calculator::getMaximum(queryTimesGTreeApproximation) << "," << Calculator::getMinimum(queryTimesNaive) << "," << Calculator::getMinimum(queryTimesGTreeCSA) << "," << Calculator::getMinimum(queryTimesGTreeApproximation) << "," << Calculator::getAverage(absolutDifferenceMinSum) << "," << Calculator::getAverage(absolutDifferenceMinMax) << "," << Calculator::getMedian(absolutDifferenceMinSum) << "," << Calculator::getMedian(absolutDifferenceMinMax) << "," << Calculator::getMaximum(absolutDifferenceMinSum) << "," << Calculator::getMaximum(absolutDifferenceMinMax) << "," << Calculator::getMinimum(absolutDifferenceMinSum) << "," << Calculator::getMinimum(absolutDifferenceMinMax) << "," << Calculator::getAverage(accuracyMinSum) << "," << Calculator::getAverage(accuracyMinMax) << "," << Calculator::getMedian(accuracyMinSum) << "," << Calculator::getMedian(accuracyMinMax) << "," << Calculator::getMaximum(accuracyMinSum) << "," << Calculator::getMaximum(accuracyMinMax) << "," << Calculator::getMinimum(accuracyMinSum) << "," << Calculator::getMinimum(accuracyMinMax) << "\n";
+
+        if (printResults) {
+            cout << "\nCompare naive and g-tree algorithm: \n" << endl;
+            cout << "Rate of successful queries naive: " << rateOfSuccessfulQueriesNaive << endl;
+            cout << "Rate of successful queries gTree (csa): " << rateOfSuccessfulCSAQueriesGTree << endl;
+            cout << "Rate of successful queries gTree (approximation): " << rateOfSuccessfulApproximationQueriesGTree << endl;
+            cout << "Rate of successful queries for all of them: " << rateOfSuccessfulQueries << endl;
+
+            cout << "\nQuery times:" << endl;
+            cout << "Average query time naive: " << Calculator::getAverage(queryTimesNaive) << " milliseconds" << endl;
+            cout << "Average query time gTree (csa): " << Calculator::getAverage(queryTimesGTreeCSA) << " milliseconds" << endl;
+            cout << "Average query time gTree (approximation): " << Calculator::getAverage(queryTimesGTreeApproximation) << " milliseconds" << endl;
+            cout << "Median query time naive: " << Calculator::getMedian(queryTimesNaive) << " milliseconds" << endl;
+            cout << "Median query time gTree (csa): " << Calculator::getMedian(queryTimesGTreeCSA) << " milliseconds" << endl;
+            cout << "Median query time gTree (approximation): " << Calculator::getMedian(queryTimesGTreeApproximation) << " milliseconds" << endl;
+            cout << "Maximum query time naive: " << Calculator::getMaximum(queryTimesNaive) << " milliseconds" << endl;
+            cout << "Maximum query time gTree (csa): " << Calculator::getMaximum(queryTimesGTreeCSA) << " milliseconds" << endl;
+            cout << "Maximum query time gTree (approximation): " << Calculator::getMaximum(queryTimesGTreeApproximation) << " milliseconds" << endl;
+            cout << "Minimum query time naive: " << Calculator::getMinimum(queryTimesNaive) << " milliseconds" << endl;
+            cout << "Minimum query time gTree (csa): " << Calculator::getMinimum(queryTimesGTreeCSA) << " milliseconds" << endl;
+            cout << "Minimum query time gTree (approximation): " << Calculator::getMinimum(queryTimesGTreeApproximation) << " milliseconds" << endl;
+
+            cout << "\nAbsolut result differences:" << endl;
+            cout << "Average absolut difference min sum: " << Calculator::getAverage(absolutDifferenceMinSum) << " minutes" << endl;
+            cout << "Average absolut difference min max: " << Calculator::getAverage(absolutDifferenceMinMax) << " minutes" << endl;
+            cout << "Median absolut difference min sum: " << Calculator::getMedian(absolutDifferenceMinSum) << " minutes" << endl;
+            cout << "Median absolut difference min max: " << Calculator::getMedian(absolutDifferenceMinMax) << " minutes" << endl;
+            cout << "Maximum absolut difference min sum: " << Calculator::getMaximum(absolutDifferenceMinSum) << " minutes" << endl;
+            cout << "Maximum absolut difference min max: " << Calculator::getMaximum(absolutDifferenceMinMax) << " minutes" << endl;
+            cout << "Minimum absolut difference min sum: " << Calculator::getMinimum(absolutDifferenceMinSum) << " minutes" << endl;
+            cout << "Minimum absolut difference min max: " << Calculator::getMinimum(absolutDifferenceMinMax) << " minutes" << endl;
+
+            cout << "\nRelative result differences:" << endl;
+            cout << "Average accuracy min sum: " << Calculator::getAverage(accuracyMinSum) << endl;
+            cout << "Average accuracy min max: " << Calculator::getAverage(accuracyMinMax) << endl;
+            cout << "Median accuracy min sum: " << Calculator::getMedian(accuracyMinSum) << endl;
+            cout << "Median accuracy min max: " << Calculator::getMedian(accuracyMinMax) << endl;
+            cout << "Maximum accuracy min sum: " << Calculator::getMaximum(accuracyMinSum) << endl;
+            cout << "Maximum accuracy min max: " << Calculator::getMaximum(accuracyMinMax) << endl;
+            cout << "Minimum accuracy min sum: " << Calculator::getMinimum(accuracyMinSum) << endl;
+            cout << "Minimum accuracy min max: " << Calculator::getMinimum(accuracyMinMax) << endl;
         }
-
-        if (!naiveQuerySuccessful || !gTreeCSAQuerySuccessful || !gTreeApproximationQuerySuccessful) {
-            continue;
-        }
-
-        successfulQueries++;
-
-        queryTimesNaive.push_back((double) meetingPointQueryResultNaive.queryTime);
-        queryTimesGTreeCSA.push_back((double) meetingPointQueryResultGTreeCSA.queryTime);
-        queryTimesGTreeApproximation.push_back((double) meetingPointQueryResultGTreeApproximation.queryTime);
-
-        int differenceMinSum = meetingPointQueryResultGTreeApproximation.minSumDurationInSeconds - meetingPointQueryResultNaive.minSumDurationInSeconds;
-        int differenceMinMax = meetingPointQueryResultGTreeApproximation.minMaxDurationInSeconds - meetingPointQueryResultNaive.minMaxDurationInSeconds;
-
-        absolutDifferenceMinSum.push_back((double) differenceMinSum);
-        absolutDifferenceMinMax.push_back((double) differenceMinMax);
-
-        double relativeDifferenceMinSum = (double) differenceMinSum / meetingPointQueryResultNaive.minSumDurationInSeconds;
-        double relativeDifferenceMinMax = (double) differenceMinMax / meetingPointQueryResultNaive.minMaxDurationInSeconds;
-
-        accuracyMinSum.push_back(1 - relativeDifferenceMinSum);
-        accuracyMinMax.push_back(1 - relativeDifferenceMinMax);
-
-
-        if (printEveryResult) {
-            PrintHelper::printMeetingPointQuery(meetingPointQuery);
-            cout << "Naive: " << endl;
-            PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultNaive);
-
-            cout << "GTree (csa): " << endl;
-            PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultGTreeCSA);
-
-            cout << "GTree (approximation): " << endl;
-            PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultGTreeApproximation);
-        }
+        queriesFile.close();
     }
-
-    double rateOfSuccessfulQueriesNaive = (double) successfulQueriesNaive / numberOfQueries;
-    double rateOfSuccessfulCSAQueriesGTree = (double) successfulQueriesGTreeCSA / numberOfQueries;
-    double rateOfSuccessfulApproximationQueriesGTree = (double) successfulQueriesGTreeApproximation / numberOfQueries;
-    double rateOfSuccessfulQueries = (double) successfulQueries / numberOfQueries;
-
-    cout << "\nCompare naive and g-tree algorithm: \n" << endl;
-    cout << "Rate of successful queries naive: " << rateOfSuccessfulQueriesNaive << endl;
-    cout << "Rate of successful queries gTree (csa): " << rateOfSuccessfulCSAQueriesGTree << endl;
-    cout << "Rate of successful queries gTree (approximation): " << rateOfSuccessfulApproximationQueriesGTree << endl;
-    cout << "Rate of successful queries for all of them: " << rateOfSuccessfulQueries << endl;
-
-    cout << "\nQuery times:" << endl;
-    cout << "Average query time naive: " << Calculator::getAverage(queryTimesNaive) << " milliseconds" << endl;
-    cout << "Average query time gTree (csa): " << Calculator::getAverage(queryTimesGTreeCSA) << " milliseconds" << endl;
-    cout << "Average query time gTree (approximation): " << Calculator::getAverage(queryTimesGTreeApproximation) << " milliseconds" << endl;
-    cout << "Median query time naive: " << Calculator::getMedian(queryTimesNaive) << " milliseconds" << endl;
-    cout << "Median query time gTree (csa): " << Calculator::getMedian(queryTimesGTreeCSA) << " milliseconds" << endl;
-    cout << "Median query time gTree (approximation): " << Calculator::getMedian(queryTimesGTreeApproximation) << " milliseconds" << endl;
-    cout << "Maximum query time naive: " << Calculator::getMaximum(queryTimesNaive) << " milliseconds" << endl;
-    cout << "Maximum query time gTree (csa): " << Calculator::getMaximum(queryTimesGTreeCSA) << " milliseconds" << endl;
-    cout << "Maximum query time gTree (approximation): " << Calculator::getMaximum(queryTimesGTreeApproximation) << " milliseconds" << endl;
-    cout << "Minimum query time naive: " << Calculator::getMinimum(queryTimesNaive) << " milliseconds" << endl;
-    cout << "Minimum query time gTree (csa): " << Calculator::getMinimum(queryTimesGTreeCSA) << " milliseconds" << endl;
-    cout << "Minimum query time gTree (approximation): " << Calculator::getMinimum(queryTimesGTreeApproximation) << " milliseconds" << endl;
-
-    cout << "\nAbsolut result differences:" << endl;
-    cout << "Average absolut difference min sum: " << Calculator::getAverage(absolutDifferenceMinSum) / 60 << " minutes" << endl;
-    cout << "Average absolut difference min max: " << Calculator::getAverage(absolutDifferenceMinMax) / 60 << " minutes" << endl;
-    cout << "Median absolut difference min sum: " << Calculator::getMedian(absolutDifferenceMinSum) / 60 << " minutes" << endl;
-    cout << "Median absolut difference min max: " << Calculator::getMedian(absolutDifferenceMinMax) / 60 << " minutes" << endl;
-    cout << "Maximum absolut difference min sum: " << Calculator::getMaximum(absolutDifferenceMinSum) / 60 << " minutes" << endl;
-    cout << "Maximum absolut difference min max: " << Calculator::getMaximum(absolutDifferenceMinMax) / 60 << " minutes" << endl;
-    cout << "Minimum absolut difference min sum: " << Calculator::getMinimum(absolutDifferenceMinSum) / 60 << " minutes" << endl;
-    cout << "Minimum absolut difference min max: " << Calculator::getMinimum(absolutDifferenceMinMax) / 60 << " minutes" << endl;
-
-    cout << "\nRelative result differences:" << endl;
-    cout << "Average accuracy min sum: " << Calculator::getAverage(accuracyMinSum) << endl;
-    cout << "Average accuracy min max: " << Calculator::getAverage(accuracyMinMax) << endl;
-    cout << "Median accuracy min sum: " << Calculator::getMedian(accuracyMinSum) << endl;
-    cout << "Median accuracy min max: " << Calculator::getMedian(accuracyMinMax) << endl;
-    cout << "Maximum accuracy min sum: " << Calculator::getMaximum(accuracyMinSum) << endl;
-    cout << "Maximum accuracy min max: " << Calculator::getMaximum(accuracyMinMax) << endl;
-    cout << "Minimum accuracy min sum: " << Calculator::getMinimum(accuracyMinSum) << endl;
-    cout << "Minimum accuracy min max: " << Calculator::getMinimum(accuracyMinMax) << endl;
+    resultsFile.close();
 }
 
-void AlgorithmComparer::compareAlgorithms(GTree* gTree, MeetingPointQuery meetingPointQuery, bool printTime){
+void AlgorithmComparer::compareAlgorithms(GTree* gTree, MeetingPointQuery meetingPointQuery){
     NaiveQueryProcessor naiveQueryProcessor = NaiveQueryProcessor(meetingPointQuery);
-    naiveQueryProcessor.processNaiveQuery(printTime);
+    naiveQueryProcessor.processNaiveQuery();
     MeetingPointQueryResult meetingPointQueryResultNaive = naiveQueryProcessor.getMeetingPointQueryResult();
 
     GTreeQueryProcessor gTreeQueryProcessorCSA = GTreeQueryProcessor(meetingPointQuery, gTree);
-    gTreeQueryProcessorCSA.processGTreeQuery(printTime, true);
+    gTreeQueryProcessorCSA.processGTreeQuery(true);
     MeetingPointQueryResult meetingPointQueryResultGTreeCSA = gTreeQueryProcessorCSA.getMeetingPointQueryResult();
 
     GTreeQueryProcessor gTreeQueryProcessorApproximation = GTreeQueryProcessor(meetingPointQuery, gTree);
-    gTreeQueryProcessorApproximation.processGTreeQuery(printTime, false);
+    gTreeQueryProcessorApproximation.processGTreeQuery(false);
     MeetingPointQueryResult meetingPointQueryResultGTreeApproximation = gTreeQueryProcessorApproximation.getMeetingPointQueryResult();
 
     PrintHelper::printMeetingPointQuery(meetingPointQuery);

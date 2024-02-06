@@ -10,8 +10,8 @@ class NaiveAlgorithmTester {
         explicit NaiveAlgorithmTester(){};
         ~NaiveAlgorithmTester(){};
 
-        static void testNaiveAlgorithmRandom(int numberOfQueries, int numberOfSources, int numberOfDays = 1, bool printTime = false, bool printOnlySuccessful = false);
-        static void testNaiveAlgorithm(MeetingPointQuery meetingPointQuery, bool printTime = false, bool printJourneys = false);
+        static void testNaiveAlgorithmRandom(int numberOfSuccessfulQueries, int numberOfSources, int numberOfDays = 1, bool printOnlySuccessful = false);
+        static void testNaiveAlgorithm(MeetingPointQuery meetingPointQuery, bool printJourneys = false);
 };
 
 class GTreeAlgorithmTester {
@@ -19,8 +19,8 @@ class GTreeAlgorithmTester {
         explicit GTreeAlgorithmTester(){};
         ~GTreeAlgorithmTester(){};
 
-        static void testGTreeAlgorithmRandom(GTree* gTree, int numberOfQueries, int numberOfSources, int numberOfDays = 1, bool printTime = false, bool printOnlySuccessful = false);
-        static void testGTreeAlgorithm(GTree* gTree, MeetingPointQuery meetingPointQuery, bool printTime = false, bool printJourneys = false);
+        static void testGTreeAlgorithmRandom(GTree* gTree, int numberOfSuccessfulQueries, int numberOfSources, int numberOfDays = 1, bool printOnlySuccessful = false);
+        static void testGTreeAlgorithm(GTree* gTree, MeetingPointQuery meetingPointQuery, bool printJourneys = false);
 };
 
 class AlgorithmComparer {
@@ -28,8 +28,8 @@ class AlgorithmComparer {
         explicit AlgorithmComparer(){};
         ~AlgorithmComparer(){};
 
-        static void compareAlgorithmsRandom(GTree* gTree, int numberOfQueries, int numberOfSources, int numberOfDays = 1, bool printTime = false, bool printEveryResult = false);
-        static void compareAlgorithms(GTree* gTree, MeetingPointQuery meetingPointQuery, bool printTime = false);
+        static void compareAlgorithmsRandom(GTree* gTree, int numberOfSuccessfulQueries, vector<int> numberOfSources, int numberOfDays = 1, bool printResults = false);
+        static void compareAlgorithms(GTree* gTree, MeetingPointQuery meetingPointQuery);
 };
 
 class PrintHelper {

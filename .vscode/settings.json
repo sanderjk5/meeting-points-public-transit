@@ -49,6 +49,13 @@
         "bitset": "cpp",
         "cstring": "cpp",
         "iterator": "cpp",
-        "regex": "cpp"
+        "regex": "cpp",
+        "bit": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "functional": "cpp",
+        "numeric": "cpp",
+        "random": "cpp",
+        "numbers": "cpp"
     }
 }

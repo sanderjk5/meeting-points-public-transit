@@ -27,7 +27,7 @@ using namespace std;
     The stop with the lowest sum and the stop with the highest maximum earliest arrival time are the meeting points.
 
 */
-void NaiveQueryProcessor::processNaiveQuery(bool printTime) {
+void NaiveQueryProcessor::processNaiveQuery() {
     for (CSA* csa : csas) {
         delete csa;
     }
@@ -48,7 +48,7 @@ void NaiveQueryProcessor::processNaiveQuery(bool printTime) {
     // Process the CSA algorithm for each source stop
     #pragma omp parallel for
     for (int i = 0; i < csas.size(); i++) {
-        csas[i]->processCSA(printTime);
+        csas[i]->processCSA();
     }
 
     int minSum = INT_MAX;
@@ -94,12 +94,6 @@ void NaiveQueryProcessor::processNaiveQuery(bool printTime) {
     // Stop the timer and calculate the duration
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-
-    // Print the duration
-    if (printTime) {
-        cout << "Naive Query duration : " << duration << " milliseconds" << endl;
-    }
-
     meetingPointQueryResult.queryTime = duration;
 }
 
@@ -183,7 +177,7 @@ CSAQuery QueryGenerator::createCSAQueryWithTargetStops(string sourceStopName, ve
     Process a G-tree query. If useCSA is true, the CSA algorithm is used to calculate the real durations during the algorithm. 
     Otherwise, approximate durations are calculated. In this case are the real durations calculated after the algorithm.
 */
-void GTreeQueryProcessor::processGTreeQuery(bool printTime, bool useCSA) {
+void GTreeQueryProcessor::processGTreeQuery(bool useCSA) {
     for (CSA* csa : csas) {
         delete csa;
     }
@@ -233,7 +227,7 @@ void GTreeQueryProcessor::processGTreeQuery(bool printTime, bool useCSA) {
         if(!useCSA) {
             for(int i = 0; i < csas.size(); i++){
                 csas[i]->setTargetStopIds(targetStopIds);
-                csas[i]->processCSA(false);
+                csas[i]->processCSA();
             }
         }
 
@@ -260,12 +254,6 @@ void GTreeQueryProcessor::processGTreeQuery(bool printTime, bool useCSA) {
         meetingPointQueryResult.minMaxDuration = TimeConverter::convertSecondsToTime(meetingPointMinMaxDuration, false);
         meetingPointQueryResult.minMaxDurationInSeconds = meetingPointMinMaxDuration;
         meetingPointQueryResult.meetingTimeMinMax = TimeConverter::convertSecondsToTime(meetingPointMinMaxArrivalTime, true);
-    }
-    
-
-    // Print the duration
-    if (printTime) {
-        cout << "GTree Query duration : " << duration << " milliseconds" << endl;
     }
 }
 
@@ -392,7 +380,7 @@ void GTreeQueryProcessor::processCSAToTargetStops(vector<int> targetStopIds, int
             csas[i]->setMaxDepartureTime(maxDepartureTime);
         }
         csas[i]->setTargetStopIds(targetStopIds);
-        csas[i]->processCSA(false);
+        csas[i]->processCSA();
     }
 }
 

@@ -44,7 +44,7 @@ class NaiveQueryProcessor {
         };
         ~NaiveQueryProcessor(){};
 
-        void processNaiveQuery(bool printTime = false);
+        void processNaiveQuery();
         MeetingPointQueryResult getMeetingPointQueryResult();
         vector<Journey> getJourneys(Optimization optimization);
     
@@ -65,7 +65,7 @@ class GTreeQueryProcessor {
         };
         ~GTreeQueryProcessor(){};
 
-        void processGTreeQuery(bool printTime = false, bool useCSA = false);
+        void processGTreeQuery(bool useCSA = false);
         MeetingPointQueryResult getMeetingPointQueryResult();
         vector<Journey> getJourneys(Optimization optimization);
     

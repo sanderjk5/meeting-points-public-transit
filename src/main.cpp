@@ -37,17 +37,12 @@ int main(int argc, const char *argv[]) {
   GTree* networkGTreePointer = &networkGTree;
   networkGTreePointer->initializeGTree();
 
-  // NaiveAlgorithmTester::testNaiveAlgorithmRandom(10, 10, 3, false, true);
-  // GTreeAlgorithmTester::testGTreeAlgorithmRandom(networkGTreePointer, 20, 3, 3, false, true);
-
   MeetingPointQuery meetingPointQuery = QueryGenerator::generateMeetingPointQuery(sourceStopNames, "09:00:00", "monday", 7);
-
-  // NaiveAlgorithmTester::testNaiveAlgorithm(meetingPointQuery, false, false);
-  // GTreeAlgorithmTester::testGTreeAlgorithm(networkGTreePointer, meetingPointQuery, true, false);
 
   // AlgorithmComparer::compareAlgorithms(networkGTreePointer, meetingPointQuery, false);
 
-  AlgorithmComparer::compareAlgorithmsRandom(networkGTreePointer, 10, 5, 7, false, false);
+  vector<int> numberOfSourceStops = {2, 5, 10};
+  AlgorithmComparer::compareAlgorithmsRandom(networkGTreePointer, 10, numberOfSourceStops, 7, true);
 
   return 0;
 }

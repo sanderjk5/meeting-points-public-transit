@@ -30,7 +30,7 @@ class CSA {
 
         void setTargetStopIds(vector<int> targetStopIds);
         void setMaxDepartureTime(int maxDepartureTime);
-        void processCSA(bool printTime = false);
+        void processCSA();
         Journey createJourney(int targetStopId);
 
         vector<int>* getEarliestArrivalTimes();
