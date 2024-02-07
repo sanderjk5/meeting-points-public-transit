@@ -42,15 +42,15 @@ void Importer::import(string folderName, bool prepareData, DataType dataType) {
     // Start the timer
     auto start = std::chrono::high_resolution_clock::now();
 
-    string folderPath = "../../data/" + folderName + "/";
+    string folderPathResults = "../../data/" + folderName + "/";
 
     // Import the data
     cout << "Importing data..." << endl;
-    importCalendars(folderPath, dataType);
-    importRoutes(folderPath, dataType);
-    importStops(folderPath, dataType);
-    importTrips(folderPath, dataType);
-    importStopTimes(folderPath, dataType);
+    importCalendars(folderPathResults, dataType);
+    importRoutes(folderPathResults, dataType);
+    importStops(folderPathResults, dataType);
+    importTrips(folderPathResults, dataType);
+    importStopTimes(folderPathResults, dataType);
 
     // Prepare the data for the algorithms
     if (prepareData) {
@@ -76,8 +76,8 @@ void Importer::import(string folderName, bool prepareData, DataType dataType) {
     The data is imported from the folder with the given name.
     The dataType parameter is used to determine the format of the GTFS files.
 */
-void Importer::importCalendars(string folderPath, DataType dataType) {
-    std::string filePath = folderPath + "calendar.txt";
+void Importer::importCalendars(string folderPathResults, DataType dataType) {
+    std::string filePath = folderPathResults + "calendar.txt";
 
     std::ifstream file(filePath);
     if (!file.is_open()) {
@@ -136,9 +136,9 @@ void Importer::importCalendars(string folderPath, DataType dataType) {
     The data is imported from the folder with the given name.
     The dataType parameter is used to determine the format of the GTFS files.
 */
-void Importer::importRoutes(string folderPath, DataType dataType) {
+void Importer::importRoutes(string folderPathResults, DataType dataType) {
     // combine folder path with file name
-    std::string filePath = folderPath + "routes.txt";
+    std::string filePath = folderPathResults + "routes.txt";
 
     std::ifstream file(filePath);
     if (!file.is_open()) {
@@ -179,8 +179,8 @@ void Importer::importRoutes(string folderPath, DataType dataType) {
     The data is imported from the folder with the given name.
     The dataType parameter is used to determine the format of the GTFS files.
 */
-void Importer::importStops(string folderPath, DataType dataType) {
-    std::string filePath = folderPath + "stops.txt";
+void Importer::importStops(string folderPathResults, DataType dataType) {
+    std::string filePath = folderPathResults + "stops.txt";
 
     std::ifstream file(filePath);
     if (!file.is_open()) {
@@ -238,8 +238,8 @@ void Importer::importStops(string folderPath, DataType dataType) {
     The data is imported from the folder with the given name.
     The dataType parameter is used to determine the format of the GTFS files.
 */
-void Importer::importStopTimes(string folderPath, DataType dataType) {
-    std::string filePath = folderPath + "stop_times.txt";
+void Importer::importStopTimes(string folderPathResults, DataType dataType) {
+    std::string filePath = folderPathResults + "stop_times.txt";
 
     std::ifstream file(filePath);
     if (!file.is_open()) {
@@ -285,8 +285,8 @@ void Importer::importStopTimes(string folderPath, DataType dataType) {
     The data is imported from the folder with the given name.
     The dataType parameter is used to determine the format of the GTFS files.
 */
-void Importer::importTrips(string folderPath, DataType dataType) {
-    std::string filePath = folderPath + "trips.txt";
+void Importer::importTrips(string folderPathResults, DataType dataType) {
+    std::string filePath = folderPathResults + "trips.txt";
 
     std::ifstream file(filePath);
     if (!file.is_open()) {

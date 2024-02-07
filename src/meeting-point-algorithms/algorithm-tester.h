@@ -28,7 +28,7 @@ class AlgorithmComparer {
         explicit AlgorithmComparer(){};
         ~AlgorithmComparer(){};
 
-        static void compareAlgorithmsRandom(GTree* gTree, int numberOfSuccessfulQueries, vector<int> numberOfSources, int numberOfDays = 1, bool printResults = false);
+        static void compareAlgorithmsRandom(GTree* gTree, int numberOfSuccessfulQueries, vector<int> numberOfSources, int numberOfDays = 1, bool printResults = false, bool loadOrStoreQueries = false);
         static void compareAlgorithms(GTree* gTree, MeetingPointQuery meetingPointQuery);
 };
 

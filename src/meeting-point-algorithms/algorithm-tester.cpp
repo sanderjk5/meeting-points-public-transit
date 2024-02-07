@@ -112,14 +112,15 @@ void GTreeAlgorithmTester::testGTreeAlgorithm(GTree* gTree, MeetingPointQuery me
     }
 }
 
-void AlgorithmComparer::compareAlgorithmsRandom(GTree* gTree, int numberOfSuccessfulQueries, vector<int> numberOfSources, int numberOfDays, bool printResults) {
-    string folderPath = "../../results/";
+void AlgorithmComparer::compareAlgorithmsRandom(GTree* gTree, int numberOfSuccessfulQueries, vector<int> numberOfSources, int numberOfDays, bool printResults, bool loadOrStoreQueries) {
+    string folderPathResults = "../../tests/results/";
+    string folderPathQueries = "../../tests/queries/";
     // get the current timestamp
     time_t now = time(0);
     tm *ltm = localtime(&now);
     string timestamp = to_string(1900 + ltm->tm_year) + "-" + to_string(1 + ltm->tm_mon) + "-" + to_string(ltm->tm_mday) + "-" + to_string(ltm->tm_hour) + "-" + to_string(ltm->tm_min) + "-" + to_string(ltm->tm_sec);
     
-    string resultsFileName = folderPath + "results-" + timestamp + ".csv";
+    string resultsFileName = folderPathResults + "results-" + timestamp + ".csv";
     
     // Create a csv file to store the results
     std::ofstream resultsFile (resultsFileName, std::ofstream::out);
@@ -127,6 +128,8 @@ void AlgorithmComparer::compareAlgorithmsRandom(GTree* gTree, int numberOfSucces
     
     for (int i = 0; i < numberOfSources.size(); i++) {
         int numberOfSourceStops = numberOfSources[i];
+
+        cout << "\nProcess queries for " << numberOfSourceStops << " source stops..." << endl;
 
         string numberOfSourceStopsString = "";
         if (numberOfSourceStops < 10) {
@@ -137,8 +140,23 @@ void AlgorithmComparer::compareAlgorithmsRandom(GTree* gTree, int numberOfSucces
             numberOfSourceStopsString = to_string(numberOfSourceStops);
         }
 
+        std::ofstream queriesInfoFile;
+        vector<MeetingPointQuery> meetingPointQueries;
+        if (loadOrStoreQueries) {
+            string filePath = folderPathQueries + "meeting-point-query-" + numberOfSourceStopsString + "-" + to_string(numberOfSuccessfulQueries) + ".csv";
+            std::ifstream file(filePath);
+            if (file.is_open()) {
+                std::string line;
+                while (std::getline(file, line)) {
+                    meetingPointQueries.push_back(QueryGenerator::parseMeetingPointQuery(line, numberOfSourceStops));
+                }
+            } else {
+                queriesInfoFile.open(filePath, std::ofstream::out);
+            }
+        }
+
         // Create a csv file to store the queries
-        string queriesFileName = folderPath + "queries-" + to_string(numberOfSourceStops) + "-" + timestamp + ".csv";
+        string queriesFileName = folderPathResults + "queries-" + to_string(numberOfSourceStops) + "-" + timestamp + ".csv";
         std::ofstream queriesFile (queriesFileName, std::ofstream::out);
         queriesFile << "sourceStopIds,sourceTime,weekday,queryTimeNaive,queryTimeGTreeCSA,queryTimeGTreeApprox,absolutDifferenceMinSum,absolutDifferenceMinMax,accuracyMinSum,accuracyMinMax\n";
 
@@ -162,7 +180,12 @@ void AlgorithmComparer::compareAlgorithmsRandom(GTree* gTree, int numberOfSucces
         while(successfulQueryCounter < numberOfSuccessfulQueries) {
             queryCounter++;
 
-            MeetingPointQuery meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSourceStops, numberOfDays);
+            MeetingPointQuery meetingPointQuery;
+            if (loadOrStoreQueries && meetingPointQueries.size() > 0) {
+                meetingPointQuery = meetingPointQueries[successfulQueryCounter];
+            } else {
+                meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSourceStops, numberOfDays);
+            }
             
             NaiveQueryProcessor naiveQueryProcessor = NaiveQueryProcessor(meetingPointQuery);
             naiveQueryProcessor.processNaiveQuery();
@@ -218,13 +241,24 @@ void AlgorithmComparer::compareAlgorithmsRandom(GTree* gTree, int numberOfSucces
             accuracyMinMax.push_back(accuracyMinMaxVal);
 
             // Store the query information in a csv file
-            string sourceStopIds = "";
+            string sourceStopNames = "";
             for (int j = 0; j < meetingPointQuery.sourceStopIds.size()-1; j++) {
-                sourceStopIds += to_string(meetingPointQuery.sourceStopIds[j]) + "-";
+                sourceStopNames += Importer::getStopName(meetingPointQuery.sourceStopIds[j]) + "-";
             }
-            sourceStopIds += to_string(meetingPointQuery.sourceStopIds[meetingPointQuery.sourceStopIds.size()-1]);
+            sourceStopNames += Importer::getStopName(meetingPointQuery.sourceStopIds[meetingPointQuery.sourceStopIds.size()-1]);
 
-            queriesFile << sourceStopIds << "," << meetingPointQuery.sourceTime << "," << meetingPointQuery.weekday << "," << meetingPointQueryResultNaive.queryTime << "," << meetingPointQueryResultGTreeCSA.queryTime << "," << meetingPointQueryResultGTreeApproximation.queryTime << "," << differenceMinSum << "," << differenceMinMax << "," << accuracyMinSumVal << "," << accuracyMinMaxVal << "\n";
+            queriesFile << sourceStopNames << "," << meetingPointQuery.sourceTime << "," << meetingPointQuery.weekday << "," << meetingPointQueryResultNaive.queryTime << "," << meetingPointQueryResultGTreeCSA.queryTime << "," << meetingPointQueryResultGTreeApproximation.queryTime << "," << differenceMinSum << "," << differenceMinMax << "," << accuracyMinSumVal << "," << accuracyMinMaxVal << "\n";
+
+            if (loadOrStoreQueries && meetingPointQueries.size() == 0) {
+                for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
+                    queriesInfoFile << meetingPointQuery.sourceStopIds[i] << ",";
+                }
+                queriesInfoFile << meetingPointQuery.sourceTime << "," << meetingPointQuery.weekday << "," << meetingPointQuery.numberOfDays << "\n";
+            }
+            // Print progress every 10% of the queries
+            if (successfulQueryCounter % (numberOfSuccessfulQueries / 5) == 0) {
+                cout << "Progress: " << successfulQueryCounter << " / " << numberOfSuccessfulQueries << endl;
+            }
         }
 
         double rateOfSuccessfulQueriesNaive = (double) successfulQueriesNaive / queryCounter;
@@ -276,6 +310,7 @@ void AlgorithmComparer::compareAlgorithmsRandom(GTree* gTree, int numberOfSucces
             cout << "Minimum accuracy min max: " << Calculator::getMinimum(accuracyMinMax) << endl;
         }
         queriesFile.close();
+        queriesInfoFile.close();
     }
     resultsFile.close();
 }

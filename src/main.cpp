@@ -42,7 +42,7 @@ int main(int argc, const char *argv[]) {
   // AlgorithmComparer::compareAlgorithms(networkGTreePointer, meetingPointQuery, false);
 
   vector<int> numberOfSourceStops = {2, 5, 10};
-  AlgorithmComparer::compareAlgorithmsRandom(networkGTreePointer, 10, numberOfSourceStops, 7, true);
+  AlgorithmComparer::compareAlgorithmsRandom(networkGTreePointer, 10, numberOfSourceStops, 7, true, true);
 
   return 0;
 }

@@ -11,6 +11,7 @@
 #include <omp.h>
 
 #include <iostream>
+#include <sstream>
 #include <chrono>
 #include <queue>
 #include <map>
@@ -171,6 +172,26 @@ CSAQuery QueryGenerator::createCSAQueryWithTargetStops(string sourceStopName, ve
         query.targetStopIds.push_back(Importer::getStopId(targetStopName));
     }
     return query;
+}
+
+MeetingPointQuery QueryGenerator::parseMeetingPointQuery(string line, int numberOfSourceStops) {
+    MeetingPointQuery meetingPointQuery;
+    vector<string> parts;
+
+    // Split the line into substrings
+    std::stringstream ss(line);
+    std::string substring;
+    while (std::getline(ss, substring, ',')) {
+        parts.push_back(substring);
+    }
+
+    for (int i = 0; i < numberOfSourceStops; i++) {
+        meetingPointQuery.sourceStopIds.push_back(stoi(parts[i]));
+    }
+    meetingPointQuery.sourceTime = stoi(parts[numberOfSourceStops]);
+    meetingPointQuery.weekday = stoi(parts[numberOfSourceStops + 1]);
+    meetingPointQuery.numberOfDays = stoi(parts[numberOfSourceStops + 2]);
+    return meetingPointQuery;
 }
 
 /*
