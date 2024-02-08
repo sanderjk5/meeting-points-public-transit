@@ -56,9 +56,7 @@ void Importer::import(string folderName, bool prepareData, DataType dataType) {
     if (prepareData) {
         combineStops();
         generateValidRoutes();
-        if(dataType != s_bahn_stuttgart) {
-            setIsAvailableOfTrips();
-        }
+        setIsAvailableOfTrips();
         clearAndSortTrips();
         generateSortedConnections();
     }
@@ -95,7 +93,7 @@ void Importer::importCalendars(string folderPathResults, DataType dataType) {
         Calendar calendar;
 
         // Read each field and assign it to the calendar variable
-        if (dataType == s_bahn_stuttgart || dataType == vvs_j24){
+        if (dataType == vvs_j24){
             calendar.serviceId = id;
             serviceIdOldToNew[fields[0]] = id;
 
@@ -198,19 +196,13 @@ void Importer::importStops(string folderPathResults, DataType dataType) {
         Stop stop;
 
         // Read each field and assign it to the stop variable
-        if (dataType == s_bahn_stuttgart || dataType == vvs_j24){
+        if (dataType == vvs_j24){
             stop.id = id;
             stopIdOldToNew[fields[0]] = id;
 
-            if (dataType == s_bahn_stuttgart){
-            stop.name = fields[2];
-            stop.lat = std::stod(fields[4]);
-            stop.lon = std::stod(fields[5]);
-            } else {
-                stop.name = fields[1];
-                stop.lat = std::stod(fields[2]);
-                stop.lon = std::stod(fields[3]);
-            }
+            stop.name = fields[1];
+            stop.lat = std::stod(fields[2]);
+            stop.lon = std::stod(fields[3]);
         } else {
             stop.id = id;
             if (dataType == schienenregionalverkehr_de){

@@ -70,7 +70,6 @@ struct TripDepartureTimePair
 };
 
 enum DataType {
-    s_bahn_stuttgart,
     vvs_j24,
     schienenregionalverkehr_de,
     schienenfernverkehr_de
