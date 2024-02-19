@@ -6,4 +6,6 @@ constexpr int MIN_COARSE_GRAPH_VERTEX_DIFF = 10;
 constexpr int KL_ITERATIONS = 20;
 constexpr int KL_MAX_UNUSED_SWAPS = 50;
 
+constexpr int NUMBER_OF_DAYS = 3;
+
 #endif //CMAKE_HEADER_H
