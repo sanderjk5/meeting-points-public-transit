@@ -72,7 +72,8 @@ struct TripDepartureTimePair
 enum DataType {
     vvs_j24,
     schienenregionalverkehr_de,
-    schienenfernverkehr_de
+    schienenfernverkehr_de,
+    gesamt_de
 };
 
 /*

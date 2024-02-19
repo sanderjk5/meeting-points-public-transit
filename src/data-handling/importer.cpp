@@ -107,8 +107,10 @@ void Importer::importCalendars(string folderPathResults, DataType dataType) {
             calendar.serviceId = id;
             if (dataType == schienenregionalverkehr_de){
                 serviceIdOldToNew["re-" + fields[9]] = id;
-            } else {
+            } else if (dataType == schienenfernverkehr_de) {
                 serviceIdOldToNew["fe-" + fields[9]] = id;
+            } else {
+                serviceIdOldToNew[fields[9]] = id;
             }
 
             for (int i = 0; i < 7; i++) {
@@ -155,10 +157,12 @@ void Importer::importRoutes(string folderPathResults, DataType dataType) {
 
         // Read each field and assign it to the routes variable
         route.id = id;
-        if (dataType == schienenregionalverkehr_de){
-            serviceIdOldToNew["re-" + fields[4]] = id;
+        if (dataType == schienenregionalverkehr_de) {
+            routeIdOldToNew["re-" + fields[4]] = id;
         } else if (dataType == schienenfernverkehr_de) {
-            serviceIdOldToNew["fe-" + fields[4]] = id;
+            routeIdOldToNew["fe-" + fields[4]] = id;
+        } else if (dataType == gesamt_de) {
+            routeIdOldToNew[fields[4]] = id;
         } else {
             routeIdOldToNew[fields[0]] = id;
         }
@@ -207,8 +211,10 @@ void Importer::importStops(string folderPathResults, DataType dataType) {
             stop.id = id;
             if (dataType == schienenregionalverkehr_de){
                 stopIdOldToNew["re-" + fields[2]] = id;
-            } else {
+            } else if(dataType == schienenfernverkehr_de) {
                 stopIdOldToNew["fe-" + fields[2]] = id;
+            } else {
+                stopIdOldToNew[fields[2]] = id;
             }
 
             stop.name = fields[0];
