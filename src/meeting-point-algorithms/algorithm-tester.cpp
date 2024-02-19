@@ -112,9 +112,83 @@ void GTreeAlgorithmTester::testGTreeAlgorithm(GTree* gTree, MeetingPointQuery me
     }
 }
 
-void AlgorithmComparer::compareAlgorithmsRandom(GTree* gTree, int numberOfSuccessfulQueries, vector<int> numberOfSources, int numberOfDays, bool printResults, bool loadOrStoreQueries) {
-    string folderPathResults = "../../tests/results/";
-    string folderPathQueries = "../../tests/queries/";
+AverageRunTimeAndAccuracy GTreeAlgorithmTester::getAverageRunTimeAndAccuracy(DataType dataType, GTree* gTree, int numberOfSourceStops, int numberOfSuccessfulQueries) {
+    string dataTypeString = Importer::getDataTypeString(dataType);
+    string folderPathQueries = "../../tests/" + dataTypeString + "/queries/";
+
+    vector<double> queryTimesCSA;
+    vector<double> queryTimesApproximation;
+    vector<double> absolutDifferenceMinSum;
+    vector<double> absolutDifferenceMinMax;
+    vector<double> accuracyMinSum;
+    vector<double> accuracyMinMax;
+
+    string numberOfSourceStopsString = "";
+    if (numberOfSourceStops < 10) {
+        numberOfSourceStopsString = "00" + to_string(numberOfSourceStops);
+    } else if (numberOfSourceStops < 100) {
+        numberOfSourceStopsString = "0" + to_string(numberOfSourceStops);
+    } else {
+        numberOfSourceStopsString = to_string(numberOfSourceStops);
+    }
+
+    std::ofstream queriesInfoFile;
+    vector<MeetingPointQuery> meetingPointQueries;
+    string filePath = folderPathQueries + "meeting-point-query-" + numberOfSourceStopsString + "-" + to_string(numberOfSuccessfulQueries) + ".csv";
+    std::ifstream file(filePath);
+    if (file.is_open()) {
+        std::string line;
+        while (std::getline(file, line)) {
+            meetingPointQueries.push_back(QueryGenerator::parseMeetingPointQuery(line, numberOfSourceStops));
+        }
+    } else {
+        cout << "No queries found for " << numberOfSourceStops << " source stops and " << numberOfSuccessfulQueries << " successful queries." << endl;
+        AverageRunTimeAndAccuracy averageRunTimeAndAccuracy;
+        return averageRunTimeAndAccuracy;
+    }
+
+    for (int i = 0; i < meetingPointQueries.size(); i++) {
+        MeetingPointQuery meetingPointQuery = meetingPointQueries[i];
+
+        GTreeQueryProcessor gTreeQueryProcessorCSA = GTreeQueryProcessor(meetingPointQuery, gTree);
+        gTreeQueryProcessorCSA.processGTreeQuery(true);
+        MeetingPointQueryResult meetingPointQueryResultGTreeCSA = gTreeQueryProcessorCSA.getMeetingPointQueryResult();
+        
+        GTreeQueryProcessor gTreeQueryProcessorApproximation = GTreeQueryProcessor(meetingPointQuery, gTree);
+        gTreeQueryProcessorApproximation.processGTreeQuery();
+        MeetingPointQueryResult meetingPointQueryResultApprox = gTreeQueryProcessorApproximation.getMeetingPointQueryResult();
+
+        queryTimesCSA.push_back((double) meetingPointQueryResultGTreeCSA.queryTime);
+        queryTimesApproximation.push_back((double) meetingPointQueryResultApprox.queryTime);
+
+        int differenceMinSum = meetingPointQueryResultApprox.minSumDurationInSeconds - meetingPointQueryResultGTreeCSA.minSumDurationInSeconds;
+        int differenceMinMax = meetingPointQueryResultApprox.minMaxDurationInSeconds - meetingPointQueryResultGTreeCSA.minMaxDurationInSeconds;
+
+        double relativeDifferenceMinSum = (double) differenceMinSum / meetingPointQueryResultApprox.minSumDurationInSeconds;
+        double relativeDifferenceMinMax = (double) differenceMinMax / meetingPointQueryResultApprox.minMaxDurationInSeconds;
+
+        accuracyMinSum.push_back(1 - relativeDifferenceMinSum);
+        accuracyMinMax.push_back(1 - relativeDifferenceMinMax);
+    }
+
+    AverageRunTimeAndAccuracy averageRunTimeAndAccuracy;
+    averageRunTimeAndAccuracy.averageRunTimeGTreeCSA = Calculator::getAverage(queryTimesCSA);
+    averageRunTimeAndAccuracy.averageRunTimeGTreeApproximation = Calculator::getAverage(queryTimesApproximation);
+    averageRunTimeAndAccuracy.averageAccuracyMinSum = Calculator::getAverage(accuracyMinSum);
+    averageRunTimeAndAccuracy.averageAccuracyMinMax = Calculator::getAverage(accuracyMinMax);
+
+    return averageRunTimeAndAccuracy;
+}
+
+void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree, int numberOfSuccessfulQueries, vector<int> numberOfSources, int numberOfDays, bool printResults, bool loadOrStoreQueries) {
+    string dataTypeString = Importer::getDataTypeString(dataType);
+    string folderPathResults = "../../tests/" + dataTypeString + "/results/";
+    string folderPathQueries = "../../tests/" + dataTypeString + "/queries/";
+
+    cout << "Compare algorithms for " << dataTypeString << " data..." << endl;
+    cout << folderPathResults << endl;
+    cout << folderPathQueries << endl;
+
     // get the current timestamp
     time_t now = time(0);
     tm *ltm = localtime(&now);

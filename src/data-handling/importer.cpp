@@ -613,3 +613,20 @@ int Importer::getStopId(string stopName) {
     }
     return -1;
 }
+
+string Importer::getDataTypeString(DataType dataType) {
+    string dataTypeString = "";
+    if(dataType == vvs_j24) {
+        dataTypeString = "vvs_j24";
+    } else if (dataType == schienenfernverkehr_de) {
+        dataTypeString = "schienenfernverkehr_de";
+    } else if (dataType == schienenregionalverkehr_de) {
+        dataTypeString = "schienenregionalverkehr_de";
+    } else if (dataType == schienenfern_und_regionalverkehr_de) {
+        dataTypeString = "schienenfern_und_regionalverkehr_de";
+    } else if (dataType == gesamt_de) {
+        dataTypeString = "gesamt_de";
+    }
+
+    return dataTypeString;
+}

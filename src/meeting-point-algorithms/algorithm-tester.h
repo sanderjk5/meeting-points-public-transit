@@ -3,7 +3,17 @@
 
 #include "query-processor.h"
 #include <../data-structures/g-tree.h>
+#include <../data-handling/importer.h>
 #include "journey.h"
+
+#include <vector>
+
+struct AverageRunTimeAndAccuracy {
+    double averageRunTimeGTreeCSA;
+    double averageRunTimeGTreeApproximation;
+    double averageAccuracyMinSum;
+    double averageAccuracyMinMax;
+};
 
 class NaiveAlgorithmTester {
     public:
@@ -21,6 +31,8 @@ class GTreeAlgorithmTester {
 
         static void testGTreeAlgorithmRandom(GTree* gTree, int numberOfSuccessfulQueries, int numberOfSources, int numberOfDays = 1, bool printOnlySuccessful = false);
         static void testGTreeAlgorithm(GTree* gTree, MeetingPointQuery meetingPointQuery, bool printJourneys = false);
+
+        static AverageRunTimeAndAccuracy getAverageRunTimeAndAccuracy(DataType dataType, GTree* gTree, int numberOfSourceStops, int numberOfSuccessfulQueries);
 };
 
 class AlgorithmComparer {
@@ -28,7 +40,7 @@ class AlgorithmComparer {
         explicit AlgorithmComparer(){};
         ~AlgorithmComparer(){};
 
-        static void compareAlgorithmsRandom(GTree* gTree, int numberOfSuccessfulQueries, vector<int> numberOfSources, int numberOfDays = 1, bool printResults = false, bool loadOrStoreQueries = false);
+        static void compareAlgorithmsRandom(DataType dataType, GTree* gTree, int numberOfSuccessfulQueries, vector<int> numberOfSources, int numberOfDays = 1, bool printResults = false, bool loadOrStoreQueries = false);
         static void compareAlgorithms(GTree* gTree, MeetingPointQuery meetingPointQuery);
 };
 

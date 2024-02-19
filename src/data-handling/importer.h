@@ -73,6 +73,7 @@ enum DataType {
     vvs_j24,
     schienenregionalverkehr_de,
     schienenfernverkehr_de,
+    schienenfern_und_regionalverkehr_de,
     gesamt_de
 };
 
@@ -106,6 +107,8 @@ class Importer {
 
         static string getStopName(int stopId);
         static int getStopId(string stopName);
+
+        static string getDataTypeString(DataType dataType);
 
     private:
         // The following maps are used to map the old ids to new ids
