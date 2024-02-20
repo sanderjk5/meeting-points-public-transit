@@ -50,7 +50,7 @@ class AlgorithmComparer {
         ~AlgorithmComparer(){};
 
         static void compareAlgorithmsRandom(DataType dataType, GTree* gTree, int numberOfSuccessfulQueries, vector<int> numberOfSources, int numberOfDays = 3, bool printResults = false, bool loadOrStoreQueries = false);
-        static void compareAlgorithms(GTree* gTree, MeetingPointQuery meetingPointQuery);
+        static void compareAlgorithms(DataType dataType, GTree* gTree, MeetingPointQuery meetingPointQuery);
 };
 
 class PrintHelper {

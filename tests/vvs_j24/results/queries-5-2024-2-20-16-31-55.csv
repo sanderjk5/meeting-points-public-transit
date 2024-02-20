@@ -1,0 +1,11 @@
+sourceStopIds,sourceTime,weekday,queryTimeNaive,queryTimeNaiveKeyStop,queryTimeGTreeCSA,queryTimeGTreeApprox,absolutDifferenceMinSumGTree,absolutDifferenceMinMaxGTree,accuracyMinSumGTree,accuracyMinMaxGTree,absolutDifferenceMinSumKeyStop,absolutDifferenceMinMaxKeyStop,accuracyMinSumKeyStop,accuracyMinMaxKeyStop
+Dettenhausen-Eglosheim Tammer Straße-Pforzheim Bahnhofstr.-Aichschieß Industriegeb.-Hößlinsw. W-parkpl. Rot. Stich,204,1,1438,77,3026,875,13356,2160,0.889143,0.927361,12876,0,0.8927,1
+Möhringen Freibad-Haus am Weinberg-Häfnerhasl. Alte Mühle-Rutesheim Schulzentrum-Kirchheim (T) Freiwaldaustraße,64954,1,1212,77,1323,1148,270,22680,0.997035,0.677318,60,21960,0.99934,0.684329
+Endersbach Stettener Str.-Malmsheim Schnallenäcker-Albert-Luthuli-Platz-Sommerrain-Herrenberg Amselweg,32321,2,1588,30,2541,1145,0,180,1,0.97892,0,480,1,0.945695
+Kornwestheim Enzstraße-Wolfschlugen Reinhardtstr.-Oßweil Gegen Eich-Hulb-Grunbach Stuttgarter-/Weststr.,2435,5,1615,473,4719,825,16645,6060,0.96393,0.970263,14395,5640,0.968653,0.972267
+Backnang Föhrenbühl-Urbach Bf-Denkendorf Hindenburgstr.-Ludwigsburg Rathaus-Zizish. Oberboihinger Str.,6253,2,1264,35,2231,939,10487,2640,0.889581,0.89076,9437,1380,0.899526,0.939756
+Esslingen (N) Maille-Fellbach Adlerstraße-Erbstetten Burgstaller Str.-Renningen Südbahnhof-Uhingen Nassach Friedhof,27858,5,1094,160,2082,744,2940,6660,0.985824,0.962125,1800,4620,0.991273,0.973418
+Beilstein Breslauer Straße-Backnang K.-Ferd.-Braun-Straße-Tiefenbachschule-Göpp. Kaiserbau (Ag. für Arb.)-Welzheim Eckartsweiler,79754,5,1354,195,2128,717,42180,1800,0.879372,0.985065,1200,3480,0.996113,0.971523
+Laupheim West-Großsachsh. Kleinsachsh. Str.-Stafflenbergstraße-Oberboihingen Lerchenstraße-Ludwigsburg Friedrichstraße,69915,4,937,32,1743,726,300,2820,0.989935,0.757419,150,0,0.994942,1
+Weilh.(T) Limb.sch./Kelterstr.-Welzheim Schafhof-Bonlanden Hauptstraße-Rommelsbach Mitte-Plochingen Beethovenstraße,5303,0,1232,33,2219,756,10477,5040,0.887568,0.822641,13087,5040,0.863385,0.822641
+Abzeig Altersberg-Rechberghausen Ebene/Schule-Eutingen im Gäu-Rietenau-Heimsheim See,25203,1,1029,47,1359,765,1080,3840,0.972881,0.732162,420,1620,0.989276,0.866304

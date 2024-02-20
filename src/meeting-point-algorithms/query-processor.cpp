@@ -631,6 +631,7 @@ int GTreeQueryProcessor::getCostsToStop(int stopId, map<pair<int, int>, vector<p
     Process the CSA algorithm for the target stops.
 */
 void GTreeQueryProcessor::processCSAToTargetStops(vector<int> targetStopIds, int currentBest) {
+    #pragma omp parallel for
     for (int i = 0; i < csas.size(); i++) {
         if (currentBest != INT_MAX) {
             int maxDepartureTime = meetingPointQuery.sourceTime + currentBest;

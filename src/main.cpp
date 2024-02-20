@@ -29,40 +29,42 @@ int main(int argc, const char *argv[]) {
   // DataType dataType = schienenfern_und_regionalverkehr_de;
   // DataType dataType = gesamt_de;
 
+  vector<string> sourceStopNames;
+
   if (dataType == vvs_j24){
     string folderName = "vvs_gtfs_j24";
     Importer::import(folderName, true, vvs_j24);
-    vector<string> sourceStopNames = {"Rohr", "Waldau"};
+    sourceStopNames = {"Rohr", "Waldau"};
   } else if (dataType == schienenfernverkehr_de){
     string folderName = "schienenfernverkehr_de";
     Importer::import(folderName, true, schienenfernverkehr_de);
-    vector<string> sourceStopNames = {"Falkensee", "Stuttgart-Rohr"};
+    sourceStopNames = {"Falkensee", "Stuttgart-Rohr"};
   } else if (dataType == schienenregionalverkehr_de){
     string folderName = "schienenregionalverkehr_de";
     Importer::import(folderName, true, schienenregionalverkehr_de);
-    vector<string> sourceStopNames = {"Falkensee", "Stuttgart-Rohr"};
+    sourceStopNames = {"Falkensee", "Stuttgart-Rohr"};
   } else if (dataType == schienenfern_und_regionalverkehr_de){
     string folderName0 = "schienenfernverkehr_de";
     string folderName1 = "schienenregionalverkehr_de";
     Importer::import(folderName0, false, schienenfernverkehr_de);
     Importer::import(folderName1, true, schienenregionalverkehr_de);
-    vector<string> sourceStopNames = {"Falkensee", "Stuttgart-Rohr"};
+    sourceStopNames = {"Falkensee", "Stuttgart-Rohr"};
   } else if (dataType == gesamt_de){
     string folderName = "gesamt_de";
     Importer::import(folderName, true, gesamt_de);
-    vector<string> sourceStopNames = {"Falkensee", "Stuttgart-Rohr"};
+    sourceStopNames = {"Falkensee", "Stuttgart-Rohr"};
   }
 
   Creator::createNetworkGraph();
     
-  // GTree networkGTree = Creator::createNetworkGTree(4, 512);
+  // GTree networkGTree = Creator::createNetworkGTree(2, 16);
 
   // GTree* networkGTreePointer = &networkGTree;
   // networkGTreePointer->initializeGTree();
 
   // MeetingPointQuery meetingPointQuery = QueryGenerator::generateMeetingPointQuery(sourceStopNames, "09:00:00", "monday", NUMBER_OF_DAYS);
 
-  // AlgorithmComparer::compareAlgorithms(networkGTreePointer, meetingPointQuery);
+  // AlgorithmComparer::compareAlgorithms(dataType, networkGTreePointer, meetingPointQuery);
 
   vector<int> numberOfSourceStops = {2, 5, 10};
   // AlgorithmComparer::compareAlgorithmsRandom(dataType, networkGTreePointer, 10, numberOfSourceStops, NUMBER_OF_DAYS, true, true);

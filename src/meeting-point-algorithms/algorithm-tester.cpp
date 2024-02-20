@@ -522,10 +522,15 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
     resultsFile.close();
 }
 
-void AlgorithmComparer::compareAlgorithms(GTree* gTree, MeetingPointQuery meetingPointQuery){
+void AlgorithmComparer::compareAlgorithms(DataType dataType, GTree* gTree, MeetingPointQuery meetingPointQuery){
     NaiveQueryProcessor naiveQueryProcessor = NaiveQueryProcessor(meetingPointQuery);
     naiveQueryProcessor.processNaiveQuery();
     MeetingPointQueryResult meetingPointQueryResultNaive = naiveQueryProcessor.getMeetingPointQueryResult();
+
+    vector<int> keyStops = NaiveKeyStopQueryProcessor::getKeyStops(dataType, meetingPointQuery.sourceStopIds.size());
+    NaiveKeyStopQueryProcessor naiveKeyStopQueryProcessor = NaiveKeyStopQueryProcessor(meetingPointQuery);
+    naiveKeyStopQueryProcessor.processNaiveKeyStopQuery(keyStops);
+    MeetingPointQueryResult meetingPointQueryResultNaiveKeyStop = naiveKeyStopQueryProcessor.getMeetingPointQueryResult();
 
     GTreeQueryProcessor gTreeQueryProcessorCSA = GTreeQueryProcessor(meetingPointQuery, gTree);
     gTreeQueryProcessorCSA.processGTreeQuery(true);
@@ -539,6 +544,9 @@ void AlgorithmComparer::compareAlgorithms(GTree* gTree, MeetingPointQuery meetin
     cout << "Naive: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultNaive);
 
+    cout << "Naive - Key Stop: " << endl;
+    PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultNaiveKeyStop);
+
     cout << "GTree - CSA: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultGTreeCSA);
 
@@ -546,20 +554,34 @@ void AlgorithmComparer::compareAlgorithms(GTree* gTree, MeetingPointQuery meetin
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultGTreeApproximation);
 
     bool naiveQuerySuccessful = meetingPointQueryResultNaive.meetingPointMinSum != "" && meetingPointQueryResultNaive.meetingPointMinMax != "";
+    bool naiveKeyStopQuerySuccessful = meetingPointQueryResultNaiveKeyStop.meetingPointMinSum != "" && meetingPointQueryResultNaiveKeyStop.meetingPointMinMax != "";
+    bool gTreeCSAQuerySuccessful = meetingPointQueryResultGTreeCSA.meetingPointMinSum != "" && meetingPointQueryResultGTreeCSA.meetingPointMinMax != "";
     bool gTreeApproximationQuerySuccessful = meetingPointQueryResultGTreeApproximation.meetingPointMinSum != "" && meetingPointQueryResultGTreeApproximation.meetingPointMinMax != "";
 
-    if(naiveQuerySuccessful && gTreeApproximationQuerySuccessful) {
-        double absolutDifferenceMinSum = (double) (meetingPointQueryResultGTreeApproximation.minSumDurationInSeconds - meetingPointQueryResultNaive.minSumDurationInSeconds);
-        double absolutDifferenceMinMax = (double) (meetingPointQueryResultGTreeApproximation.minMaxDurationInSeconds - meetingPointQueryResultNaive.minMaxDurationInSeconds);
+    if(naiveQuerySuccessful && naiveKeyStopQuerySuccessful && gTreeApproximationQuerySuccessful && gTreeCSAQuerySuccessful) {
+        double absolutDifferenceMinSumGTree = (double) (meetingPointQueryResultGTreeApproximation.minSumDurationInSeconds - meetingPointQueryResultNaive.minSumDurationInSeconds);
+        double absolutDifferenceMinMaxGTree = (double) (meetingPointQueryResultGTreeApproximation.minMaxDurationInSeconds - meetingPointQueryResultNaive.minMaxDurationInSeconds);
 
-        double accuracyMinSum = (double) 1 - (absolutDifferenceMinSum / meetingPointQueryResultNaive.minSumDurationInSeconds);
-        double accuracyMinMax = (double) 1 - (absolutDifferenceMinMax / meetingPointQueryResultNaive.minMaxDurationInSeconds);
+        double accuracyMinSumGTree = (double) 1 - (absolutDifferenceMinSumGTree / meetingPointQueryResultGTreeApproximation.minSumDurationInSeconds);
+        double accuracyMinMaxGTree = (double) 1 - (absolutDifferenceMinMaxGTree / meetingPointQueryResultGTreeApproximation.minMaxDurationInSeconds);
 
-        cout << "Result differences:" << endl;
-        cout << "Absolut difference min sum: " << absolutDifferenceMinSum / 60 << " minutes" << endl;
-        cout << "Absolut difference min max: " << absolutDifferenceMinMax / 60 << " minutes" << endl;
-        cout << "Accuracy min sum: " << accuracyMinSum << endl;
-        cout << "Accuracy min max: " << accuracyMinMax << endl;
+        double absolutDifferenceMinSumKeyStop = (double) (meetingPointQueryResultNaiveKeyStop.minSumDurationInSeconds - meetingPointQueryResultNaive.minSumDurationInSeconds);
+        double absolutDifferenceMinMaxKeyStop = (double) (meetingPointQueryResultNaiveKeyStop.minMaxDurationInSeconds - meetingPointQueryResultNaive.minMaxDurationInSeconds);
+
+        double accuracyMinSumKeyStop = (double) 1 - (absolutDifferenceMinSumKeyStop / meetingPointQueryResultNaiveKeyStop.minSumDurationInSeconds);
+        double accuracyMinMaxKeyStop = (double) 1 - (absolutDifferenceMinMaxKeyStop / meetingPointQueryResultNaiveKeyStop.minMaxDurationInSeconds);
+
+        cout << "Result differences (GTree Approximation):" << endl;
+        cout << "Absolut difference min sum: " << absolutDifferenceMinSumGTree / 60 << " minutes" << endl;
+        cout << "Absolut difference min max: " << absolutDifferenceMinMaxGTree / 60 << " minutes" << endl;
+        cout << "Accuracy min sum: " << accuracyMinSumGTree << endl;
+        cout << "Accuracy min max: " << accuracyMinMaxGTree << endl;
+
+        cout << "\nResult differences (Key Stop Approximation):" << endl;
+        cout << "Absolut difference min sum: " << absolutDifferenceMinSumKeyStop / 60 << " minutes" << endl;
+        cout << "Absolut difference min max: " << absolutDifferenceMinMaxKeyStop / 60 << " minutes" << endl;
+        cout << "Accuracy min sum: " << accuracyMinSumKeyStop << endl;
+        cout << "Accuracy min max: " << accuracyMinMaxKeyStop << endl;
     }
 }
 

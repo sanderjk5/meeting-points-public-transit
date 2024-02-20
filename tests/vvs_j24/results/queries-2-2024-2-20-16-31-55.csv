@@ -1,0 +1,11 @@
+sourceStopIds,sourceTime,weekday,queryTimeNaive,queryTimeNaiveKeyStop,queryTimeGTreeCSA,queryTimeGTreeApprox,absolutDifferenceMinSumGTree,absolutDifferenceMinMaxGTree,accuracyMinSumGTree,accuracyMinMaxGTree,absolutDifferenceMinSumKeyStop,absolutDifferenceMinMaxKeyStop,accuracyMinSumKeyStop,accuracyMinMaxKeyStop
+Streich-Weiler zum Stein Im Hummerholz,67906,6,402,45,647,61,4274,3840,0.629893,0.634773,45734,31500,0.137225,0.174831
+Oberfischbach-Weissach (BB) Wöhr-Tours-Dep.,80654,2,372,40,303,293,22606,11160,0.57692,0.701333,11986,6720,0.720032,0.795906
+Denteltal-Böblingen Karlstraße,13508,5,385,298,826,353,0,156000,1,0.152506,16612,14100,0.706003,0.665655
+Kirchheim (T) medius Klinik-Bartenbach Raiffeisenstr.,39517,6,368,108,922,192,3180,3480,0.643737,0.474558,9180,7920,0.384966,0.2841
+Eltingen Leobad-Zizish. Oberboihinger Str.,30814,3,412,67,741,372,6326,4620,0.711036,0.758191,6326,3960,0.711036,0.785319
+Ditz. Breslauer Str./Kinderg.-Sillenbuch,51235,5,675,236,695,506,510,2280,0.939141,0.645136,4320,4680,0.645611,0.469688
+Bönnigheim Hofener Str.-Sindelf. Mercedes-Benz Hst. A,30893,6,639,191,513,347,0,37440,1,0.665436,58867,34800,0.5585,0.681514
+Tiefenbr. Albrecht-Dürer-Str.-Bernhausen Klinkernfeld,57591,0,474,102,978,221,3789,1740,0.643824,0.752454,3309,1140,0.674247,0.822678
+Ilsfeld Industrie-Hofen (LB) Sonnenhalde,27061,0,468,101,909,131,1021,6660,0.959386,0.723869,17280,11340,0.582589,0.606236
+Wüstenrot Silberstollen-Rohr Bf,36469,2,513,44,840,304,2149,6900,0.84574,0.489305,3300,5400,0.781196,0.550412
