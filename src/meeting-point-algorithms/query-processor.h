@@ -47,7 +47,27 @@ class NaiveQueryProcessor {
         void processNaiveQuery();
         MeetingPointQueryResult getMeetingPointQueryResult();
         vector<Journey> getJourneys(Optimization optimization);
+        vector<int> getStopsWithGivenAccuracy(double accuracyBound);
     
+    private:
+        MeetingPointQuery meetingPointQuery;
+        MeetingPointQueryResult meetingPointQueryResult;
+        vector<CSA*> csas;
+};
+
+class NaiveKeyStopQueryProcessor {
+    public:
+        explicit NaiveKeyStopQueryProcessor(MeetingPointQuery meetingPointQuery){
+            this->meetingPointQuery = meetingPointQuery;
+        };
+        ~NaiveKeyStopQueryProcessor(){};
+
+        static void findKeyStops(DataType dataType, vector<int> numberOfSourceStopsVec, int numberOfQueries, int numberOfKeyStops, double accuracyBound);
+        static vector<int> getKeyStops(DataType dataType, int numberOfSourceStops);
+        void processNaiveKeyStopQuery(vector<int> keyStops);
+        MeetingPointQueryResult getMeetingPointQueryResult();
+        vector<Journey> getJourneys(Optimization optimization);
+
     private:
         MeetingPointQuery meetingPointQuery;
         MeetingPointQueryResult meetingPointQueryResult;

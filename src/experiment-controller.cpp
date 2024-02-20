@@ -72,9 +72,7 @@ void ExperimentController::findBestGTreeParameters(DataType dataType, int number
   cout << "Best parameters for accuracy min max: " << bestNumberOfChildrenPerNodeAccuracyMinMax << " children per node, " << bestMaxNumberOfVerticesPerLeafAccuracyMinMax << " vertices per leaf" << endl;
 }
 
-void ExperimentController::testAndCompareAlgorithmsRandom(DataType dataType, int numberOfSuccessfulQueries) {
-    vector<int> numberOfSourceStops = {2, 5, 10};
-
+void ExperimentController::testAndCompareAlgorithmsRandom(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSourceStops) {
     GTree networkGTree = Creator::createNetworkGTree(2, 128);
     GTree* networkGTreePointer = &networkGTree;
     networkGTreePointer->initializeGTree();

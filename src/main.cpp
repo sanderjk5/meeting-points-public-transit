@@ -64,11 +64,13 @@ int main(int argc, const char *argv[]) {
 
   // AlgorithmComparer::compareAlgorithms(networkGTreePointer, meetingPointQuery);
 
-  // vector<int> numberOfSourceStops = {2, 5, 10};
+  vector<int> numberOfSourceStops = {2, 5, 10};
   // AlgorithmComparer::compareAlgorithmsRandom(dataType, networkGTreePointer, 10, numberOfSourceStops, NUMBER_OF_DAYS, true, true);
 
+  // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 10, 10, 0.90);
+
   // ExperimentController::findBestGTreeParameters(dataType, 2, 10);
-  ExperimentController::testAndCompareAlgorithmsRandom(dataType, 10);
+  ExperimentController::testAndCompareAlgorithmsRandom(dataType, 10, numberOfSourceStops);
   
   return 0;
 }

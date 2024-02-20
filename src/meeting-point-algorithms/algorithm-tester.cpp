@@ -62,6 +62,61 @@ void NaiveAlgorithmTester::testNaiveAlgorithm(MeetingPointQuery meetingPointQuer
     }
 }
 
+void NaiveKeyStopAlgorithmTester::testNaiveKeyStopAlgorithmRandom(DataType dataType, int numberOfSuccessfulQueries, int numberOfSources, int numberOfDays, bool printOnlySuccessful) {
+    int successfulQueryCounter = 0;
+
+    vector<int> keyStops = NaiveKeyStopQueryProcessor::getKeyStops(dataType, numberOfSources);
+
+    for (int i = 0; i < numberOfSuccessfulQueries; i++) {
+        MeetingPointQuery meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSources, numberOfDays);
+        
+        NaiveKeyStopQueryProcessor naiveKeyStopQueryProcessor = NaiveKeyStopQueryProcessor(meetingPointQuery);
+        naiveKeyStopQueryProcessor.processNaiveKeyStopQuery(keyStops);
+        MeetingPointQueryResult meetingPointQueryResult = naiveKeyStopQueryProcessor.getMeetingPointQueryResult();
+
+        if (meetingPointQueryResult.meetingPointMinSum == "" || meetingPointQueryResult.meetingPointMinMax == "") {
+            if(printOnlySuccessful) {
+                continue;
+            }
+        } else {
+            successfulQueryCounter++;
+        }
+
+        PrintHelper::printMeetingPointQuery(meetingPointQuery);
+        PrintHelper::printMeetingPointQueryResult(meetingPointQueryResult);
+    }
+
+    double rateOfSuccessfulQueries = (double) successfulQueryCounter / numberOfSuccessfulQueries;
+
+    cout << "Rate of successful queries: " << rateOfSuccessfulQueries << endl;
+}
+
+void NaiveKeyStopAlgorithmTester::testNaiveKeyStopAlgorithm(DataType dataType, MeetingPointQuery meetingPointQuery, bool printJourneys) {
+    PrintHelper::printMeetingPointQuery(meetingPointQuery);
+
+    vector<int> keyStops = NaiveKeyStopQueryProcessor::getKeyStops(dataType, meetingPointQuery.sourceStopIds.size());
+
+    NaiveKeyStopQueryProcessor naiveKeyStopQueryProcessor = NaiveKeyStopQueryProcessor(meetingPointQuery);
+    naiveKeyStopQueryProcessor.processNaiveKeyStopQuery(keyStops);
+    MeetingPointQueryResult meetingPointQueryResult = naiveKeyStopQueryProcessor.getMeetingPointQueryResult();
+    
+    PrintHelper::printMeetingPointQueryResult(meetingPointQueryResult);
+
+    if (printJourneys) {
+        vector<Journey> journeysMinSum = naiveKeyStopQueryProcessor.getJourneys(min_sum);
+        vector<Journey> journeysMinMax = naiveKeyStopQueryProcessor.getJourneys(min_max);
+
+        cout << "Journeys min sum: " << endl;
+        for (int i = 0; i < journeysMinSum.size(); i++) {
+            PrintHelper::printJourney(journeysMinSum[i]);
+        }
+        cout << "Journeys min max: " << endl;
+        for (int i = 0; i < journeysMinMax.size(); i++) {
+            PrintHelper::printJourney(journeysMinMax[i]);
+        }
+    }
+}
+
 void GTreeAlgorithmTester::testGTreeAlgorithmRandom(GTree* gTree, int numberOfSuccessfulQueries, int numberOfSources, int numberOfDays, bool printOnlySuccessful) {
     int successfulQueryCounter = 0;
     for (int i = 0; i < numberOfSuccessfulQueries; i++) {
@@ -185,10 +240,6 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
     string folderPathResults = "../../tests/" + dataTypeString + "/results/";
     string folderPathQueries = "../../tests/" + dataTypeString + "/queries/";
 
-    cout << "Compare algorithms for " << dataTypeString << " data..." << endl;
-    cout << folderPathResults << endl;
-    cout << folderPathQueries << endl;
-
     // get the current timestamp
     time_t now = time(0);
     tm *ltm = localtime(&now);
@@ -198,7 +249,7 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
     
     // Create a csv file to store the results
     std::ofstream resultsFile (resultsFileName, std::ofstream::out);
-    resultsFile << "numberOfSourceStops,avgQueryTimeNaive,avgQueryTimeGTreeCSA,avgQueryTimeGTreeApprox,medianQueryTimeNaive,medianQueryTimeGTreeCSA,medianQueryTimeGTreeApprox,maxQueryTimeNaive,maxQueryTimeGTreeCSA,maxQueryTimeGTreeApprox,minQueryTimeNaive,minQueryTimeGTreeCSA,minQueryTimeGTreeApprox,avgAbsDiffMinSum,avgAbsDiffMinMax,medianAbsDiffMinSum,medianAbsDiffMinMax,maxAbsDiffMinSum,maxAbsDiffMinMax,minAbsDiffMinSum,minAbsDiffMinMax,avgAccMinSum,avgAccMinMax,medianAccMinSum,medianAccMinMax,maxAccMinSum,maxAccMinMax,minAccMinSum,minAccMinMax\n";
+    resultsFile << "numberOfSourceStops,avgQueryTimeNaive,avgQueryTimeNaiveKeyStop,avgQueryTimeGTreeCSA,avgQueryTimeGTreeApprox,medianQueryTimeNaive,medianQueryTimeNaiveKeyStop,medianQueryTimeGTreeCSA,medianQueryTimeGTreeApprox,maxQueryTimeNaive,maxQueryTimeNaiveKeyStop,maxQueryTimeGTreeCSA,maxQueryTimeGTreeApprox,minQueryTimeNaive,minQueryTimeNaiveKeyStop,minQueryTimeGTreeCSA,minQueryTimeGTreeApprox,avgAbsDiffMinSumGTree,avgAbsDiffMinMaxGTree,medianAbsDiffMinSumGTree,medianAbsDiffMinMaxGTree,maxAbsDiffMinSumGTree,maxAbsDiffMinMaxGTree,minAbsDiffMinSumGTree,minAbsDiffMinMaxGTree,avgAccMinSumGTree,avgAccMinMaxGTree,medianAccMinSumGTree,medianAccMinMaxGTree,maxAccMinSumGTree,maxAccMinMaxGTree,minAccMinSumGTree,minAccMinMaxGTree,avgAbsDiffMinSumKeyStop,avgAbsDiffMinMaxKeyStop,medianAbsDiffMinSumKeyStop,medianAbsDiffMinMaxKeyStop,maxAbsDiffMinSumKeyStop,maxAbsDiffMinMaxKeyStop,minAbsDiffMinSumKeyStop,minAbsDiffMinMaxKeyStop,avgAccMinSumKeyStop,avgAccMinMaxKeyStop,medianAccMinSumKeyStop,medianAccMinMaxKeyStop,maxAccMinSumKeyStop,maxAccMinMaxKeyStop,minAccMinSumKeyStop,minAccMinMaxKeyStop\n";
     
     for (int i = 0; i < numberOfSources.size(); i++) {
         int numberOfSourceStops = numberOfSources[i];
@@ -232,9 +283,12 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
         // Create a csv file to store the queries
         string queriesFileName = folderPathResults + "queries-" + to_string(numberOfSourceStops) + "-" + timestamp + ".csv";
         std::ofstream queriesFile (queriesFileName, std::ofstream::out);
-        queriesFile << "sourceStopIds,sourceTime,weekday,queryTimeNaive,queryTimeGTreeCSA,queryTimeGTreeApprox,absolutDifferenceMinSum,absolutDifferenceMinMax,accuracyMinSum,accuracyMinMax\n";
+        queriesFile << "sourceStopIds,sourceTime,weekday,queryTimeNaive,queryTimeNaiveKeyStop,queryTimeGTreeCSA,queryTimeGTreeApprox,absolutDifferenceMinSumGTree,absolutDifferenceMinMaxGTree,accuracyMinSumGTree,accuracyMinMaxGTree,absolutDifferenceMinSumKeyStop,absolutDifferenceMinMaxKeyStop,accuracyMinSumKeyStop,accuracyMinMaxKeyStop\n";
+
+        vector<int> keyStops = NaiveKeyStopQueryProcessor::getKeyStops(dataType, numberOfSourceStops);
 
         int successfulQueriesNaive = 0;
+        int successfulQueriesNaiveKeyStop = 0;
         int successfulQueriesGTreeCSA = 0;
         int successfulQueriesGTreeApproximation = 0;
 
@@ -242,14 +296,21 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
         int successfulQueryCounter = 0;
 
         vector<double> queryTimesNaive;
+        vector<double> queryTimesNaiveKeyStop;
         vector<double> queryTimesGTreeCSA;
         vector<double> queryTimesGTreeApproximation;
 
-        vector<double> absolutDifferenceMinSum;
-        vector<double> absolutDifferenceMinMax;
+        vector<double> absolutDifferenceMinSumGTree;
+        vector<double> absolutDifferenceMinMaxGTree;
 
-        vector<double> accuracyMinSum;
-        vector<double> accuracyMinMax;
+        vector<double> accuracyMinSumGTree;
+        vector<double> accuracyMinMaxGTree;
+
+        vector<double> absolutDifferenceMinSumKeyStop;
+        vector<double> absolutDifferenceMinMaxKeyStop;
+
+        vector<double> accuracyMinSumKeyStop;
+        vector<double> accuracyMinMaxKeyStop;
 
         while(successfulQueryCounter < numberOfSuccessfulQueries) {
             queryCounter++;
@@ -265,6 +326,10 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
             naiveQueryProcessor.processNaiveQuery();
             MeetingPointQueryResult meetingPointQueryResultNaive = naiveQueryProcessor.getMeetingPointQueryResult();
 
+            NaiveKeyStopQueryProcessor naiveKeyStopQueryProcessor = NaiveKeyStopQueryProcessor(meetingPointQuery);
+            naiveKeyStopQueryProcessor.processNaiveKeyStopQuery(keyStops);
+            MeetingPointQueryResult meetingPointQueryResultNaiveKeyStop = naiveKeyStopQueryProcessor.getMeetingPointQueryResult();
+
             GTreeQueryProcessor gTreeQueryProcessorCSA = GTreeQueryProcessor(meetingPointQuery, gTree);
             gTreeQueryProcessorCSA.processGTreeQuery(true);
             MeetingPointQueryResult meetingPointQueryResultGTreeCSA = gTreeQueryProcessorCSA.getMeetingPointQueryResult();
@@ -274,11 +339,16 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
             MeetingPointQueryResult meetingPointQueryResultGTreeApproximation = gTreeQueryProcessorApproximation.getMeetingPointQueryResult();
 
             bool naiveQuerySuccessful = meetingPointQueryResultNaive.meetingPointMinSum != "" && meetingPointQueryResultNaive.meetingPointMinMax != "";
+            bool naiveKeyStopQuerySuccessful = meetingPointQueryResultNaiveKeyStop.meetingPointMinSum != "" && meetingPointQueryResultNaiveKeyStop.meetingPointMinMax != "";
             bool gTreeCSAQuerySuccessful = meetingPointQueryResultGTreeCSA.meetingPointMinSum != "" && meetingPointQueryResultGTreeCSA.meetingPointMinMax != "";
             bool gTreeApproximationQuerySuccessful = meetingPointQueryResultGTreeApproximation.meetingPointMinSum != "" && meetingPointQueryResultGTreeApproximation.meetingPointMinMax != "";
 
             if (naiveQuerySuccessful) {
                 successfulQueriesNaive++;
+            }
+
+            if (naiveKeyStopQuerySuccessful) {
+                successfulQueriesNaiveKeyStop++;
             }
 
             if (gTreeCSAQuerySuccessful) {
@@ -289,30 +359,46 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
                 successfulQueriesGTreeApproximation++;
             }
 
-            if (!naiveQuerySuccessful || !gTreeCSAQuerySuccessful || !gTreeApproximationQuerySuccessful) {
+            if (!naiveQuerySuccessful || !naiveKeyStopQuerySuccessful || !gTreeCSAQuerySuccessful || !gTreeApproximationQuerySuccessful) {
                 continue;
             }
 
             successfulQueryCounter++;
 
             queryTimesNaive.push_back((double) meetingPointQueryResultNaive.queryTime);
+            queryTimesNaiveKeyStop.push_back((double) meetingPointQueryResultNaiveKeyStop.queryTime);
             queryTimesGTreeCSA.push_back((double) meetingPointQueryResultGTreeCSA.queryTime);
             queryTimesGTreeApproximation.push_back((double) meetingPointQueryResultGTreeApproximation.queryTime);
 
-            int differenceMinSum = meetingPointQueryResultGTreeApproximation.minSumDurationInSeconds - meetingPointQueryResultNaive.minSumDurationInSeconds;
-            int differenceMinMax = meetingPointQueryResultGTreeApproximation.minMaxDurationInSeconds - meetingPointQueryResultNaive.minMaxDurationInSeconds;
+            int differenceMinSumGTree = meetingPointQueryResultGTreeApproximation.minSumDurationInSeconds - meetingPointQueryResultNaive.minSumDurationInSeconds;
+            int differenceMinMaxGTree = meetingPointQueryResultGTreeApproximation.minMaxDurationInSeconds - meetingPointQueryResultNaive.minMaxDurationInSeconds;
 
-            absolutDifferenceMinSum.push_back((double) differenceMinSum / 60);
-            absolutDifferenceMinMax.push_back((double) differenceMinMax / 60);
+            absolutDifferenceMinSumGTree.push_back((double) differenceMinSumGTree / 60);
+            absolutDifferenceMinMaxGTree.push_back((double) differenceMinMaxGTree / 60);
 
-            double relativeDifferenceMinSum = (double) differenceMinSum / meetingPointQueryResultGTreeApproximation.minSumDurationInSeconds;
-            double relativeDifferenceMinMax = (double) differenceMinMax / meetingPointQueryResultGTreeApproximation.minMaxDurationInSeconds;
+            double relativeDifferenceMinSumGTree = (double) differenceMinSumGTree / meetingPointQueryResultGTreeApproximation.minSumDurationInSeconds;
+            double relativeDifferenceMinMaxGTree = (double) differenceMinMaxGTree / meetingPointQueryResultGTreeApproximation.minMaxDurationInSeconds;
 
-            double accuracyMinSumVal = 1 - relativeDifferenceMinSum;
-            double accuracyMinMaxVal = 1 - relativeDifferenceMinMax;
+            double accuracyMinSumValGTree = 1 - relativeDifferenceMinSumGTree;
+            double accuracyMinMaxValGTree = 1 - relativeDifferenceMinMaxGTree;
 
-            accuracyMinSum.push_back(accuracyMinSumVal);
-            accuracyMinMax.push_back(accuracyMinMaxVal);
+            accuracyMinSumGTree.push_back(accuracyMinSumValGTree);
+            accuracyMinMaxGTree.push_back(accuracyMinMaxValGTree);
+
+            int differenceMinSumKeyStop = meetingPointQueryResultNaiveKeyStop.minSumDurationInSeconds - meetingPointQueryResultNaive.minSumDurationInSeconds;
+            int differenceMinMaxKeyStop = meetingPointQueryResultNaiveKeyStop.minMaxDurationInSeconds - meetingPointQueryResultNaive.minMaxDurationInSeconds;
+
+            absolutDifferenceMinSumKeyStop.push_back((double) differenceMinSumKeyStop / 60);
+            absolutDifferenceMinMaxKeyStop.push_back((double) differenceMinMaxKeyStop / 60);
+
+            double relativeDifferenceMinSumKeyStop = (double) differenceMinSumKeyStop / meetingPointQueryResultNaiveKeyStop.minSumDurationInSeconds;
+            double relativeDifferenceMinMaxKeyStop = (double) differenceMinMaxKeyStop / meetingPointQueryResultNaiveKeyStop.minMaxDurationInSeconds;
+
+            double accuracyMinSumValKeyStop = 1 - relativeDifferenceMinSumKeyStop;
+            double accuracyMinMaxValKeyStop = 1 - relativeDifferenceMinMaxKeyStop;
+
+            accuracyMinSumKeyStop.push_back(accuracyMinSumValKeyStop);
+            accuracyMinMaxKeyStop.push_back(accuracyMinMaxValKeyStop);
 
             // Store the query information in a csv file
             string sourceStopNames = "";
@@ -321,7 +407,7 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
             }
             sourceStopNames += Importer::getStopName(meetingPointQuery.sourceStopIds[meetingPointQuery.sourceStopIds.size()-1]);
 
-            queriesFile << sourceStopNames << "," << meetingPointQuery.sourceTime << "," << meetingPointQuery.weekday << "," << meetingPointQueryResultNaive.queryTime << "," << meetingPointQueryResultGTreeCSA.queryTime << "," << meetingPointQueryResultGTreeApproximation.queryTime << "," << differenceMinSum << "," << differenceMinMax << "," << accuracyMinSumVal << "," << accuracyMinMaxVal << "\n";
+            queriesFile << sourceStopNames << "," << meetingPointQuery.sourceTime << "," << meetingPointQuery.weekday << "," << meetingPointQueryResultNaive.queryTime << "," << meetingPointQueryResultNaiveKeyStop.queryTime << "," << meetingPointQueryResultGTreeCSA.queryTime << "," << meetingPointQueryResultGTreeApproximation.queryTime << "," << differenceMinSumGTree << "," << differenceMinMaxGTree << "," << accuracyMinSumValGTree << "," << accuracyMinMaxValGTree << "," << differenceMinSumKeyStop << "," << differenceMinMaxKeyStop << "," << accuracyMinSumValKeyStop << "," << accuracyMinMaxValKeyStop << "\n";
 
             if (loadOrStoreQueries && meetingPointQueries.size() == 0) {
                 for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
@@ -336,53 +422,100 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
         }
 
         double rateOfSuccessfulQueriesNaive = (double) successfulQueriesNaive / queryCounter;
+        double rateOfSuccessfulQueriesNaiveKeyStop = (double) successfulQueriesNaive / queryCounter;
         double rateOfSuccessfulCSAQueriesGTree = (double) successfulQueriesGTreeCSA / queryCounter;
         double rateOfSuccessfulApproximationQueriesGTree = (double) successfulQueriesGTreeApproximation / queryCounter;
         double rateOfSuccessfulQueries = (double) successfulQueryCounter / queryCounter;
 
-        resultsFile << numberOfSourceStops << "," << Calculator::getAverage(queryTimesNaive) << "," << Calculator::getAverage(queryTimesGTreeCSA) << "," << Calculator::getAverage(queryTimesGTreeApproximation) << "," << Calculator::getMedian(queryTimesNaive) << "," << Calculator::getMedian(queryTimesGTreeCSA) << "," << Calculator::getMedian(queryTimesGTreeApproximation) << "," << Calculator::getMaximum(queryTimesNaive) << "," << Calculator::getMaximum(queryTimesGTreeCSA) << "," << Calculator::getMaximum(queryTimesGTreeApproximation) << "," << Calculator::getMinimum(queryTimesNaive) << "," << Calculator::getMinimum(queryTimesGTreeCSA) << "," << Calculator::getMinimum(queryTimesGTreeApproximation) << "," << Calculator::getAverage(absolutDifferenceMinSum) << "," << Calculator::getAverage(absolutDifferenceMinMax) << "," << Calculator::getMedian(absolutDifferenceMinSum) << "," << Calculator::getMedian(absolutDifferenceMinMax) << "," << Calculator::getMaximum(absolutDifferenceMinSum) << "," << Calculator::getMaximum(absolutDifferenceMinMax) << "," << Calculator::getMinimum(absolutDifferenceMinSum) << "," << Calculator::getMinimum(absolutDifferenceMinMax) << "," << Calculator::getAverage(accuracyMinSum) << "," << Calculator::getAverage(accuracyMinMax) << "," << Calculator::getMedian(accuracyMinSum) << "," << Calculator::getMedian(accuracyMinMax) << "," << Calculator::getMaximum(accuracyMinSum) << "," << Calculator::getMaximum(accuracyMinMax) << "," << Calculator::getMinimum(accuracyMinSum) << "," << Calculator::getMinimum(accuracyMinMax) << "\n";
+        resultsFile << numberOfSourceStops << "," << Calculator::getAverage(queryTimesNaive) << "," << Calculator::getAverage(queryTimesNaiveKeyStop) << "," << Calculator::getAverage(queryTimesGTreeCSA) << "," << Calculator::getAverage(queryTimesGTreeApproximation); 
+        resultsFile << "," << Calculator::getMedian(queryTimesNaive) << ","  << Calculator::getMedian(queryTimesNaiveKeyStop) << "," << Calculator::getMedian(queryTimesGTreeCSA) << "," << Calculator::getMedian(queryTimesGTreeApproximation);
+        resultsFile << "," << Calculator::getMaximum(queryTimesNaive) << "," << Calculator::getMaximum(queryTimesNaiveKeyStop) << "," << Calculator::getMaximum(queryTimesGTreeCSA) << "," << Calculator::getMaximum(queryTimesGTreeApproximation);
+        resultsFile << "," << Calculator::getMinimum(queryTimesNaive) << "," << Calculator::getMinimum(queryTimesNaiveKeyStop) << "," << Calculator::getMinimum(queryTimesGTreeCSA) << "," << Calculator::getMinimum(queryTimesGTreeApproximation);
+        resultsFile << "," << Calculator::getAverage(absolutDifferenceMinSumGTree) << "," << Calculator::getAverage(absolutDifferenceMinMaxGTree);
+        resultsFile << "," << Calculator::getMedian(absolutDifferenceMinSumGTree) << "," << Calculator::getMedian(absolutDifferenceMinMaxGTree);
+        resultsFile << "," << Calculator::getMaximum(absolutDifferenceMinSumGTree) << "," << Calculator::getMaximum(absolutDifferenceMinMaxGTree);
+        resultsFile << "," << Calculator::getMinimum(absolutDifferenceMinSumGTree) << "," << Calculator::getMinimum(absolutDifferenceMinMaxGTree);
+        resultsFile << "," << Calculator::getAverage(accuracyMinSumGTree) << "," << Calculator::getAverage(accuracyMinMaxGTree);
+        resultsFile << "," << Calculator::getMedian(accuracyMinSumGTree) << "," << Calculator::getMedian(accuracyMinMaxGTree);
+        resultsFile << "," << Calculator::getMaximum(accuracyMinSumGTree) << "," << Calculator::getMaximum(accuracyMinMaxGTree);
+        resultsFile << "," << Calculator::getMinimum(accuracyMinSumGTree) << "," << Calculator::getMinimum(accuracyMinMaxGTree);
+        resultsFile << "," << Calculator::getAverage(absolutDifferenceMinSumKeyStop) << "," << Calculator::getAverage(absolutDifferenceMinMaxKeyStop);
+        resultsFile << "," << Calculator::getMedian(absolutDifferenceMinSumKeyStop) << "," << Calculator::getMedian(absolutDifferenceMinMaxKeyStop);
+        resultsFile << "," << Calculator::getMaximum(absolutDifferenceMinSumKeyStop) << "," << Calculator::getMaximum(absolutDifferenceMinMaxKeyStop);
+        resultsFile << "," << Calculator::getMinimum(absolutDifferenceMinSumKeyStop) << "," << Calculator::getMinimum(absolutDifferenceMinMaxKeyStop);
+        resultsFile << "," << Calculator::getAverage(accuracyMinSumKeyStop) << "," << Calculator::getAverage(accuracyMinMaxKeyStop);
+        resultsFile << "," << Calculator::getMedian(accuracyMinSumKeyStop) << "," << Calculator::getMedian(accuracyMinMaxKeyStop);
+        resultsFile << "," << Calculator::getMaximum(accuracyMinSumKeyStop) << "," << Calculator::getMaximum(accuracyMinMaxKeyStop);
+        resultsFile << "," << Calculator::getMinimum(accuracyMinSumKeyStop) << "," << Calculator::getMinimum(accuracyMinMaxKeyStop);
+        resultsFile << "\n";
 
         if (printResults) {
             cout << "\nCompare naive and g-tree algorithm: \n" << endl;
             cout << "Rate of successful queries naive: " << rateOfSuccessfulQueriesNaive << endl;
+            cout << "Rate of successful queries naive (key stop): " << rateOfSuccessfulQueriesNaiveKeyStop << endl;
             cout << "Rate of successful queries gTree (csa): " << rateOfSuccessfulCSAQueriesGTree << endl;
             cout << "Rate of successful queries gTree (approximation): " << rateOfSuccessfulApproximationQueriesGTree << endl;
             cout << "Rate of successful queries for all of them: " << rateOfSuccessfulQueries << endl;
 
             cout << "\nQuery times:" << endl;
             cout << "Average query time naive: " << Calculator::getAverage(queryTimesNaive) << " milliseconds" << endl;
+            cout << "Average query time naive (key stop): " << Calculator::getAverage(queryTimesNaiveKeyStop) << " milliseconds" << endl;
             cout << "Average query time gTree (csa): " << Calculator::getAverage(queryTimesGTreeCSA) << " milliseconds" << endl;
             cout << "Average query time gTree (approximation): " << Calculator::getAverage(queryTimesGTreeApproximation) << " milliseconds" << endl;
             cout << "Median query time naive: " << Calculator::getMedian(queryTimesNaive) << " milliseconds" << endl;
+            cout << "Median query time naive (key stop): " << Calculator::getMedian(queryTimesNaiveKeyStop) << " milliseconds" << endl;
             cout << "Median query time gTree (csa): " << Calculator::getMedian(queryTimesGTreeCSA) << " milliseconds" << endl;
             cout << "Median query time gTree (approximation): " << Calculator::getMedian(queryTimesGTreeApproximation) << " milliseconds" << endl;
             cout << "Maximum query time naive: " << Calculator::getMaximum(queryTimesNaive) << " milliseconds" << endl;
+            cout << "Maximum query time naive (key stop): " << Calculator::getMaximum(queryTimesNaiveKeyStop) << " milliseconds" << endl;
             cout << "Maximum query time gTree (csa): " << Calculator::getMaximum(queryTimesGTreeCSA) << " milliseconds" << endl;
             cout << "Maximum query time gTree (approximation): " << Calculator::getMaximum(queryTimesGTreeApproximation) << " milliseconds" << endl;
             cout << "Minimum query time naive: " << Calculator::getMinimum(queryTimesNaive) << " milliseconds" << endl;
+            cout << "Minimum query time naive (key stop): " << Calculator::getMinimum(queryTimesNaiveKeyStop) << " milliseconds" << endl;
             cout << "Minimum query time gTree (csa): " << Calculator::getMinimum(queryTimesGTreeCSA) << " milliseconds" << endl;
             cout << "Minimum query time gTree (approximation): " << Calculator::getMinimum(queryTimesGTreeApproximation) << " milliseconds" << endl;
 
-            cout << "\nAbsolut result differences:" << endl;
-            cout << "Average absolut difference min sum: " << Calculator::getAverage(absolutDifferenceMinSum) << " minutes" << endl;
-            cout << "Average absolut difference min max: " << Calculator::getAverage(absolutDifferenceMinMax) << " minutes" << endl;
-            cout << "Median absolut difference min sum: " << Calculator::getMedian(absolutDifferenceMinSum) << " minutes" << endl;
-            cout << "Median absolut difference min max: " << Calculator::getMedian(absolutDifferenceMinMax) << " minutes" << endl;
-            cout << "Maximum absolut difference min sum: " << Calculator::getMaximum(absolutDifferenceMinSum) << " minutes" << endl;
-            cout << "Maximum absolut difference min max: " << Calculator::getMaximum(absolutDifferenceMinMax) << " minutes" << endl;
-            cout << "Minimum absolut difference min sum: " << Calculator::getMinimum(absolutDifferenceMinSum) << " minutes" << endl;
-            cout << "Minimum absolut difference min max: " << Calculator::getMinimum(absolutDifferenceMinMax) << " minutes" << endl;
+            cout << "\nAbsolut result differences (g tree approximation):" << endl;
+            cout << "Average absolut difference min sum: " << Calculator::getAverage(absolutDifferenceMinSumGTree) << " minutes" << endl;
+            cout << "Average absolut difference min max: " << Calculator::getAverage(absolutDifferenceMinMaxGTree) << " minutes" << endl;
+            cout << "Median absolut difference min sum: " << Calculator::getMedian(absolutDifferenceMinSumGTree) << " minutes" << endl;
+            cout << "Median absolut difference min max: " << Calculator::getMedian(absolutDifferenceMinMaxGTree) << " minutes" << endl;
+            cout << "Maximum absolut difference min sum: " << Calculator::getMaximum(absolutDifferenceMinSumGTree) << " minutes" << endl;
+            cout << "Maximum absolut difference min max: " << Calculator::getMaximum(absolutDifferenceMinMaxGTree) << " minutes" << endl;
+            cout << "Minimum absolut difference min sum: " << Calculator::getMinimum(absolutDifferenceMinSumGTree) << " minutes" << endl;
+            cout << "Minimum absolut difference min max: " << Calculator::getMinimum(absolutDifferenceMinMaxGTree) << " minutes" << endl;
 
-            cout << "\nRelative result differences:" << endl;
-            cout << "Average accuracy min sum: " << Calculator::getAverage(accuracyMinSum) << endl;
-            cout << "Average accuracy min max: " << Calculator::getAverage(accuracyMinMax) << endl;
-            cout << "Median accuracy min sum: " << Calculator::getMedian(accuracyMinSum) << endl;
-            cout << "Median accuracy min max: " << Calculator::getMedian(accuracyMinMax) << endl;
-            cout << "Maximum accuracy min sum: " << Calculator::getMaximum(accuracyMinSum) << endl;
-            cout << "Maximum accuracy min max: " << Calculator::getMaximum(accuracyMinMax) << endl;
-            cout << "Minimum accuracy min sum: " << Calculator::getMinimum(accuracyMinSum) << endl;
-            cout << "Minimum accuracy min max: " << Calculator::getMinimum(accuracyMinMax) << endl;
+            cout << "\nRelative result differences (g tree approximation):" << endl;
+            cout << "Average accuracy min sum: " << Calculator::getAverage(accuracyMinSumGTree) << endl;
+            cout << "Average accuracy min max: " << Calculator::getAverage(accuracyMinMaxGTree) << endl;
+            cout << "Median accuracy min sum: " << Calculator::getMedian(accuracyMinSumGTree) << endl;
+            cout << "Median accuracy min max: " << Calculator::getMedian(accuracyMinMaxGTree) << endl;
+            cout << "Maximum accuracy min sum: " << Calculator::getMaximum(accuracyMinSumGTree) << endl;
+            cout << "Maximum accuracy min max: " << Calculator::getMaximum(accuracyMinMaxGTree) << endl;
+            cout << "Minimum accuracy min sum: " << Calculator::getMinimum(accuracyMinSumGTree) << endl;
+            cout << "Minimum accuracy min max: " << Calculator::getMinimum(accuracyMinMaxGTree) << endl;
+
+            cout << "\nAbsolut result differences (key stop approximation):" << endl;
+            cout << "Average absolut difference min sum: " << Calculator::getAverage(absolutDifferenceMinSumKeyStop) << " minutes" << endl;
+            cout << "Average absolut difference min max: " << Calculator::getAverage(absolutDifferenceMinMaxKeyStop) << " minutes" << endl;
+            cout << "Median absolut difference min sum: " << Calculator::getMedian(absolutDifferenceMinSumKeyStop) << " minutes" << endl;
+            cout << "Median absolut difference min max: " << Calculator::getMedian(absolutDifferenceMinMaxKeyStop) << " minutes" << endl;
+            cout << "Maximum absolut difference min sum: " << Calculator::getMaximum(absolutDifferenceMinSumKeyStop) << " minutes" << endl;
+            cout << "Maximum absolut difference min max: " << Calculator::getMaximum(absolutDifferenceMinMaxKeyStop) << " minutes" << endl;
+            cout << "Minimum absolut difference min sum: " << Calculator::getMinimum(absolutDifferenceMinSumKeyStop) << " minutes" << endl;
+            cout << "Minimum absolut difference min max: " << Calculator::getMinimum(absolutDifferenceMinMaxKeyStop) << " minutes" << endl;
+
+            cout << "\nRelative result differences (key stop approximation):" << endl;
+            cout << "Average accuracy min sum: " << Calculator::getAverage(accuracyMinSumKeyStop) << endl;
+            cout << "Average accuracy min max: " << Calculator::getAverage(accuracyMinMaxKeyStop) << endl;
+            cout << "Median accuracy min sum: " << Calculator::getMedian(accuracyMinSumKeyStop) << endl;
+            cout << "Median accuracy min max: " << Calculator::getMedian(accuracyMinMaxKeyStop) << endl;
+            cout << "Maximum accuracy min sum: " << Calculator::getMaximum(accuracyMinSumKeyStop) << endl;
+            cout << "Maximum accuracy min max: " << Calculator::getMaximum(accuracyMinMaxKeyStop) << endl;
+            cout << "Minimum accuracy min sum: " << Calculator::getMinimum(accuracyMinSumKeyStop) << endl;
+            cout << "Minimum accuracy min max: " << Calculator::getMinimum(accuracyMinMaxKeyStop) << endl;
         }
+
         queriesFile.close();
         queriesInfoFile.close();
     }
