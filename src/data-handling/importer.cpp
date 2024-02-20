@@ -599,6 +599,9 @@ vector<string> Importer::splitCsvLine(string &line) {
     Get the name of a stop by its id.
 */
 string Importer::getStopName(int stopId) {
+    if (stopId == -1) {
+        return "";
+    }
     return stops[stopId].name;
 }
 

@@ -12,9 +12,11 @@
 
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <chrono>
 #include <queue>
 #include <map>
+#include <algorithm>
 
 #include <vector>
 #include <string>
@@ -109,6 +111,240 @@ MeetingPointQueryResult NaiveQueryProcessor::getMeetingPointQueryResult() {
     Get the journeys to a meeting point.
 */
 vector<Journey> NaiveQueryProcessor::getJourneys(Optimization optimization) {
+    vector<Journey> journeys;
+    int targetStopId;
+    if (optimization == min_sum) {
+        targetStopId = Importer::getStopId(meetingPointQueryResult.meetingPointMinSum);
+    } else {
+        targetStopId = Importer::getStopId(meetingPointQueryResult.meetingPointMinMax);
+    }
+    for (int i = 0; i < csas.size(); i++) {
+        Journey journey = csas[i]->createJourney(targetStopId);
+        journeys.push_back(journey);
+    }
+    return journeys;
+}
+
+vector<int> NaiveQueryProcessor::getStopsWithGivenAccuracy(double accuracyBound) {
+    vector<int> meetingPointsOverAccuracy = vector<int>(0);
+    for (int i = 0; i < Importer::stops.size(); i++) {
+        int sum = 0;
+        int max = 0;
+        for (int j = 0; j < meetingPointQuery.sourceStopIds.size(); j++) {
+            int earliestArrivalTime = csas[j]->getEarliestArrivalTime(i);
+            if (earliestArrivalTime == INT_MAX) {
+                sum = INT_MAX;
+                max = INT_MAX;
+                break;
+            }
+
+            int duration = earliestArrivalTime - meetingPointQuery.sourceTime;
+            sum += duration;
+            if (duration > max) {
+                max = duration;
+            }            
+        }
+        if (sum == INT_MAX || max == INT_MAX) {
+            continue;
+        }
+
+        int differenceMinSum = sum - meetingPointQueryResult.minSumDurationInSeconds;
+        int differenceMinMax = max - meetingPointQueryResult.minMaxDurationInSeconds;
+
+        double relativeDifferenceMinSum = (double) differenceMinSum / sum;
+        double relativeDifferenceMinMax = (double) differenceMinMax / max;
+
+        double accuracyMinSum = 1 - relativeDifferenceMinSum;
+        double accuracyMinMax = 1 - relativeDifferenceMinMax;
+
+        if (accuracyMinSum > accuracyBound && accuracyMinMax > accuracyBound) {
+            meetingPointsOverAccuracy.push_back(Importer::stops[i].id);
+        }
+    }
+
+    return meetingPointsOverAccuracy;
+}
+
+void NaiveKeyStopQueryProcessor::findKeyStops(DataType dataType, vector<int> numberOfSourceStopsVec, int numberOfQueries, int numberOfKeyStops, double accuracyBound){
+    for (int i = 0; i < numberOfSourceStopsVec.size(); i++) {
+        int numberOfSourceStops = numberOfSourceStopsVec[i];
+        cout << "Finding key stops for " << numberOfSourceStops << " source stops..." << endl;
+    
+        map<int, int> stopIdToMeetingPointCounter = map<int, int>();
+
+        for (int j = 0; j < numberOfQueries; j++) {
+            MeetingPointQuery randomMeetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSourceStops, NUMBER_OF_DAYS);
+            NaiveQueryProcessor naiveQueryProcessor = NaiveQueryProcessor(randomMeetingPointQuery);
+            naiveQueryProcessor.processNaiveQuery();
+            
+            vector<int> meetingPointStopIds = naiveQueryProcessor.getStopsWithGivenAccuracy(accuracyBound);
+
+            for (int k = 0; k < meetingPointStopIds.size(); k++) {
+                int meetingPointStopId = meetingPointStopIds[k];
+                if (stopIdToMeetingPointCounter.find(meetingPointStopId) == stopIdToMeetingPointCounter.end()) {
+                    stopIdToMeetingPointCounter[meetingPointStopId] = 1;
+                } else {
+                    stopIdToMeetingPointCounter[meetingPointStopId] += 1;
+                }
+            }
+        }
+
+        vector<pair<int, int>> counterStopIdPairs = vector<pair<int, int>>(0);
+
+        for (auto mapEntry : stopIdToMeetingPointCounter) {
+            counterStopIdPairs.push_back(make_pair(mapEntry.second, mapEntry.first));
+        }
+
+        sort(counterStopIdPairs.begin(), counterStopIdPairs.end(), greater<pair<int, int>>());
+
+        string dataTypeString = Importer::getDataTypeString(dataType);
+        string folderPathKeyStops = "../../tests/" + dataTypeString + "/key_stops/";
+        string numberOfSourceStopsString = "";
+        if (numberOfSourceStops < 10) {
+            numberOfSourceStopsString = "00" + to_string(numberOfSourceStops);
+        } else if (numberOfSourceStops < 100) {
+            numberOfSourceStopsString = "0" + to_string(numberOfSourceStops);
+        } else {
+            numberOfSourceStopsString = to_string(numberOfSourceStops);
+        }
+
+        string filePath = folderPathKeyStops + "key_stops-" + numberOfSourceStopsString + ".csv";
+
+        std::ofstream keyStopsFile;
+        keyStopsFile.open(filePath, std::ofstream::out);
+
+        for (int j = 0; j < numberOfKeyStops; j++) {
+            keyStopsFile << counterStopIdPairs[j].second << "," << Importer::getStopName(counterStopIdPairs[j].second) << "\n";
+            cout << "Key stop: " << Importer::getStopName(counterStopIdPairs[j].second) << " with count: " << counterStopIdPairs[j].first << endl;
+        }
+
+        keyStopsFile.close();
+
+        cout << "Found " << numberOfKeyStops << " key stops." << endl;
+    }
+}
+
+vector<int> NaiveKeyStopQueryProcessor::getKeyStops(DataType dataType, int numberOfSourceStops) {
+    vector<int> keyStops = vector<int>(0);
+
+    string dataTypeString = Importer::getDataTypeString(dataType);
+    string folderPathKeyStops = "../../tests/" + dataTypeString + "/key_stops/";
+    string numberOfSourceStopsString = "";
+    if (numberOfSourceStops < 10) {
+        numberOfSourceStopsString = "00" + to_string(numberOfSourceStops);
+    } else if (numberOfSourceStops < 100) {
+        numberOfSourceStopsString = "0" + to_string(numberOfSourceStops);
+    } else {
+        numberOfSourceStopsString = to_string(numberOfSourceStops);
+    }
+
+    string filePath = folderPathKeyStops + "key_stops-" + numberOfSourceStopsString + ".csv";
+    
+    std::ifstream file(filePath);
+    if (file.is_open()) {
+        std::string line;
+        while (std::getline(file, line)) {
+            vector<string> parts;
+
+            // Split the line into substrings
+            std::stringstream ss(line);
+            std::string substring;
+            while (std::getline(ss, substring, ',')) {
+                parts.push_back(substring);
+            }
+
+            keyStops.push_back(stoi(parts[0]));
+        }
+    } else {
+        cout << "Couldn't find key stops for " << numberOfSourceStops << " source stops." << endl;
+    }
+
+    return keyStops;
+}
+
+void NaiveKeyStopQueryProcessor::processNaiveKeyStopQuery(vector<int> keyStops) {
+    for (CSA* csa : csas) {
+        delete csa;
+    }
+    csas.clear();
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+    for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
+        CSAQuery query;
+        query.sourceStopId = meetingPointQuery.sourceStopIds[i];
+        query.targetStopIds = keyStops;
+        query.sourceTime = meetingPointQuery.sourceTime;
+        query.weekday = meetingPointQuery.weekday;
+        query.numberOfDays = meetingPointQuery.numberOfDays;
+        CSA* csa = new CSA(query);
+        csas.push_back(csa);
+    }
+
+    // Process the CSA algorithm for each source stop
+    #pragma omp parallel for
+    for (int i = 0; i < csas.size(); i++) {
+        csas[i]->processCSA();
+    }
+
+    int minSum = INT_MAX;
+    int minMax = INT_MAX;
+
+    // Calculate the sum of the earliest arrival times for all stops and the maximum earliest arrival time for all stops
+    for (int i = 0; i < keyStops.size(); i++) {
+        int stopId = keyStops[i];
+        int sum = 0;
+        int max = 0;
+        int arrivalTime = 0;
+        for (int j = 0; j < meetingPointQuery.sourceStopIds.size(); j++) {
+            int earliestArrivalTime = csas[j]->getEarliestArrivalTime(stopId);
+            if (earliestArrivalTime == INT_MAX) {
+                sum = INT_MAX;
+                max = INT_MAX;
+                break;
+            }
+
+            int duration = earliestArrivalTime - meetingPointQuery.sourceTime;
+            sum += duration;
+            if (duration > max) {
+                max = duration;
+                arrivalTime = earliestArrivalTime;
+            }
+        }
+
+        if (sum < minSum) {
+            meetingPointQueryResult.meetingPointMinSum = Importer::getStopName(stopId);
+            meetingPointQueryResult.meetingTimeMinSum = TimeConverter::convertSecondsToTime(arrivalTime, true);
+            meetingPointQueryResult.minSumDuration = TimeConverter::convertSecondsToTime(sum, false);
+            meetingPointQueryResult.minSumDurationInSeconds = sum;
+            minSum = sum;
+        }
+        if (max < minMax) {
+            meetingPointQueryResult.meetingPointMinMax = Importer::getStopName(stopId);
+            meetingPointQueryResult.meetingTimeMinMax = TimeConverter::convertSecondsToTime(arrivalTime, true);
+            meetingPointQueryResult.minMaxDuration = TimeConverter::convertSecondsToTime(max, false);
+            meetingPointQueryResult.minMaxDurationInSeconds = max;
+            minMax = max;
+        }
+    }
+
+    // Stop the timer and calculate the duration
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    meetingPointQueryResult.queryTime = duration;
+}
+
+/*
+    Get the meeting point query result.
+*/
+MeetingPointQueryResult NaiveKeyStopQueryProcessor::getMeetingPointQueryResult() {
+    return meetingPointQueryResult;
+}
+
+/*
+    Get the journeys to a meeting point.
+*/
+vector<Journey> NaiveKeyStopQueryProcessor::getJourneys(Optimization optimization) {
     vector<Journey> journeys;
     int targetStopId;
     if (optimization == min_sum) {

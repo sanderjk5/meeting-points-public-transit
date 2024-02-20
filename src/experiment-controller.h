@@ -9,7 +9,7 @@ class ExperimentController {
         ~ExperimentController(){};
 
         static void findBestGTreeParameters(DataType dataType, int numberOfSourceStops, int numberOfSuccessfulQueries);
-        static void testAndCompareAlgorithmsRandom(DataType dataType, int numberOfSuccessfulQueries);
+        static void testAndCompareAlgorithmsRandom(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSourceStops);
 };
 
 #endif //CMAKE_EXPERIMENT_CONTROLLER_H
