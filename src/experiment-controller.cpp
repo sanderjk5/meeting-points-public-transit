@@ -1,6 +1,8 @@
 #include"experiment-controller.h"
 
-#include<iostream>
+#include <iostream>
+#include <sstream>
+#include <fstream>
 #include"data-handling/importer.h"
 #include<string>
 #include"meeting-point-algorithms/algorithm-tester.h"
@@ -13,63 +15,79 @@
 #include"limits.h"
 
 void ExperimentController::findBestGTreeParameters(DataType dataType, int numberOfSourceStops, int numberOfSuccessfulQueries) {
-  vector<int> numberOfChildrenPerNodeParams = {2};
-  vector<int> maxNumberOfVerticesPerLeafParams = {16, 256};
+    // vector<int> numberOfChildrenPerNodeParams = {2, 4};
+    // vector<int> maxNumberOfVerticesPerLeafParams = {16, 64, 128, 256, 1024};
 
-  double bestRunTimeCSA = INT_MAX;
-  int bestNumberOfChildrenPerNodeRunTimeCSA = 0;
-  int bestMaxNumberOfVerticesPerLeafRunTimeCSA = 0;
+    vector<int> numberOfChildrenPerNodeParams = {2};
+    vector<int> maxNumberOfVerticesPerLeafParams = {16, 64};
 
-  double bestRunTimeApprox = INT_MAX;
-  int bestNumberOfChildrenPerNodeRunTimeApprox = 0;
-  int bestMaxNumberOfVerticesPerLeafRunTimeApprox = 0;
+    double bestRunTimeCSA = INT_MAX;
+    int bestNumberOfChildrenPerNodeRunTimeCSA = 0;
+    int bestMaxNumberOfVerticesPerLeafRunTimeCSA = 0;
 
-  double bestAccuracyMinSum = 0;
-  int bestNumberOfChildrenPerNodeAccuracyMinSum = 0;
-  int bestMaxNumberOfVerticesPerLeafAccuracyMinSum = 0;
+    double bestRunTimeApprox = INT_MAX;
+    int bestNumberOfChildrenPerNodeRunTimeApprox = 0;
+    int bestMaxNumberOfVerticesPerLeafRunTimeApprox = 0;
 
-  double bestAccuracyMinMax = 0;
-  int bestNumberOfChildrenPerNodeAccuracyMinMax = 0;
-  int bestMaxNumberOfVerticesPerLeafAccuracyMinMax = 0;
-  
-  for (int numberOfChildrenPerNode : numberOfChildrenPerNodeParams) {
-    for (int maxNumberOfVerticesPerLeaf : maxNumberOfVerticesPerLeafParams) {
-        GTree gTree = Creator::createNetworkGTree(numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
-        GTree* gTreePointer = &gTree;
-        gTreePointer->initializeGTree();
+    double bestAccuracyMinSum = 0;
+    int bestNumberOfChildrenPerNodeAccuracyMinSum = 0;
+    int bestMaxNumberOfVerticesPerLeafAccuracyMinSum = 0;
 
-        AverageRunTimeAndAccuracy averageRunTimeAndAccuracy = GTreeAlgorithmTester::getAverageRunTimeAndAccuracy(dataType, gTreePointer, 2, 10);
+    double bestAccuracyMinMax = 0;
+    int bestNumberOfChildrenPerNodeAccuracyMinMax = 0;
+    int bestMaxNumberOfVerticesPerLeafAccuracyMinMax = 0;
+    
+    for (int numberOfChildrenPerNode : numberOfChildrenPerNodeParams) {
+        for (int maxNumberOfVerticesPerLeaf : maxNumberOfVerticesPerLeafParams) {
+            GTree gTree = Creator::createNetworkGTree(numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
+            GTree* gTreePointer = &gTree;
+            gTreePointer->initializeGTree();
 
-        if (averageRunTimeAndAccuracy.averageRunTimeGTreeCSA < bestRunTimeCSA) {
-            bestRunTimeCSA = averageRunTimeAndAccuracy.averageRunTimeGTreeCSA;
-            bestNumberOfChildrenPerNodeRunTimeCSA = numberOfChildrenPerNode;
-            bestMaxNumberOfVerticesPerLeafRunTimeCSA = maxNumberOfVerticesPerLeaf;
-        }
+            AverageRunTimeAndAccuracy averageRunTimeAndAccuracy = GTreeAlgorithmTester::getAverageRunTimeAndAccuracy(dataType, gTreePointer, numberOfSourceStops, numberOfSuccessfulQueries);
 
-        if (averageRunTimeAndAccuracy.averageRunTimeGTreeApproximation < bestRunTimeApprox) {
-            bestRunTimeApprox = averageRunTimeAndAccuracy.averageRunTimeGTreeApproximation;
-            bestNumberOfChildrenPerNodeRunTimeApprox = numberOfChildrenPerNode;
-            bestMaxNumberOfVerticesPerLeafRunTimeApprox = maxNumberOfVerticesPerLeaf;
-        }
+            if (averageRunTimeAndAccuracy.averageRunTimeGTreeCSA < bestRunTimeCSA) {
+                bestRunTimeCSA = averageRunTimeAndAccuracy.averageRunTimeGTreeCSA;
+                bestNumberOfChildrenPerNodeRunTimeCSA = numberOfChildrenPerNode;
+                bestMaxNumberOfVerticesPerLeafRunTimeCSA = maxNumberOfVerticesPerLeaf;
+            }
 
-        if (averageRunTimeAndAccuracy.averageAccuracyMinSum > bestAccuracyMinSum) {
-            bestAccuracyMinSum = averageRunTimeAndAccuracy.averageAccuracyMinSum;
-            bestNumberOfChildrenPerNodeAccuracyMinSum = numberOfChildrenPerNode;
-            bestMaxNumberOfVerticesPerLeafAccuracyMinSum = maxNumberOfVerticesPerLeaf;
-        }
+            if (averageRunTimeAndAccuracy.averageRunTimeGTreeApproximation < bestRunTimeApprox) {
+                bestRunTimeApprox = averageRunTimeAndAccuracy.averageRunTimeGTreeApproximation;
+                bestNumberOfChildrenPerNodeRunTimeApprox = numberOfChildrenPerNode;
+                bestMaxNumberOfVerticesPerLeafRunTimeApprox = maxNumberOfVerticesPerLeaf;
+            }
 
-        if (averageRunTimeAndAccuracy.averageAccuracyMinMax > bestAccuracyMinMax) {
-            bestAccuracyMinMax = averageRunTimeAndAccuracy.averageAccuracyMinMax;
-            bestNumberOfChildrenPerNodeAccuracyMinMax = numberOfChildrenPerNode;
-            bestMaxNumberOfVerticesPerLeafAccuracyMinMax = maxNumberOfVerticesPerLeaf;
+            if (averageRunTimeAndAccuracy.averageAccuracyMinSum > bestAccuracyMinSum) {
+                bestAccuracyMinSum = averageRunTimeAndAccuracy.averageAccuracyMinSum;
+                bestNumberOfChildrenPerNodeAccuracyMinSum = numberOfChildrenPerNode;
+                bestMaxNumberOfVerticesPerLeafAccuracyMinSum = maxNumberOfVerticesPerLeaf;
+            }
+
+            if (averageRunTimeAndAccuracy.averageAccuracyMinMax > bestAccuracyMinMax) {
+                bestAccuracyMinMax = averageRunTimeAndAccuracy.averageAccuracyMinMax;
+                bestNumberOfChildrenPerNodeAccuracyMinMax = numberOfChildrenPerNode;
+                bestMaxNumberOfVerticesPerLeafAccuracyMinMax = maxNumberOfVerticesPerLeaf;
+            }
         }
     }
-  }
 
-  cout << "Best parameters for CSA run time: " << bestNumberOfChildrenPerNodeRunTimeCSA << " children per node, " << bestMaxNumberOfVerticesPerLeafRunTimeCSA << " vertices per leaf" << endl;
-  cout << "Best parameters for approximation run time: " << bestNumberOfChildrenPerNodeRunTimeApprox << " children per node, " << bestMaxNumberOfVerticesPerLeafRunTimeApprox << " vertices per leaf" << endl;
-  cout << "Best parameters for accuracy min sum: " << bestNumberOfChildrenPerNodeAccuracyMinSum << " children per node, " << bestMaxNumberOfVerticesPerLeafAccuracyMinSum << " vertices per leaf" << endl;
-  cout << "Best parameters for accuracy min max: " << bestNumberOfChildrenPerNodeAccuracyMinMax << " children per node, " << bestMaxNumberOfVerticesPerLeafAccuracyMinMax << " vertices per leaf" << endl;
+    string dataTypeString = Importer::getDataTypeString(dataType);
+    string folderPathParams = "../../tests/" + dataTypeString + "/gtree_params/";
+
+    string filePath = folderPathParams + "gtree_best_params.csv";
+
+    std::ofstream paramsFile;
+    paramsFile.open(filePath, std::ofstream::out);
+
+    paramsFile << "numberOfChildrenPerNodeRunTimeCSA,maxNumberOfVerticesPerLeafRunTimeCSA,numberOfChildrenPerNodeRunTimeApprox,maxNumberOfVerticesPerLeafRunTimeApprox,numberOfChildrenPerNodeAccuracyMinSum,maxNumberOfVerticesPerLeafAccuracyMinSum,numberOfChildrenPerNodeAccuracyMinMax,maxNumberOfVerticesPerLeafAccuracyMinMax" << endl;
+    paramsFile << bestNumberOfChildrenPerNodeRunTimeCSA << "," << bestMaxNumberOfVerticesPerLeafRunTimeCSA << "," << bestNumberOfChildrenPerNodeRunTimeApprox << "," << bestMaxNumberOfVerticesPerLeafRunTimeApprox << "," << bestNumberOfChildrenPerNodeAccuracyMinSum << "," << bestMaxNumberOfVerticesPerLeafAccuracyMinSum << "," << bestNumberOfChildrenPerNodeAccuracyMinMax << "," << bestMaxNumberOfVerticesPerLeafAccuracyMinMax << endl;
+
+    paramsFile.close();
+
+    cout << "Best parameters for CSA run time: " << bestNumberOfChildrenPerNodeRunTimeCSA << " children per node, " << bestMaxNumberOfVerticesPerLeafRunTimeCSA << " vertices per leaf" << endl;
+    cout << "Best parameters for approximation run time: " << bestNumberOfChildrenPerNodeRunTimeApprox << " children per node, " << bestMaxNumberOfVerticesPerLeafRunTimeApprox << " vertices per leaf" << endl;
+    cout << "Best parameters for accuracy min sum: " << bestNumberOfChildrenPerNodeAccuracyMinSum << " children per node, " << bestMaxNumberOfVerticesPerLeafAccuracyMinSum << " vertices per leaf" << endl;
+    cout << "Best parameters for accuracy min max: " << bestNumberOfChildrenPerNodeAccuracyMinMax << " children per node, " << bestMaxNumberOfVerticesPerLeafAccuracyMinMax << " vertices per leaf" << endl;
 }
 
 void ExperimentController::testAndCompareAlgorithmsRandom(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSourceStops) {

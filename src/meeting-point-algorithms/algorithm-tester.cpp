@@ -5,6 +5,7 @@
 #include <../data-handling/importer.h>
 #include <../data-handling/converter.h>
 #include <../data-structures/g-tree.h>
+#include <../constants.h>
 #include <algorithm>
 
 #include <iostream>
@@ -168,9 +169,6 @@ void GTreeAlgorithmTester::testGTreeAlgorithm(GTree* gTree, MeetingPointQuery me
 }
 
 AverageRunTimeAndAccuracy GTreeAlgorithmTester::getAverageRunTimeAndAccuracy(DataType dataType, GTree* gTree, int numberOfSourceStops, int numberOfSuccessfulQueries) {
-    string dataTypeString = Importer::getDataTypeString(dataType);
-    string folderPathQueries = "../../tests/" + dataTypeString + "/queries/";
-
     vector<double> queryTimesCSA;
     vector<double> queryTimesApproximation;
     vector<double> absolutDifferenceMinSum;
@@ -178,32 +176,10 @@ AverageRunTimeAndAccuracy GTreeAlgorithmTester::getAverageRunTimeAndAccuracy(Dat
     vector<double> accuracyMinSum;
     vector<double> accuracyMinMax;
 
-    string numberOfSourceStopsString = "";
-    if (numberOfSourceStops < 10) {
-        numberOfSourceStopsString = "00" + to_string(numberOfSourceStops);
-    } else if (numberOfSourceStops < 100) {
-        numberOfSourceStopsString = "0" + to_string(numberOfSourceStops);
-    } else {
-        numberOfSourceStopsString = to_string(numberOfSourceStops);
-    }
+    int successfulQueryCounter = 0;
 
-    std::ofstream queriesInfoFile;
-    vector<MeetingPointQuery> meetingPointQueries;
-    string filePath = folderPathQueries + "meeting-point-query-" + numberOfSourceStopsString + "-" + to_string(numberOfSuccessfulQueries) + ".csv";
-    std::ifstream file(filePath);
-    if (file.is_open()) {
-        std::string line;
-        while (std::getline(file, line)) {
-            meetingPointQueries.push_back(QueryGenerator::parseMeetingPointQuery(line, numberOfSourceStops));
-        }
-    } else {
-        cout << "No queries found for " << numberOfSourceStops << " source stops and " << numberOfSuccessfulQueries << " successful queries." << endl;
-        AverageRunTimeAndAccuracy averageRunTimeAndAccuracy;
-        return averageRunTimeAndAccuracy;
-    }
-
-    for (int i = 0; i < meetingPointQueries.size(); i++) {
-        MeetingPointQuery meetingPointQuery = meetingPointQueries[i];
+    while (successfulQueryCounter < numberOfSuccessfulQueries) {
+        MeetingPointQuery meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSourceStops, NUMBER_OF_DAYS);
 
         GTreeQueryProcessor gTreeQueryProcessorCSA = GTreeQueryProcessor(meetingPointQuery, gTree);
         gTreeQueryProcessorCSA.processGTreeQuery(true);
@@ -212,6 +188,15 @@ AverageRunTimeAndAccuracy GTreeAlgorithmTester::getAverageRunTimeAndAccuracy(Dat
         GTreeQueryProcessor gTreeQueryProcessorApproximation = GTreeQueryProcessor(meetingPointQuery, gTree);
         gTreeQueryProcessorApproximation.processGTreeQuery();
         MeetingPointQueryResult meetingPointQueryResultApprox = gTreeQueryProcessorApproximation.getMeetingPointQueryResult();
+
+        bool gTreeCSAQuerySuccessful = meetingPointQueryResultGTreeCSA.meetingPointMinSum != "" && meetingPointQueryResultGTreeCSA.meetingPointMinMax != "";
+        bool gTreeApproximationQuerySuccessful = meetingPointQueryResultApprox.meetingPointMinSum != "" && meetingPointQueryResultApprox.meetingPointMinMax != "";
+
+        if (!gTreeCSAQuerySuccessful || !gTreeApproximationQuerySuccessful) {
+            continue;
+        }
+
+        successfulQueryCounter++;
 
         queryTimesCSA.push_back((double) meetingPointQueryResultGTreeCSA.queryTime);
         queryTimesApproximation.push_back((double) meetingPointQueryResultApprox.queryTime);

@@ -172,10 +172,19 @@ void NaiveKeyStopQueryProcessor::findKeyStops(DataType dataType, vector<int> num
     
         map<int, int> stopIdToMeetingPointCounter = map<int, int>();
 
-        for (int j = 0; j < numberOfQueries; j++) {
+        int successfulQueries = 0;
+
+        while(successfulQueries < numberOfQueries) {
             MeetingPointQuery randomMeetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSourceStops, NUMBER_OF_DAYS);
             NaiveQueryProcessor naiveQueryProcessor = NaiveQueryProcessor(randomMeetingPointQuery);
             naiveQueryProcessor.processNaiveQuery();
+            MeetingPointQueryResult meetingPointQueryResult = naiveQueryProcessor.getMeetingPointQueryResult();
+
+            if (meetingPointQueryResult.meetingPointMinSum != "" && meetingPointQueryResult.meetingPointMinMax != "") {
+                successfulQueries++;
+            } else {
+                continue;
+            }
             
             vector<int> meetingPointStopIds = naiveQueryProcessor.getStopsWithGivenAccuracy(accuracyBound);
 
@@ -215,7 +224,6 @@ void NaiveKeyStopQueryProcessor::findKeyStops(DataType dataType, vector<int> num
 
         for (int j = 0; j < numberOfKeyStops; j++) {
             keyStopsFile << counterStopIdPairs[j].second << "," << Importer::getStopName(counterStopIdPairs[j].second) << "\n";
-            cout << "Key stop: " << Importer::getStopName(counterStopIdPairs[j].second) << " with count: " << counterStopIdPairs[j].first << endl;
         }
 
         keyStopsFile.close();
