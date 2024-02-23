@@ -110,8 +110,8 @@ class QueryGenerator {
         explicit QueryGenerator(){};
         ~QueryGenerator(){};
 
-        static MeetingPointQuery generateRandomMeetingPointQuery(int numberOfSources, int numberOfDays = 1);
-        static MeetingPointQuery generateMeetingPointQuery(vector<string> sourceStopNames, string sourceTime, string weekday, int numberOfDays = 1);
+        static MeetingPointQuery generateRandomMeetingPointQuery(int numberOfSources, int numberOfDays = 3);
+        static MeetingPointQuery generateMeetingPointQuery(vector<string> sourceStopNames, string sourceTime, string weekday, int numberOfDays = 3);
         static MeetingPointQuery parseMeetingPointQuery(string line, int numberOfSourceStops);
         static CSAQuery createCSAQuery(string sourceStopName, string sourceTime, string weekday);
         static CSAQuery createCSAQueryWithTargetStops(string sourceStopName, vector<string> targetStopNames, string sourceTime, string weekday);

@@ -1,6 +1,11 @@
 #ifndef CMAKE_HEADER_H
 #define CMAKE_HEADER_H
 
+#include <string>
+
+constexpr string FOLDER_PREFIX = "";
+// const string FOLDER_PREFIX = "../../";
+
 constexpr int SECONDS_PER_DAY = 86400;
 constexpr int MIN_COARSE_GRAPH_VERTEX_DIFF = 10;
 constexpr int KL_ITERATIONS = 20;

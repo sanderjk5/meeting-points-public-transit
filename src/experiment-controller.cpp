@@ -72,7 +72,7 @@ void ExperimentController::findBestGTreeParameters(DataType dataType, int number
     }
 
     string dataTypeString = Importer::getDataTypeString(dataType);
-    string folderPathParams = "../../tests/" + dataTypeString + "/gtree_params/";
+    string folderPathParams = FOLDER_PREFIX + "tests/" + dataTypeString + "/gtree_params/";
 
     string filePath = folderPathParams + "gtree_best_params.csv";
 

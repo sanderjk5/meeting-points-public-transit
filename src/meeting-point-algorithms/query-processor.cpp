@@ -207,7 +207,7 @@ void NaiveKeyStopQueryProcessor::findKeyStops(DataType dataType, vector<int> num
         sort(counterStopIdPairs.begin(), counterStopIdPairs.end(), greater<pair<int, int>>());
 
         string dataTypeString = Importer::getDataTypeString(dataType);
-        string folderPathKeyStops = "../../tests/" + dataTypeString + "/key_stops/";
+        string folderPathKeyStops = FOLDER_PREFIX + "tests/" + dataTypeString + "/key_stops/";
         string numberOfSourceStopsString = "";
         if (numberOfSourceStops < 10) {
             numberOfSourceStopsString = "00" + to_string(numberOfSourceStops);
@@ -236,7 +236,7 @@ vector<int> NaiveKeyStopQueryProcessor::getKeyStops(DataType dataType, int numbe
     vector<int> keyStops = vector<int>(0);
 
     string dataTypeString = Importer::getDataTypeString(dataType);
-    string folderPathKeyStops = "../../tests/" + dataTypeString + "/key_stops/";
+    string folderPathKeyStops = FOLDER_PREFIX + "tests/" + dataTypeString + "/key_stops/";
     string numberOfSourceStopsString = "";
     if (numberOfSourceStops < 10) {
         numberOfSourceStopsString = "00" + to_string(numberOfSourceStops);

@@ -2,6 +2,8 @@
 #include <converter.h>
 #include <comparator.h>
 
+#include <../constants.h>
+
 #include <iostream>
 #include <algorithm>
 #include <chrono>
@@ -42,10 +44,10 @@ void Importer::import(string folderName, bool prepareData, DataType dataType) {
     // Start the timer
     auto start = std::chrono::high_resolution_clock::now();
 
-    string folderPathResults = "../../data/" + folderName + "/";
+    string folderPathResults = FOLDER_PREFIX + "data/" + folderName + "/";
 
     // Import the data
-    cout << "Importing data..." << endl;
+    cout << "\nImporting data..." << endl;
     importCalendars(folderPathResults, dataType);
     importRoutes(folderPathResults, dataType);
     importStops(folderPathResults, dataType);
