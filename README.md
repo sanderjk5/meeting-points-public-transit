@@ -9,7 +9,7 @@ Prerequesites: git lfs, cmake
 git clone https://github.com/sanderjk5/meeting-points-public-transit.git
 cd meeting-points-public-transit
 ```
-2. Build the program:
+2. Build the project:
 ```bash
 rm -rf build && mkdir build
 git submodule init && git submodule update
@@ -17,7 +17,6 @@ cd build
 cmake ..
 make && make install
 cd ..
-bin/meeting-points-public-transit dataType experiment
 ```
 3. Start the program:
 ```bash
