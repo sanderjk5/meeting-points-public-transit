@@ -3,7 +3,7 @@
 
 #include <string>
 
-constexpr string FOLDER_PREFIX = "";
+const string FOLDER_PREFIX = "";
 // const string FOLDER_PREFIX = "../../";
 
 constexpr int SECONDS_PER_DAY = 86400;
