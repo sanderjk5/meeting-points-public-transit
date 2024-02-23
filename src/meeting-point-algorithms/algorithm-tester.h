@@ -38,8 +38,8 @@ class GTreeAlgorithmTester {
         explicit GTreeAlgorithmTester(){};
         ~GTreeAlgorithmTester(){};
 
-        static void testGTreeAlgorithmRandom(GTree* gTree, int numberOfSuccessfulQueries, int numberOfSources, int numberOfDays = 3, bool printOnlySuccessful = false);
-        static void testGTreeAlgorithm(GTree* gTree, MeetingPointQuery meetingPointQuery, bool printJourneys = false);
+        static void testGTreeAlgorithmRandom(GTree* gTree, bool useCSA, int numberOfSuccessfulQueries, int numberOfSources, int numberOfDays = 3, bool printOnlySuccessful = false);
+        static void testGTreeAlgorithm(GTree* gTree, MeetingPointQuery meetingPointQuery, bool useCSA, bool printJourneys = false);
 
         static AverageRunTimeAndAccuracy getAverageRunTimeAndAccuracy(DataType dataType, GTree* gTree, int numberOfSourceStops, int numberOfSuccessfulQueries);
 };

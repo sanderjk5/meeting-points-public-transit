@@ -9,8 +9,10 @@
 #include"data-structures/graph.h"
 #include"constants.h"
 #include"limits.h"
+#include <cstring>
 
 #include "experiment-controller.h"
+#include "cli-controller.h"
 
 
 using namespace std;
@@ -29,56 +31,85 @@ int main(int argc, const char *argv[]) {
   // DataType dataType = schienenfern_und_regionalverkehr_de;
   // DataType dataType = gesamt_de;
 
+  bool startExperiments = false;
+
+  if (argc > 1){
+    if (strcmp(argv[1], "vvs") == 0){
+      dataType = vvs_j24;
+    } else if (strcmp(argv[1], "fern") == 0){
+      dataType = schienenfernverkehr_de;
+    } else if (strcmp(argv[1], "regio") == 0){
+      dataType = schienenregionalverkehr_de;
+    } else if (strcmp(argv[1], "fern_regio") == 0){
+      dataType = schienenfern_und_regionalverkehr_de;
+    } else if (strcmp(argv[1], "de") == 0){
+      dataType = gesamt_de;
+    } else {
+      cout << "Invalid data type. Using default data type vvs." << endl;
+    }
+  } else {
+    cout << "No data type specified. Using default data type vvs." << endl;
+  }
+
+  if (argc > 2){
+    if (strcmp(argv[2], "exp") == 0){
+      startExperiments = true;
+    }
+  }
+
   vector<string> sourceStopNames;
 
   if (dataType == vvs_j24){
     string folderName = "vvs_gtfs_j24";
     Importer::import(folderName, true, vvs_j24);
-    sourceStopNames = {"Rohr", "Waldau"};
   } else if (dataType == schienenfernverkehr_de){
     string folderName = "schienenfernverkehr_de";
     Importer::import(folderName, true, schienenfernverkehr_de);
-    sourceStopNames = {"Falkensee", "Stuttgart-Rohr"};
   } else if (dataType == schienenregionalverkehr_de){
     string folderName = "schienenregionalverkehr_de";
     Importer::import(folderName, true, schienenregionalverkehr_de);
-    sourceStopNames = {"Falkensee", "Stuttgart-Rohr"};
   } else if (dataType == schienenfern_und_regionalverkehr_de){
     string folderName0 = "schienenfernverkehr_de";
     string folderName1 = "schienenregionalverkehr_de";
     Importer::import(folderName0, false, schienenfernverkehr_de);
     Importer::import(folderName1, true, schienenregionalverkehr_de);
-    sourceStopNames = {"Falkensee", "Stuttgart-Rohr"};
   } else if (dataType == gesamt_de){
     string folderName = "gesamt_de";
     Importer::import(folderName, true, gesamt_de);
-    sourceStopNames = {"Falkensee", "Stuttgart-Rohr"};
   }
 
   Creator::createNetworkGraph();
+
+  if (startExperiments){
+    // Real experiments
+    // vector<int> numberOfSourceStops = {2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40, 50, 75, 100, 150, 200};
+
+    // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 1000, 50, 0.90);
+
+    // ExperimentController::findBestGTreeParameters(dataType, 10, 1000);
+    // ExperimentController::testAndCompareAlgorithmsRandom(dataType, 1000, numberOfSourceStops);
+
+    // Test experiments
+    vector<int> numberOfSourceStops = {2, 5, 10};
+
+    // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 10, 10, 0.90);
+
+    // ExperimentController::findBestGTreeParameters(dataType, 2, 10);
+    ExperimentController::testAndCompareAlgorithmsRandom(dataType, 10, numberOfSourceStops);
+  } else {
     
-  // GTree networkGTree = Creator::createNetworkGTree(2, 16);
+    GTree networkGTree;
+    if(dataType == vvs_j24){
+      networkGTree = Creator::createNetworkGTree(2, 16);
+    } else {
+      networkGTree = Creator::createNetworkGTree(2, 128);
+    }
 
-  // GTree* networkGTreePointer = &networkGTree;
-  // networkGTreePointer->initializeGTree();
+    GTree* networkGTreePointer = &networkGTree;
+    networkGTreePointer->initializeGTree();
 
-  // MeetingPointQuery meetingPointQuery = QueryGenerator::generateMeetingPointQuery(sourceStopNames, "09:00:00", "monday", NUMBER_OF_DAYS);
-
-  // AlgorithmComparer::compareAlgorithms(dataType, networkGTreePointer, meetingPointQuery);
-
-  vector<int> numberOfSourceStops = {2, 5, 10};
-
-  // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 10, 10, 0.90);
-
-  // ExperimentController::findBestGTreeParameters(dataType, 2, 10);
-  ExperimentController::testAndCompareAlgorithmsRandom(dataType, 10, numberOfSourceStops);
-
-  // vector<int> numberOfSourceStops = {2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40, 50, 75, 100, 150, 200};
-
-  // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 1000, 50, 0.90);
-
-  // ExperimentController::findBestGTreeParameters(dataType, 10, 1000);
-  // ExperimentController::testAndCompareAlgorithmsRandom(dataType, 1000, numberOfSourceStops);
+    CliController::runCli(dataType, networkGTreePointer);
+  }
   
   return 0;
 }
