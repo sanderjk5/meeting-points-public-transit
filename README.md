@@ -11,7 +11,8 @@ cd meeting-points-public-transit
 ```
 2. Build and start the program:
 ```bash
-mkdir build
+rm -rf build && mkdir build
+git submodule init && git submodule update
 cd build
 cmake ..
 make & make install
