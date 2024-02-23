@@ -2,10 +2,14 @@
 Project for my master thesis. The goal is to implement an algorithm that solves the meeting points problem for public transit networks.
 
 ## Setup 
-Prerequesites: cmake
+Prerequesites: git lfs, cmake
 
-
-Build and start the program by running the following commands:
+1. Clone the repository
+```bash
+git clone https://github.com/sanderjk5/meeting-points-public-transit.git
+cd meeting-points-public-transit
+```
+2. Build and start the program:
 ```bash
 mkdir build
 cd build
