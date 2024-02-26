@@ -619,6 +619,9 @@ int Importer::getStopId(string stopName) {
     return -1;
 }
 
+/*
+    Get the data type as a string.
+*/
 string Importer::getDataTypeString(DataType dataType) {
     string dataTypeString = "";
     if(dataType == vvs_j24) {

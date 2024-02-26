@@ -10,6 +10,9 @@
 
 using namespace std;
 
+/*
+    Run the command line interface for the meeting point query.
+*/
 void CliController::runCli(DataType dataType, GTree* gTree) {
     bool stop = false;
 

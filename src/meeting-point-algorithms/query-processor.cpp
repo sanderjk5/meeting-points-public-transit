@@ -125,6 +125,12 @@ vector<Journey> NaiveQueryProcessor::getJourneys(Optimization optimization) {
     return journeys;
 }
 
+/*
+    Get the stops with a given accuracy.
+    Calculate the sum of the earliest arrival times for all source stops and the maximum earliest arrival time for all source stops.
+    Then calculate the relative difference between the sum and the maximum and the real sum and the real maximum. Use these values to calculate the accuracy.
+    If the accuracy is higher than the accuracy bound, the stop is added to the result.
+*/
 vector<int> NaiveQueryProcessor::getStopsWithGivenAccuracy(double accuracyBound) {
     vector<int> meetingPointsOverAccuracy = vector<int>(0);
     for (int i = 0; i < Importer::stops.size(); i++) {
@@ -165,6 +171,9 @@ vector<int> NaiveQueryProcessor::getStopsWithGivenAccuracy(double accuracyBound)
     return meetingPointsOverAccuracy;
 }
 
+/*
+    Find the key stops for a given number of source stops. Execute a number of queries and find the stops that are the most common meeting points.
+*/
 void NaiveKeyStopQueryProcessor::findKeyStops(DataType dataType, vector<int> numberOfSourceStopsVec, int numberOfQueries, int numberOfKeyStops, double accuracyBound){
     for (int i = 0; i < numberOfSourceStopsVec.size(); i++) {
         int numberOfSourceStops = numberOfSourceStopsVec[i];
@@ -206,6 +215,7 @@ void NaiveKeyStopQueryProcessor::findKeyStops(DataType dataType, vector<int> num
 
         sort(counterStopIdPairs.begin(), counterStopIdPairs.end(), greater<pair<int, int>>());
 
+        // Write the key stops to a file
         string dataTypeString = Importer::getDataTypeString(dataType);
         string folderPathKeyStops = FOLDER_PREFIX + "tests/" + dataTypeString + "/key_stops/";
         string numberOfSourceStopsString = "";
@@ -232,6 +242,9 @@ void NaiveKeyStopQueryProcessor::findKeyStops(DataType dataType, vector<int> num
     }
 }
 
+/*
+    Get the key stops for a given number of source stops from a file if it exists.
+*/
 vector<int> NaiveKeyStopQueryProcessor::getKeyStops(DataType dataType, int numberOfSourceStops) {
     vector<int> keyStops = vector<int>(0);
 
@@ -270,6 +283,13 @@ vector<int> NaiveKeyStopQueryProcessor::getKeyStops(DataType dataType, int numbe
     return keyStops;
 }
 
+/*
+    Process the naive key stop query.
+    For each source stop, calculate the earliest arrival time for all key stop.
+    Then calculate the sum of the earliest arrival times for all stops and the maximum earliest arrival time for all stops.
+    The stop with the lowest sum and the stop with the highest maximum earliest arrival time are the meeting points.
+
+*/
 void NaiveKeyStopQueryProcessor::processNaiveKeyStopQuery(vector<int> keyStops) {
     for (CSA* csa : csas) {
         delete csa;
@@ -418,6 +438,9 @@ CSAQuery QueryGenerator::createCSAQueryWithTargetStops(string sourceStopName, ve
     return query;
 }
 
+/*
+    Parse a meeting point query.
+*/
 MeetingPointQuery QueryGenerator::parseMeetingPointQuery(string line, int numberOfSourceStops) {
     MeetingPointQuery meetingPointQuery;
     vector<string> parts;

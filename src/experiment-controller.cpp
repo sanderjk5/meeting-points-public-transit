@@ -14,12 +14,15 @@
 #include"constants.h"
 #include"limits.h"
 
+/*
+    Find the best parameters for the GTree algorithm. Compares the run time and accuracy of the GTree algorithm with different parameters.
+*/
 void ExperimentController::findBestGTreeParameters(DataType dataType, int numberOfSourceStops, int numberOfSuccessfulQueries) {
-    // vector<int> numberOfChildrenPerNodeParams = {2, 4};
-    // vector<int> maxNumberOfVerticesPerLeafParams = {16, 64, 128, 256, 1024};
+    vector<int> numberOfChildrenPerNodeParams = {2, 4};
+    vector<int> maxNumberOfVerticesPerLeafParams = {16, 64, 128, 256, 1024};
 
-    vector<int> numberOfChildrenPerNodeParams = {2};
-    vector<int> maxNumberOfVerticesPerLeafParams = {16, 64};
+    // vector<int> numberOfChildrenPerNodeParams = {2};
+    // vector<int> maxNumberOfVerticesPerLeafParams = {16, 64};
 
     double bestRunTimeCSA = INT_MAX;
     int bestNumberOfChildrenPerNodeRunTimeCSA = 0;
@@ -90,6 +93,9 @@ void ExperimentController::findBestGTreeParameters(DataType dataType, int number
     cout << "Best parameters for accuracy min max: " << bestNumberOfChildrenPerNodeAccuracyMinMax << " children per node, " << bestMaxNumberOfVerticesPerLeafAccuracyMinMax << " vertices per leaf" << endl;
 }
 
+/*
+    Test and compare the different algorithms with a set of queries. The results are written to a file.
+*/
 void ExperimentController::testAndCompareAlgorithmsRandom(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSourceStops) {
     GTree networkGTree = Creator::createNetworkGTree(2, 128);
     GTree* networkGTreePointer = &networkGTree;

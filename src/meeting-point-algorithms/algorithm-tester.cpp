@@ -13,6 +13,9 @@
 
 using namespace std;
 
+/*
+    Execute the naive algorithm for a given number of successful random queries and print the results.
+*/
 void NaiveAlgorithmTester::testNaiveAlgorithmRandom(int numberOfSuccessfulQueries, int numberOfSources, int numberOfDays, bool printOnlySuccessful) {
     int successfulQueryCounter = 0;
     for (int i = 0; i < numberOfSuccessfulQueries; i++) {
@@ -39,6 +42,9 @@ void NaiveAlgorithmTester::testNaiveAlgorithmRandom(int numberOfSuccessfulQuerie
     cout << "Rate of successful queries: " << rateOfSuccessfulQueries << endl;
 }
 
+/*
+    Execute the naive algorithm for a given meeting point query and print the results.
+*/
 void NaiveAlgorithmTester::testNaiveAlgorithm(MeetingPointQuery meetingPointQuery, bool printJourneys) {
     PrintHelper::printMeetingPointQuery(meetingPointQuery);
 
@@ -65,6 +71,9 @@ void NaiveAlgorithmTester::testNaiveAlgorithm(MeetingPointQuery meetingPointQuer
     }
 }
 
+/*
+    Execute the naive key stop algorithm for a given number of successful random queries and print the results.
+*/
 void NaiveKeyStopAlgorithmTester::testNaiveKeyStopAlgorithmRandom(DataType dataType, int numberOfSuccessfulQueries, int numberOfSources, int numberOfDays, bool printOnlySuccessful) {
     int successfulQueryCounter = 0;
 
@@ -94,6 +103,9 @@ void NaiveKeyStopAlgorithmTester::testNaiveKeyStopAlgorithmRandom(DataType dataT
     cout << "Rate of successful queries: " << rateOfSuccessfulQueries << endl;
 }
 
+/*
+    Execute the naive key stop algorithm for a given meeting point query and print the results.
+*/
 void NaiveKeyStopAlgorithmTester::testNaiveKeyStopAlgorithm(DataType dataType, MeetingPointQuery meetingPointQuery, bool printJourneys) {
     PrintHelper::printMeetingPointQuery(meetingPointQuery);
 
@@ -122,6 +134,9 @@ void NaiveKeyStopAlgorithmTester::testNaiveKeyStopAlgorithm(DataType dataType, M
     }
 }
 
+/*
+    Execute the g-tree algorithm for a given number of successful random queries and print the results.
+*/
 void GTreeAlgorithmTester::testGTreeAlgorithmRandom(GTree* gTree, bool useCSA, int numberOfSuccessfulQueries, int numberOfSources, int numberOfDays, bool printOnlySuccessful) {
     int successfulQueryCounter = 0;
     for (int i = 0; i < numberOfSuccessfulQueries; i++) {
@@ -148,6 +163,9 @@ void GTreeAlgorithmTester::testGTreeAlgorithmRandom(GTree* gTree, bool useCSA, i
     cout << "Rate of successful queries: " << rateOfSuccessfulQueries << endl;
 }
 
+/*
+    Execute the g-tree algorithm for a given meeting point query and print the results.
+*/
 void GTreeAlgorithmTester::testGTreeAlgorithm(GTree* gTree, MeetingPointQuery meetingPointQuery, bool useCSA, bool printJourneys) {
     PrintHelper::printMeetingPointQuery(meetingPointQuery);
 
@@ -174,6 +192,9 @@ void GTreeAlgorithmTester::testGTreeAlgorithm(GTree* gTree, MeetingPointQuery me
     }
 }
 
+/*
+    Execute the naive and g-tree approximation algorithm for a given number of successful random queries and return the average runtime and accuracy.
+*/
 AverageRunTimeAndAccuracy GTreeAlgorithmTester::getAverageRunTimeAndAccuracy(DataType dataType, GTree* gTree, int numberOfSourceStops, int numberOfSuccessfulQueries) {
     vector<double> queryTimesCSA;
     vector<double> queryTimesApproximation;
@@ -226,6 +247,10 @@ AverageRunTimeAndAccuracy GTreeAlgorithmTester::getAverageRunTimeAndAccuracy(Dat
     return averageRunTimeAndAccuracy;
 }
 
+/*
+    Execute all algorithms for a given number of successful random queries and print the results. Compare the query times and the accuracies of the results.
+    Store the queries and results in csv files.
+*/
 void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree, int numberOfSuccessfulQueries, vector<int> numberOfSources, int numberOfDays, bool printResults, bool loadOrStoreQueries) {
     string dataTypeString = Importer::getDataTypeString(dataType);
     string folderPathResults = FOLDER_PREFIX + "tests/" + dataTypeString + "/results/";
@@ -513,6 +538,9 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
     resultsFile.close();
 }
 
+/*
+    Execute all algorithms for a given meeting point query and print the results. Compare the query times and the accuracies of the results.
+*/
 void AlgorithmComparer::compareAlgorithms(DataType dataType, GTree* gTree, MeetingPointQuery meetingPointQuery){
     NaiveQueryProcessor naiveQueryProcessor = NaiveQueryProcessor(meetingPointQuery);
     naiveQueryProcessor.processNaiveQuery();
@@ -626,6 +654,9 @@ double Calculator::getMinimum(vector<double> numbers) {
     return min;
 }
 
+/*
+    Print the meeting point query.
+*/
 void PrintHelper::printMeetingPointQuery(MeetingPointQuery meetingPointQuery) {
     cout << "\nSource stops: ";
     for (int j = 0; j < meetingPointQuery.sourceStopIds.size()-1; j++) {
@@ -637,6 +668,9 @@ void PrintHelper::printMeetingPointQuery(MeetingPointQuery meetingPointQuery) {
     cout << "Weekday: " << WeekdayConverter::convertIntToWeekday(meetingPointQuery.weekday) << endl;
 }
 
+/*
+    Print the meeting point query result.
+*/
 void PrintHelper::printMeetingPointQueryResult(MeetingPointQueryResult meetingPointQueryResult) {
     if (meetingPointQueryResult.meetingPointMinSum == "" || meetingPointQueryResult.meetingPointMinMax == "") {
         cout << "No meeting point found" << endl;
@@ -648,6 +682,9 @@ void PrintHelper::printMeetingPointQueryResult(MeetingPointQueryResult meetingPo
     cout << "Query time: " << meetingPointQueryResult.queryTime << " milliseconds \n" << endl;
 }
 
+/*
+    Print the journey.
+*/
 void PrintHelper::printJourney(Journey journey) {
     cout << "Journey duration: " << TimeConverter::convertSecondsToTime(journey.duration, false) << endl;
     for (int i = 0; i < journey.legs.size(); i++) {
