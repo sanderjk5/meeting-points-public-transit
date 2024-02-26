@@ -48,7 +48,9 @@ void NaiveAlgorithmTester::testNaiveAlgorithm(MeetingPointQuery meetingPointQuer
     
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResult);
 
-    if (printJourneys) {
+    bool querySuccessful = meetingPointQueryResult.meetingPointMinSum != "" && meetingPointQueryResult.meetingPointMinMax != "";
+
+    if (querySuccessful && printJourneys) {
         vector<Journey> journeysMinSum = naiveQueryProcessor.getJourneys(min_sum);
         vector<Journey> journeysMinMax = naiveQueryProcessor.getJourneys(min_max);
 
@@ -103,7 +105,9 @@ void NaiveKeyStopAlgorithmTester::testNaiveKeyStopAlgorithm(DataType dataType, M
     
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResult);
 
-    if (printJourneys) {
+    bool querySuccessful = meetingPointQueryResult.meetingPointMinSum != "" && meetingPointQueryResult.meetingPointMinMax != "";
+
+    if (querySuccessful && printJourneys) {
         vector<Journey> journeysMinSum = naiveKeyStopQueryProcessor.getJourneys(min_sum);
         vector<Journey> journeysMinMax = naiveKeyStopQueryProcessor.getJourneys(min_max);
 
@@ -153,7 +157,9 @@ void GTreeAlgorithmTester::testGTreeAlgorithm(GTree* gTree, MeetingPointQuery me
     
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResult);
 
-    if (printJourneys) {
+    bool querySuccessful = meetingPointQueryResult.meetingPointMinSum != "" && meetingPointQueryResult.meetingPointMinMax != "";
+
+    if (querySuccessful && printJourneys) {
         vector<Journey> journeysMinSum = gTreeQueryProcessor.getJourneys(min_sum);
         vector<Journey> journeysMinMax = gTreeQueryProcessor.getJourneys(min_max);
 
