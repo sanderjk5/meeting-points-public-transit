@@ -101,5 +101,5 @@ void ExperimentController::testAndCompareAlgorithmsRandom(DataType dataType, int
     GTree* networkGTreePointer = &networkGTree;
     networkGTreePointer->initializeGTree();
 
-    AlgorithmComparer::compareAlgorithmsRandom(dataType, networkGTreePointer, numberOfSuccessfulQueries, numberOfSourceStops, NUMBER_OF_DAYS, true, true);
+    AlgorithmComparer::compareAlgorithmsRandom(dataType, networkGTreePointer, numberOfSuccessfulQueries, numberOfSourceStops, true, true);
 }

@@ -20,7 +20,7 @@ class NaiveAlgorithmTester {
         explicit NaiveAlgorithmTester(){};
         ~NaiveAlgorithmTester(){};
 
-        static void testNaiveAlgorithmRandom(int numberOfSuccessfulQueries, int numberOfSources, int numberOfDays = 3, bool printOnlySuccessful = false);
+        static void testNaiveAlgorithmRandom(int numberOfSuccessfulQueries, int numberOfSources, bool printOnlySuccessful = false);
         static void testNaiveAlgorithm(MeetingPointQuery meetingPointQuery, bool printJourneys = false);
 };
 
@@ -29,7 +29,7 @@ class NaiveKeyStopAlgorithmTester {
         explicit NaiveKeyStopAlgorithmTester(){};
         ~NaiveKeyStopAlgorithmTester(){};
 
-        static void testNaiveKeyStopAlgorithmRandom(DataType dataType, int numberOfSuccessfulQueries, int numberOfSources, int numberOfDays = 3, bool printOnlySuccessful = false);
+        static void testNaiveKeyStopAlgorithmRandom(DataType dataType, int numberOfSuccessfulQueries, int numberOfSources, bool printOnlySuccessful = false);
         static void testNaiveKeyStopAlgorithm(DataType dataType, MeetingPointQuery meetingPointQuery, bool printJourneys = false);
 };
 
@@ -38,7 +38,7 @@ class GTreeAlgorithmTester {
         explicit GTreeAlgorithmTester(){};
         ~GTreeAlgorithmTester(){};
 
-        static void testGTreeAlgorithmRandom(GTree* gTree, bool useCSA, int numberOfSuccessfulQueries, int numberOfSources, int numberOfDays = 3, bool printOnlySuccessful = false);
+        static void testGTreeAlgorithmRandom(GTree* gTree, bool useCSA, int numberOfSuccessfulQueries, int numberOfSources, bool printOnlySuccessful = false);
         static void testGTreeAlgorithm(GTree* gTree, MeetingPointQuery meetingPointQuery, bool useCSA, bool printJourneys = false);
 
         static AverageRunTimeAndAccuracy getAverageRunTimeAndAccuracy(DataType dataType, GTree* gTree, int numberOfSourceStops, int numberOfSuccessfulQueries);
@@ -49,7 +49,7 @@ class AlgorithmComparer {
         explicit AlgorithmComparer(){};
         ~AlgorithmComparer(){};
 
-        static void compareAlgorithmsRandom(DataType dataType, GTree* gTree, int numberOfSuccessfulQueries, vector<int> numberOfSources, int numberOfDays = 3, bool printResults = false, bool loadOrStoreQueries = false);
+        static void compareAlgorithmsRandom(DataType dataType, GTree* gTree, int numberOfSuccessfulQueries, vector<int> numberOfSources, bool printResults = false, bool loadOrStoreQueries = false);
         static void compareAlgorithms(DataType dataType, GTree* gTree, MeetingPointQuery meetingPointQuery);
 };
 
@@ -60,6 +60,7 @@ class PrintHelper {
 
         static void printMeetingPointQuery(MeetingPointQuery meetingPointQuery);
         static void printMeetingPointQueryResult(MeetingPointQueryResult meetingPointQueryResult);
+        static void printGTreeCSAInfo(MeetingPointQueryGTreeCSAInfo meetingPointQueryGTreeCSAInfo);
         static void printJourney(Journey journey);
 };
 

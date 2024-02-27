@@ -37,7 +37,9 @@ void CSA::initializeCSA() {
     previousDepartureTime = query.sourceTime;
     dayOffset = 0;
 
-    maxDepartureTime = query.sourceTime + query.numberOfDays * SECONDS_PER_DAY;
+    maxDepartureTime = query.sourceTime + (NUMBER_OF_DAYS * SECONDS_PER_DAY);
+
+    connectionCounter = 0;
 }
 
 void CSA::setTargetStopIds(vector<int> targetStopIds) {
@@ -62,19 +64,6 @@ void CSA::processCSA() {
         }
         previousDepartureTime = connection->departureTime;
 
-        int weekdayOfTrip = (query.weekday + dayOffset) % 7;
-
-        int firstDepartureTimeOfTrip = Importer::stopTimes[Importer::indexOfFirstStopTimeOfATrip[connection->tripId]].departureTime;
-
-        if (firstDepartureTimeOfTrip > connection->departureTime) {
-            weekdayOfTrip = (weekdayOfTrip + 6) % 7;
-        }
-
-        if (!Importer::isTripAvailable(connection->tripId, weekdayOfTrip)) {
-            currentConnectionIndex = (currentConnectionIndex + 1) % Importer::connections.size();
-            continue;
-        }
-
         // Calculate the arrival and departure time of the connection
         int connectionDepartureTime = connection->departureTime + dayOffset * SECONDS_PER_DAY;
         int connectionArrivalTime = connection->arrivalTime + dayOffset * SECONDS_PER_DAY;
@@ -97,6 +86,21 @@ void CSA::processCSA() {
             }
         }
 
+        currentConnectionIndex = (currentConnectionIndex + 1) % Importer::connections.size();
+        connectionCounter++;
+
+        int weekdayOfTrip = (query.weekday + dayOffset) % 7;
+
+        int firstDepartureTimeOfTrip = Importer::stopTimes[Importer::indexOfFirstStopTimeOfATrip[connection->tripId]].departureTime;
+
+        if (firstDepartureTimeOfTrip > connection->departureTime) {
+            weekdayOfTrip = (weekdayOfTrip + 6) % 7;
+        }
+
+        if (!Importer::isTripAvailable(connection->tripId, weekdayOfTrip)) {
+            continue;
+        }
+
         // Update the earliest arrival time for the arrival stop of the connection
         if (t[connection->tripId] != -1 || s[connection->departureStopId] < connectionDepartureTime) {
             if (t[connection->tripId] == -1) {
@@ -113,8 +117,6 @@ void CSA::processCSA() {
                 journeyPointers[connection->arrivalStopId].exitConnection = connection;
             }
         }
-
-        currentConnectionIndex = (currentConnectionIndex + 1) % Importer::connections.size();
     }
 }
 
@@ -190,4 +192,8 @@ int CSA::findFirstConnectionAfterTime(int departureTime){
     }
 
     return mid;
+}
+
+int CSA::getConnectionCounter() {
+    return connectionCounter;
 }

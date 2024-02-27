@@ -9,7 +9,6 @@ struct CSAQuery {
     vector<int> targetStopIds;
     int sourceTime;
     int weekday;
-    int numberOfDays;
 };
 
 struct JourneyPointer {
@@ -35,6 +34,7 @@ class CSA {
 
         vector<int>* getEarliestArrivalTimes();
         int getEarliestArrivalTime(int stopId);
+        int getConnectionCounter();
 
     private:
         CSAQuery query;
@@ -45,6 +45,7 @@ class CSA {
         int previousDepartureTime;
         int dayOffset;
         int maxDepartureTime;
+        int connectionCounter;
 
         void initializeCSA();
 

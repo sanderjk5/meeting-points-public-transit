@@ -47,7 +47,7 @@ void CliController::runCli(DataType dataType, GTree* gTree) {
         }
 
         if (randomQuery) {
-            query = QueryGenerator::generateRandomMeetingPointQuery(numberOfSourceStops, NUMBER_OF_DAYS);
+            query = QueryGenerator::generateRandomMeetingPointQuery(numberOfSourceStops);
         } else {
             vector<string> sourceStopNames;
             cout << "Enter the names of the source stops:" << endl;
@@ -88,7 +88,7 @@ void CliController::runCli(DataType dataType, GTree* gTree) {
                 }
             }
 
-            query = QueryGenerator::generateMeetingPointQuery(sourceStopNames, sourceTime, weekday, NUMBER_OF_DAYS);
+            query = QueryGenerator::generateMeetingPointQuery(sourceStopNames, sourceTime, weekday);
         }
 
         bool validAlgorithm = false;

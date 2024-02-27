@@ -14,7 +14,6 @@ struct MeetingPointQuery {
     vector<int> sourceStopIds;
     int sourceTime;
     int weekday;
-    int numberOfDays;
 };
 
 struct MeetingPointQueryResult {
@@ -27,6 +26,12 @@ struct MeetingPointQueryResult {
     string minMaxDuration;
     int minMaxDurationInSeconds;
     double queryTime;
+};
+
+struct MeetingPointQueryGTreeCSAInfo {
+    double csaTargetStopFractionMinSum;
+    double csaTargetStopFractionMinMax;
+    double csaVisitedConnectionsFraction;
 };
 
 enum Optimization {
@@ -87,18 +92,21 @@ class GTreeQueryProcessor {
 
         void processGTreeQuery(bool useCSA = false);
         MeetingPointQueryResult getMeetingPointQueryResult();
+        MeetingPointQueryGTreeCSAInfo getMeetingPointQueryGTreeCSAInfo();
         vector<Journey> getJourneys(Optimization optimization);
-    
+        
     private:
         GTree* gTree;
         MeetingPointQuery meetingPointQuery;
         MeetingPointQueryResult meetingPointQueryResult;
+        MeetingPointQueryGTreeCSAInfo meetingPointQueryGTreeCSAInfo;
         map<pair<int, int>, vector<pair<int, int>>> queryPointAndNodeToBorderStopDurations;
         vector<CSA*> csas;
 
         void processGTreeQueryWithOptimization(Optimization optimization, bool useCSA);
         int getLowerBoundToNode(int nodeId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization);
-        int getCostsToStop(int stopId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization, bool useCSA);
+        int getApproximatedCostsToStop(int stopId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization);
+        int getCostsToStop(int stopId, Optimization optimization);
         void processCSAToTargetStops(vector<int> targetStopIds, int currentBest);
 };
 
@@ -110,8 +118,8 @@ class QueryGenerator {
         explicit QueryGenerator(){};
         ~QueryGenerator(){};
 
-        static MeetingPointQuery generateRandomMeetingPointQuery(int numberOfSources, int numberOfDays = 3);
-        static MeetingPointQuery generateMeetingPointQuery(vector<string> sourceStopNames, string sourceTime, string weekday, int numberOfDays = 3);
+        static MeetingPointQuery generateRandomMeetingPointQuery(int numberOfSources);
+        static MeetingPointQuery generateMeetingPointQuery(vector<string> sourceStopNames, string sourceTime, string weekday);
         static MeetingPointQuery parseMeetingPointQuery(string line, int numberOfSourceStops);
         static CSAQuery createCSAQuery(string sourceStopName, string sourceTime, string weekday);
         static CSAQuery createCSAQueryWithTargetStops(string sourceStopName, vector<string> targetStopNames, string sourceTime, string weekday);
