@@ -696,7 +696,7 @@ int GTreeQueryProcessor::getCostsToStop(int stopId, Optimization optimization) {
 void GTreeQueryProcessor::processCSAToTargetStops(vector<int> targetStopIds, int currentBest) {
     for (int i = 0; i < csas.size(); i++) {
         if (currentBest != INT_MAX) {
-            int maxDepartureTime = meetingPointQuery.sourceTime + currentBest;
+            int maxDepartureTime = min(meetingPointQuery.sourceTime + currentBest, meetingPointQuery.sourceTime + (NUMBER_OF_DAYS * SECONDS_PER_DAY));
             csas[i]->setMaxDepartureTime(maxDepartureTime);
         }
         csas[i]->setTargetStopIds(targetStopIds);
