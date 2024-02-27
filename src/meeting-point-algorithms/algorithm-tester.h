@@ -44,6 +44,15 @@ class GTreeAlgorithmTester {
         static AverageRunTimeAndAccuracy getAverageRunTimeAndAccuracy(DataType dataType, GTree* gTree, int numberOfSourceStops, int numberOfSuccessfulQueries);
 };
 
+class RaptorAlgorithmTester {
+    public:
+        explicit RaptorAlgorithmTester(){};
+        ~RaptorAlgorithmTester(){};
+
+        static void testRaptorAlgorithmRandom(int numberOfSuccessfulQueries, int numberOfSources, bool printOnlySuccessful = false);
+        static void testRaptorAlgorithm(MeetingPointQuery meetingPointQuery);
+};
+
 class AlgorithmComparer {
     public:
         explicit AlgorithmComparer(){};
@@ -60,6 +69,7 @@ class PrintHelper {
 
         static void printMeetingPointQuery(MeetingPointQuery meetingPointQuery);
         static void printMeetingPointQueryResult(MeetingPointQueryResult meetingPointQueryResult);
+        static void printMeetingPointQueryRaptorResult(MeetingPointQueryRaptorResult meetingPointQueryResult);
         static void printGTreeCSAInfo(MeetingPointQueryGTreeCSAInfo meetingPointQueryGTreeCSAInfo);
         static void printJourney(Journey journey);
 };

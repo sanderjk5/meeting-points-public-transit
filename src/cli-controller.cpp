@@ -94,9 +94,9 @@ void CliController::runCli(DataType dataType, GTree* gTree) {
         bool validAlgorithm = false;
         string algorithm;
         while(!validAlgorithm) {
-            cout << "Which algorithm do you want to use? \nThe options are (enter the abbrevation): compare all algorithms (a), naive csa algorithm (n), naive algorithm with key stops (k), gtree approximation algorithm (g), gtree algorithm with csa (c)." << endl;
+            cout << "Which algorithm do you want to use? \nThe options are (enter the abbrevation): compare all algorithms (a), naive csa algorithm (n), naive algorithm with key stops (k), gtree approximation algorithm (g), gtree algorithm with csa (c), raptor algorithm (r)." << endl;
             getline(cin, algorithm);
-            if (algorithm == "a" || algorithm == "n" || algorithm == "k" || algorithm == "g" || algorithm == "c") {
+            if (algorithm == "a" || algorithm == "n" || algorithm == "k" || algorithm == "g" || algorithm == "c" || algorithm == "r") {
                 validAlgorithm = true;
             } else {
                 cout << "Invalid algorithm. Please enter the abbrevation of a valid algorithm." << endl;
@@ -116,7 +116,9 @@ void CliController::runCli(DataType dataType, GTree* gTree) {
             GTreeAlgorithmTester::testGTreeAlgorithm(gTree, query, false, true);
         } else if (algorithm == "c") {
             GTreeAlgorithmTester::testGTreeAlgorithm(gTree, query, true, true);
-        }        
+        } else if (algorithm == "r") {
+            RaptorAlgorithmTester::testRaptorAlgorithm(query);
+        }
 
         cout << "\nDo you want to run another query? (y/N)" << endl;
         string runAgain;

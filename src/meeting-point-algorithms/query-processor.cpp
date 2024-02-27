@@ -1,6 +1,7 @@
 #include "query-processor.h"
 
 #include "csa.h"
+#include "raptor.h"
 #include <../data-structures/creator.h>
 #include <../data-structures/g-tree.h>
 #include <../constants.h>
@@ -731,4 +732,72 @@ vector<Journey> GTreeQueryProcessor::getJourneys(Optimization optimization) {
         journeys.push_back(journey);
     }
     return journeys;
+}
+
+void RaptorQueryProcessor::processRaptorQuery() {
+    auto start = std::chrono::high_resolution_clock::now();
+
+    for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
+        RaptorQuery query;
+        query.sourceStopId = meetingPointQuery.sourceStopIds[i];
+        query.sourceTime = meetingPointQuery.sourceTime;
+        query.weekday = meetingPointQuery.weekday;
+        Raptor* raptor = new Raptor(query);
+        raptors.push_back(raptor);
+    }
+
+    int transfers = 0;
+
+    while (true) {
+        for (int i = 0; i < raptors.size(); i++) {
+            if(!raptors[i]->isFinished()) {
+                raptors[i]->processRaptorRound();
+            }
+        }
+        
+        int minMeetingTime = INT_MAX;
+        int durationSumOfMeetingPoint = 0;
+        int meetingStopId = -1;
+
+        for (int i = 0; i < Importer::stops.size(); i++) {
+            int meetingTime = 0;
+            int durationSum = 0;
+            for (int j = 0; j < raptors.size(); j++) {
+                int earliestArrivalTime = raptors[j]->getEarliestArrivalTime(i);
+                if (earliestArrivalTime == INT_MAX) {
+                    meetingTime = INT_MAX;
+                    break;
+                }
+                durationSum += earliestArrivalTime - meetingPointQuery.sourceTime;
+                if (earliestArrivalTime > meetingTime) {
+                    meetingTime = earliestArrivalTime;
+                }
+            }
+            if (meetingTime < minMeetingTime) {
+                minMeetingTime = meetingTime;
+                durationSumOfMeetingPoint = durationSum;
+                meetingStopId = i;
+            }
+        }
+
+        if (minMeetingTime != INT_MAX) {
+            meetingPointQueryResult.meetingPoint = Importer::getStopName(meetingStopId);
+            meetingPointQueryResult.meetingTime = TimeConverter::convertSecondsToTime(minMeetingTime, true);
+            meetingPointQueryResult.durationInSeconds = minMeetingTime - meetingPointQuery.sourceTime;
+            meetingPointQueryResult.duration = TimeConverter::convertSecondsToTime(meetingPointQueryResult.durationInSeconds, false);
+            meetingPointQueryResult.maxNumberOfTransfers = transfers;
+
+            break;
+        }
+
+        transfers++;
+    }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    meetingPointQueryResult.queryTime = duration;
+}
+
+MeetingPointQueryRaptorResult RaptorQueryProcessor::getMeetingPointQueryResult() {
+    return meetingPointQueryResult;
 }
