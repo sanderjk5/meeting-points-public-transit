@@ -92,9 +92,9 @@ int main(int argc, const char *argv[]) {
     // Test experiments
     vector<int> numberOfSourceStops = {2, 5, 10};
 
-    // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 10, 10, 0.90);
+    NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 10, 10, 0.90);
 
-    // ExperimentController::findBestGTreeParameters(dataType, 2, 10);
+    ExperimentController::findBestGTreeParameters(dataType, 2, 10);
     ExperimentController::testAndCompareAlgorithmsRandom(dataType, 10, numberOfSourceStops);
   } else {
     

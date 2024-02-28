@@ -18,11 +18,11 @@
     Find the best parameters for the GTree algorithm. Compares the run time and accuracy of the GTree algorithm with different parameters.
 */
 void ExperimentController::findBestGTreeParameters(DataType dataType, int numberOfSourceStops, int numberOfSuccessfulQueries) {
-    vector<int> numberOfChildrenPerNodeParams = {2, 4};
-    vector<int> maxNumberOfVerticesPerLeafParams = {16, 64, 128, 256, 1024};
+    // vector<int> numberOfChildrenPerNodeParams = {2, 4};
+    // vector<int> maxNumberOfVerticesPerLeafParams = {16, 64, 128, 256, 1024};
 
-    // vector<int> numberOfChildrenPerNodeParams = {2};
-    // vector<int> maxNumberOfVerticesPerLeafParams = {16, 64};
+    vector<int> numberOfChildrenPerNodeParams = {2};
+    vector<int> maxNumberOfVerticesPerLeafParams = {16, 64};
 
     double bestRunTimeCSA = INT_MAX;
     int bestNumberOfChildrenPerNodeRunTimeCSA = 0;
