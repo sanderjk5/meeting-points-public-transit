@@ -57,6 +57,9 @@ void NaiveQueryProcessor::processNaiveQuery() {
     int minSum = INT_MAX;
     int minMax = INT_MAX;
 
+    int stopIdMinSum = -1;
+    int stopIdMinMax = -1;
+
     // Calculate the sum of the earliest arrival times for all stops and the maximum earliest arrival time for all stops
     for (int i = 0; i < Importer::stops.size(); i++) {
         int sum = 0;
@@ -83,6 +86,7 @@ void NaiveQueryProcessor::processNaiveQuery() {
             meetingPointQueryResult.meetingTimeMinSum = TimeConverter::convertSecondsToTime(arrivalTime, true);
             meetingPointQueryResult.minSumDuration = TimeConverter::convertSecondsToTime(sum, false);
             meetingPointQueryResult.minSumDurationInSeconds = sum;
+            stopIdMinSum = i;
             minSum = sum;
         }
         if (max < minMax) {
@@ -90,8 +94,28 @@ void NaiveQueryProcessor::processNaiveQuery() {
             meetingPointQueryResult.meetingTimeMinMax = TimeConverter::convertSecondsToTime(arrivalTime, true);
             meetingPointQueryResult.minMaxDuration = TimeConverter::convertSecondsToTime(max, false);
             meetingPointQueryResult.minMaxDurationInSeconds = max;
+            stopIdMinMax = i;
             minMax = max;
         }
+    }
+
+    if (stopIdMinSum != -1 && stopIdMinMax != -1) {
+        int maxTransfersMinSum = 0;
+        int maxTransfersMinMax = 0;
+        for (int i = 0; i < csas.size(); i++) {
+            Journey journeyMinSum = csas[i]->createJourney(stopIdMinSum);
+            Journey journeyMinMax = csas[i]->createJourney(stopIdMinMax);
+
+            if (journeyMinSum.legs.size() > maxTransfersMinSum) {
+                maxTransfersMinSum = journeyMinSum.legs.size();
+            }
+
+            if (journeyMinMax.legs.size() > maxTransfersMinMax) {
+                maxTransfersMinMax = journeyMinMax.legs.size();
+            }
+        }
+        meetingPointQueryResult.maxTransfersMinSum = maxTransfersMinSum;
+        meetingPointQueryResult.maxTransfersMinMax = maxTransfersMinMax;
     }
 
     // Stop the timer and calculate the duration
@@ -317,6 +341,9 @@ void NaiveKeyStopQueryProcessor::processNaiveKeyStopQuery(vector<int> keyStops) 
     int minSum = INT_MAX;
     int minMax = INT_MAX;
 
+    int stopIdMinSum = -1;
+    int stopIdMinMax = -1;
+
     // Calculate the sum of the earliest arrival times for all stops and the maximum earliest arrival time for all stops
     for (int i = 0; i < keyStops.size(); i++) {
         int stopId = keyStops[i];
@@ -344,6 +371,7 @@ void NaiveKeyStopQueryProcessor::processNaiveKeyStopQuery(vector<int> keyStops) 
             meetingPointQueryResult.meetingTimeMinSum = TimeConverter::convertSecondsToTime(arrivalTime, true);
             meetingPointQueryResult.minSumDuration = TimeConverter::convertSecondsToTime(sum, false);
             meetingPointQueryResult.minSumDurationInSeconds = sum;
+            stopIdMinSum = stopId;
             minSum = sum;
         }
         if (max < minMax) {
@@ -351,8 +379,28 @@ void NaiveKeyStopQueryProcessor::processNaiveKeyStopQuery(vector<int> keyStops) 
             meetingPointQueryResult.meetingTimeMinMax = TimeConverter::convertSecondsToTime(arrivalTime, true);
             meetingPointQueryResult.minMaxDuration = TimeConverter::convertSecondsToTime(max, false);
             meetingPointQueryResult.minMaxDurationInSeconds = max;
+            stopIdMinMax = stopId;
             minMax = max;
         }
+    }
+
+    if (stopIdMinSum != -1 && stopIdMinMax != -1) {
+        int maxTransfersMinSum = 0;
+        int maxTransfersMinMax = 0;
+        for (int i = 0; i < csas.size(); i++) {
+            Journey journeyMinSum = csas[i]->createJourney(stopIdMinSum);
+            Journey journeyMinMax = csas[i]->createJourney(stopIdMinMax);
+
+            if (journeyMinSum.legs.size() > maxTransfersMinSum) {
+                maxTransfersMinSum = journeyMinSum.legs.size();
+            }
+
+            if (journeyMinMax.legs.size() > maxTransfersMinMax) {
+                maxTransfersMinMax = journeyMinMax.legs.size();
+            }
+        }
+        meetingPointQueryResult.maxTransfersMinSum = maxTransfersMinSum;
+        meetingPointQueryResult.maxTransfersMinMax = maxTransfersMinMax;
     }
 
     // Stop the timer and calculate the duration
@@ -537,6 +585,25 @@ void GTreeQueryProcessor::processGTreeQuery(bool useCSA) {
         meetingPointQueryResult.minMaxDuration = TimeConverter::convertSecondsToTime(meetingPointMinMaxDuration, false);
         meetingPointQueryResult.minMaxDurationInSeconds = meetingPointMinMaxDuration;
         meetingPointQueryResult.meetingTimeMinMax = TimeConverter::convertSecondsToTime(meetingPointMinMaxArrivalTime, true);
+
+
+        int maxTransfersMinSum = 0;
+        int maxTransfersMinMax = 0;
+        for (int i = 0; i < csas.size(); i++) {
+            Journey journeyMinSum = csas[i]->createJourney(meetingPointMinSumStopId);
+            Journey journeyMinMax = csas[i]->createJourney(meetingPointMinMaxStopId);
+
+            if (journeyMinSum.legs.size() > maxTransfersMinSum) {
+                maxTransfersMinSum = journeyMinSum.legs.size();
+            }
+
+            if (journeyMinMax.legs.size() > maxTransfersMinMax) {
+                maxTransfersMinMax = journeyMinMax.legs.size();
+            }
+        }
+        meetingPointQueryResult.maxTransfersMinSum = maxTransfersMinSum;
+        meetingPointQueryResult.maxTransfersMinMax = maxTransfersMinMax;
+    
 
         if (useCSA) {
             int connectionCounter = 0;
@@ -749,10 +816,15 @@ void RaptorQueryProcessor::processRaptorQuery() {
     int transfers = 0;
 
     while (true) {
+        bool allFinished = true;
         for (int i = 0; i < raptors.size(); i++) {
             if(!raptors[i]->isFinished()) {
                 raptors[i]->processRaptorRound();
+                allFinished = false;
             }
+        }
+        if (allFinished) {
+            break;
         }
         
         int minMeetingTime = INT_MAX;
@@ -785,6 +857,8 @@ void RaptorQueryProcessor::processRaptorQuery() {
             meetingPointQueryResult.meetingTime = TimeConverter::convertSecondsToTime(minMeetingTime, true);
             meetingPointQueryResult.durationInSeconds = minMeetingTime - meetingPointQuery.sourceTime;
             meetingPointQueryResult.duration = TimeConverter::convertSecondsToTime(meetingPointQueryResult.durationInSeconds, false);
+            meetingPointQueryResult.durationSum = TimeConverter::convertSecondsToTime(durationSumOfMeetingPoint, false);
+            meetingPointQueryResult.durationSumInSeconds = durationSumOfMeetingPoint;
             meetingPointQueryResult.maxNumberOfTransfers = transfers;
 
             break;

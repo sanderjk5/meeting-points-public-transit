@@ -22,10 +22,12 @@ struct MeetingPointQueryResult {
     string meetingTimeMinSum;
     string minSumDuration;
     int minSumDurationInSeconds;
+    int maxTransfersMinSum;
     string meetingPointMinMax;
     string meetingTimeMinMax;
     string minMaxDuration;
     int minMaxDurationInSeconds;
+    int maxTransfersMinMax;
     double queryTime;
 };
 

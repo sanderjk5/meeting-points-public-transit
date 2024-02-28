@@ -38,6 +38,7 @@ class Raptor {
         vector<int> minStopSequencePerRoute;
         vector<int> tripIndexPerRoute;
         vector<pair<int, int>> q;
+        bool isFinishedFlag;
 
         void initializeRaptor();
         void fillQ();
