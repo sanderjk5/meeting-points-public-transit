@@ -49,7 +49,7 @@ int TimeConverter::getDayOffset(int seconds) {
 }
 
 int TimeConverter::getDayDifference(int seconds) {
-    return seconds % SECONDS_PER_DAY;
+    return seconds / SECONDS_PER_DAY;
 }
 
 int WeekdayConverter::convertWeekdayToInt(string weekday) {

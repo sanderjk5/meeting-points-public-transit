@@ -255,6 +255,42 @@ AverageRunTimeAndAccuracy GTreeAlgorithmTester::getAverageRunTimeAndAccuracy(Dat
     return averageRunTimeAndAccuracy;
 }
 
+void RaptorAlgorithmTester::testRaptorAlgorithmRandom(int numberOfSuccessfulQueries, int numberOfSources, bool printOnlySuccessful) {
+    int successfulQueryCounter = 0;
+    for (int i = 0; i < numberOfSuccessfulQueries; i++) {
+        MeetingPointQuery meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSources);
+        
+        RaptorQueryProcessor raptorQueryProcessor = RaptorQueryProcessor(meetingPointQuery);
+        raptorQueryProcessor.processRaptorQuery();
+        MeetingPointQueryRaptorResult meetingPointQueryResult = raptorQueryProcessor.getMeetingPointQueryResult();
+
+        if (meetingPointQueryResult.meetingPoint == "") {
+            if(printOnlySuccessful) {
+                continue;
+            }
+        } else {
+            successfulQueryCounter++;
+        }
+
+        PrintHelper::printMeetingPointQuery(meetingPointQuery);
+        PrintHelper::printMeetingPointQueryRaptorResult(meetingPointQueryResult);
+    }
+
+    double rateOfSuccessfulQueries = (double) successfulQueryCounter / numberOfSuccessfulQueries;
+
+    cout << "Rate of successful queries: " << rateOfSuccessfulQueries << endl;
+}
+
+void RaptorAlgorithmTester::testRaptorAlgorithm(MeetingPointQuery meetingPointQuery) {
+    PrintHelper::printMeetingPointQuery(meetingPointQuery);
+
+    RaptorQueryProcessor raptorQueryProcessor = RaptorQueryProcessor(meetingPointQuery);
+    raptorQueryProcessor.processRaptorQuery();
+    MeetingPointQueryRaptorResult meetingPointQueryResult = raptorQueryProcessor.getMeetingPointQueryResult();
+    
+    PrintHelper::printMeetingPointQueryRaptorResult(meetingPointQueryResult);
+}
+
 /*
     Execute all algorithms for a given number of successful random queries and print the results. Compare the query times and the accuracies of the results.
     Store the queries and results in csv files.
@@ -273,14 +309,18 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
     
     // Create a csv file to store the results
     std::ofstream resultsFile (resultsFileName, std::ofstream::out);
-    resultsFile << "numberOfSourceStops,avgQueryTimeNaive,avgQueryTimeNaiveKeyStop,avgQueryTimeGTreeCSA,avgQueryTimeGTreeApprox";
-    resultsFile << ",medianQueryTimeNaive,medianQueryTimeNaiveKeyStop,medianQueryTimeGTreeCSA,medianQueryTimeGTreeApprox";
-    resultsFile << ",maxQueryTimeNaive,maxQueryTimeNaiveKeyStop,maxQueryTimeGTreeCSA,maxQueryTimeGTreeApprox";
-    resultsFile << ",minQueryTimeNaive,minQueryTimeNaiveKeyStop,minQueryTimeGTreeCSA,minQueryTimeGTreeApprox";
+    resultsFile << "numberOfSourceStops,avgQueryTimeNaive,avgQueryTimeNaiveKeyStop,avgQueryTimeGTreeCSA,avgQueryTimeGTreeApprox,avgQueryTimeRaptor";
+    resultsFile << ",medianQueryTimeNaive,medianQueryTimeNaiveKeyStop,medianQueryTimeGTreeCSA,medianQueryTimeGTreeApprox,medianQueryTimeRaptor";
+    resultsFile << ",maxQueryTimeNaive,maxQueryTimeNaiveKeyStop,maxQueryTimeGTreeCSA,maxQueryTimeGTreeApprox,maxQueryTimeRaptor";
+    resultsFile << ",minQueryTimeNaive,minQueryTimeNaiveKeyStop,minQueryTimeGTreeCSA,minQueryTimeGTreeApprox,minQueryTimeRaptor";
     resultsFile << ",avgCSATargetStopFractionMinSum,avgCSATargetStopFractionMinMax,avgCSAVisitedConnectionsFraction";
     resultsFile << ",medianCSATargetStopFractionMinSum,medianCSATargetStopFractionMinMax,medianCSAVisitedConnectionsFraction";
     resultsFile << ",maxCSATargetStopFractionMinSum,maxCSATargetStopFractionMinMax,maxCSAVisitedConnectionsFraction";
     resultsFile << ",minCSATargetStopFractionMinSum,minCSATargetStopFractionMinMax,minCSAVisitedConnectionsFraction";
+    resultsFile << ",avgMaxTransfersNaive,avgMaxTransfersNaiveKeyStop,avgMaxTransfersGTreeCSA,avgMaxTransfersGTreeApprox,avgMaxTransfersRaptor";
+    resultsFile << ",medianMaxTransfersNaive,medianMaxTransfersNaiveKeyStop,medianMaxTransfersGTreeCSA,medianMaxTransfersGTreeApprox,medianMaxTransfersRaptor";
+    resultsFile << ",maxMaxTransfersNaive,maxMaxTransfersNaiveKeyStop,maxMaxTransfersGTreeCSA,maxMaxTransfersGTreeApprox,maxMaxTransfersRaptor";
+    resultsFile << ",minMaxTransfersNaive,minMaxTransfersNaiveKeyStop,minMaxTransfersGTreeCSA,minMaxTransfersGTreeApprox,minMaxTransfersRaptor";
     resultsFile << ",avgAbsDiffMinSumGTree,avgAbsDiffMinMaxGTree,medianAbsDiffMinSumGTree,medianAbsDiffMinMaxGTree";
     resultsFile << ",maxAbsDiffMinSumGTree,maxAbsDiffMinMaxGTree,minAbsDiffMinSumGTree,minAbsDiffMinMaxGTree";
     resultsFile << ",avgAccMinSumGTree,avgAccMinMaxGTree,medianAccMinSumGTree,medianAccMinMaxGTree";
@@ -288,7 +328,11 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
     resultsFile << ",avgAbsDiffMinSumKeyStop,avgAbsDiffMinMaxKeyStop,medianAbsDiffMinSumKeyStop,medianAbsDiffMinMaxKeyStop";
     resultsFile << ",maxAbsDiffMinSumKeyStop,maxAbsDiffMinMaxKeyStop,minAbsDiffMinSumKeyStop,minAbsDiffMinMaxKeyStop";
     resultsFile << ",avgAccMinSumKeyStop,avgAccMinMaxKeyStop,medianAccMinSumKeyStop,medianAccMinMaxKeyStop";
-    resultsFile << ",maxAccMinSumKeyStop,maxAccMinMaxKeyStop,minAccMinSumKeyStop,minAccMinMaxKeyStop\n";
+    resultsFile << ",maxAccMinSumKeyStop,maxAccMinMaxKeyStop,minAccMinSumKeyStop,minAccMinMaxKeyStop";
+    resultsFile << ",avgAbsDiffMinSumRaptor,avgAbsDiffMinMaxRaptor,medianAbsDiffMinSumRaptor,medianAbsDiffMinMaxRaptor";
+    resultsFile << ",maxAbsDiffMinSumRaptor,maxAbsDiffMinMaxRaptor,minAbsDiffMinSumRaptor,minAbsDiffMinMaxRaptor";
+    resultsFile << ",avgAccMinSumRaptor,avgAccMinMaxRaptor,medianAccMinSumRaptor,medianAccMinMaxRaptor";
+    resultsFile << ",maxAccMinSumRaptor,maxAccMinMaxRaptor,minAccMinSumRaptor,minAccMinMaxRaptor\n";
     
     for (int i = 0; i < numberOfSources.size(); i++) {
         int numberOfSourceStops = numberOfSources[i];
@@ -323,10 +367,13 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
         string queriesFileName = folderPathResults + "queries-" + to_string(numberOfSourceStops) + "-" + timestamp + ".csv";
         std::ofstream queriesFile (queriesFileName, std::ofstream::out);
         queriesFile << "sourceStopIds,sourceTime,weekday";
-        queriesFile << ",queryTimeNaive,queryTimeNaiveKeyStop,queryTimeGTreeCSA,queryTimeGTreeApprox";
+        queriesFile << ",queryTimeNaive,queryTimeNaiveKeyStop,queryTimeGTreeCSA,queryTimeGTreeApprox,queryTimeRaptor";
         queriesFile << ",csaTargetStopFractionMinSum,csaTargetStopFractionMinMax,csaVisitedConnectionsFraction";
+        queriesFile << ",maxTransfersMinSumNaive,maxTransfersMinMaxNaive,maxTransfersMinSumNaiveKeyStop,maxTransfersMinMaxNaiveKeyStop";
+        queriesFile << ",maxTransfersMinSumGTreeCSA,maxTransfersMinMaxGTreeCSA,maxTransfersMinSumGTreeApprox,maxTransfersMinMaxGTreeApprox,maxTransfersRaptor";
         queriesFile << ",absolutDifferenceMinSumGTree,absolutDifferenceMinMaxGTree,accuracyMinSumGTree,accuracyMinMaxGTree";
-        queriesFile << ",absolutDifferenceMinSumKeyStop,absolutDifferenceMinMaxKeyStop,accuracyMinSumKeyStop,accuracyMinMaxKeyStop\n";
+        queriesFile << ",absolutDifferenceMinSumKeyStop,absolutDifferenceMinMaxKeyStop,accuracyMinSumKeyStop,accuracyMinMaxKeyStop";
+        queriesFile << ",absolutDifferenceMinSumRaptor,absolutDifferenceMinMaxRaptor,accuracyMinSumRaptor,accuracyMinMaxRaptor\n";
 
         vector<int> keyStops = NaiveKeyStopQueryProcessor::getKeyStops(dataType, numberOfSourceStops);
 
@@ -334,6 +381,7 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
         int successfulQueriesNaiveKeyStop = 0;
         int successfulQueriesGTreeCSA = 0;
         int successfulQueriesGTreeApproximation = 0;
+        int successfulQueriesRaptor = 0;
 
         int queryCounter = 0;
         int successfulQueryCounter = 0;
@@ -342,10 +390,17 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
         vector<double> queryTimesNaiveKeyStop;
         vector<double> queryTimesGTreeCSA;
         vector<double> queryTimesGTreeApproximation;
+        vector<double> queryTimesRaptor;
 
         vector<double> csaTargetStopFractionMinSum;
         vector<double> csaTargetStopFractionMinMax;
         vector<double> csaVisitedConnectionsFraction;
+
+        vector<double> maxTransfersNaive;
+        vector<double> maxTransfersNaiveKeyStop;
+        vector<double> maxTransfersGTreeCSA;
+        vector<double> maxTransfersGTreeApproximation;
+        vector<double> maxTransfersRaptor;
 
         vector<double> absolutDifferenceMinSumGTree;
         vector<double> absolutDifferenceMinMaxGTree;
@@ -358,6 +413,12 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
 
         vector<double> accuracyMinSumKeyStop;
         vector<double> accuracyMinMaxKeyStop;
+
+        vector<double> absolutDifferenceMinSumRaptor;
+        vector<double> absolutDifferenceMinMaxRaptor;
+
+        vector<double> accuracyMinSumRaptor;
+        vector<double> accuracyMinMaxRaptor;
 
         while(successfulQueryCounter < numberOfSuccessfulQueries) {
             queryCounter++;
@@ -386,10 +447,15 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
             gTreeQueryProcessorApproximation.processGTreeQuery(false);
             MeetingPointQueryResult meetingPointQueryResultGTreeApproximation = gTreeQueryProcessorApproximation.getMeetingPointQueryResult();
 
+            RaptorQueryProcessor raptorQueryProcessor = RaptorQueryProcessor(meetingPointQuery);
+            raptorQueryProcessor.processRaptorQuery();
+            MeetingPointQueryRaptorResult meetingPointQueryResultRaptor = raptorQueryProcessor.getMeetingPointQueryResult();
+
             bool naiveQuerySuccessful = meetingPointQueryResultNaive.meetingPointMinSum != "" && meetingPointQueryResultNaive.meetingPointMinMax != "";
             bool naiveKeyStopQuerySuccessful = meetingPointQueryResultNaiveKeyStop.meetingPointMinSum != "" && meetingPointQueryResultNaiveKeyStop.meetingPointMinMax != "";
             bool gTreeCSAQuerySuccessful = meetingPointQueryResultGTreeCSA.meetingPointMinSum != "" && meetingPointQueryResultGTreeCSA.meetingPointMinMax != "";
             bool gTreeApproximationQuerySuccessful = meetingPointQueryResultGTreeApproximation.meetingPointMinSum != "" && meetingPointQueryResultGTreeApproximation.meetingPointMinMax != "";
+            bool raptorQuerySuccessful = meetingPointQueryResultRaptor.meetingPoint != "";
 
             if (naiveQuerySuccessful) {
                 successfulQueriesNaive++;
@@ -407,7 +473,11 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
                 successfulQueriesGTreeApproximation++;
             }
 
-            if (!naiveQuerySuccessful || !naiveKeyStopQuerySuccessful || !gTreeCSAQuerySuccessful || !gTreeApproximationQuerySuccessful) {
+            if (raptorQuerySuccessful) {
+                successfulQueriesRaptor++;
+            }
+
+            if (!naiveQuerySuccessful || !naiveKeyStopQuerySuccessful || !gTreeCSAQuerySuccessful || !gTreeApproximationQuerySuccessful || !raptorQuerySuccessful) {
                 continue;
             }
 
@@ -417,10 +487,21 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
             queryTimesNaiveKeyStop.push_back((double) meetingPointQueryResultNaiveKeyStop.queryTime);
             queryTimesGTreeCSA.push_back((double) meetingPointQueryResultGTreeCSA.queryTime);
             queryTimesGTreeApproximation.push_back((double) meetingPointQueryResultGTreeApproximation.queryTime);
+            queryTimesRaptor.push_back((double) meetingPointQueryResultRaptor.queryTime);
 
             csaTargetStopFractionMinSum.push_back(meetingPointQueryGTreeCSAInfo.csaTargetStopFractionMinSum);
             csaTargetStopFractionMinMax.push_back(meetingPointQueryGTreeCSAInfo.csaTargetStopFractionMinMax);
             csaVisitedConnectionsFraction.push_back(meetingPointQueryGTreeCSAInfo.csaVisitedConnectionsFraction);
+
+            maxTransfersNaive.push_back(meetingPointQueryResultNaive.maxTransfersMinSum);
+            maxTransfersNaive.push_back(meetingPointQueryResultNaive.maxTransfersMinMax);
+            maxTransfersNaiveKeyStop.push_back(meetingPointQueryResultNaiveKeyStop.maxTransfersMinSum);
+            maxTransfersNaiveKeyStop.push_back(meetingPointQueryResultNaiveKeyStop.maxTransfersMinMax);
+            maxTransfersGTreeCSA.push_back(meetingPointQueryResultGTreeCSA.maxTransfersMinSum);
+            maxTransfersGTreeCSA.push_back(meetingPointQueryResultGTreeCSA.maxTransfersMinMax);
+            maxTransfersGTreeApproximation.push_back(meetingPointQueryResultGTreeApproximation.maxTransfersMinSum);
+            maxTransfersGTreeApproximation.push_back(meetingPointQueryResultGTreeApproximation.maxTransfersMinMax);
+            maxTransfersRaptor.push_back(meetingPointQueryResultRaptor.maxNumberOfTransfers);
 
             int differenceMinSumGTree = meetingPointQueryResultGTreeApproximation.minSumDurationInSeconds - meetingPointQueryResultNaive.minSumDurationInSeconds;
             int differenceMinMaxGTree = meetingPointQueryResultGTreeApproximation.minMaxDurationInSeconds - meetingPointQueryResultNaive.minMaxDurationInSeconds;
@@ -452,6 +533,21 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
             accuracyMinSumKeyStop.push_back(accuracyMinSumValKeyStop);
             accuracyMinMaxKeyStop.push_back(accuracyMinMaxValKeyStop);
 
+            int differenceMinSumRaptor = meetingPointQueryResultRaptor.durationSumInSeconds - meetingPointQueryResultNaive.minSumDurationInSeconds;
+            int differenceMinMaxRaptor = meetingPointQueryResultRaptor.durationInSeconds - meetingPointQueryResultNaive.minMaxDurationInSeconds;
+
+            absolutDifferenceMinSumRaptor.push_back((double) differenceMinSumRaptor / 60);
+            absolutDifferenceMinMaxRaptor.push_back((double) differenceMinMaxRaptor / 60);
+
+            double relativeDifferenceMinSumRaptor = (double) differenceMinSumRaptor / meetingPointQueryResultRaptor.durationSumInSeconds;
+            double relativeDifferenceMinMaxRaptor = (double) differenceMinMaxRaptor / meetingPointQueryResultRaptor.durationInSeconds;
+
+            double accuracyMinSumValRaptor = 1 - relativeDifferenceMinSumRaptor;
+            double accuracyMinMaxValRaptor = 1 - relativeDifferenceMinMaxRaptor;
+
+            accuracyMinSumRaptor.push_back(accuracyMinSumValRaptor);
+            accuracyMinMaxRaptor.push_back(accuracyMinMaxValRaptor);
+
             // Store the query information in a csv file
             string sourceStopNames = "";
             for (int j = 0; j < meetingPointQuery.sourceStopIds.size()-1; j++) {
@@ -462,12 +558,20 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
             queriesFile << sourceStopNames << "," << meetingPointQuery.sourceTime << "," << meetingPointQuery.weekday;
             queriesFile << "," << meetingPointQueryResultNaive.queryTime << "," << meetingPointQueryResultNaiveKeyStop.queryTime;
             queriesFile  << "," << meetingPointQueryResultGTreeCSA.queryTime << "," << meetingPointQueryResultGTreeApproximation.queryTime;
+            queriesFile  << "," << meetingPointQueryResultRaptor.queryTime;
             queriesFile << "," << meetingPointQueryGTreeCSAInfo.csaTargetStopFractionMinSum << "," << meetingPointQueryGTreeCSAInfo.csaTargetStopFractionMinMax;
             queriesFile << "," << meetingPointQueryGTreeCSAInfo.csaVisitedConnectionsFraction;
+            queriesFile << "," << meetingPointQueryResultNaive.maxTransfersMinSum << "," << meetingPointQueryResultNaive.maxTransfersMinMax;
+            queriesFile << "," << meetingPointQueryResultNaiveKeyStop.maxTransfersMinSum << "," << meetingPointQueryResultNaiveKeyStop.maxTransfersMinMax;
+            queriesFile << "," << meetingPointQueryResultGTreeCSA.maxTransfersMinSum << "," << meetingPointQueryResultGTreeCSA.maxTransfersMinMax;
+            queriesFile << "," << meetingPointQueryResultGTreeApproximation.maxTransfersMinSum << "," << meetingPointQueryResultGTreeApproximation.maxTransfersMinMax;
+            queriesFile << "," << meetingPointQueryResultRaptor.maxNumberOfTransfers;
             queriesFile  << "," << differenceMinSumGTree << "," << differenceMinMaxGTree;
             queriesFile  << "," << accuracyMinSumValGTree << "," << accuracyMinMaxValGTree;
             queriesFile  << "," << differenceMinSumKeyStop << "," << differenceMinMaxKeyStop;
-            queriesFile  << "," << accuracyMinSumValKeyStop << "," << accuracyMinMaxValKeyStop << "\n";
+            queriesFile  << "," << accuracyMinSumValKeyStop << "," << accuracyMinMaxValKeyStop;
+            queriesFile  << "," << differenceMinSumRaptor << "," << differenceMinMaxRaptor;
+            queriesFile  << "," << accuracyMinSumValRaptor << "," << accuracyMinMaxValRaptor << "\n";
 
             if (loadOrStoreQueries && meetingPointQueries.size() == 0) {
                 for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
@@ -485,16 +589,21 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
         double rateOfSuccessfulQueriesNaiveKeyStop = (double) successfulQueriesNaive / queryCounter;
         double rateOfSuccessfulCSAQueriesGTree = (double) successfulQueriesGTreeCSA / queryCounter;
         double rateOfSuccessfulApproximationQueriesGTree = (double) successfulQueriesGTreeApproximation / queryCounter;
+        double rateOfSuccessfulQueriesRaptor = (double) successfulQueriesRaptor / queryCounter;
         double rateOfSuccessfulQueries = (double) successfulQueryCounter / queryCounter;
 
-        resultsFile << numberOfSourceStops << "," << Calculator::getAverage(queryTimesNaive) << "," << Calculator::getAverage(queryTimesNaiveKeyStop) << "," << Calculator::getAverage(queryTimesGTreeCSA) << "," << Calculator::getAverage(queryTimesGTreeApproximation); 
-        resultsFile << "," << Calculator::getMedian(queryTimesNaive) << ","  << Calculator::getMedian(queryTimesNaiveKeyStop) << "," << Calculator::getMedian(queryTimesGTreeCSA) << "," << Calculator::getMedian(queryTimesGTreeApproximation);
-        resultsFile << "," << Calculator::getMaximum(queryTimesNaive) << "," << Calculator::getMaximum(queryTimesNaiveKeyStop) << "," << Calculator::getMaximum(queryTimesGTreeCSA) << "," << Calculator::getMaximum(queryTimesGTreeApproximation);
-        resultsFile << "," << Calculator::getMinimum(queryTimesNaive) << "," << Calculator::getMinimum(queryTimesNaiveKeyStop) << "," << Calculator::getMinimum(queryTimesGTreeCSA) << "," << Calculator::getMinimum(queryTimesGTreeApproximation);
+        resultsFile << numberOfSourceStops << "," << Calculator::getAverage(queryTimesNaive) << "," << Calculator::getAverage(queryTimesNaiveKeyStop) << "," << Calculator::getAverage(queryTimesGTreeCSA) << "," << Calculator::getAverage(queryTimesGTreeApproximation) << "," << Calculator::getAverage(queryTimesRaptor); 
+        resultsFile << "," << Calculator::getMedian(queryTimesNaive) << ","  << Calculator::getMedian(queryTimesNaiveKeyStop) << "," << Calculator::getMedian(queryTimesGTreeCSA) << "," << Calculator::getMedian(queryTimesGTreeApproximation) << "," << Calculator::getMedian(queryTimesRaptor);
+        resultsFile << "," << Calculator::getMaximum(queryTimesNaive) << "," << Calculator::getMaximum(queryTimesNaiveKeyStop) << "," << Calculator::getMaximum(queryTimesGTreeCSA) << "," << Calculator::getMaximum(queryTimesGTreeApproximation) << "," << Calculator::getMaximum(queryTimesRaptor);
+        resultsFile << "," << Calculator::getMinimum(queryTimesNaive) << "," << Calculator::getMinimum(queryTimesNaiveKeyStop) << "," << Calculator::getMinimum(queryTimesGTreeCSA) << "," << Calculator::getMinimum(queryTimesGTreeApproximation) << "," << Calculator::getMinimum(queryTimesRaptor);
         resultsFile << "," << Calculator::getAverage(csaTargetStopFractionMinSum) << "," << Calculator::getAverage(csaTargetStopFractionMinMax) << "," << Calculator::getAverage(csaVisitedConnectionsFraction);
         resultsFile << "," << Calculator::getMedian(csaTargetStopFractionMinSum) << "," << Calculator::getMedian(csaTargetStopFractionMinMax) << "," << Calculator::getMedian(csaVisitedConnectionsFraction);
         resultsFile << "," << Calculator::getMaximum(csaTargetStopFractionMinSum) << "," << Calculator::getMaximum(csaTargetStopFractionMinMax) << "," << Calculator::getMaximum(csaVisitedConnectionsFraction);
         resultsFile << "," << Calculator::getMinimum(csaTargetStopFractionMinSum) << "," << Calculator::getMinimum(csaTargetStopFractionMinMax) << "," << Calculator::getMinimum(csaVisitedConnectionsFraction);
+        resultsFile << "," << Calculator::getAverage(maxTransfersNaive) << "," << Calculator::getAverage(maxTransfersNaiveKeyStop) << "," << Calculator::getAverage(maxTransfersGTreeCSA) << "," << Calculator::getAverage(maxTransfersGTreeApproximation) << "," << Calculator::getAverage(maxTransfersRaptor);
+        resultsFile << "," << Calculator::getMedian(maxTransfersNaive) << "," << Calculator::getMedian(maxTransfersNaiveKeyStop) << "," << Calculator::getMedian(maxTransfersGTreeCSA) << "," << Calculator::getMedian(maxTransfersGTreeApproximation) << "," << Calculator::getMedian(maxTransfersRaptor);
+        resultsFile << "," << Calculator::getMaximum(maxTransfersNaive) << "," << Calculator::getMaximum(maxTransfersNaiveKeyStop) << "," << Calculator::getMaximum(maxTransfersGTreeCSA) << "," << Calculator::getMaximum(maxTransfersGTreeApproximation) << "," << Calculator::getMaximum(maxTransfersRaptor);
+        resultsFile << "," << Calculator::getMinimum(maxTransfersNaive) << "," << Calculator::getMinimum(maxTransfersNaiveKeyStop) << "," << Calculator::getMinimum(maxTransfersGTreeCSA) << "," << Calculator::getMinimum(maxTransfersGTreeApproximation) << "," << Calculator::getMinimum(maxTransfersRaptor);
         resultsFile << "," << Calculator::getAverage(absolutDifferenceMinSumGTree) << "," << Calculator::getAverage(absolutDifferenceMinMaxGTree);
         resultsFile << "," << Calculator::getMedian(absolutDifferenceMinSumGTree) << "," << Calculator::getMedian(absolutDifferenceMinMaxGTree);
         resultsFile << "," << Calculator::getMaximum(absolutDifferenceMinSumGTree) << "," << Calculator::getMaximum(absolutDifferenceMinMaxGTree);
@@ -511,6 +620,14 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
         resultsFile << "," << Calculator::getMedian(accuracyMinSumKeyStop) << "," << Calculator::getMedian(accuracyMinMaxKeyStop);
         resultsFile << "," << Calculator::getMaximum(accuracyMinSumKeyStop) << "," << Calculator::getMaximum(accuracyMinMaxKeyStop);
         resultsFile << "," << Calculator::getMinimum(accuracyMinSumKeyStop) << "," << Calculator::getMinimum(accuracyMinMaxKeyStop);
+        resultsFile << "," << Calculator::getAverage(absolutDifferenceMinSumRaptor) << "," << Calculator::getAverage(absolutDifferenceMinMaxRaptor);
+        resultsFile << "," << Calculator::getMedian(absolutDifferenceMinSumRaptor) << "," << Calculator::getMedian(absolutDifferenceMinMaxRaptor);
+        resultsFile << "," << Calculator::getMaximum(absolutDifferenceMinSumRaptor) << "," << Calculator::getMaximum(absolutDifferenceMinMaxRaptor);
+        resultsFile << "," << Calculator::getMinimum(absolutDifferenceMinSumRaptor) << "," << Calculator::getMinimum(absolutDifferenceMinMaxRaptor);
+        resultsFile << "," << Calculator::getAverage(accuracyMinSumRaptor) << "," << Calculator::getAverage(accuracyMinMaxRaptor);
+        resultsFile << "," << Calculator::getMedian(accuracyMinSumRaptor) << "," << Calculator::getMedian(accuracyMinMaxRaptor);
+        resultsFile << "," << Calculator::getMaximum(accuracyMinSumRaptor) << "," << Calculator::getMaximum(accuracyMinMaxRaptor);
+        resultsFile << "," << Calculator::getMinimum(accuracyMinSumRaptor) << "," << Calculator::getMinimum(accuracyMinMaxRaptor);
         resultsFile << "\n";
 
         if (printResults) {
@@ -519,6 +636,7 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
             cout << "Rate of successful queries naive (key stop): " << rateOfSuccessfulQueriesNaiveKeyStop << endl;
             cout << "Rate of successful queries gTree (csa): " << rateOfSuccessfulCSAQueriesGTree << endl;
             cout << "Rate of successful queries gTree (approximation): " << rateOfSuccessfulApproximationQueriesGTree << endl;
+            cout << "Rate of successful queries raptor: " << rateOfSuccessfulQueriesRaptor << endl;
             cout << "Rate of successful queries for all of them: " << rateOfSuccessfulQueries << endl;
 
             cout << "\nQuery times:" << endl;
@@ -526,18 +644,22 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
             cout << "Average query time naive (key stop): " << Calculator::getAverage(queryTimesNaiveKeyStop) << " milliseconds" << endl;
             cout << "Average query time gTree (csa): " << Calculator::getAverage(queryTimesGTreeCSA) << " milliseconds" << endl;
             cout << "Average query time gTree (approximation): " << Calculator::getAverage(queryTimesGTreeApproximation) << " milliseconds" << endl;
+            cout << "Average query time raptor: " << Calculator::getAverage(queryTimesRaptor) << " milliseconds" << endl;
             cout << "Median query time naive: " << Calculator::getMedian(queryTimesNaive) << " milliseconds" << endl;
             cout << "Median query time naive (key stop): " << Calculator::getMedian(queryTimesNaiveKeyStop) << " milliseconds" << endl;
             cout << "Median query time gTree (csa): " << Calculator::getMedian(queryTimesGTreeCSA) << " milliseconds" << endl;
             cout << "Median query time gTree (approximation): " << Calculator::getMedian(queryTimesGTreeApproximation) << " milliseconds" << endl;
+            cout << "Median query time raptor: " << Calculator::getMedian(queryTimesRaptor) << " milliseconds" << endl;
             cout << "Maximum query time naive: " << Calculator::getMaximum(queryTimesNaive) << " milliseconds" << endl;
             cout << "Maximum query time naive (key stop): " << Calculator::getMaximum(queryTimesNaiveKeyStop) << " milliseconds" << endl;
             cout << "Maximum query time gTree (csa): " << Calculator::getMaximum(queryTimesGTreeCSA) << " milliseconds" << endl;
             cout << "Maximum query time gTree (approximation): " << Calculator::getMaximum(queryTimesGTreeApproximation) << " milliseconds" << endl;
+            cout << "Maximum query time raptor: " << Calculator::getMaximum(queryTimesRaptor) << " milliseconds" << endl;
             cout << "Minimum query time naive: " << Calculator::getMinimum(queryTimesNaive) << " milliseconds" << endl;
             cout << "Minimum query time naive (key stop): " << Calculator::getMinimum(queryTimesNaiveKeyStop) << " milliseconds" << endl;
             cout << "Minimum query time gTree (csa): " << Calculator::getMinimum(queryTimesGTreeCSA) << " milliseconds" << endl;
             cout << "Minimum query time gTree (approximation): " << Calculator::getMinimum(queryTimesGTreeApproximation) << " milliseconds" << endl;
+            cout << "Minimum query time raptor: " << Calculator::getMinimum(queryTimesRaptor) << " milliseconds" << endl;
 
             cout << "\nCSA information:" << endl;
             cout << "Average target stop fraction min sum: " << Calculator::getAverage(csaTargetStopFractionMinSum) << endl;
@@ -552,6 +674,28 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
             cout << "Minimum target stop fraction min sum: " << Calculator::getMinimum(csaTargetStopFractionMinSum) << endl;
             cout << "Minimum target stop fraction min max: " << Calculator::getMinimum(csaTargetStopFractionMinMax) << endl;
             cout << "Minimum visited connections fraction: " << Calculator::getMinimum(csaVisitedConnectionsFraction) << endl;
+
+            cout << "\nMax transfers:" << endl;
+            cout << "Average max transfers naive: " << Calculator::getAverage(maxTransfersNaive) << endl;
+            cout << "Average max transfers naive (key stop): " << Calculator::getAverage(maxTransfersNaiveKeyStop) << endl;
+            cout << "Average max transfers gTree (csa): " << Calculator::getAverage(maxTransfersGTreeCSA) << endl;
+            cout << "Average max transfers gTree (approximation): " << Calculator::getAverage(maxTransfersGTreeApproximation) << endl;
+            cout << "Average max transfers raptor: " << Calculator::getAverage(maxTransfersRaptor) << endl;
+            cout << "Median max transfers naive: " << Calculator::getMedian(maxTransfersNaive) << endl;
+            cout << "Median max transfers naive (key stop): " << Calculator::getMedian(maxTransfersNaiveKeyStop) << endl;
+            cout << "Median max transfers gTree (csa): " << Calculator::getMedian(maxTransfersGTreeCSA) << endl;
+            cout << "Median max transfers gTree (approximation): " << Calculator::getMedian(maxTransfersGTreeApproximation) << endl;
+            cout << "Median max transfers raptor: " << Calculator::getMedian(maxTransfersRaptor) << endl;
+            cout << "Maximum max transfers naive: " << Calculator::getMaximum(maxTransfersNaive) << endl;
+            cout << "Maximum max transfers naive (key stop): " << Calculator::getMaximum(maxTransfersNaiveKeyStop) << endl;
+            cout << "Maximum max transfers gTree (csa): " << Calculator::getMaximum(maxTransfersGTreeCSA) << endl;
+            cout << "Maximum max transfers gTree (approximation): " << Calculator::getMaximum(maxTransfersGTreeApproximation) << endl;
+            cout << "Maximum max transfers raptor: " << Calculator::getMaximum(maxTransfersRaptor) << endl;
+            cout << "Minimum max transfers naive: " << Calculator::getMinimum(maxTransfersNaive) << endl;
+            cout << "Minimum max transfers naive (key stop): " << Calculator::getMinimum(maxTransfersNaiveKeyStop) << endl;
+            cout << "Minimum max transfers gTree (csa): " << Calculator::getMinimum(maxTransfersGTreeCSA) << endl;
+            cout << "Minimum max transfers gTree (approximation): " << Calculator::getMinimum(maxTransfersGTreeApproximation) << endl;
+            cout << "Minimum max transfers raptor: " << Calculator::getMinimum(maxTransfersRaptor) << endl;
 
             cout << "\nAbsolut result differences (g tree approximation):" << endl;
             cout << "Average absolut difference min sum: " << Calculator::getAverage(absolutDifferenceMinSumGTree) << " minutes" << endl;
@@ -592,6 +736,26 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
             cout << "Maximum accuracy min max: " << Calculator::getMaximum(accuracyMinMaxKeyStop) << endl;
             cout << "Minimum accuracy min sum: " << Calculator::getMinimum(accuracyMinSumKeyStop) << endl;
             cout << "Minimum accuracy min max: " << Calculator::getMinimum(accuracyMinMaxKeyStop) << endl;
+
+            cout << "\nAbsolut result differences (raptor):" << endl;
+            cout << "Average absolut difference min sum: " << Calculator::getAverage(absolutDifferenceMinSumRaptor) << " minutes" << endl;
+            cout << "Average absolut difference min max: " << Calculator::getAverage(absolutDifferenceMinMaxRaptor) << " minutes" << endl;
+            cout << "Median absolut difference min sum: " << Calculator::getMedian(absolutDifferenceMinSumRaptor) << " minutes" << endl;
+            cout << "Median absolut difference min max: " << Calculator::getMedian(absolutDifferenceMinMaxRaptor) << " minutes" << endl;
+            cout << "Maximum absolut difference min sum: " << Calculator::getMaximum(absolutDifferenceMinSumRaptor) << " minutes" << endl;
+            cout << "Maximum absolut difference min max: " << Calculator::getMaximum(absolutDifferenceMinMaxRaptor) << " minutes" << endl;
+            cout << "Minimum absolut difference min sum: " << Calculator::getMinimum(absolutDifferenceMinSumRaptor) << " minutes" << endl;
+            cout << "Minimum absolut difference min max: " << Calculator::getMinimum(absolutDifferenceMinMaxRaptor) << " minutes" << endl;
+
+            cout << "\nRelative result differences (raptor):" << endl;
+            cout << "Average accuracy min sum: " << Calculator::getAverage(accuracyMinSumRaptor) << endl;
+            cout << "Average accuracy min max: " << Calculator::getAverage(accuracyMinMaxRaptor) << endl;
+            cout << "Median accuracy min sum: " << Calculator::getMedian(accuracyMinSumRaptor) << endl;
+            cout << "Median accuracy min max: " << Calculator::getMedian(accuracyMinMaxRaptor) << endl;
+            cout << "Maximum accuracy min sum: " << Calculator::getMaximum(accuracyMinSumRaptor) << endl;
+            cout << "Maximum accuracy min max: " << Calculator::getMaximum(accuracyMinMaxRaptor) << endl;
+            cout << "Minimum accuracy min sum: " << Calculator::getMinimum(accuracyMinSumRaptor) << endl;
+            cout << "Minimum accuracy min max: " << Calculator::getMinimum(accuracyMinMaxRaptor) << endl;
         }
 
         queriesFile.close();
@@ -627,6 +791,10 @@ void AlgorithmComparer::compareAlgorithms(DataType dataType, GTree* gTree, Meeti
     gTreeQueryProcessorApproximation.processGTreeQuery(false);
     MeetingPointQueryResult meetingPointQueryResultGTreeApproximation = gTreeQueryProcessorApproximation.getMeetingPointQueryResult();
 
+    RaptorQueryProcessor raptorQueryProcessor = RaptorQueryProcessor(meetingPointQuery);
+    raptorQueryProcessor.processRaptorQuery();
+    MeetingPointQueryRaptorResult meetingPointQueryResultRaptor = raptorQueryProcessor.getMeetingPointQueryResult();
+
     PrintHelper::printMeetingPointQuery(meetingPointQuery);
     cout << "Naive: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultNaive);
@@ -643,6 +811,9 @@ void AlgorithmComparer::compareAlgorithms(DataType dataType, GTree* gTree, Meeti
     cout << "GTree - Approximation: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultGTreeApproximation);
 
+    cout << "Raptor: " << endl;
+    PrintHelper::printMeetingPointQueryRaptorResult(meetingPointQueryResultRaptor);
+
     bool naiveQuerySuccessful = meetingPointQueryResultNaive.meetingPointMinSum != "" && meetingPointQueryResultNaive.meetingPointMinMax != "";
     bool naiveKeyStopQuerySuccessful = true;
     if (executeKeyStopQuery) {
@@ -650,8 +821,9 @@ void AlgorithmComparer::compareAlgorithms(DataType dataType, GTree* gTree, Meeti
     }
     bool gTreeCSAQuerySuccessful = meetingPointQueryResultGTreeCSA.meetingPointMinSum != "" && meetingPointQueryResultGTreeCSA.meetingPointMinMax != "";
     bool gTreeApproximationQuerySuccessful = meetingPointQueryResultGTreeApproximation.meetingPointMinSum != "" && meetingPointQueryResultGTreeApproximation.meetingPointMinMax != "";
+    bool raptorQuerySuccessful = meetingPointQueryResultRaptor.meetingPoint != "";
 
-    if(naiveQuerySuccessful && naiveKeyStopQuerySuccessful && gTreeApproximationQuerySuccessful && gTreeCSAQuerySuccessful) {
+    if(naiveQuerySuccessful && gTreeApproximationQuerySuccessful) {
         double absolutDifferenceMinSumGTree = (double) (meetingPointQueryResultGTreeApproximation.minSumDurationInSeconds - meetingPointQueryResultNaive.minSumDurationInSeconds);
         double absolutDifferenceMinMaxGTree = (double) (meetingPointQueryResultGTreeApproximation.minMaxDurationInSeconds - meetingPointQueryResultNaive.minMaxDurationInSeconds);
 
@@ -663,20 +835,33 @@ void AlgorithmComparer::compareAlgorithms(DataType dataType, GTree* gTree, Meeti
         cout << "Absolut difference min max: " << absolutDifferenceMinMaxGTree / 60 << " minutes" << endl;
         cout << "Accuracy min sum: " << accuracyMinSumGTree << endl;
         cout << "Accuracy min max: " << accuracyMinMaxGTree << endl;
+    }
 
-        if (executeKeyStopQuery) {
-            double absolutDifferenceMinSumKeyStop = (double) (meetingPointQueryResultNaiveKeyStop.minSumDurationInSeconds - meetingPointQueryResultNaive.minSumDurationInSeconds);
-            double absolutDifferenceMinMaxKeyStop = (double) (meetingPointQueryResultNaiveKeyStop.minMaxDurationInSeconds - meetingPointQueryResultNaive.minMaxDurationInSeconds);
+    if (naiveQuerySuccessful && naiveKeyStopQuerySuccessful && executeKeyStopQuery) {
+        double absolutDifferenceMinSumKeyStop = (double) (meetingPointQueryResultNaiveKeyStop.minSumDurationInSeconds - meetingPointQueryResultNaive.minSumDurationInSeconds);
+        double absolutDifferenceMinMaxKeyStop = (double) (meetingPointQueryResultNaiveKeyStop.minMaxDurationInSeconds - meetingPointQueryResultNaive.minMaxDurationInSeconds);
 
-            double accuracyMinSumKeyStop = (double) 1 - (absolutDifferenceMinSumKeyStop / meetingPointQueryResultNaiveKeyStop.minSumDurationInSeconds);
-            double accuracyMinMaxKeyStop = (double) 1 - (absolutDifferenceMinMaxKeyStop / meetingPointQueryResultNaiveKeyStop.minMaxDurationInSeconds);
+        double accuracyMinSumKeyStop = (double) 1 - (absolutDifferenceMinSumKeyStop / meetingPointQueryResultNaiveKeyStop.minSumDurationInSeconds);
+        double accuracyMinMaxKeyStop = (double) 1 - (absolutDifferenceMinMaxKeyStop / meetingPointQueryResultNaiveKeyStop.minMaxDurationInSeconds);
 
-            cout << "\nResult differences (Key Stop Approximation):" << endl;
-            cout << "Absolut difference min sum: " << absolutDifferenceMinSumKeyStop / 60 << " minutes" << endl;
-            cout << "Absolut difference min max: " << absolutDifferenceMinMaxKeyStop / 60 << " minutes" << endl;
-            cout << "Accuracy min sum: " << accuracyMinSumKeyStop << endl;
-            cout << "Accuracy min max: " << accuracyMinMaxKeyStop << endl;
-        }
+        cout << "\nResult differences (Key Stop Approximation):" << endl;
+        cout << "Absolut difference min sum: " << absolutDifferenceMinSumKeyStop / 60 << " minutes" << endl;
+        cout << "Absolut difference min max: " << absolutDifferenceMinMaxKeyStop / 60 << " minutes" << endl;
+        cout << "Accuracy min sum: " << accuracyMinSumKeyStop << endl;
+        cout << "Accuracy min max: " << accuracyMinMaxKeyStop << endl;
+    }
+
+    if (naiveQuerySuccessful && raptorQuerySuccessful) {
+        double absolutDifferenceMinSumRaptor = (double) (meetingPointQueryResultRaptor.durationSumInSeconds - meetingPointQueryResultNaive.minSumDurationInSeconds);
+        double absolutDifferenceMinMaxRaptor = (double) (meetingPointQueryResultRaptor.durationInSeconds - meetingPointQueryResultNaive.minMaxDurationInSeconds);
+        double accuracyMinSumRaptor = (double) 1 - (absolutDifferenceMinSumRaptor / meetingPointQueryResultRaptor.durationSumInSeconds);
+        double accuracyMinMaxRaptor = (double) 1 - (absolutDifferenceMinMaxRaptor / meetingPointQueryResultRaptor.durationInSeconds);
+
+        cout << "\nResult differences (Raptor):" << endl;
+        cout << "Absolut difference min sum: " << absolutDifferenceMinSumRaptor / 60 << " minutes" << endl;
+        cout << "Absolut difference min max: " << absolutDifferenceMinMaxRaptor / 60 << " minutes" << endl;
+        cout << "Accuracy min sum: " << accuracyMinSumRaptor << endl;
+        cout << "Accuracy min max: " << accuracyMinMaxRaptor << endl;    
     }
 }
 
@@ -741,8 +926,18 @@ void PrintHelper::printMeetingPointQueryResult(MeetingPointQueryResult meetingPo
         cout << "Query time: " << meetingPointQueryResult.queryTime << " milliseconds \n" << endl;
         return;
     }
-    cout << "Min sum - meeting point: " << meetingPointQueryResult.meetingPointMinSum << ", meeting time: " << meetingPointQueryResult.meetingTimeMinSum << ",  travel time sum: " << meetingPointQueryResult.minSumDuration << endl;
-    cout << "Min max - meeting point: " << meetingPointQueryResult.meetingPointMinMax << ", meeting time: " << meetingPointQueryResult.meetingTimeMinMax << ", travel time max: " << meetingPointQueryResult.minMaxDuration << endl;
+    cout << "Min sum - meeting point: " << meetingPointQueryResult.meetingPointMinSum << ", meeting time: " << meetingPointQueryResult.meetingTimeMinSum << ",  travel time sum: " << meetingPointQueryResult.minSumDuration << ", max transfers: " << meetingPointQueryResult.maxTransfersMinSum << endl;
+    cout << "Min max - meeting point: " << meetingPointQueryResult.meetingPointMinMax << ", meeting time: " << meetingPointQueryResult.meetingTimeMinMax << ", travel time max: " << meetingPointQueryResult.minMaxDuration << ", max transfers: " << meetingPointQueryResult.maxTransfersMinMax << endl;
+    cout << "Query time: " << meetingPointQueryResult.queryTime << " milliseconds \n" << endl;
+}
+
+void PrintHelper::printMeetingPointQueryRaptorResult(MeetingPointQueryRaptorResult meetingPointQueryResult) {
+    if (meetingPointQueryResult.meetingPoint == "") {
+        cout << "No meeting point found" << endl;
+        cout << "Query time: " << meetingPointQueryResult.queryTime << " milliseconds \n" << endl;
+        return;
+    }
+    cout << "Min max transfers - meeting point: " << meetingPointQueryResult.meetingPoint << ", meeting time: " << meetingPointQueryResult.meetingTime << ",  travel time (max): " << meetingPointQueryResult.duration << ",  travel time (sum): " << meetingPointQueryResult.durationSum << ", max transfers: " << meetingPointQueryResult.maxNumberOfTransfers << endl;
     cout << "Query time: " << meetingPointQueryResult.queryTime << " milliseconds \n" << endl;
 }
 
@@ -761,8 +956,9 @@ void PrintHelper::printJourney(Journey journey) {
 }
 
 void PrintHelper::printGTreeCSAInfo(MeetingPointQueryGTreeCSAInfo meetingPointQueryGTreeCSAInfo) {
-    cout << "\nGTree CSA Info: " << endl;
+    cout << "GTree CSA Info: " << endl;
     cout << "Min Sum - fraction of target stops: " << meetingPointQueryGTreeCSAInfo.csaTargetStopFractionMinSum << endl;
     cout << "Min Max - fraction of target stops: " << meetingPointQueryGTreeCSAInfo.csaTargetStopFractionMinMax << endl;
     cout << "Fraction of visited connections: " << meetingPointQueryGTreeCSAInfo.csaVisitedConnectionsFraction << endl;
+    cout << endl;
 }

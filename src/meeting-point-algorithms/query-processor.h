@@ -4,6 +4,7 @@
 #include <../data-handling/importer.h>
 #include <../data-structures/g-tree.h>
 #include "csa.h" 
+#include "raptor.h" 
 #include "journey.h"
 
 #include <vector>
@@ -21,10 +22,23 @@ struct MeetingPointQueryResult {
     string meetingTimeMinSum;
     string minSumDuration;
     int minSumDurationInSeconds;
+    int maxTransfersMinSum;
     string meetingPointMinMax;
     string meetingTimeMinMax;
     string minMaxDuration;
     int minMaxDurationInSeconds;
+    int maxTransfersMinMax;
+    double queryTime;
+};
+
+struct MeetingPointQueryRaptorResult {
+    string meetingPoint;
+    string meetingTime;
+    string duration;
+    string durationSum;
+    int durationInSeconds;
+    int durationSumInSeconds;
+    int maxNumberOfTransfers;
     double queryTime;
 };
 
@@ -108,6 +122,22 @@ class GTreeQueryProcessor {
         int getApproximatedCostsToStop(int stopId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization);
         int getCostsToStop(int stopId, Optimization optimization);
         void processCSAToTargetStops(vector<int> targetStopIds, int currentBest);
+};
+
+class RaptorQueryProcessor {
+    public:
+        explicit RaptorQueryProcessor(MeetingPointQuery meetingPointQuery){
+            this->meetingPointQuery = meetingPointQuery;
+        };
+        ~RaptorQueryProcessor(){};
+
+        void processRaptorQuery();
+        MeetingPointQueryRaptorResult getMeetingPointQueryResult();
+
+    private:
+        MeetingPointQuery meetingPointQuery;
+        MeetingPointQueryRaptorResult meetingPointQueryResult;
+        vector<Raptor*> raptors;
 };
 
 /*
