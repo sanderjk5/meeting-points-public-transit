@@ -118,8 +118,11 @@ vector<Graph> Creator::partitionateGraph(Graph graph, int numberOfPartitions, in
 
         for (int j = 0; j < previousGraphs.size(); j++) {
             vector<Graph> coarsedGraphs = coarseGraph(previousGraphs[j], maxNumberOfVerticesInGraph);
+            cout << "Coarsed graph" << endl;
             partitionateCoarsedGraph(coarsedGraphs[coarsedGraphs.size()-1], KL_ITERATIONS);
+            cout << "Partitionated graph" << endl;
             refineGraphs(coarsedGraphs);
+            cout << "Refinded graph" << endl;
             vector<Graph> partitionatedGraphs = splitPartitionatedGraph(coarsedGraphs[0]);
             for(int k = 0; k < partitionatedGraphs.size(); k++) {
                 newGraphs.push_back(partitionatedGraphs[k]);
@@ -255,7 +258,7 @@ vector<Graph> Creator::coarseGraph(Graph &graph, int maxNumberOfVerticesInGraph)
         cout << "Number of vertices in coarsed graph: " << coarsedGraph.vertices.size() << endl;
 
         // Break if the coarsed graph is not coarser than the previous graph
-        if(coarsedGraph.vertices.size() > previousGraph->vertices.size() * 0.75){
+        if(coarsedGraph.vertices.size() > previousGraph->vertices.size() * 0.95){
             break;
         }
         coarsedGraphs.push_back(coarsedGraph);
