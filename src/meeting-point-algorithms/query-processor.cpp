@@ -272,36 +272,46 @@ void NaiveKeyStopQueryProcessor::findKeyStops(DataType dataType, vector<int> num
 vector<int> NaiveKeyStopQueryProcessor::getKeyStops(DataType dataType, int numberOfSourceStops) {
     vector<int> keyStops = vector<int>(0);
 
-    string dataTypeString = Importer::getDataTypeString(dataType);
-    string folderPathKeyStops = FOLDER_PREFIX + "tests/" + dataTypeString + "/key_stops/";
-    string numberOfSourceStopsString = "";
-    if (numberOfSourceStops < 10) {
-        numberOfSourceStopsString = "00" + to_string(numberOfSourceStops);
-    } else if (numberOfSourceStops < 100) {
-        numberOfSourceStopsString = "0" + to_string(numberOfSourceStops);
-    } else {
-        numberOfSourceStopsString = to_string(numberOfSourceStops);
-    }
+    int currentNumberOfSourceStops = numberOfSourceStops;
 
-    string filePath = folderPathKeyStops + "key_stops-" + numberOfSourceStopsString + ".csv";
-    
-    std::ifstream file(filePath);
-    if (file.is_open()) {
-        std::string line;
-        while (std::getline(file, line)) {
-            vector<string> parts;
+    while (currentNumberOfSourceStops > 1) {
+        string dataTypeString = Importer::getDataTypeString(dataType);
+        string folderPathKeyStops = FOLDER_PREFIX + "tests/" + dataTypeString + "/key_stops/";
+        string currentNumberOfSourceStops = "";
+        if (currentNumberOfSourceStops < 10) {
+            currentNumberOfSourceStops = "00" + to_string(currentNumberOfSourceStops);
+        } else if (currentNumberOfSourceStops < 100) {
+            currentNumberOfSourceStops = "0" + to_string(currentNumberOfSourceStops);
+        } else {
+            currentNumberOfSourceStops = to_string(currentNumberOfSourceStops);
+        }
 
-            // Split the line into substrings
-            std::stringstream ss(line);
-            std::string substring;
-            while (std::getline(ss, substring, ',')) {
-                parts.push_back(substring);
+        string filePath = folderPathKeyStops + "key_stops-" + currentNumberOfSourceStops + ".csv";
+        
+        std::ifstream file(filePath);
+        if (file.is_open()) {
+            std::string line;
+            while (std::getline(file, line)) {
+                vector<string> parts;
+
+                // Split the line into substrings
+                std::stringstream ss(line);
+                std::string substring;
+                while (std::getline(ss, substring, ',')) {
+                    parts.push_back(substring);
+                }
+
+                keyStops.push_back(stoi(parts[0]));
             }
 
-            keyStops.push_back(stoi(parts[0]));
-        }
-    } else {
-        cout << "Couldn't find key stops for " << numberOfSourceStops << " source stops." << endl;
+            break;
+        } 
+
+        currentNumberOfSourceStops--;
+    }
+
+    if (keyStops.size() == 0) {
+        cout << "Couldn't find key stops for the dataset." << endl;
     }
 
     return keyStops;
