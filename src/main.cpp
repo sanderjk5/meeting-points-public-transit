@@ -102,7 +102,7 @@ int main(int argc, const char *argv[]) {
     if(dataType == vvs_j24){
       networkGTree = Creator::createNetworkGTree(2, 64);
     } else {
-      networkGTree = Creator::createNetworkGTree(4, 4096);
+      networkGTree = Creator::createNetworkGTree(4, 256);
     }
 
     GTree* networkGTreePointer = &networkGTree;
