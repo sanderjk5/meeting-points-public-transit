@@ -94,6 +94,7 @@ GTree Creator::createNetworkGTree(int numberOfChildrenPerNode, int maxNumberOfVe
 
     // Partitionate the network graph and create the network g-tree
     vector<Graph> graphs = partitionateGraph(networkGraph, leafs, maxNumberOfVerticesPerLeaf);
+    cout << "Partitionated the graph into " << graphs.size() << " partitions." << endl;
     GTree networkGTree = createGTree(networkGraph, graphs, numberOfChildrenPerNode, depth);
 
     // Stop the timer and calculate the duration
@@ -483,8 +484,14 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
             }
         }
 
+        cout << "Number of vertices: " << node->stopIds.size() << endl;
+
         previousLevelNodes.push_back(node);
     }
+
+    cout << "Created leaf nodes." << endl;
+
+    int level = 1;
 
     // create the rest of the nodes
     while(previousLevelNodes.size() > 1){
@@ -543,9 +550,14 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
                         }
                     }
                 }
+                cout << "Number of border stops: " << node->borderStopIds.size() << endl;
             }
         }
+
         previousLevelNodes = currentLevelNodes;
+
+        cout << "Created nodes on level " << level << endl;
+        level++;
     }
 
     gTree.root = previousLevelNodes[0];
