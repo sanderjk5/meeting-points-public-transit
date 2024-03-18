@@ -100,9 +100,9 @@ int main(int argc, const char *argv[]) {
     
     GTree networkGTree;
     if(dataType == vvs_j24){
-      networkGTree = Creator::createNetworkGTree(2, 16);
+      networkGTree = Creator::createNetworkGTree(2, 64);
     } else {
-      networkGTree = Creator::createNetworkGTree(4, 1024);
+      networkGTree = Creator::createNetworkGTree(4, 4096);
     }
 
     GTree* networkGTreePointer = &networkGTree;
