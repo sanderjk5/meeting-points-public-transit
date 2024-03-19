@@ -81,7 +81,7 @@ void Creator::createNetworkGraph() {
 /*
     Use the network graph to create the network g-tree.
 */
-GTree Creator::createNetworkGTree(int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf) {
+GTree* Creator::createNetworkGTree(int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf) {
     cout << "Creating network g-tree..." << endl;
 
     // Start the timer
@@ -96,7 +96,7 @@ GTree Creator::createNetworkGTree(int numberOfChildrenPerNode, int maxNumberOfVe
     // Partitionate the network graph and create the network g-tree
     vector<Graph> graphs = partitionateGraph(networkGraph, leafs, maxNumberOfVerticesPerLeaf);
     cout << "Partitionated the graph into " << graphs.size() << " partitions." << endl;
-    GTree networkGTree = createGTree(networkGraph, graphs, numberOfChildrenPerNode, depth);
+    GTree* networkGTree = createGTree(networkGraph, graphs, numberOfChildrenPerNode, depth);
 
     // Stop the timer and calculate the duration
     auto end = std::chrono::high_resolution_clock::now();
@@ -451,9 +451,9 @@ vector<Graph> Creator::splitPartitionatedGraph(Graph &graph) {
 /*
     Create the g-tree using the partitionated graphs.
 */
-GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numberOfChildrenPerNode, int depth) {
-    GTree gTree = GTree();
-    gTree.nodeOfStopId = vector<GNode*>(Importer::stops.size(), nullptr);
+GTree* Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numberOfChildrenPerNode, int depth) {
+    GTree* gTree = new GTree();
+    gTree->nodeOfStopId = vector<GNode*>(Importer::stops.size(), nullptr);
 
     vector<GNode*> previousLevelNodes = vector<GNode*>(0);
 
@@ -470,7 +470,7 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
         for (int j = 0; j < graphs[i].vertices.size(); j++) {
             int stopId = graphs[i].vertices[j].stopId;
             node->stopIds.push_back(stopId);
-            gTree.nodeOfStopId[stopId] = node;
+            gTree->nodeOfStopId[stopId] = node;
             for (int k = 0; k < originalGraph.adjacencyList[stopId].size(); k++) {
                 int targetStopId = originalGraph.adjacencyList[stopId][k].targetStopId;
                 if (find(node->stopIds.begin(), node->stopIds.end(), targetStopId) == node->stopIds.end()) {
@@ -491,7 +491,7 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
         cout << "Number of vertices: " << node->stopIds.size() << endl;
 
         // print the progress after every 10% of the graphs
-        if (i % (graphs.size() / 4) == 3){
+        if (i % (graphs.size() / 5) == 0){
             auto end = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::minutes>(end - start).count();
             cout << "Created " << i + 1 << "/" << graphs.size() << " of the leaf nodes in " << duration << " minutes." << endl;
@@ -584,19 +584,19 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
         level++;
     }
 
-    gTree.root = previousLevelNodes[0];
+    gTree->root = previousLevelNodes[0];
 
     // set the ids of the nodes
     int nodeId = 0;
-    gTree.nodeOfNodeId = vector<GNode*>(0);
+    gTree->nodeOfNodeId = vector<GNode*>(0);
     vector<GNode*> nodes = vector<GNode*>(0);
-    nodes.push_back(gTree.root);
+    nodes.push_back(gTree->root);
     while(nodes.size() > 0){
         GNode* node = nodes[0];
         nodes.erase(nodes.begin());
         node->nodeId = nodeId;
         nodeId++;
-        gTree.nodeOfNodeId.push_back(node);
+        gTree->nodeOfNodeId.push_back(node);
         for (int i = 0; i < node->children.size(); i++) {
             nodes.push_back(node->children[i]);
         }

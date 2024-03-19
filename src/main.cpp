@@ -13,6 +13,7 @@
 
 #include "experiment-controller.h"
 #include "cli-controller.h"
+#include "gtree-controller.h"
 
 
 using namespace std;
@@ -98,7 +99,6 @@ int main(int argc, const char *argv[]) {
     // ExperimentController::testAndCompareAlgorithmsRandom(dataType, 10, numberOfSourceStops);
   } else {
     
-    GTree networkGTree;
     int numberOfChildrenPerNode;
     int maxNumberOfVerticesPerLeaf;
     if(dataType == vvs_j24){
@@ -109,11 +109,7 @@ int main(int argc, const char *argv[]) {
       maxNumberOfVerticesPerLeaf = 1048;
     }
 
-    networkGTree = Creator::createNetworkGTree(numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
-    networkGTree.saveTreeAsJson(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
-  
-    GTree* networkGTreePointer = &networkGTree;
-    networkGTreePointer->initializeGTree();
+    GTree* networkGTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
 
     CliController::runCli(dataType, networkGTreePointer);
   }

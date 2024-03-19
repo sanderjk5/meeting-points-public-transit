@@ -14,7 +14,7 @@ class Creator {
 
         static Graph networkGraph;
         static void createNetworkGraph();
-        static GTree createNetworkGTree(int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf);
+        static GTree* createNetworkGTree(int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf);
 
     private:
         static vector<Graph> partitionateGraph(Graph graph, int numberOfPartitions, int maxNumberOfVerticesInGraph);
@@ -22,7 +22,7 @@ class Creator {
         static void partitionateCoarsedGraph(Graph &graph, int klIterations);
         static void refineGraphs(vector<Graph> &graphs);
         static vector<Graph> splitPartitionatedGraph(Graph &graph);
-        static GTree createGTree(Graph &originalGraph, vector<Graph> &graphs, int numberOfChildrenPerNode, int depth);
+        static GTree* createGTree(Graph &originalGraph, vector<Graph> &graphs, int numberOfChildrenPerNode, int depth);
 };
 
 #endif //CMAKE_CREATOR_H
