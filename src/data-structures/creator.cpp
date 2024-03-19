@@ -539,7 +539,7 @@ GTree* Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int num
 
             // print the progress after every 5% of the graphs
             if (numberOfNodes > 20) {
-                if (j % (numberOfNodes / 5) == 0){
+                if (j % (numberOfNodes / 20) == 0){
                     auto end = std::chrono::high_resolution_clock::now();
                     auto duration = std::chrono::duration_cast<std::chrono::minutes>(end - start).count();
                     cout << "Created " << j + 1 << "/" << numberOfNodes << " of the level " << level << " nodes in " << duration << " minutes." << endl;
