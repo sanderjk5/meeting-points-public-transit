@@ -457,6 +457,7 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
     vector<GNode*> previousLevelNodes = vector<GNode*>(0);
 
     // create leaf nodes using the graphs
+    #pragma omp parallel for
     for (int i = 0;  i < graphs.size(); i++){
         GNode* node = new GNode();
         node->stopIds = vector<int>(0);
@@ -486,6 +487,11 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
 
         cout << "Number of vertices: " << node->stopIds.size() << endl;
 
+        // print the progress after every 10% of the graphs
+        // if (i % (graphs.size() / 10) == 0){
+        //     cout << "Created " << i << "/" << graphs.size() << " of the leaf nodes." << endl;
+        // }
+
         previousLevelNodes.push_back(node);
     }
 
@@ -497,6 +503,7 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
     while(previousLevelNodes.size() > 1){
         vector<GNode*> currentLevelNodes = vector<GNode*>(0);
 
+        #pragma omp parallel for
         for (int j = 0; j < previousLevelNodes.size()/numberOfChildrenPerNode; j++) {
             GNode* node = new GNode();
             
@@ -520,6 +527,8 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
                     node->borderDurations[make_pair(node->stopIds[k], node->stopIds[l])] = distances[node->stopIds[l]];
                 }
             }
+
+            cout << "Number of vertices: " << node->stopIds.size() << endl;
 
             currentLevelNodes.push_back(node);
         }
@@ -550,7 +559,6 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
                         }
                     }
                 }
-                cout << "Number of border stops: " << node->borderStopIds.size() << endl;
             }
         }
 
