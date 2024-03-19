@@ -277,16 +277,16 @@ vector<int> NaiveKeyStopQueryProcessor::getKeyStops(DataType dataType, int numbe
     while (currentNumberOfSourceStops > 1) {
         string dataTypeString = Importer::getDataTypeString(dataType);
         string folderPathKeyStops = FOLDER_PREFIX + "tests/" + dataTypeString + "/key_stops/";
-        string currentNumberOfSourceStops = "";
+        string currentNumberOfSourceStopsString = "";
         if (currentNumberOfSourceStops < 10) {
-            currentNumberOfSourceStops = "00" + to_string(currentNumberOfSourceStops);
+            currentNumberOfSourceStopsString = "00" + to_string(currentNumberOfSourceStops);
         } else if (currentNumberOfSourceStops < 100) {
-            currentNumberOfSourceStops = "0" + to_string(currentNumberOfSourceStops);
+            currentNumberOfSourceStopsString = "0" + to_string(currentNumberOfSourceStops);
         } else {
-            currentNumberOfSourceStops = to_string(currentNumberOfSourceStops);
+            currentNumberOfSourceStopsString = to_string(currentNumberOfSourceStops);
         }
 
-        string filePath = folderPathKeyStops + "key_stops-" + currentNumberOfSourceStops + ".csv";
+        string filePath = folderPathKeyStops + "key_stops-" + currentNumberOfSourceStopsString + ".csv";
         
         std::ifstream file(filePath);
         if (file.is_open()) {

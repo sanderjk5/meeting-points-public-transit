@@ -13,6 +13,7 @@
 #include"data-structures/graph.h"
 #include"constants.h"
 #include"limits.h"
+#include "gtree-controller.h"
 
 /*
     Find the best parameters for the GTree algorithm. Compares the run time and accuracy of the GTree algorithm with different parameters.
@@ -42,9 +43,7 @@ void ExperimentController::findBestGTreeParameters(DataType dataType, int number
     
     for (int numberOfChildrenPerNode : numberOfChildrenPerNodeParams) {
         for (int maxNumberOfVerticesPerLeaf : maxNumberOfVerticesPerLeafParams) {
-            GTree gTree = Creator::createNetworkGTree(numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
-            GTree* gTreePointer = &gTree;
-            gTreePointer->initializeGTree();
+            GTree* gTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
 
             AverageRunTimeAndAccuracy averageRunTimeAndAccuracy = GTreeAlgorithmTester::getAverageRunTimeAndAccuracy(dataType, gTreePointer, numberOfSourceStops, numberOfSuccessfulQueries);
 
@@ -97,9 +96,6 @@ void ExperimentController::findBestGTreeParameters(DataType dataType, int number
     Test and compare the different algorithms with a set of queries. The results are written to a file.
 */
 void ExperimentController::testAndCompareAlgorithmsRandom(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSourceStops) {
-    GTree networkGTree = Creator::createNetworkGTree(2, 128);
-    GTree* networkGTreePointer = &networkGTree;
-    networkGTreePointer->initializeGTree();
-
+    GTree* networkGTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, 2, 128);
     AlgorithmComparer::compareAlgorithmsRandom(dataType, networkGTreePointer, numberOfSuccessfulQueries, numberOfSourceStops, true, true);
 }

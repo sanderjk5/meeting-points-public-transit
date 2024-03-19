@@ -1,25 +1,3 @@
-{
-    "configurations": [
-        {
-            "name": "Win32",
-            "includePath": [
-                "/usr/include/c++/7",
-                "/usr/include/x86_64-linux-gnu/c++/7",
-                "/usr/include/c++/7/backward",
-                "/usr/lib/gcc/x86_64-linux-gnu/7/include",
-                "/usr/local/include",
-                "/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed",
-                "/usr/include/x86_64-linux-gnu",
-                "/usr/include"
-            ],
-            "defines": [
-                "_DEBUG",
-                "UNICODE",
-                "_UNICODE"
-            ],
-            "intelliSenseMode": "windows-msvc-x64",
-            "configurationProvider": "ms-vscode.cmake-tools"
-        }
-    ],
-    "version": 4
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:013336d53d920136b61ba5897a6ae82fc8220f0b44741db8fb6851e227c242c8
+size 759
