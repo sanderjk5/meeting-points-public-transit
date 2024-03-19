@@ -99,12 +99,19 @@ int main(int argc, const char *argv[]) {
   } else {
     
     GTree networkGTree;
+    int numberOfChildrenPerNode;
+    int maxNumberOfVerticesPerLeaf;
     if(dataType == vvs_j24){
-      networkGTree = Creator::createNetworkGTree(2, 64);
+      numberOfChildrenPerNode = 2;
+      maxNumberOfVerticesPerLeaf = 64;
     } else {
-      networkGTree = Creator::createNetworkGTree(4, 256);
+      numberOfChildrenPerNode = 4;
+      maxNumberOfVerticesPerLeaf = 1048;
     }
 
+    networkGTree = Creator::createNetworkGTree(numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
+    networkGTree.saveTreeAsJson(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
+  
     GTree* networkGTreePointer = &networkGTree;
     networkGTreePointer->initializeGTree();
 

@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <map>
+#include <string>
+#include <../data-handling/importer.h>
 
 using namespace std;
 
@@ -39,6 +41,7 @@ class GTree {
         int getMinimalDurationToNode(int sourceStopId, int targetNodeId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations);
         int getMinimalDurationToStop(int sourceStopId, int targetStopId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations);
         void initializeGTree();
+        void saveTreeAsJson(DataType dataType, int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf);
 
     private:
         vector<int> getNodePath(int stopId, int nodeId);

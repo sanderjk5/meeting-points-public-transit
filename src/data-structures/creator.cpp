@@ -4,6 +4,7 @@
 #include <../data-handling/importer.h>
 #include <../constants.h>
 
+#include <chrono>
 #include <vector>
 #include <map>
 #include <iostream>
@@ -89,7 +90,7 @@ GTree Creator::createNetworkGTree(int numberOfChildrenPerNode, int maxNumberOfVe
     // Calculate the number of leafs and the depth of the g-tree
     int numberOfVertices = networkGraph.vertices.size();
     int leafs = numberOfVertices / maxNumberOfVerticesPerLeaf;
-    int depth = (log(leafs) / log(numberOfChildrenPerNode)) + 1;
+    int depth = (log(leafs) / log(numberOfChildrenPerNode));
     leafs = pow(numberOfChildrenPerNode, depth);
 
     // Partitionate the network graph and create the network g-tree
@@ -456,9 +457,11 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
 
     vector<GNode*> previousLevelNodes = vector<GNode*>(0);
 
+    // measure the time
+    auto start = std::chrono::high_resolution_clock::now(); 
+
     // create leaf nodes using the graphs
-    #pragma omp parallel for
-    for (int i = 0;  i < graphs.size(); i++){
+    for (int i = 0;  i < graphs.size(); i++) {
         GNode* node = new GNode();
         node->stopIds = vector<int>(0);
         node->borderStopIds = vector<int>(0);
@@ -470,7 +473,7 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
             gTree.nodeOfStopId[stopId] = node;
             for (int k = 0; k < originalGraph.adjacencyList[stopId].size(); k++) {
                 int targetStopId = originalGraph.adjacencyList[stopId][k].targetStopId;
-                if(find(node->stopIds.begin(), node->stopIds.end(), targetStopId) == node->stopIds.end()){
+                if (find(node->stopIds.begin(), node->stopIds.end(), targetStopId) == node->stopIds.end()) {
                     node->borderStopIds.push_back(stopId);
                     break;
                 }
@@ -488,9 +491,11 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
         cout << "Number of vertices: " << node->stopIds.size() << endl;
 
         // print the progress after every 10% of the graphs
-        // if (i % (graphs.size() / 10) == 0){
-        //     cout << "Created " << i << "/" << graphs.size() << " of the leaf nodes." << endl;
-        // }
+        if (i % (graphs.size() / 5) == 0){
+            auto end = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::minutes>(end - start).count();
+            cout << "Created " << i + 1 << "/" << graphs.size() << " of the leaf nodes in " << duration << " minutes." << endl;
+        }
 
         previousLevelNodes.push_back(node);
     }
@@ -500,11 +505,13 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
     int level = 1;
 
     // create the rest of the nodes
-    while(previousLevelNodes.size() > 1){
+    while (previousLevelNodes.size() > 1) {
+        auto start = std::chrono::high_resolution_clock::now();
         vector<GNode*> currentLevelNodes = vector<GNode*>(0);
 
-        #pragma omp parallel for
-        for (int j = 0; j < previousLevelNodes.size()/numberOfChildrenPerNode; j++) {
+        int numberOfNodes = previousLevelNodes.size()/numberOfChildrenPerNode;
+        
+        for (int j = 0; j < numberOfNodes; j++) {
             GNode* node = new GNode();
             
             node->children = vector<GNode*>(0);
@@ -521,7 +528,7 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
             }
 
             // calculate the border durations of the children
-            for(int k = 0; k < node->stopIds.size(); k++) {
+            for (int k = 0; k < node->stopIds.size(); k++) {
                 vector<int> distances = originalGraph.getDistances(node->stopIds[k], node->stopIds);
                 for (int l = 0; l < node->stopIds.size(); l++) {
                     node->borderDurations[make_pair(node->stopIds[k], node->stopIds[l])] = distances[node->stopIds[l]];
@@ -529,6 +536,15 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
             }
 
             cout << "Number of vertices: " << node->stopIds.size() << endl;
+
+            // print the progress after every 10% of the graphs
+            if (numberOfNodes > 5) {
+                if (j % (numberOfNodes / 5) == 0){
+                    auto end = std::chrono::high_resolution_clock::now();
+                    auto duration = std::chrono::duration_cast<std::chrono::minutes>(end - start).count();
+                    cout << "Created " << j + 1 << "/" << numberOfNodes << " of the level " << level << " nodes in " << duration << " minutes." << endl;
+                }
+            }
 
             currentLevelNodes.push_back(node);
         }
