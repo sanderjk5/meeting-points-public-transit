@@ -490,8 +490,8 @@ GTree* Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int num
 
         cout << "Number of vertices: " << node->stopIds.size() << endl;
 
-        // print the progress after every 10% of the graphs
-        if (i % (graphs.size() / 5) == 0){
+        // print the progress after every 5% of the graphs
+        if (i % (graphs.size() / 20) == 0){
             auto end = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::minutes>(end - start).count();
             cout << "Created " << i + 1 << "/" << graphs.size() << " of the leaf nodes in " << duration << " minutes." << endl;
@@ -537,9 +537,9 @@ GTree* Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int num
 
             cout << "Number of vertices: " << node->stopIds.size() << endl;
 
-            // print the progress after every 10% of the graphs
-            if (numberOfNodes > 5) {
-                if (j % (numberOfNodes / 5) == 0){
+            // print the progress after every 5% of the graphs
+            if (numberOfNodes > 20) {
+                if (j % (numberOfNodes / 20) == 0){
                     auto end = std::chrono::high_resolution_clock::now();
                     auto duration = std::chrono::duration_cast<std::chrono::minutes>(end - start).count();
                     cout << "Created " << j + 1 << "/" << numberOfNodes << " of the level " << level << " nodes in " << duration << " minutes." << endl;
