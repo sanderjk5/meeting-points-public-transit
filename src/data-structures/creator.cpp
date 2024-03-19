@@ -90,7 +90,7 @@ GTree Creator::createNetworkGTree(int numberOfChildrenPerNode, int maxNumberOfVe
     // Calculate the number of leafs and the depth of the g-tree
     int numberOfVertices = networkGraph.vertices.size();
     int leafs = numberOfVertices / maxNumberOfVerticesPerLeaf;
-    int depth = (log(leafs) / log(numberOfChildrenPerNode));
+    int depth = (log(leafs) / log(numberOfChildrenPerNode)) + 1;
     leafs = pow(numberOfChildrenPerNode, depth);
 
     // Partitionate the network graph and create the network g-tree
@@ -491,7 +491,7 @@ GTree Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numb
         cout << "Number of vertices: " << node->stopIds.size() << endl;
 
         // print the progress after every 10% of the graphs
-        if (i % (graphs.size() / 5) == 0){
+        if (i % (graphs.size() / 4) == 3){
             auto end = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::minutes>(end - start).count();
             cout << "Created " << i + 1 << "/" << graphs.size() << " of the leaf nodes in " << duration << " minutes." << endl;
