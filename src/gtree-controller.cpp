@@ -22,8 +22,13 @@ GTree* GTreeController::createOrLoadNetworkGTree(DataType dataType, int numberOf
         return gTree;
     } else {
         file.close();
-        GTree* gTree = Creator::createNetworkGTree(numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
+        GTree* gTree = Creator::createNetworkGTree(numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf, false);
         gTree->exportTreeAsJson(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
         return gTree;
     }
+}
+
+void GTreeController::calculateBorderDistancesOfStopIdsAndExportTree(GTree* gTree, vector<int> stopIds, DataType dataType, int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf) {
+    gTree->calculateBorderDistancesOfStopIds(stopIds);
+    gTree->exportTreeAsJson(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
 }

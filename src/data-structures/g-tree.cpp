@@ -2,6 +2,7 @@
 
 #include <../constants.h>
 #include <../data-handling/importer.h>
+#include <../data-structures/creator.h>
 #include <../dist/json/json.h>
 #include <iostream>
 #include <vector>
@@ -9,6 +10,8 @@
 #include <algorithm>
 #include <limits.h>
 #include <fstream>
+#include <chrono>
+#include <omp.h>
 
 using namespace std;
 
@@ -211,6 +214,9 @@ void GTree::exportTreeAsJson(DataType dataType, int numberOfChildrenPerNode, int
 
     string fileName = folderPath + "g-tree-" + to_string(numberOfChildrenPerNode) + "-" + to_string(maxNumberOfVerticesPerLeaf) + ".json";
 
+    // delete the file if it already exists
+    remove(fileName.c_str());
+
     ofstream file;
     file.open(fileName);
 
@@ -307,9 +313,9 @@ void GTree::importTreeFromJson(DataType dataType, int numberOfChildrenPerNode, i
         return;
     }
 
-    this->nodeOfNodeId = vector<GNode*>(0);
-
     Json::Value nodes = root["nodes"];
+
+    this->nodeOfNodeId = vector<GNode*>(nodes.size(), nullptr);
 
     for (int i = 0; i < nodes.size(); i++) {
         Json::Value node = nodes[i];
@@ -337,7 +343,7 @@ void GTree::importTreeFromJson(DataType dataType, int numberOfChildrenPerNode, i
 
         gNode->children = vector<GNode*>(0);
 
-        this->nodeOfNodeId.push_back(gNode);
+        this->nodeOfNodeId[gNode->nodeId] = gNode;
     }
 
     this->nodeOfStopId = vector<GNode*>(Importer::stops.size(), nullptr);
@@ -359,4 +365,47 @@ void GTree::importTreeFromJson(DataType dataType, int numberOfChildrenPerNode, i
     file.close();
 
     cout << "G-tree imported.\n" << endl;
+}
+
+void GTree::calculateBorderDistancesOfStopIds(vector<int> stopIds) {
+    auto start = std::chrono::high_resolution_clock::now();
+    std::cout << "Max threads: " << omp_get_max_threads() << "\n";
+    #pragma omp parallel
+    {
+        #pragma omp for
+        for (int i = 0; i < stopIds.size(); i++) {
+            int stopId = stopIds[i];
+            vector<int> targetStopIds = vector<int>(0);
+            GNode* node = nodeOfStopId[stopIds[i]];
+            while (node != nullptr) {
+                if (find(node->stopIds.begin(), node->stopIds.end(), stopId) != node->stopIds.end()) {
+                    for (int j = 0; j < node->stopIds.size(); j++) {
+                        if (node->stopIds[j] != stopId && find(targetStopIds.begin(), targetStopIds.end(), node->stopIds[j]) == targetStopIds.end()){
+                            targetStopIds.push_back(node->stopIds[j]);
+                        }
+                    }
+                } else {
+                    break;
+                }
+                node = node->parent;
+            }
+
+            vector<int> distances = Creator::networkGraph.getDistances(stopId, targetStopIds);
+
+            node = nodeOfStopId[stopIds[i]];
+            while (node != nullptr) {
+                if (find(node->stopIds.begin(), node->stopIds.end(), stopId) != node->stopIds.end()) {
+                    for (int j = 0; j < node->stopIds.size(); j++) {
+                        node->borderDurations[make_pair(stopId, node->stopIds[j])] = distances[node->stopIds[j]];
+                    }
+                } else {
+                    break;
+                }
+                node = node->parent;
+            }
+        }
+    }
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::minutes>(end - start).count();
+    cout << "Calculated " << stopIds.size() << " distances in " << duration << " minutes." << endl;
 }
