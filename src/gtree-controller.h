@@ -11,6 +11,7 @@ class GTreeController {
         ~GTreeController(){};
 
         static GTree* createOrLoadNetworkGTree(DataType dataType, int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf); 
+        static void calculateBorderDistancesOfStopIdsAndExportTree(GTree* gTree, vector<int> stopIds, DataType dataType, int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf);
 };
 
 #endif // CMAKE_GTREE_CONTROLLER_H

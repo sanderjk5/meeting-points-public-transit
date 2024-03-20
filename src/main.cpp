@@ -110,6 +110,11 @@ int main(int argc, const char *argv[]) {
     }
 
     GTree* networkGTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
+    vector<int> stopIds = vector<int>(0);
+    for (int i = 0; i < 100; i++){
+      stopIds.push_back(Creator::networkGraph.vertices[i].stopId);
+    }
+    GTreeController::calculateBorderDistancesOfStopIdsAndExportTree(networkGTreePointer, stopIds, dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
 
     CliController::runCli(dataType, networkGTreePointer);
   }

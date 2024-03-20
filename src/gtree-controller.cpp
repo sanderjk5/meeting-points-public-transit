@@ -27,3 +27,8 @@ GTree* GTreeController::createOrLoadNetworkGTree(DataType dataType, int numberOf
         return gTree;
     }
 }
+
+void GTreeController::calculateBorderDistancesOfStopIdsAndExportTree(GTree* gTree, vector<int> stopIds, DataType dataType, int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf) {
+    gTree->calculateBorderDistancesOfStopIds(stopIds);
+    gTree->exportTreeAsJson(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
+}
