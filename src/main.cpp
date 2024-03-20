@@ -104,14 +104,20 @@ int main(int argc, const char *argv[]) {
     if(dataType == vvs_j24){
       numberOfChildrenPerNode = 2;
       maxNumberOfVerticesPerLeaf = 64;
-    } else {
+    } else if (dataType == schienenfernverkehr_de) {
+      numberOfChildrenPerNode = 2;
+      maxNumberOfVerticesPerLeaf = 32;
+    } else if (dataType == schienenregionalverkehr_de || dataType == schienenfern_und_regionalverkehr_de) {
+      numberOfChildrenPerNode = 2;
+      maxNumberOfVerticesPerLeaf = 256;
+    } else if (dataType == gesamt_de) {
       numberOfChildrenPerNode = 4;
       maxNumberOfVerticesPerLeaf = 1048;
     }
 
     GTree* networkGTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
     vector<int> stopIds = vector<int>(0);
-    for (int i = 250; i < 1250; i++){
+    for (int i = 0; i < Creator::networkGraph.vertices.size(); i++){
       stopIds.push_back(Creator::networkGraph.vertices[i].stopId);
     }
     GTreeController::calculateBorderDistancesOfStopIdsAndExportTree(networkGTreePointer, stopIds, dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);

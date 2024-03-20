@@ -47,6 +47,8 @@ class CSA {
         int maxDepartureTime;
         int connectionCounter;
 
+        vector<int> extendedSourceStopIds;
+
         void initializeCSA();
 
         static int findFirstConnectionAfterTime(int departureTime);

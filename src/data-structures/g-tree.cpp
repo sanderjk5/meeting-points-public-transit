@@ -212,7 +212,11 @@ void GTree::exportTreeAsJson(DataType dataType, int numberOfChildrenPerNode, int
     string dataTypeString = Importer::getDataTypeString(dataType);
     string folderPath = FOLDER_PREFIX + "graphs/" + dataTypeString + "/";
 
-    string fileName = folderPath + "g-tree-" + to_string(numberOfChildrenPerNode) + "-" + to_string(maxNumberOfVerticesPerLeaf) + ".json";
+    string fileName = folderPath + "g-tree-" + to_string(numberOfChildrenPerNode) + "-" + to_string(maxNumberOfVerticesPerLeaf);
+    if (USE_FOOTPATHS) {
+        fileName += "-with-footpaths";
+    }
+    fileName += ".json";
 
     // delete the file if it already exists
     remove(fileName.c_str());
@@ -234,7 +238,7 @@ void GTree::exportTreeAsJson(DataType dataType, int numberOfChildrenPerNode, int
         nodes.erase(nodes.begin());
         file << "    {\n";
         file << "      \"nodeId\": " << node->nodeId << ",\n";
-        if (node->parent == nullptr) {
+        if (node->nodeId == 0) {
             file << "      \"parent\": null,\n";
         } else {
             file << "      \"parent\": " << node->parent->nodeId << ",\n";
@@ -297,7 +301,11 @@ void GTree::importTreeFromJson(DataType dataType, int numberOfChildrenPerNode, i
     string dataTypeString = Importer::getDataTypeString(dataType);
     string folderPath = FOLDER_PREFIX + "graphs/" + dataTypeString + "/";
 
-    string fileName = folderPath + "g-tree-" + to_string(numberOfChildrenPerNode) + "-" + to_string(maxNumberOfVerticesPerLeaf) + ".json";
+    string fileName = folderPath + "g-tree-" + to_string(numberOfChildrenPerNode) + "-" + to_string(maxNumberOfVerticesPerLeaf);
+    if (USE_FOOTPATHS) {
+        fileName += "-with-footpaths";
+    }
+    fileName += ".json";
 
     ifstream file;
     file.open(fileName);
@@ -376,7 +384,7 @@ void GTree::calculateBorderDistancesOfStopIds(vector<int> stopIds) {
         for (int i = 0; i < stopIds.size(); i++) {
             int stopId = stopIds[i];
             vector<int> targetStopIds = vector<int>(0);
-            GNode* node = nodeOfStopId[stopIds[i]];
+            GNode* node = nodeOfStopId[stopId];
             while (node != nullptr) {
                 if (find(node->stopIds.begin(), node->stopIds.end(), stopId) != node->stopIds.end()) {
                     for (int j = 0; j < node->stopIds.size(); j++) {
@@ -392,7 +400,7 @@ void GTree::calculateBorderDistancesOfStopIds(vector<int> stopIds) {
 
             vector<int> distances = Creator::networkGraph.getDistances(stopId, targetStopIds);
 
-            node = nodeOfStopId[stopIds[i]];
+            node = nodeOfStopId[stopId];
             while (node != nullptr) {
                 if (find(node->stopIds.begin(), node->stopIds.end(), stopId) != node->stopIds.end()) {
                     for (int j = 0; j < node->stopIds.size(); j++) {

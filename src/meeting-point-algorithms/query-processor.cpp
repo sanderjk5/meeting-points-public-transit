@@ -82,6 +82,7 @@ void NaiveQueryProcessor::processNaiveQuery() {
         }
 
         if (sum < minSum) {
+            meetingPointQueryResult.meetingPointMinSumStopId = i;
             meetingPointQueryResult.meetingPointMinSum = Importer::getStopName(i);
             meetingPointQueryResult.meetingTimeMinSum = TimeConverter::convertSecondsToTime(arrivalTime, true);
             meetingPointQueryResult.minSumDuration = TimeConverter::convertSecondsToTime(sum, false);
@@ -90,6 +91,7 @@ void NaiveQueryProcessor::processNaiveQuery() {
             minSum = sum;
         }
         if (max < minMax) {
+            meetingPointQueryResult.meetingPointMinMaxStopId = i;
             meetingPointQueryResult.meetingPointMinMax = Importer::getStopName(i);
             meetingPointQueryResult.meetingTimeMinMax = TimeConverter::convertSecondsToTime(arrivalTime, true);
             meetingPointQueryResult.minMaxDuration = TimeConverter::convertSecondsToTime(max, false);
@@ -138,9 +140,9 @@ vector<Journey> NaiveQueryProcessor::getJourneys(Optimization optimization) {
     vector<Journey> journeys;
     int targetStopId;
     if (optimization == min_sum) {
-        targetStopId = Importer::getStopId(meetingPointQueryResult.meetingPointMinSum);
+        targetStopId = meetingPointQueryResult.meetingPointMinSumStopId;
     } else {
-        targetStopId = Importer::getStopId(meetingPointQueryResult.meetingPointMinMax);
+        targetStopId = meetingPointQueryResult.meetingPointMinMaxStopId;
     }
     for (int i = 0; i < csas.size(); i++) {
         Journey journey = csas[i]->createJourney(targetStopId);
@@ -377,6 +379,7 @@ void NaiveKeyStopQueryProcessor::processNaiveKeyStopQuery(vector<int> keyStops) 
         }
 
         if (sum < minSum) {
+            meetingPointQueryResult.meetingPointMinSumStopId = stopId;
             meetingPointQueryResult.meetingPointMinSum = Importer::getStopName(stopId);
             meetingPointQueryResult.meetingTimeMinSum = TimeConverter::convertSecondsToTime(arrivalTime, true);
             meetingPointQueryResult.minSumDuration = TimeConverter::convertSecondsToTime(sum, false);
@@ -385,6 +388,7 @@ void NaiveKeyStopQueryProcessor::processNaiveKeyStopQuery(vector<int> keyStops) 
             minSum = sum;
         }
         if (max < minMax) {
+            meetingPointQueryResult.meetingPointMinMaxStopId = stopId;
             meetingPointQueryResult.meetingPointMinMax = Importer::getStopName(stopId);
             meetingPointQueryResult.meetingTimeMinMax = TimeConverter::convertSecondsToTime(arrivalTime, true);
             meetingPointQueryResult.minMaxDuration = TimeConverter::convertSecondsToTime(max, false);
@@ -433,9 +437,9 @@ vector<Journey> NaiveKeyStopQueryProcessor::getJourneys(Optimization optimizatio
     vector<Journey> journeys;
     int targetStopId;
     if (optimization == min_sum) {
-        targetStopId = Importer::getStopId(meetingPointQueryResult.meetingPointMinSum);
+        targetStopId = meetingPointQueryResult.meetingPointMinSumStopId;
     } else {
-        targetStopId = Importer::getStopId(meetingPointQueryResult.meetingPointMinMax);
+        targetStopId = meetingPointQueryResult.meetingPointMinMaxStopId;
     }
     for (int i = 0; i < csas.size(); i++) {
         Journey journey = csas[i]->createJourney(targetStopId);
@@ -550,8 +554,8 @@ void GTreeQueryProcessor::processGTreeQuery(bool useCSA) {
 
     if (meetingPointQueryResult.meetingPointMinSum != "" || meetingPointQueryResult.meetingPointMinMax != "") {
         // Calculate the real durations to the meeting point
-        int meetingPointMinSumStopId = Importer::getStopId(meetingPointQueryResult.meetingPointMinSum);
-        int meetingPointMinMaxStopId = Importer::getStopId(meetingPointQueryResult.meetingPointMinMax);
+        int meetingPointMinSumStopId = meetingPointQueryResult.meetingPointMinSumStopId;
+        int meetingPointMinMaxStopId = meetingPointQueryResult.meetingPointMinMaxStopId;
 
         vector<int> targetStopIds = vector<int>(1, meetingPointMinSumStopId);
         if (meetingPointMinSumStopId != meetingPointMinMaxStopId){
@@ -699,9 +703,11 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
         optimalMeetingPointStopName = Importer::getStopName(optimalMeetingPointStopId);
     }
     if (optimization == min_sum) {
+        meetingPointQueryResult.meetingPointMinSumStopId = optimalMeetingPointStopId;
         meetingPointQueryResult.meetingPointMinSum = optimalMeetingPointStopName;
         meetingPointQueryGTreeCSAInfo.csaTargetStopFractionMinSum = (double) csaTargetStops / Importer::stops.size();
     } else {
+        meetingPointQueryResult.meetingPointMinMaxStopId = optimalMeetingPointStopId;
         meetingPointQueryResult.meetingPointMinMax = optimalMeetingPointStopName;
         meetingPointQueryGTreeCSAInfo.csaTargetStopFractionMinMax = (double) csaTargetStops / Importer::stops.size();
     }
@@ -800,9 +806,9 @@ vector<Journey> GTreeQueryProcessor::getJourneys(Optimization optimization) {
     vector<Journey> journeys;
     int targetStopId;
     if (optimization == min_sum) {
-        targetStopId = Importer::getStopId(meetingPointQueryResult.meetingPointMinSum);
+        targetStopId = meetingPointQueryResult.meetingPointMinSumStopId;
     } else {
-        targetStopId = Importer::getStopId(meetingPointQueryResult.meetingPointMinMax);
+        targetStopId = meetingPointQueryResult.meetingPointMinMaxStopId;
     }
     for (int i = 0; i < csas.size(); i++) {
         Journey journey = csas[i]->createJourney(targetStopId);
@@ -863,6 +869,7 @@ void RaptorQueryProcessor::processRaptorQuery() {
         }
 
         if (minMeetingTime != INT_MAX) {
+            meetingPointQueryResult.meetingPointStopId = meetingStopId;
             meetingPointQueryResult.meetingPoint = Importer::getStopName(meetingStopId);
             meetingPointQueryResult.meetingTime = TimeConverter::convertSecondsToTime(minMeetingTime, true);
             meetingPointQueryResult.durationInSeconds = minMeetingTime - meetingPointQuery.sourceTime;

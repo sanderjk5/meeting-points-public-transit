@@ -18,11 +18,13 @@ struct MeetingPointQuery {
 };
 
 struct MeetingPointQueryResult {
+    int meetingPointMinSumStopId;
     string meetingPointMinSum;
     string meetingTimeMinSum;
     string minSumDuration;
     int minSumDurationInSeconds;
     int maxTransfersMinSum;
+    int meetingPointMinMaxStopId;
     string meetingPointMinMax;
     string meetingTimeMinMax;
     string minMaxDuration;
@@ -32,6 +34,7 @@ struct MeetingPointQueryResult {
 };
 
 struct MeetingPointQueryRaptorResult {
+    int meetingPointStopId;
     string meetingPoint;
     string meetingTime;
     string duration;

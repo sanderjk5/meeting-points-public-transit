@@ -1,8 +1,11 @@
-#include <importer.h>
+#include "importer.h"
+
 #include <converter.h>
 #include <comparator.h>
+#include <calculator.h>
 
 #include <../constants.h>
+
 
 #include <iostream>
 #include <algorithm>
@@ -33,6 +36,8 @@ vector<vector<int>> Importer::tripsOfARoute = vector<vector<int>>(0);
 vector<vector<int>> Importer::stopsOfARoute = vector<vector<int>>(0);
 vector<vector<RouteSequencePair>> Importer::routesOfAStop = vector<vector<RouteSequencePair>>(0);
 vector<Connection> Importer::connections = vector<Connection>(0);
+vector<FootPath> Importer::footPaths = vector<FootPath>(0);
+vector<int> Importer::indexOfFirstFootPathOfAStop = vector<int>(0);
 
 /*
     Import the data from the GTFS files and prepare it for the algorithms.
@@ -56,11 +61,14 @@ void Importer::import(string folderName, bool prepareData, DataType dataType) {
 
     // Prepare the data for the algorithms
     if (prepareData) {
-        combineStops();
+        if (!USE_FOOTPATHS){
+            combineStops();
+        }
         generateValidRoutes();
         setIsAvailableOfTrips();
         clearAndSortTrips();
         generateSortedConnections();
+        generateFootPaths();
     }
 
     // Stop the timer and calculate the duration
@@ -541,6 +549,36 @@ void Importer::generateSortedConnections() {
     }
 
     cout << "Generated " << connections.size() << " connections." << endl;
+}
+
+void Importer::generateFootPaths() {
+    cout << "Generating foot paths..." << endl;
+    footPaths = vector<FootPath>(0);
+    indexOfFirstFootPathOfAStop = vector<int>(stops.size());
+    for (int i = 0; i < stops.size(); i++){
+        indexOfFirstFootPathOfAStop[i] = footPaths.size();
+        if (USE_FOOTPATHS) {
+            for (int j = 0; j < stops.size(); j++){
+                double distance = DistanceCalculator::calculateDistance(stops[i].lat, stops[i].lon, stops[j].lat, stops[j].lon);
+                if (distance < 0.5){
+                    FootPath footPath;
+                    footPath.departureStopId = i;
+                    footPath.arrivalStopId = j;
+                    // assume 4km/h walking speed
+                    footPath.duration = distance * 900;
+                    footPaths.push_back(footPath);
+                }
+            }
+        } else {
+            FootPath footPath;
+            footPath.departureStopId = i;
+            footPath.arrivalStopId = i;
+            footPath.duration = 0;
+            footPaths.push_back(footPath);
+        }
+    }
+    cout << "Generated " << footPaths.size() << " foot paths." << endl;
+
 }
 
 /*
