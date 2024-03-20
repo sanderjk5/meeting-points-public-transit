@@ -368,6 +368,7 @@ void GTree::importTreeFromJson(DataType dataType, int numberOfChildrenPerNode, i
 
 void GTree::calculateBorderDistancesOfStopIds(vector<int> stopIds) {
     auto start = std::chrono::high_resolution_clock::now();
+    #pragma omp parallel for
     for (int i = 0; i < stopIds.size(); i++) {
         int stopId = stopIds[i];
         vector<int> targetStopIds = vector<int>(0);
@@ -402,12 +403,15 @@ void GTree::calculateBorderDistancesOfStopIds(vector<int> stopIds) {
         }
 
         // print the progress after every 5% of the graphs
-        if (stopIds.size() > 20) {
-            if (i % (stopIds.size() / 20) == 0){
-                auto end = std::chrono::high_resolution_clock::now();
-                auto duration = std::chrono::duration_cast<std::chrono::minutes>(end - start).count();
-                cout << "Calculated " << i + 1 << "/" << stopIds.size() << " durations in " << duration << " minutes." << endl;
-            }
-        }
+        // if (stopIds.size() > 20) {
+        //     if (i % (stopIds.size() / 20) == 0){
+        //         auto end = std::chrono::high_resolution_clock::now();
+        //         auto duration = std::chrono::duration_cast<std::chrono::minutes>(end - start).count();
+        //         cout << "Calculated " << i + 1 << "/" << stopIds.size() << " durations in " << duration << " minutes." << endl;
+        //     }
+        // }
     }
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::minutes>(end - start).count();
+    cout << "Calculated " << stopIds.size() << " distances in " << duration << " minutes." << endl;
 }
