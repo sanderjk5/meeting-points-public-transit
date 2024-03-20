@@ -81,7 +81,7 @@ void Creator::createNetworkGraph() {
 /*
     Use the network graph to create the network g-tree.
 */
-GTree* Creator::createNetworkGTree(int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf) {
+GTree* Creator::createNetworkGTree(int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf, bool withDistances) {
     cout << "Creating network g-tree..." << endl;
 
     // Start the timer
@@ -96,7 +96,7 @@ GTree* Creator::createNetworkGTree(int numberOfChildrenPerNode, int maxNumberOfV
     // Partitionate the network graph and create the network g-tree
     vector<Graph> graphs = partitionateGraph(networkGraph, leafs, maxNumberOfVerticesPerLeaf);
     cout << "Partitionated the graph into " << graphs.size() << " partitions." << endl;
-    GTree* networkGTree = createGTree(networkGraph, graphs, numberOfChildrenPerNode, depth);
+    GTree* networkGTree = createGTree(networkGraph, graphs, numberOfChildrenPerNode, depth, withDistances);
 
     // Stop the timer and calculate the duration
     auto end = std::chrono::high_resolution_clock::now();
@@ -451,7 +451,7 @@ vector<Graph> Creator::splitPartitionatedGraph(Graph &graph) {
 /*
     Create the g-tree using the partitionated graphs.
 */
-GTree* Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numberOfChildrenPerNode, int depth) {
+GTree* Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int numberOfChildrenPerNode, int depth, bool withDistances) {
     GTree* gTree = new GTree();
     gTree->nodeOfStopId = vector<GNode*>(Importer::stops.size(), nullptr);
 
@@ -481,13 +481,15 @@ GTree* Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int num
         }
 
         // calculate the durations between the stops of the node
-        for (int j = 0; j < node->stopIds.size(); j++) {
-            vector<int> distances = originalGraph.getDistances(node->stopIds[j], node->stopIds);
-            for (int k = 0; k < node->stopIds.size(); k++) {
-                node->borderDurations[make_pair(node->stopIds[j], node->stopIds[k])] = distances[node->stopIds[k]];
+        if (withDistances) {
+            for (int j = 0; j < node->stopIds.size(); j++) {
+                vector<int> distances = originalGraph.getDistances(node->stopIds[j], node->stopIds);
+                for (int k = 0; k < node->stopIds.size(); k++) {
+                    node->borderDurations[make_pair(node->stopIds[j], node->stopIds[k])] = distances[node->stopIds[k]];
+                }
             }
         }
-
+        
         cout << "Number of vertices: " << node->stopIds.size() << endl;
 
         // print the progress after every 5% of the graphs
@@ -528,10 +530,12 @@ GTree* Creator::createGTree(Graph &originalGraph, vector<Graph> &graphs, int num
             }
 
             // calculate the border durations of the children
-            for (int k = 0; k < node->stopIds.size(); k++) {
-                vector<int> distances = originalGraph.getDistances(node->stopIds[k], node->stopIds);
-                for (int l = 0; l < node->stopIds.size(); l++) {
-                    node->borderDurations[make_pair(node->stopIds[k], node->stopIds[l])] = distances[node->stopIds[l]];
+            if (withDistances) {
+                for (int k = 0; k < node->stopIds.size(); k++) {
+                    vector<int> distances = originalGraph.getDistances(node->stopIds[k], node->stopIds);
+                    for (int l = 0; l < node->stopIds.size(); l++) {
+                        node->borderDurations[make_pair(node->stopIds[k], node->stopIds[l])] = distances[node->stopIds[l]];
+                    }
                 }
             }
 

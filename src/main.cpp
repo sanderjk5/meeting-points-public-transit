@@ -83,17 +83,17 @@ int main(int argc, const char *argv[]) {
 
   if (startExperiments){
     // Real experiments
-    vector<int> numberOfSourceStops = {2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40, 50, 75, 100, 150, 200};
+    // vector<int> numberOfSourceStops = {2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40, 50, 75, 100, 150, 200};
 
-    NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 1000, 25, 0.90);
+    // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 1000, 25, 0.90);
 
-    ExperimentController::findBestGTreeParameters(dataType, 10, 1000);
+    // ExperimentController::findBestGTreeParameters(dataType, 10, 1000);
     // ExperimentController::testAndCompareAlgorithmsRandom(dataType, 1000, numberOfSourceStops);
 
     // Test experiments
-    // vector<int> numberOfSourceStops = {2, 5, 10};
+    vector<int> numberOfSourceStops = {2};
 
-    // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 10, 10, 0.90);
+    NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 10, 30, 0.90);
 
     // ExperimentController::findBestGTreeParameters(dataType, 2, 10);
     // ExperimentController::testAndCompareAlgorithmsRandom(dataType, 10, numberOfSourceStops);
@@ -110,6 +110,11 @@ int main(int argc, const char *argv[]) {
     }
 
     GTree* networkGTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
+    vector<int> stopIds = vector<int>(0);
+    for (int i = 250; i < 1250; i++){
+      stopIds.push_back(Creator::networkGraph.vertices[i].stopId);
+    }
+    GTreeController::calculateBorderDistancesOfStopIdsAndExportTree(networkGTreePointer, stopIds, dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
 
     CliController::runCli(dataType, networkGTreePointer);
   }

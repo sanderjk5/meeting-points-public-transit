@@ -42,6 +42,7 @@ class GTree {
         int getMinimalDurationToStop(int sourceStopId, int targetStopId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations);
         void exportTreeAsJson(DataType dataType, int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf);
         void importTreeFromJson(DataType dataType, int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf);
+        void calculateBorderDistancesOfStopIds(vector<int> stopIds);
 
     private:
         vector<int> getNodePath(int stopId, int nodeId);
