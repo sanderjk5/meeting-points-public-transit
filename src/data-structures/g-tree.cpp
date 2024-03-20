@@ -389,8 +389,6 @@ void GTree::calculateBorderDistancesOfStopIds(vector<int> stopIds) {
                 }
                 node = node->parent;
             }
-            
-            cout << "Calculating border distances of stop " << stopId << " to " << targetStopIds.size() << " target stops." << endl;
 
             vector<int> distances = Creator::networkGraph.getDistances(stopId, targetStopIds);
 
@@ -405,15 +403,6 @@ void GTree::calculateBorderDistancesOfStopIds(vector<int> stopIds) {
                 }
                 node = node->parent;
             }
-
-            // print the progress after every 5% of the graphs
-            // if (stopIds.size() > 20) {
-            //     if (i % (stopIds.size() / 20) == 0){
-            //         auto end = std::chrono::high_resolution_clock::now();
-            //         auto duration = std::chrono::duration_cast<std::chrono::minutes>(end - start).count();
-            //         cout << "Calculated " << i + 1 << "/" << stopIds.size() << " durations in " << duration << " minutes." << endl;
-            //     }
-            // }
         }
     }
     auto end = std::chrono::high_resolution_clock::now();
