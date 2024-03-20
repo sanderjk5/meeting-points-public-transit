@@ -368,48 +368,51 @@ void GTree::importTreeFromJson(DataType dataType, int numberOfChildrenPerNode, i
 
 void GTree::calculateBorderDistancesOfStopIds(vector<int> stopIds) {
     auto start = std::chrono::high_resolution_clock::now();
-    #pragma omp parallel for
-    for (int i = 0; i < stopIds.size(); i++) {
-        int stopId = stopIds[i];
-        vector<int> targetStopIds = vector<int>(0);
-        GNode* node = nodeOfStopId[stopIds[i]];
-        while (node != nullptr) {
-            if (find(node->stopIds.begin(), node->stopIds.end(), stopId) != node->stopIds.end()) {
-                for (int j = 0; j < node->stopIds.size(); j++) {
-                    if (node->stopIds[j] != stopId && find(targetStopIds.begin(), targetStopIds.end(), node->stopIds[j]) == targetStopIds.end()){
-                        targetStopIds.push_back(node->stopIds[j]);
+    #pragma omp parallel num_threads(3)
+    {
+        #pragma omp for
+        for (int i = 0; i < stopIds.size(); i++) {
+            int stopId = stopIds[i];
+            vector<int> targetStopIds = vector<int>(0);
+            GNode* node = nodeOfStopId[stopIds[i]];
+            while (node != nullptr) {
+                if (find(node->stopIds.begin(), node->stopIds.end(), stopId) != node->stopIds.end()) {
+                    for (int j = 0; j < node->stopIds.size(); j++) {
+                        if (node->stopIds[j] != stopId && find(targetStopIds.begin(), targetStopIds.end(), node->stopIds[j]) == targetStopIds.end()){
+                            targetStopIds.push_back(node->stopIds[j]);
+                        }
                     }
+                } else {
+                    break;
                 }
-            } else {
-                break;
+                node = node->parent;
             }
-            node = node->parent;
-        }
-        
-        cout << "Calculating border distances of stop " << stopId << " to " << targetStopIds.size() << " target stops." << endl;
+            
+            cout << "Calculating border distances of stop " << stopId << " to " << targetStopIds.size() << " target stops." << endl;
 
-        vector<int> distances = Creator::networkGraph.getDistances(stopId, targetStopIds);
+            vector<int> distances = Creator::networkGraph.getDistances(stopId, targetStopIds);
 
-        node = nodeOfStopId[stopIds[i]];
-        while (node != nullptr) {
-            if (find(node->stopIds.begin(), node->stopIds.end(), stopId) != node->stopIds.end()) {
-                for (int j = 0; j < node->stopIds.size(); j++) {
-                    node->borderDurations[make_pair(stopId, node->stopIds[j])] = distances[node->stopIds[j]];
+            node = nodeOfStopId[stopIds[i]];
+            while (node != nullptr) {
+                if (find(node->stopIds.begin(), node->stopIds.end(), stopId) != node->stopIds.end()) {
+                    for (int j = 0; j < node->stopIds.size(); j++) {
+                        node->borderDurations[make_pair(stopId, node->stopIds[j])] = distances[node->stopIds[j]];
+                    }
+                } else {
+                    break;
                 }
-            } else {
-                break;
+                node = node->parent;
             }
-            node = node->parent;
-        }
 
-        // print the progress after every 5% of the graphs
-        // if (stopIds.size() > 20) {
-        //     if (i % (stopIds.size() / 20) == 0){
-        //         auto end = std::chrono::high_resolution_clock::now();
-        //         auto duration = std::chrono::duration_cast<std::chrono::minutes>(end - start).count();
-        //         cout << "Calculated " << i + 1 << "/" << stopIds.size() << " durations in " << duration << " minutes." << endl;
-        //     }
-        // }
+            // print the progress after every 5% of the graphs
+            // if (stopIds.size() > 20) {
+            //     if (i % (stopIds.size() / 20) == 0){
+            //         auto end = std::chrono::high_resolution_clock::now();
+            //         auto duration = std::chrono::duration_cast<std::chrono::minutes>(end - start).count();
+            //         cout << "Calculated " << i + 1 << "/" << stopIds.size() << " durations in " << duration << " minutes." << endl;
+            //     }
+            // }
+        }
     }
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::minutes>(end - start).count();
