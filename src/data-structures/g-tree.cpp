@@ -11,6 +11,7 @@
 #include <limits.h>
 #include <fstream>
 #include <chrono>
+#include <omp.h>
 
 using namespace std;
 
@@ -368,7 +369,8 @@ void GTree::importTreeFromJson(DataType dataType, int numberOfChildrenPerNode, i
 
 void GTree::calculateBorderDistancesOfStopIds(vector<int> stopIds) {
     auto start = std::chrono::high_resolution_clock::now();
-    #pragma omp parallel num_threads(3)
+    std::cout << "Max threads: " << omp_get_max_threads() << "\n";
+    #pragma omp parallel
     {
         #pragma omp for
         for (int i = 0; i < stopIds.size(); i++) {
