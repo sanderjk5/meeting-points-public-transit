@@ -834,6 +834,7 @@ void RaptorQueryProcessor::processRaptorQuery() {
 
     while (true) {
         bool allFinished = true;
+        #pragma omp parallel for
         for (int i = 0; i < raptors.size(); i++) {
             if(!raptors[i]->isFinished()) {
                 raptors[i]->processRaptorRound();
