@@ -101,7 +101,8 @@ int main(int argc, const char *argv[]) {
     
     int numberOfChildrenPerNode;
     int maxNumberOfVerticesPerLeaf;
-    int numberOfVertices = Creator::networkGraph.vertices.size();
+    int firstStopId = 0;
+    int lastStopId = Creator::networkGraph.vertices.size();
     if(dataType == vvs_j24){
       numberOfChildrenPerNode = 2;
       maxNumberOfVerticesPerLeaf = 64;
@@ -114,12 +115,13 @@ int main(int argc, const char *argv[]) {
     } else if (dataType == gesamt_de) {
       numberOfChildrenPerNode = 4;
       maxNumberOfVerticesPerLeaf = 256;
-      numberOfVertices = 100000;
+      firstStopId = 100000
+      lastStopId = Creator::networkGraph.vertices.size();
     }
 
     GTree* networkGTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
     vector<int> stopIds = vector<int>(0);
-    for (int i = 0; i < numberOfVertices; i++) {
+    for (int i = firstStopId; i < lastStopId; i++) {
       stopIds.push_back(Creator::networkGraph.vertices[i].stopId);
     }
     GTreeController::calculateBorderDistancesOfStopIdsAndExportTree(networkGTreePointer, stopIds, dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);

@@ -117,7 +117,7 @@ class GTreeQueryProcessor {
         MeetingPointQuery meetingPointQuery;
         MeetingPointQueryResult meetingPointQueryResult;
         MeetingPointQueryGTreeCSAInfo meetingPointQueryGTreeCSAInfo;
-        map<pair<int, int>, vector<pair<int, int>>> queryPointAndNodeToBorderStopDurations;
+        vector<map<int, vector<pair<int, int>>>> queryPointAndNodeToBorderStopDurations;
         vector<CSA*> csas;
 
         void processGTreeQueryWithOptimization(Optimization optimization, bool useCSA);

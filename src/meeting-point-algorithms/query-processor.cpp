@@ -538,7 +538,7 @@ void GTreeQueryProcessor::processGTreeQuery(bool useCSA) {
         csas.push_back(csa);
     }
 
-    queryPointAndNodeToBorderStopDurations = map<pair<int, int>, vector<pair<int, int>>>();
+    queryPointAndNodeToBorderStopDurations = vector<map<int, vector<pair<int, int>>>>(meetingPointQuery.sourceStopIds.size(), map<int, vector<pair<int, int>>>());
 
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -720,7 +720,7 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
 int GTreeQueryProcessor::getLowerBoundToNode(int nodeId, Optimization optimization) {
     int lowerBound = 0;
     for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
-        int duration = gTree->getMinimalDurationToNode(meetingPointQuery.sourceStopIds[i], nodeId, queryPointAndNodeToBorderStopDurations);
+        int duration = gTree->getMinimalDurationToNode(meetingPointQuery.sourceStopIds[i], nodeId, queryPointAndNodeToBorderStopDurations[i]);
         if (duration == INT_MAX) {
             return INT_MAX;
         }
@@ -741,7 +741,7 @@ int GTreeQueryProcessor::getLowerBoundToNode(int nodeId, Optimization optimizati
 int GTreeQueryProcessor::getApproximatedCostsToStop(int stopId, Optimization optimization) {
     int costs = 0;
     for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
-        int duration = gTree->getMinimalDurationToStop(meetingPointQuery.sourceStopIds[i], stopId, queryPointAndNodeToBorderStopDurations);
+        int duration = gTree->getMinimalDurationToStop(meetingPointQuery.sourceStopIds[i], stopId, queryPointAndNodeToBorderStopDurations[i]);
         if (duration == INT_MAX) {
             return INT_MAX;
         }
