@@ -642,7 +642,7 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
     int csaTargetStops = 0;
 
     // Calculate the initial lower bound of the root node
-    int l = getLowerBoundToNode(gTree->root->nodeId, queryPointAndNodeToBorderStopDurations, optimization);
+    int l = getLowerBoundToNode(gTree->root->nodeId, optimization);
     pq.push(make_pair(l, gTree->root->nodeId));
 
     // Process the query until the priority queue is empty or the current lower bound is greater than the current best
@@ -662,7 +662,7 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
             for(int i = 0; i < currentNode->children.size(); i++){
                 GNode* childNode = currentNode->children[i];
                 int childNodeId = childNode->nodeId;
-                int childLowerBound = getLowerBoundToNode(childNodeId, queryPointAndNodeToBorderStopDurations, optimization);
+                int childLowerBound = getLowerBoundToNode(childNodeId, optimization);
                 if (childLowerBound < currentBest) {
                     pq.push(make_pair(childLowerBound, childNodeId));
                 }
@@ -673,7 +673,7 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
             vector<int> reachableTargetStopIds = vector<int>(0);
             for (int i = 0; i < currentNode->stopIds.size(); i++) {
                 int stopId = currentNode->stopIds[i];
-                int costs = getApproximatedCostsToStop(stopId, queryPointAndNodeToBorderStopDurations, optimization);
+                int costs = getApproximatedCostsToStop(stopId, optimization);
                 if (costs < currentBest) {
                     reachableTargetStopIds.push_back(stopId);
                     if (!useCSA) {
@@ -717,7 +717,7 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
 /*
     Get the lower bound to a node.
 */
-int GTreeQueryProcessor::getLowerBoundToNode(int nodeId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization) {
+int GTreeQueryProcessor::getLowerBoundToNode(int nodeId, Optimization optimization) {
     int lowerBound = 0;
     for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
         int duration = gTree->getMinimalDurationToNode(meetingPointQuery.sourceStopIds[i], nodeId, queryPointAndNodeToBorderStopDurations);
@@ -738,7 +738,7 @@ int GTreeQueryProcessor::getLowerBoundToNode(int nodeId, map<pair<int, int>, vec
 /*
     Get the costs to a stop.
 */
-int GTreeQueryProcessor::getApproximatedCostsToStop(int stopId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization) {
+int GTreeQueryProcessor::getApproximatedCostsToStop(int stopId, Optimization optimization) {
     int costs = 0;
     for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
         int duration = gTree->getMinimalDurationToStop(meetingPointQuery.sourceStopIds[i], stopId, queryPointAndNodeToBorderStopDurations);

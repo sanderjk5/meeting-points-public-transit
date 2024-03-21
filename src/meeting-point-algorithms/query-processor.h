@@ -121,8 +121,8 @@ class GTreeQueryProcessor {
         vector<CSA*> csas;
 
         void processGTreeQueryWithOptimization(Optimization optimization, bool useCSA);
-        int getLowerBoundToNode(int nodeId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization);
-        int getApproximatedCostsToStop(int stopId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization);
+        int getLowerBoundToNode(int nodeId, Optimization optimization);
+        int getApproximatedCostsToStop(int stopId, Optimization optimization);
         int getCostsToStop(int stopId, Optimization optimization);
         void processCSAToTargetStops(vector<int> targetStopIds, int currentBest);
 };

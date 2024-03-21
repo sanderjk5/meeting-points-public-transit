@@ -115,7 +115,7 @@ int GTree::getMinimalDurationToStop(int sourceStopId, int targetStopId, map<pair
     pair<int, int> queryPointAndNode = make_pair(sourceStopId, nodeOfStopId[targetStopId]->nodeId);
 
     // fill the map with the border stop durations of the target node if it is not already filled
-    if (queryPointAndNodeToBorderStopDurations.find(queryPointAndNode) != queryPointAndNodeToBorderStopDurations.end()) {
+    if (queryPointAndNodeToBorderStopDurations.find(queryPointAndNode) == queryPointAndNodeToBorderStopDurations.end()) {
         getMinimalDurationToNode(sourceStopId, nodeOfStopId[targetStopId]->nodeId, queryPointAndNodeToBorderStopDurations);
     }
 
