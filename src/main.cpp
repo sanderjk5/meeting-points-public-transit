@@ -110,10 +110,10 @@ int main(int argc, const char *argv[]) {
       maxNumberOfVerticesPerLeaf = 32;
     } else if (dataType == schienenregionalverkehr_de || dataType == schienenfern_und_regionalverkehr_de) {
       numberOfChildrenPerNode = 2;
-      maxNumberOfVerticesPerLeaf = 256;
+      maxNumberOfVerticesPerLeaf = 128;
     } else if (dataType == gesamt_de) {
       numberOfChildrenPerNode = 4;
-      maxNumberOfVerticesPerLeaf = 1048;
+      maxNumberOfVerticesPerLeaf = 256;
       numberOfVertices = 10000;
     }
 
