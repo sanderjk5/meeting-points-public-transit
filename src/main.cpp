@@ -115,7 +115,7 @@ int main(int argc, const char *argv[]) {
     } else if (dataType == gesamt_de) {
       numberOfChildrenPerNode = 4;
       maxNumberOfVerticesPerLeaf = 256;
-      firstStopId = 100000;
+      firstStopId = 0;
       lastStopId = Creator::networkGraph.vertices.size();
     }
 
