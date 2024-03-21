@@ -546,12 +546,12 @@ void GTreeQueryProcessor::processGTreeQuery(bool useCSA) {
     processGTreeQueryWithOptimization(min_sum, useCSA);
     processGTreeQueryWithOptimization(min_max, useCSA);
 
-    int numberOfNodes = gTree->nodeOfNodeId.size();
+    int totalNumberOfNodes = gTree->nodeOfNodeId.size() * meetingPointQuery.sourceStopIds.size();
+    int visitedNodes = 0;
     for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
-        int visitedNodes = queryPointAndNodeToBorderStopDurations[i].size();
-        double fraction = (double) visitedNodes / numberOfNodes;
-        cout << "Visited nodes: " << visitedNodes << "/" << numberOfNodes << ", fraction" << fraction << endl;
+        visitedNodes += queryPointAndNodeToBorderStopDurations[i].size();
     }
+    visitedNodesAvgFraction = (double) visitedNodes / totalNumberOfNodes;
 
     // Stop the timer and calculate the duration
     auto end = std::chrono::high_resolution_clock::now();

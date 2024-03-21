@@ -111,6 +111,7 @@ class GTreeQueryProcessor {
         MeetingPointQueryResult getMeetingPointQueryResult();
         MeetingPointQueryGTreeCSAInfo getMeetingPointQueryGTreeCSAInfo();
         vector<Journey> getJourneys(Optimization optimization);
+        double visitedNodesAvgFraction;
         
     private:
         GTree* gTree;
