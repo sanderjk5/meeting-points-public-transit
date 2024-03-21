@@ -139,7 +139,10 @@ class Importer {
         static void setIsAvailableOfTrips();
         static void clearAndSortTrips();
         static void generateSortedConnections();
+        static void loadOrGenerateFootPaths(DataType dataType);
         static void generateFootPaths();
+        static void exportFootPaths(DataType dataType);
+        static void importFootPaths(DataType dataType);
 };
 
 #endif //CMAKE_IMPORTER_H

@@ -61,7 +61,7 @@ int main(int argc, const char *argv[]) {
   vector<string> sourceStopNames;
 
   if (dataType == vvs_j24){
-    string folderName = "vvs_gtfs_j24";
+    string folderName = "vvs_j24";
     Importer::import(folderName, true, vvs_j24);
   } else if (dataType == schienenfernverkehr_de){
     string folderName = "schienenfernverkehr_de";
@@ -73,7 +73,7 @@ int main(int argc, const char *argv[]) {
     string folderName0 = "schienenfernverkehr_de";
     string folderName1 = "schienenregionalverkehr_de";
     Importer::import(folderName0, false, schienenfernverkehr_de);
-    Importer::import(folderName1, true, schienenregionalverkehr_de);
+    Importer::import(folderName1, true, schienenfern_und_regionalverkehr_de);
   } else if (dataType == gesamt_de){
     string folderName = "gesamt_de";
     Importer::import(folderName, true, gesamt_de);
@@ -101,6 +101,7 @@ int main(int argc, const char *argv[]) {
     
     int numberOfChildrenPerNode;
     int maxNumberOfVerticesPerLeaf;
+    int numberOfVertices = Creator::networkGraph.vertices.size();
     if(dataType == vvs_j24){
       numberOfChildrenPerNode = 2;
       maxNumberOfVerticesPerLeaf = 64;
@@ -113,11 +114,12 @@ int main(int argc, const char *argv[]) {
     } else if (dataType == gesamt_de) {
       numberOfChildrenPerNode = 4;
       maxNumberOfVerticesPerLeaf = 1048;
+      numberOfVertices = 10000;
     }
 
     GTree* networkGTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
     vector<int> stopIds = vector<int>(0);
-    for (int i = 0; i < 60000; i++){
+    for (int i = 0; i < numberOfVertices; i++) {
       stopIds.push_back(Creator::networkGraph.vertices[i].stopId);
     }
     GTreeController::calculateBorderDistancesOfStopIdsAndExportTree(networkGTreePointer, stopIds, dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
