@@ -114,7 +114,7 @@ int main(int argc, const char *argv[]) {
     } else if (dataType == gesamt_de) {
       numberOfChildrenPerNode = 4;
       maxNumberOfVerticesPerLeaf = 256;
-      numberOfVertices = 10000;
+      numberOfVertices = 100000;
     }
 
     GTree* networkGTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);

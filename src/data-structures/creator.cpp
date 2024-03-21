@@ -288,7 +288,7 @@ vector<Graph> Creator::coarseGraph(Graph &graph, int maxNumberOfVerticesInGraph)
         // cout << "Number of vertices in coarsed graph: " << coarsedGraph.vertices.size() << endl;
 
         // Break if the coarsed graph is not coarser than the previous graph
-        if(coarsedGraph.vertices.size() > previousGraph->vertices.size() * 0.95){
+        if(coarsedGraph.vertices.size() > previousGraph->vertices.size() * 0.99){
             break;
         }
         coarsedGraphs.push_back(coarsedGraph);

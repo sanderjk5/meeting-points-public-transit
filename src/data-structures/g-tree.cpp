@@ -262,16 +262,10 @@ void GTree::exportTreeAsJson(DataType dataType, int numberOfChildrenPerNode, int
         }
         file << "],\n";
 
-        int numberOfEntries = node->borderDurations.size();
-        int counter = 0;
         file << "      \"borderDurations\": [\n";
         for (auto const& entry : node->borderDurations) {
             file << "        {\"source\": " << entry.first.first << ", \"target\": " << entry.first.second << ", \"duration\": " << entry.second << "}";
-            if (counter < numberOfEntries - 1) {
-                file << ",";
-            }
-            file << "\n";
-            counter++;
+            file << ",\n";
         }
         file << "      ]\n";
 

@@ -684,6 +684,7 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
             }
             if (useCSA) {
                 processCSAToTargetStops(reachableTargetStopIds, currentBest);
+                #pragma omp parallel for
                 for (int i = 0; i < reachableTargetStopIds.size(); i++) {
                     int stopId = reachableTargetStopIds[i];
                     int costs = getCostsToStop(stopId, optimization);
