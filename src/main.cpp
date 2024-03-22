@@ -87,8 +87,8 @@ int main(int argc, const char *argv[]) {
 
     // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 1000, 25, 0.90);
 
-    ExperimentController::findBestGTreeParameters(dataType, 10, 100);
-    // ExperimentController::testAndCompareAlgorithmsRandom(dataType, 1000, numberOfSourceStops);
+    // ExperimentController::findBestGTreeParameters(dataType, 10, 100);
+    ExperimentController::testAndCompareAlgorithmsRandom(dataType, 1000, numberOfSourceStops);
 
     // Test experiments
     // vector<int> numberOfSourceStops = {2};
@@ -109,7 +109,7 @@ int main(int argc, const char *argv[]) {
       maxNumberOfVerticesPerLeaf = 32;
     } else if (dataType == schienenregionalverkehr_de || dataType == schienenfern_und_regionalverkehr_de) {
       numberOfChildrenPerNode = 4;
-      maxNumberOfVerticesPerLeaf = 64;
+      maxNumberOfVerticesPerLeaf = 128;
     } else if (dataType == gesamt_de) {
       numberOfChildrenPerNode = 8;
       maxNumberOfVerticesPerLeaf = 256;
