@@ -98,6 +98,15 @@ void Creator::createNetworkGraph() {
         networkGraph.vertices.push_back(vertex);
     }
 
+    // Get the number of vertices and edges
+    int numberOfVertices = networkGraph.vertices.size();
+    int numberOfEdges = 0;
+    for (int i = 0; i < networkGraph.adjacencyList.size(); i++) {
+        numberOfEdges += networkGraph.adjacencyList[i].size();
+    }
+    cout << "Number of vertices: " << numberOfVertices << endl;
+    cout << "Number of edges: " << numberOfEdges << endl;
+
     // Stop the timer and calculate the duration
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();

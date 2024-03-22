@@ -87,7 +87,7 @@ int main(int argc, const char *argv[]) {
 
     // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 1000, 25, 0.90);
 
-    ExperimentController::findBestGTreeParameters(dataType, 10, 20);
+    ExperimentController::findBestGTreeParameters(dataType, 10, 100);
     // ExperimentController::testAndCompareAlgorithmsRandom(dataType, 1000, numberOfSourceStops);
 
     // Test experiments
