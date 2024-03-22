@@ -230,10 +230,17 @@ AverageRunTimeAndAccuracy GTreeAlgorithmTester::getAverageRunTimeAndAccuracy(Dat
 
         bool gTreeCSAQuerySuccessful = meetingPointQueryResultGTreeCSA.meetingPointMinSum != "" && meetingPointQueryResultGTreeCSA.meetingPointMinMax != "";
         bool gTreeApproximationQuerySuccessful = meetingPointQueryResultApprox.meetingPointMinSum != "" && meetingPointQueryResultApprox.meetingPointMinMax != "";
+        
         cout << successfulQueryCounter << endl;
+
         if (!gTreeCSAQuerySuccessful || !gTreeApproximationQuerySuccessful) {
             continue;
         }
+
+        cout << "query succesfull" << endl;
+
+        PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultGTreeCSA);
+        PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultApprox);
 
         successfulQueryCounter++;
 
