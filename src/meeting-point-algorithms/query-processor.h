@@ -18,11 +18,13 @@ struct MeetingPointQuery {
 };
 
 struct MeetingPointQueryResult {
+    int meetingPointMinSumStopId;
     string meetingPointMinSum;
     string meetingTimeMinSum;
     string minSumDuration;
     int minSumDurationInSeconds;
     int maxTransfersMinSum;
+    int meetingPointMinMaxStopId;
     string meetingPointMinMax;
     string meetingTimeMinMax;
     string minMaxDuration;
@@ -32,6 +34,7 @@ struct MeetingPointQueryResult {
 };
 
 struct MeetingPointQueryRaptorResult {
+    int meetingPointStopId;
     string meetingPoint;
     string meetingTime;
     string duration;
@@ -108,18 +111,19 @@ class GTreeQueryProcessor {
         MeetingPointQueryResult getMeetingPointQueryResult();
         MeetingPointQueryGTreeCSAInfo getMeetingPointQueryGTreeCSAInfo();
         vector<Journey> getJourneys(Optimization optimization);
+        double visitedNodesAvgFraction;
         
     private:
         GTree* gTree;
         MeetingPointQuery meetingPointQuery;
         MeetingPointQueryResult meetingPointQueryResult;
         MeetingPointQueryGTreeCSAInfo meetingPointQueryGTreeCSAInfo;
-        map<pair<int, int>, vector<pair<int, int>>> queryPointAndNodeToBorderStopDurations;
+        vector<map<int, vector<pair<int, int>>>> queryPointAndNodeToBorderStopDurations;
         vector<CSA*> csas;
 
         void processGTreeQueryWithOptimization(Optimization optimization, bool useCSA);
-        int getLowerBoundToNode(int nodeId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization);
-        int getApproximatedCostsToStop(int stopId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization);
+        int getLowerBoundToNode(int nodeId, Optimization optimization);
+        int getApproximatedCostsToStop(int stopId, Optimization optimization);
         int getCostsToStop(int stopId, Optimization optimization);
         void processCSAToTargetStops(vector<int> targetStopIds, int currentBest);
 };

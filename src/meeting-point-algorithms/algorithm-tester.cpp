@@ -159,6 +159,8 @@ void GTreeAlgorithmTester::testGTreeAlgorithmRandom(GTree* gTree, bool useCSA, i
         if(useCSA) {
             MeetingPointQueryGTreeCSAInfo meetingPointQueryGTreeCSAInfo = gTreeQueryProcessor.getMeetingPointQueryGTreeCSAInfo();
             PrintHelper::printGTreeCSAInfo(meetingPointQueryGTreeCSAInfo);
+        } else {
+            PrintHelper::printGTreeApproxInfo(gTreeQueryProcessor);
         }
     }
 
@@ -181,6 +183,8 @@ void GTreeAlgorithmTester::testGTreeAlgorithm(GTree* gTree, MeetingPointQuery me
     if(useCSA) {
         MeetingPointQueryGTreeCSAInfo meetingPointQueryGTreeCSAInfo = gTreeQueryProcessor.getMeetingPointQueryGTreeCSAInfo();
         PrintHelper::printGTreeCSAInfo(meetingPointQueryGTreeCSAInfo);
+    } else {
+        PrintHelper::printGTreeApproxInfo(gTreeQueryProcessor);
     }
 
     bool querySuccessful = meetingPointQueryResult.meetingPointMinSum != "" && meetingPointQueryResult.meetingPointMinMax != "";
@@ -317,6 +321,7 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
     resultsFile << ",medianCSATargetStopFractionMinSum,medianCSATargetStopFractionMinMax,medianCSAVisitedConnectionsFraction";
     resultsFile << ",maxCSATargetStopFractionMinSum,maxCSATargetStopFractionMinMax,maxCSAVisitedConnectionsFraction";
     resultsFile << ",minCSATargetStopFractionMinSum,minCSATargetStopFractionMinMax,minCSAVisitedConnectionsFraction";
+    resultsFile << ",avgVisitedNodesAvgFraction,medianVisitedNodesAvgFraction,maxVisitedNodesAvgFraction,minVisitedNodesAvgFraction";
     resultsFile << ",avgMaxTransfersNaive,avgMaxTransfersNaiveKeyStop,avgMaxTransfersGTreeCSA,avgMaxTransfersGTreeApprox,avgMaxTransfersRaptor";
     resultsFile << ",medianMaxTransfersNaive,medianMaxTransfersNaiveKeyStop,medianMaxTransfersGTreeCSA,medianMaxTransfersGTreeApprox,medianMaxTransfersRaptor";
     resultsFile << ",maxMaxTransfersNaive,maxMaxTransfersNaiveKeyStop,maxMaxTransfersGTreeCSA,maxMaxTransfersGTreeApprox,maxMaxTransfersRaptor";
@@ -369,6 +374,7 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
         queriesFile << "sourceStopIds,sourceTime,weekday";
         queriesFile << ",queryTimeNaive,queryTimeNaiveKeyStop,queryTimeGTreeCSA,queryTimeGTreeApprox,queryTimeRaptor";
         queriesFile << ",csaTargetStopFractionMinSum,csaTargetStopFractionMinMax,csaVisitedConnectionsFraction";
+        queriesFile << ",visitedNodesAvgFraction";
         queriesFile << ",maxTransfersMinSumNaive,maxTransfersMinMaxNaive,maxTransfersMinSumNaiveKeyStop,maxTransfersMinMaxNaiveKeyStop";
         queriesFile << ",maxTransfersMinSumGTreeCSA,maxTransfersMinMaxGTreeCSA,maxTransfersMinSumGTreeApprox,maxTransfersMinMaxGTreeApprox,maxTransfersRaptor";
         queriesFile << ",absolutDifferenceMinSumGTree,absolutDifferenceMinMaxGTree,accuracyMinSumGTree,accuracyMinMaxGTree";
@@ -395,6 +401,8 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
         vector<double> csaTargetStopFractionMinSum;
         vector<double> csaTargetStopFractionMinMax;
         vector<double> csaVisitedConnectionsFraction;
+
+        vector<double> visitedNodesAvgFraction;
 
         vector<double> maxTransfersNaive;
         vector<double> maxTransfersNaiveKeyStop;
@@ -493,6 +501,8 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
             csaTargetStopFractionMinMax.push_back(meetingPointQueryGTreeCSAInfo.csaTargetStopFractionMinMax);
             csaVisitedConnectionsFraction.push_back(meetingPointQueryGTreeCSAInfo.csaVisitedConnectionsFraction);
 
+            visitedNodesAvgFraction.push_back(gTreeQueryProcessorApproximation.visitedNodesAvgFraction);
+
             maxTransfersNaive.push_back(meetingPointQueryResultNaive.maxTransfersMinSum);
             maxTransfersNaive.push_back(meetingPointQueryResultNaive.maxTransfersMinMax);
             maxTransfersNaiveKeyStop.push_back(meetingPointQueryResultNaiveKeyStop.maxTransfersMinSum);
@@ -561,6 +571,7 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
             queriesFile  << "," << meetingPointQueryResultRaptor.queryTime;
             queriesFile << "," << meetingPointQueryGTreeCSAInfo.csaTargetStopFractionMinSum << "," << meetingPointQueryGTreeCSAInfo.csaTargetStopFractionMinMax;
             queriesFile << "," << meetingPointQueryGTreeCSAInfo.csaVisitedConnectionsFraction;
+            queriesFile << "," << gTreeQueryProcessorApproximation.visitedNodesAvgFraction;
             queriesFile << "," << meetingPointQueryResultNaive.maxTransfersMinSum << "," << meetingPointQueryResultNaive.maxTransfersMinMax;
             queriesFile << "," << meetingPointQueryResultNaiveKeyStop.maxTransfersMinSum << "," << meetingPointQueryResultNaiveKeyStop.maxTransfersMinMax;
             queriesFile << "," << meetingPointQueryResultGTreeCSA.maxTransfersMinSum << "," << meetingPointQueryResultGTreeCSA.maxTransfersMinMax;
@@ -600,6 +611,7 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
         resultsFile << "," << Calculator::getMedian(csaTargetStopFractionMinSum) << "," << Calculator::getMedian(csaTargetStopFractionMinMax) << "," << Calculator::getMedian(csaVisitedConnectionsFraction);
         resultsFile << "," << Calculator::getMaximum(csaTargetStopFractionMinSum) << "," << Calculator::getMaximum(csaTargetStopFractionMinMax) << "," << Calculator::getMaximum(csaVisitedConnectionsFraction);
         resultsFile << "," << Calculator::getMinimum(csaTargetStopFractionMinSum) << "," << Calculator::getMinimum(csaTargetStopFractionMinMax) << "," << Calculator::getMinimum(csaVisitedConnectionsFraction);
+        resultsFile << "," << Calculator::getAverage(visitedNodesAvgFraction) << "," << Calculator::getMedian(visitedNodesAvgFraction) << "," << Calculator::getMaximum(visitedNodesAvgFraction) << "," << Calculator::getMinimum(visitedNodesAvgFraction);
         resultsFile << "," << Calculator::getAverage(maxTransfersNaive) << "," << Calculator::getAverage(maxTransfersNaiveKeyStop) << "," << Calculator::getAverage(maxTransfersGTreeCSA) << "," << Calculator::getAverage(maxTransfersGTreeApproximation) << "," << Calculator::getAverage(maxTransfersRaptor);
         resultsFile << "," << Calculator::getMedian(maxTransfersNaive) << "," << Calculator::getMedian(maxTransfersNaiveKeyStop) << "," << Calculator::getMedian(maxTransfersGTreeCSA) << "," << Calculator::getMedian(maxTransfersGTreeApproximation) << "," << Calculator::getMedian(maxTransfersRaptor);
         resultsFile << "," << Calculator::getMaximum(maxTransfersNaive) << "," << Calculator::getMaximum(maxTransfersNaiveKeyStop) << "," << Calculator::getMaximum(maxTransfersGTreeCSA) << "," << Calculator::getMaximum(maxTransfersGTreeApproximation) << "," << Calculator::getMaximum(maxTransfersRaptor);
@@ -674,6 +686,12 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
             cout << "Minimum target stop fraction min sum: " << Calculator::getMinimum(csaTargetStopFractionMinSum) << endl;
             cout << "Minimum target stop fraction min max: " << Calculator::getMinimum(csaTargetStopFractionMinMax) << endl;
             cout << "Minimum visited connections fraction: " << Calculator::getMinimum(csaVisitedConnectionsFraction) << endl;
+
+            cout << "\nGTree Approximation information:" << endl;
+            cout << "Average target stop fraction min sum: " << Calculator::getAverage(visitedNodesAvgFraction) << endl;
+            cout << "Median target stop fraction min sum: " << Calculator::getMedian(visitedNodesAvgFraction) << endl;
+            cout << "Maximum target stop fraction min sum: " << Calculator::getMaximum(visitedNodesAvgFraction) << endl;
+            cout << "Minimum target stop fraction min sum: " << Calculator::getMinimum(visitedNodesAvgFraction) << endl;
 
             cout << "\nMax transfers:" << endl;
             cout << "Average max transfers naive: " << Calculator::getAverage(maxTransfersNaive) << endl;
@@ -810,6 +828,7 @@ void AlgorithmComparer::compareAlgorithms(DataType dataType, GTree* gTree, Meeti
 
     cout << "GTree - Approximation: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultGTreeApproximation);
+    PrintHelper::printGTreeApproxInfo(gTreeQueryProcessorApproximation);
 
     cout << "Raptor: " << endl;
     PrintHelper::printMeetingPointQueryRaptorResult(meetingPointQueryResultRaptor);
@@ -960,5 +979,11 @@ void PrintHelper::printGTreeCSAInfo(MeetingPointQueryGTreeCSAInfo meetingPointQu
     cout << "Min Sum - fraction of target stops: " << meetingPointQueryGTreeCSAInfo.csaTargetStopFractionMinSum << endl;
     cout << "Min Max - fraction of target stops: " << meetingPointQueryGTreeCSAInfo.csaTargetStopFractionMinMax << endl;
     cout << "Fraction of visited connections: " << meetingPointQueryGTreeCSAInfo.csaVisitedConnectionsFraction << endl;
+    cout << endl;
+}
+
+void PrintHelper::printGTreeApproxInfo(GTreeQueryProcessor gTreeQueryProcessor) {
+    cout << "GTree Approximation Info: " << endl;
+    cout << "Avg Fraction of visitedNodes: " << gTreeQueryProcessor.visitedNodesAvgFraction << endl;
     cout << endl;
 }

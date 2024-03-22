@@ -61,7 +61,7 @@ int main(int argc, const char *argv[]) {
   vector<string> sourceStopNames;
 
   if (dataType == vvs_j24){
-    string folderName = "vvs_gtfs_j24";
+    string folderName = "vvs_j24";
     Importer::import(folderName, true, vvs_j24);
   } else if (dataType == schienenfernverkehr_de){
     string folderName = "schienenfernverkehr_de";
@@ -73,7 +73,7 @@ int main(int argc, const char *argv[]) {
     string folderName0 = "schienenfernverkehr_de";
     string folderName1 = "schienenregionalverkehr_de";
     Importer::import(folderName0, false, schienenfernverkehr_de);
-    Importer::import(folderName1, true, schienenregionalverkehr_de);
+    Importer::import(folderName1, true, schienenfern_und_regionalverkehr_de);
   } else if (dataType == gesamt_de){
     string folderName = "gesamt_de";
     Importer::import(folderName, true, gesamt_de);
@@ -83,17 +83,17 @@ int main(int argc, const char *argv[]) {
 
   if (startExperiments){
     // Real experiments
-    // vector<int> numberOfSourceStops = {2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40, 50, 75, 100, 150, 200};
+    vector<int> numberOfSourceStops = {2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40, 50, 75, 100, 150, 200};
 
     // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 1000, 25, 0.90);
 
-    // ExperimentController::findBestGTreeParameters(dataType, 10, 1000);
+    ExperimentController::findBestGTreeParameters(dataType, 10, 1000);
     // ExperimentController::testAndCompareAlgorithmsRandom(dataType, 1000, numberOfSourceStops);
 
     // Test experiments
-    vector<int> numberOfSourceStops = {2};
+    // vector<int> numberOfSourceStops = {2};
 
-    NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 10, 30, 0.90);
+    // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 10, 30, 0.90);
 
     // ExperimentController::findBestGTreeParameters(dataType, 2, 10);
     // ExperimentController::testAndCompareAlgorithmsRandom(dataType, 10, numberOfSourceStops);
@@ -101,17 +101,27 @@ int main(int argc, const char *argv[]) {
     
     int numberOfChildrenPerNode;
     int maxNumberOfVerticesPerLeaf;
+    int firstStopId = 0;
+    int lastStopId = Creator::networkGraph.vertices.size();
     if(dataType == vvs_j24){
       numberOfChildrenPerNode = 2;
       maxNumberOfVerticesPerLeaf = 64;
-    } else {
+    } else if (dataType == schienenfernverkehr_de) {
+      numberOfChildrenPerNode = 2;
+      maxNumberOfVerticesPerLeaf = 32;
+    } else if (dataType == schienenregionalverkehr_de || dataType == schienenfern_und_regionalverkehr_de) {
+      numberOfChildrenPerNode = 2;
+      maxNumberOfVerticesPerLeaf = 128;
+    } else if (dataType == gesamt_de) {
       numberOfChildrenPerNode = 4;
-      maxNumberOfVerticesPerLeaf = 1048;
+      maxNumberOfVerticesPerLeaf = 256;
+      firstStopId = 0;
+      lastStopId = Creator::networkGraph.vertices.size();
     }
 
     GTree* networkGTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
     vector<int> stopIds = vector<int>(0);
-    for (int i = 250; i < 1250; i++){
+    for (int i = firstStopId; i < lastStopId; i++) {
       stopIds.push_back(Creator::networkGraph.vertices[i].stopId);
     }
     GTreeController::calculateBorderDistancesOfStopIdsAndExportTree(networkGTreePointer, stopIds, dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);

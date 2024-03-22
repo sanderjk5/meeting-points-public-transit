@@ -7,6 +7,7 @@
 #include <limits.h>
 #include <iostream>
 #include <chrono>
+#include <algorithm>
 
 
 #include <vector>
@@ -28,7 +29,14 @@ void CSA::initializeCSA() {
         s[i] = INT_MAX;
     }
 
-    s[query.sourceStopId] = query.sourceTime;
+    int indexOfFirstFootpathOfSourceStop = Importer::indexOfFirstFootPathOfAStop[query.sourceStopId];
+    for (int i = indexOfFirstFootpathOfSourceStop; i < Importer::footPaths.size(); i++) {
+        if (Importer::footPaths[i].departureStopId != query.sourceStopId) {
+            break;
+        }
+        s[Importer::footPaths[i].arrivalStopId] = query.sourceTime + Importer::footPaths[i].duration;
+        extendedSourceStopIds.push_back(Importer::footPaths[i].arrivalStopId);
+    }
 
     for(int i = 0; i < Importer::trips.size(); i++) {
         t[i] = -1;
@@ -111,10 +119,17 @@ void CSA::processCSA() {
                 int arrivalStopId = connection->arrivalStopId;
                 int tripId = connection->tripId;
 
-                s[connection->arrivalStopId] = connectionArrivalTime;
-
-                journeyPointers[connection->arrivalStopId].enterConnection = &Importer::connections[t[connection->tripId]];
-                journeyPointers[connection->arrivalStopId].exitConnection = connection;
+                int indexOfFirstFootpathOfArrivalStop = Importer::indexOfFirstFootPathOfAStop[arrivalStopId];
+                for (int i = indexOfFirstFootpathOfArrivalStop; i < Importer::footPaths.size(); i++) {
+                    if (Importer::footPaths[i].departureStopId != arrivalStopId) {
+                        break;
+                    }
+                    if (s[Importer::footPaths[i].arrivalStopId] > connectionArrivalTime + Importer::footPaths[i].duration) {
+                        s[Importer::footPaths[i].arrivalStopId] = connectionArrivalTime + Importer::footPaths[i].duration;
+                        journeyPointers[Importer::footPaths[i].arrivalStopId].enterConnection = &Importer::connections[t[tripId]];
+                        journeyPointers[Importer::footPaths[i].arrivalStopId].exitConnection = connection;
+                    }
+                }
             }
         }
     }
@@ -130,7 +145,7 @@ Journey CSA::createJourney(int targetStopId) {
     vector<Leg> legs;
 
     int currentStopId = targetStopId;
-    while (currentStopId != query.sourceStopId) {
+    while (find(extendedSourceStopIds.begin(), extendedSourceStopIds.end(), currentStopId) == extendedSourceStopIds.end()) {
         JourneyPointer journeyPointer = journeyPointers[currentStopId];
 
         Leg leg;

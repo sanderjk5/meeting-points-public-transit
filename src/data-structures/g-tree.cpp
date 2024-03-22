@@ -18,7 +18,7 @@ using namespace std;
 /*
     Calculate the minimal duration to a target node from a source stop. Fill the map with the border stop durations of the nodes on the path if they are not already filled.
 */
-int GTree::getMinimalDurationToNode(int sourceStopId, int targetNodeId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations) {
+int GTree::getMinimalDurationToNode(int sourceStopId, int targetNodeId, map<int, vector<pair<int, int>>> &nodeToBorderStopDurations) {
     int minDuration = INT_MAX;
     
     // get the path from the source stop to the target node in the G-tree
@@ -30,24 +30,23 @@ int GTree::getMinimalDurationToNode(int sourceStopId, int targetNodeId, map<pair
     }
 
     // fill the map with the border stop durations of the first node if it is not already filled
-    pair<int, int> queryPointAndNode = make_pair(sourceStopId, path[0]);
-    if (queryPointAndNodeToBorderStopDurations.find(queryPointAndNode) == queryPointAndNodeToBorderStopDurations.end()) {
+    int sourceNodeId = path[0];
+    if (nodeToBorderStopDurations.find(sourceNodeId) == nodeToBorderStopDurations.end()) {
         vector<pair<int, int>> distancesToBorderStops = vector<pair<int, int>>(0);
         for (int i = 0; i < nodeOfNodeId[path[0]]->borderStopIds.size(); i++) {
             int borderStopId = nodeOfNodeId[path[0]]->borderStopIds[i];
             int distanceToBorderStop = nodeOfStopId[sourceStopId]->borderDurations[make_pair(sourceStopId, borderStopId)];
             distancesToBorderStops.push_back(make_pair(distanceToBorderStop, borderStopId));
         }
-        queryPointAndNodeToBorderStopDurations[queryPointAndNode] = distancesToBorderStops;
+        nodeToBorderStopDurations[sourceNodeId] = distancesToBorderStops;
     }
 
     // fill the map with the border stop durations of the other nodes on the path if they are not already filled
     int previousNodeId = path[0];
     for(int i = 1; i < path.size(); i++) {
         int currentNodeId = path[i];
-        queryPointAndNode = make_pair(sourceStopId, currentNodeId);
-        if (queryPointAndNodeToBorderStopDurations.find(queryPointAndNode) == queryPointAndNodeToBorderStopDurations.end()) {
-            vector<pair<int, int>> distancesToBorderStopsOfPreviousNode = queryPointAndNodeToBorderStopDurations[make_pair(sourceStopId, previousNodeId)];
+        if (nodeToBorderStopDurations.find(currentNodeId) == nodeToBorderStopDurations.end()) {
+            vector<pair<int, int>> distancesToBorderStopsOfPreviousNode = nodeToBorderStopDurations[previousNodeId];
             vector<pair<int, int>> distancesToBorderStopsOfCurrentNode = vector<pair<int, int>>(0);
             int parentNodeId;
             // case 1: the node is a parent of the previous node
@@ -82,14 +81,13 @@ int GTree::getMinimalDurationToNode(int sourceStopId, int targetNodeId, map<pair
                 distancesToBorderStopsOfCurrentNode.push_back(make_pair(minDistanceToCurrentBorderStop, borderStopId));
             }
 
-            queryPointAndNodeToBorderStopDurations[queryPointAndNode] = distancesToBorderStopsOfCurrentNode;
+            nodeToBorderStopDurations[currentNodeId] = distancesToBorderStopsOfCurrentNode;
         }
         previousNodeId = currentNodeId;
     }
 
     // get the minimal duration to the target node
-    queryPointAndNode = make_pair(sourceStopId, path.back());
-    vector<pair<int, int>> distancesToBorderStops = queryPointAndNodeToBorderStopDurations[queryPointAndNode];
+    vector<pair<int, int>> distancesToBorderStops = nodeToBorderStopDurations[targetNodeId];
     for (int i = 0; i < distancesToBorderStops.size(); i++) {
         int distanceToBorderStop = distancesToBorderStops[i].first;
         if (distanceToBorderStop < minDuration) {
@@ -104,7 +102,7 @@ int GTree::getMinimalDurationToNode(int sourceStopId, int targetNodeId, map<pair
     Calculate the minimal duration to a target stop from a source stop. Fill the map with the border stop durations of the nodes on the path if they are not already filled.
 
 */
-int GTree::getMinimalDurationToStop(int sourceStopId, int targetStopId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations) {
+int GTree::getMinimalDurationToStop(int sourceStopId, int targetStopId, map<int, vector<pair<int, int>>> &nodeToBorderStopDurations) {
     int minDuration = INT_MAX;
 
     // default case: the source stop is in the same node as the target stop
@@ -112,14 +110,14 @@ int GTree::getMinimalDurationToStop(int sourceStopId, int targetStopId, map<pair
         return nodeOfStopId[sourceStopId]->borderDurations[make_pair(sourceStopId, targetStopId)];
     }
 
-    pair<int, int> queryPointAndNode = make_pair(sourceStopId, nodeOfStopId[targetStopId]->nodeId);
+    int targetNodeId = nodeOfStopId[targetStopId]->nodeId;
 
     // fill the map with the border stop durations of the target node if it is not already filled
-    if (queryPointAndNodeToBorderStopDurations.find(queryPointAndNode) != queryPointAndNodeToBorderStopDurations.end()) {
-        getMinimalDurationToNode(sourceStopId, nodeOfStopId[targetStopId]->nodeId, queryPointAndNodeToBorderStopDurations);
+    if (nodeToBorderStopDurations.find(targetNodeId) == nodeToBorderStopDurations.end()) {
+        getMinimalDurationToNode(sourceStopId, targetNodeId, nodeToBorderStopDurations);
     }
 
-    vector<pair<int, int>> distancesToBorderStops = queryPointAndNodeToBorderStopDurations[queryPointAndNode];
+    vector<pair<int, int>> distancesToBorderStops = nodeToBorderStopDurations[targetNodeId];
 
     // get the minimal duration to the target stop
     for (int i = 0; i < distancesToBorderStops.size(); i++) {
@@ -212,7 +210,11 @@ void GTree::exportTreeAsJson(DataType dataType, int numberOfChildrenPerNode, int
     string dataTypeString = Importer::getDataTypeString(dataType);
     string folderPath = FOLDER_PREFIX + "graphs/" + dataTypeString + "/";
 
-    string fileName = folderPath + "g-tree-" + to_string(numberOfChildrenPerNode) + "-" + to_string(maxNumberOfVerticesPerLeaf) + ".json";
+    string fileName = folderPath + "g-tree-" + to_string(numberOfChildrenPerNode) + "-" + to_string(maxNumberOfVerticesPerLeaf);
+    if (USE_FOOTPATHS) {
+        fileName += "-with-footpaths";
+    }
+    fileName += ".json";
 
     // delete the file if it already exists
     remove(fileName.c_str());
@@ -234,7 +236,7 @@ void GTree::exportTreeAsJson(DataType dataType, int numberOfChildrenPerNode, int
         nodes.erase(nodes.begin());
         file << "    {\n";
         file << "      \"nodeId\": " << node->nodeId << ",\n";
-        if (node->parent == nullptr) {
+        if (node->nodeId == 0) {
             file << "      \"parent\": null,\n";
         } else {
             file << "      \"parent\": " << node->parent->nodeId << ",\n";
@@ -258,16 +260,10 @@ void GTree::exportTreeAsJson(DataType dataType, int numberOfChildrenPerNode, int
         }
         file << "],\n";
 
-        int numberOfEntries = node->borderDurations.size();
-        int counter = 0;
         file << "      \"borderDurations\": [\n";
         for (auto const& entry : node->borderDurations) {
             file << "        {\"source\": " << entry.first.first << ", \"target\": " << entry.first.second << ", \"duration\": " << entry.second << "}";
-            if (counter < numberOfEntries - 1) {
-                file << ",";
-            }
-            file << "\n";
-            counter++;
+            file << ",\n";
         }
         file << "      ]\n";
 
@@ -297,7 +293,11 @@ void GTree::importTreeFromJson(DataType dataType, int numberOfChildrenPerNode, i
     string dataTypeString = Importer::getDataTypeString(dataType);
     string folderPath = FOLDER_PREFIX + "graphs/" + dataTypeString + "/";
 
-    string fileName = folderPath + "g-tree-" + to_string(numberOfChildrenPerNode) + "-" + to_string(maxNumberOfVerticesPerLeaf) + ".json";
+    string fileName = folderPath + "g-tree-" + to_string(numberOfChildrenPerNode) + "-" + to_string(maxNumberOfVerticesPerLeaf);
+    if (USE_FOOTPATHS) {
+        fileName += "-with-footpaths";
+    }
+    fileName += ".json";
 
     ifstream file;
     file.open(fileName);
@@ -376,7 +376,7 @@ void GTree::calculateBorderDistancesOfStopIds(vector<int> stopIds) {
         for (int i = 0; i < stopIds.size(); i++) {
             int stopId = stopIds[i];
             vector<int> targetStopIds = vector<int>(0);
-            GNode* node = nodeOfStopId[stopIds[i]];
+            GNode* node = nodeOfStopId[stopId];
             while (node != nullptr) {
                 if (find(node->stopIds.begin(), node->stopIds.end(), stopId) != node->stopIds.end()) {
                     for (int j = 0; j < node->stopIds.size(); j++) {
@@ -392,7 +392,7 @@ void GTree::calculateBorderDistancesOfStopIds(vector<int> stopIds) {
 
             vector<int> distances = Creator::networkGraph.getDistances(stopId, targetStopIds);
 
-            node = nodeOfStopId[stopIds[i]];
+            node = nodeOfStopId[stopId];
             while (node != nullptr) {
                 if (find(node->stopIds.begin(), node->stopIds.end(), stopId) != node->stopIds.end()) {
                     for (int j = 0; j < node->stopIds.size(); j++) {

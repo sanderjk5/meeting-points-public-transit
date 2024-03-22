@@ -69,6 +69,12 @@ struct TripDepartureTimePair
     int departureTime;
 };
 
+struct FootPath {
+    int departureStopId;
+    int arrivalStopId;
+    int duration;
+};
+
 enum DataType {
     vvs_j24,
     schienenregionalverkehr_de,
@@ -101,6 +107,9 @@ class Importer {
         static vector<vector<int>> stopsOfARoute;
         static vector<vector<RouteSequencePair>> routesOfAStop;
 
+        static vector<FootPath> footPaths;
+        static vector<int> indexOfFirstFootPathOfAStop;
+
         static void import(string folderName, bool prepareData, DataType dataType);
         static vector<StopTime> getStopTimesOfATrip(int tripId);
         static bool isTripAvailable(int tripId, int dayOfWeek);
@@ -130,6 +139,10 @@ class Importer {
         static void setIsAvailableOfTrips();
         static void clearAndSortTrips();
         static void generateSortedConnections();
+        static void loadOrGenerateFootPaths(DataType dataType);
+        static void generateFootPaths();
+        static void exportFootPaths(DataType dataType);
+        static void importFootPaths(DataType dataType);
 };
 
 #endif //CMAKE_IMPORTER_H

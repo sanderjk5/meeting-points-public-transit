@@ -1,8 +1,11 @@
-#include <importer.h>
+#include "importer.h"
+
 #include <converter.h>
 #include <comparator.h>
+#include <calculator.h>
 
 #include <../constants.h>
+
 
 #include <iostream>
 #include <algorithm>
@@ -15,6 +18,7 @@
 #include <map>
 #include <string>
 #include <regex>
+#include <fstream>
 
 using namespace std;
 
@@ -33,6 +37,8 @@ vector<vector<int>> Importer::tripsOfARoute = vector<vector<int>>(0);
 vector<vector<int>> Importer::stopsOfARoute = vector<vector<int>>(0);
 vector<vector<RouteSequencePair>> Importer::routesOfAStop = vector<vector<RouteSequencePair>>(0);
 vector<Connection> Importer::connections = vector<Connection>(0);
+vector<FootPath> Importer::footPaths = vector<FootPath>(0);
+vector<int> Importer::indexOfFirstFootPathOfAStop = vector<int>(0);
 
 /*
     Import the data from the GTFS files and prepare it for the algorithms.
@@ -44,15 +50,15 @@ void Importer::import(string folderName, bool prepareData, DataType dataType) {
     // Start the timer
     auto start = std::chrono::high_resolution_clock::now();
 
-    string folderPathResults = FOLDER_PREFIX + "data/" + folderName + "/";
+    string folderPathData = FOLDER_PREFIX + "data/" + folderName + "/";
 
     // Import the data
     cout << "\nImporting data..." << endl;
-    importCalendars(folderPathResults, dataType);
-    importRoutes(folderPathResults, dataType);
-    importStops(folderPathResults, dataType);
-    importTrips(folderPathResults, dataType);
-    importStopTimes(folderPathResults, dataType);
+    importCalendars(folderPathData, dataType);
+    importRoutes(folderPathData, dataType);
+    importStops(folderPathData, dataType);
+    importTrips(folderPathData, dataType);
+    importStopTimes(folderPathData, dataType);
 
     // Prepare the data for the algorithms
     if (prepareData) {
@@ -61,6 +67,7 @@ void Importer::import(string folderName, bool prepareData, DataType dataType) {
         setIsAvailableOfTrips();
         clearAndSortTrips();
         generateSortedConnections();
+        loadOrGenerateFootPaths(dataType);
     }
 
     // Stop the timer and calculate the duration
@@ -107,7 +114,7 @@ void Importer::importCalendars(string folderPathResults, DataType dataType) {
             calendar.endDate = fields[9];
         } else {
             calendar.serviceId = id;
-            if (dataType == schienenregionalverkehr_de){
+            if (dataType == schienenregionalverkehr_de || dataType == schienenfern_und_regionalverkehr_de){
                 serviceIdOldToNew["re-" + fields[9]] = id;
             } else if (dataType == schienenfernverkehr_de) {
                 serviceIdOldToNew["fe-" + fields[9]] = id;
@@ -159,7 +166,7 @@ void Importer::importRoutes(string folderPathResults, DataType dataType) {
 
         // Read each field and assign it to the routes variable
         route.id = id;
-        if (dataType == schienenregionalverkehr_de) {
+        if (dataType == schienenregionalverkehr_de || dataType == schienenfern_und_regionalverkehr_de) {
             routeIdOldToNew["re-" + fields[4]] = id;
         } else if (dataType == schienenfernverkehr_de) {
             routeIdOldToNew["fe-" + fields[4]] = id;
@@ -211,7 +218,7 @@ void Importer::importStops(string folderPathResults, DataType dataType) {
             stop.lon = std::stod(fields[3]);
         } else {
             stop.id = id;
-            if (dataType == schienenregionalverkehr_de){
+            if (dataType == schienenregionalverkehr_de || dataType == schienenfern_und_regionalverkehr_de){
                 stopIdOldToNew["re-" + fields[2]] = id;
             } else if(dataType == schienenfernverkehr_de) {
                 stopIdOldToNew["fe-" + fields[2]] = id;
@@ -257,7 +264,7 @@ void Importer::importStopTimes(string folderPathResults, DataType dataType) {
         StopTime stopTime;
 
         // Read each field and assign it to the stop time variable
-        if (dataType == schienenregionalverkehr_de){
+        if (dataType == schienenregionalverkehr_de || dataType == schienenfern_und_regionalverkehr_de){
             stopTime.tripId = tripIdOldToNew["re-" + fields[0]];
             stopTime.stopId = stopIdOldToNew["re-" + fields[3]];
         } else if (dataType == schienenfernverkehr_de) {
@@ -306,7 +313,7 @@ void Importer::importTrips(string folderPathResults, DataType dataType) {
         trip.id = id;
 
         // Read each field and assign it to the trip variable
-        if (dataType == schienenregionalverkehr_de){
+        if (dataType == schienenregionalverkehr_de || dataType == schienenfern_und_regionalverkehr_de){
             trip.routeId = routeIdOldToNew["re-" + fields[0]];
             trip.serviceId = serviceIdOldToNew["re-" + fields[1]];
             tripIdOldToNew["re-" + fields[2]] = id;
@@ -336,22 +343,37 @@ void Importer::importTrips(string folderPathResults, DataType dataType) {
 */
 void Importer::combineStops() {
     map<int, int> stopIdOldToCombined = map<int, int>();
-    map<string, int> stopNameToId = map<string, int>();
+    map<string, vector<Stop>> stopNameToStops = map<string, vector<Stop>>();
 
     vector<Stop> newStops;
     int id = 0;
 
     for (Stop stop : stops) {
-        if (stopNameToId.find(stop.name) == stopNameToId.end()) {
-            stopNameToId[stop.name] = id;
+        if (stopNameToStops.find(stop.name) == stopNameToStops.end()) {
+            stopNameToStops[stop.name] = vector<Stop>(0);
             stopIdOldToCombined[stop.id] = id;
             stop.id = id;
             newStops.push_back(stop);
+            stopNameToStops[stop.name].push_back(stop);
             id++;
         } else {
-            int newId = stopNameToId[stop.name];
-            stopIdOldToCombined[stop.id] = newId;
-            stop.id = newId;
+            bool combinedStop = false;
+            for (Stop stopInMap : stopNameToStops[stop.name]) {
+                double distance = DistanceCalculator::calculateDistance(stop.lat, stop.lon, stopInMap.lat, stopInMap.lon);
+                if (distance < 1) {
+                    stopIdOldToCombined[stop.id] = stopInMap.id;
+                    stop.id = stopInMap.id;
+                    combinedStop = true;
+                    break;
+                }
+            }
+            if (!combinedStop) {
+                stopIdOldToCombined[stop.id] = id;
+                stop.id = id;
+                newStops.push_back(stop);
+                stopNameToStops[stop.name].push_back(stop);
+                id++;
+            }
         }
     }
 
@@ -541,6 +563,111 @@ void Importer::generateSortedConnections() {
     }
 
     cout << "Generated " << connections.size() << " connections." << endl;
+}
+
+void Importer::loadOrGenerateFootPaths(DataType dataType) {
+    string dataTypeString = getDataTypeString(dataType);
+    string folderPathData = FOLDER_PREFIX + "data/" + dataTypeString + "/";
+    string filePath = folderPathData + "foot_paths.txt";
+
+    ifstream file(filePath);
+
+    if (file.is_open()) {
+        file.close();
+        importFootPaths(dataType);
+    } else {
+        generateFootPaths();
+        exportFootPaths(dataType);
+    }
+}
+
+void Importer::generateFootPaths() {
+    cout << "Generating foot paths..." << endl;
+    footPaths = vector<FootPath>(0);
+    indexOfFirstFootPathOfAStop = vector<int>(stops.size());
+    for (int i = 0; i < stops.size(); i++){
+        indexOfFirstFootPathOfAStop[i] = footPaths.size();
+        if (USE_FOOTPATHS) {
+            for (int j = 0; j < stops.size(); j++){
+                double distance = DistanceCalculator::calculateDistance(stops[i].lat, stops[i].lon, stops[j].lat, stops[j].lon);
+                if (distance < 0.5){
+                    FootPath footPath;
+                    footPath.departureStopId = i;
+                    footPath.arrivalStopId = j;
+                    // assume 4km/h walking speed
+                    footPath.duration = distance * 900;
+                    footPaths.push_back(footPath);
+                }
+            }
+        } else {
+            FootPath footPath;
+            footPath.departureStopId = i;
+            footPath.arrivalStopId = i;
+            footPath.duration = 0;
+            footPaths.push_back(footPath);
+        }
+    }
+    cout << "Generated " << footPaths.size() << " foot paths." << endl;
+}
+
+void Importer::importFootPaths(DataType dataType) {
+    string dataTypeString = getDataTypeString(dataType);
+    string folderPathData = FOLDER_PREFIX + "data/" + dataTypeString + "/";
+    string filePath = folderPathData + "foot_paths.txt";
+
+    ifstream file(filePath);
+
+    if (!file.is_open()) {
+        std::cerr << "Failed to open footpath file: " << filePath << std::endl;
+    }
+
+    footPaths = vector<FootPath>(0);
+    indexOfFirstFootPathOfAStop = vector<int>(stops.size());
+
+    string line;
+    getline(file, line); // Skip the header line
+
+    int id = 0;
+    int lastStopId = -1;
+    while (getline(file, line)) {
+        vector<string> fields = splitCsvLine(line);
+
+        FootPath footPath;
+        footPath.departureStopId = stoi(fields[0]);
+        footPath.arrivalStopId = stoi(fields[1]);
+        footPath.duration = stoi(fields[2]);
+
+        if (footPath.departureStopId != lastStopId) {
+            indexOfFirstFootPathOfAStop[footPath.departureStopId] = id;
+            lastStopId = footPath.departureStopId;
+        }
+
+        footPaths.push_back(footPath);
+        id++;
+    }
+
+    file.close();
+
+    cout << "Imported " << footPaths.size() << " foot paths." << endl;
+}
+
+void Importer::exportFootPaths(DataType dataType) {
+    string dataTypeString = getDataTypeString(dataType);
+    string folderPathData = FOLDER_PREFIX + "data/" + dataTypeString + "/";
+    string filePath = folderPathData + "foot_paths.txt";
+
+    ofstream file(filePath);
+
+    if (!file.is_open()) {
+        std::cerr << "Failed to open footpath file: " << filePath << std::endl;
+    }
+
+    file << "departure_stop_id,arrival_stop_id,duration\n";
+    for (FootPath footPath : footPaths) {
+        file << footPath.departureStopId << "," << footPath.arrivalStopId << "," << footPath.duration << "\n";
+    }
+
+    file.close();
 }
 
 /*

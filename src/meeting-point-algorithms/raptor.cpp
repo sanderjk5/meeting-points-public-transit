@@ -20,8 +20,14 @@ void Raptor::initializeRaptor() {
     previousMarkedStops = vector<bool>(Importer::stops.size(), false);
     currentMarkedStops = vector<bool>(Importer::stops.size(), false);
 
-    currentEarliestArrivalTimes[query.sourceStopId] = query.sourceTime;
-    currentMarkedStops[query.sourceStopId] = true;
+    int indexOfFirstFootpathOfSourceStop = Importer::indexOfFirstFootPathOfAStop[query.sourceStopId];
+    for (int i = indexOfFirstFootpathOfSourceStop; i < Importer::footPaths.size(); i++) {
+        if (Importer::footPaths[i].departureStopId != query.sourceStopId) {
+            break;
+        }
+        currentEarliestArrivalTimes[Importer::footPaths[i].arrivalStopId] = query.sourceTime + Importer::footPaths[i].duration;
+        currentMarkedStops[Importer::footPaths[i].arrivalStopId] = true;
+    }
 
     q = vector<pair<int, int>>();
 
@@ -98,15 +104,20 @@ void Raptor::traverseRoutes() {
                     arrivalTime -= SECONDS_PER_DAY;
                 }
 
-                if (arrivalTime < currentEarliestArrivalTimes[stopId]) {
-                    currentEarliestArrivalTimes[stopId] = arrivalTime;
-                    currentMarkedStops[stopId] = true;
-                    isFinishedFlag = false;
+                int indexOfFirstFootpathOfArrivalStop = Importer::indexOfFirstFootPathOfAStop[stopId];
+                for (int k = indexOfFirstFootpathOfArrivalStop; k < Importer::footPaths.size(); k++) {
+                    if (Importer::footPaths[k].departureStopId != stopId) {
+                        break;
+                    }
+                    if (arrivalTime < currentEarliestArrivalTimes[Importer::footPaths[k].arrivalStopId]) {
+                        currentEarliestArrivalTimes[Importer::footPaths[k].arrivalStopId] = arrivalTime;
+                        currentMarkedStops[Importer::footPaths[k].arrivalStopId] = true;
+                        isFinishedFlag = false;
+                    }
                 }
             }
 
             if (previousMarkedStops[stopId] && (currentTripId == -1 || previousEarliestArrivalTimes[stopId] < stopTime.departureTime + currentDayOffset)) {
-                // cout << "routeId: " << routeId << " stopId: " << stopId << " stopSequence: " << j << endl;
                 pair<int, int> tripWithDayOffset = getEarliestTripWithDayOffset(routeId, stopId, j);
                 if (tripWithDayOffset.first != -1) {
                     currentTripId = tripWithDayOffset.first;

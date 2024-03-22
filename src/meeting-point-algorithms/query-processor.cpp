@@ -82,6 +82,7 @@ void NaiveQueryProcessor::processNaiveQuery() {
         }
 
         if (sum < minSum) {
+            meetingPointQueryResult.meetingPointMinSumStopId = i;
             meetingPointQueryResult.meetingPointMinSum = Importer::getStopName(i);
             meetingPointQueryResult.meetingTimeMinSum = TimeConverter::convertSecondsToTime(arrivalTime, true);
             meetingPointQueryResult.minSumDuration = TimeConverter::convertSecondsToTime(sum, false);
@@ -90,6 +91,7 @@ void NaiveQueryProcessor::processNaiveQuery() {
             minSum = sum;
         }
         if (max < minMax) {
+            meetingPointQueryResult.meetingPointMinMaxStopId = i;
             meetingPointQueryResult.meetingPointMinMax = Importer::getStopName(i);
             meetingPointQueryResult.meetingTimeMinMax = TimeConverter::convertSecondsToTime(arrivalTime, true);
             meetingPointQueryResult.minMaxDuration = TimeConverter::convertSecondsToTime(max, false);
@@ -138,9 +140,9 @@ vector<Journey> NaiveQueryProcessor::getJourneys(Optimization optimization) {
     vector<Journey> journeys;
     int targetStopId;
     if (optimization == min_sum) {
-        targetStopId = Importer::getStopId(meetingPointQueryResult.meetingPointMinSum);
+        targetStopId = meetingPointQueryResult.meetingPointMinSumStopId;
     } else {
-        targetStopId = Importer::getStopId(meetingPointQueryResult.meetingPointMinMax);
+        targetStopId = meetingPointQueryResult.meetingPointMinMaxStopId;
     }
     for (int i = 0; i < csas.size(); i++) {
         Journey journey = csas[i]->createJourney(targetStopId);
@@ -377,6 +379,7 @@ void NaiveKeyStopQueryProcessor::processNaiveKeyStopQuery(vector<int> keyStops) 
         }
 
         if (sum < minSum) {
+            meetingPointQueryResult.meetingPointMinSumStopId = stopId;
             meetingPointQueryResult.meetingPointMinSum = Importer::getStopName(stopId);
             meetingPointQueryResult.meetingTimeMinSum = TimeConverter::convertSecondsToTime(arrivalTime, true);
             meetingPointQueryResult.minSumDuration = TimeConverter::convertSecondsToTime(sum, false);
@@ -385,6 +388,7 @@ void NaiveKeyStopQueryProcessor::processNaiveKeyStopQuery(vector<int> keyStops) 
             minSum = sum;
         }
         if (max < minMax) {
+            meetingPointQueryResult.meetingPointMinMaxStopId = stopId;
             meetingPointQueryResult.meetingPointMinMax = Importer::getStopName(stopId);
             meetingPointQueryResult.meetingTimeMinMax = TimeConverter::convertSecondsToTime(arrivalTime, true);
             meetingPointQueryResult.minMaxDuration = TimeConverter::convertSecondsToTime(max, false);
@@ -433,9 +437,9 @@ vector<Journey> NaiveKeyStopQueryProcessor::getJourneys(Optimization optimizatio
     vector<Journey> journeys;
     int targetStopId;
     if (optimization == min_sum) {
-        targetStopId = Importer::getStopId(meetingPointQueryResult.meetingPointMinSum);
+        targetStopId = meetingPointQueryResult.meetingPointMinSumStopId;
     } else {
-        targetStopId = Importer::getStopId(meetingPointQueryResult.meetingPointMinMax);
+        targetStopId = meetingPointQueryResult.meetingPointMinMaxStopId;
     }
     for (int i = 0; i < csas.size(); i++) {
         Journey journey = csas[i]->createJourney(targetStopId);
@@ -534,13 +538,20 @@ void GTreeQueryProcessor::processGTreeQuery(bool useCSA) {
         csas.push_back(csa);
     }
 
-    queryPointAndNodeToBorderStopDurations = map<pair<int, int>, vector<pair<int, int>>>();
+    queryPointAndNodeToBorderStopDurations = vector<map<int, vector<pair<int, int>>>>(meetingPointQuery.sourceStopIds.size(), map<int, vector<pair<int, int>>>());
 
     auto start = std::chrono::high_resolution_clock::now();
 
     // Process the query for both optimizations
     processGTreeQueryWithOptimization(min_sum, useCSA);
     processGTreeQueryWithOptimization(min_max, useCSA);
+
+    int totalNumberOfNodes = gTree->nodeOfNodeId.size() * meetingPointQuery.sourceStopIds.size();
+    int visitedNodes = 0;
+    for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
+        visitedNodes += queryPointAndNodeToBorderStopDurations[i].size();
+    }
+    visitedNodesAvgFraction = (double) visitedNodes / totalNumberOfNodes;
 
     // Stop the timer and calculate the duration
     auto end = std::chrono::high_resolution_clock::now();
@@ -550,8 +561,8 @@ void GTreeQueryProcessor::processGTreeQuery(bool useCSA) {
 
     if (meetingPointQueryResult.meetingPointMinSum != "" || meetingPointQueryResult.meetingPointMinMax != "") {
         // Calculate the real durations to the meeting point
-        int meetingPointMinSumStopId = Importer::getStopId(meetingPointQueryResult.meetingPointMinSum);
-        int meetingPointMinMaxStopId = Importer::getStopId(meetingPointQueryResult.meetingPointMinMax);
+        int meetingPointMinSumStopId = meetingPointQueryResult.meetingPointMinSumStopId;
+        int meetingPointMinMaxStopId = meetingPointQueryResult.meetingPointMinMaxStopId;
 
         vector<int> targetStopIds = vector<int>(1, meetingPointMinSumStopId);
         if (meetingPointMinSumStopId != meetingPointMinMaxStopId){
@@ -638,7 +649,7 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
     int csaTargetStops = 0;
 
     // Calculate the initial lower bound of the root node
-    int l = getLowerBoundToNode(gTree->root->nodeId, queryPointAndNodeToBorderStopDurations, optimization);
+    int l = getLowerBoundToNode(gTree->root->nodeId, optimization);
     pq.push(make_pair(l, gTree->root->nodeId));
 
     // Process the query until the priority queue is empty or the current lower bound is greater than the current best
@@ -658,7 +669,7 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
             for(int i = 0; i < currentNode->children.size(); i++){
                 GNode* childNode = currentNode->children[i];
                 int childNodeId = childNode->nodeId;
-                int childLowerBound = getLowerBoundToNode(childNodeId, queryPointAndNodeToBorderStopDurations, optimization);
+                int childLowerBound = getLowerBoundToNode(childNodeId, optimization);
                 if (childLowerBound < currentBest) {
                     pq.push(make_pair(childLowerBound, childNodeId));
                 }
@@ -669,7 +680,7 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
             vector<int> reachableTargetStopIds = vector<int>(0);
             for (int i = 0; i < currentNode->stopIds.size(); i++) {
                 int stopId = currentNode->stopIds[i];
-                int costs = getApproximatedCostsToStop(stopId, queryPointAndNodeToBorderStopDurations, optimization);
+                int costs = getApproximatedCostsToStop(stopId, optimization);
                 if (costs < currentBest) {
                     reachableTargetStopIds.push_back(stopId);
                     if (!useCSA) {
@@ -680,6 +691,7 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
             }
             if (useCSA) {
                 processCSAToTargetStops(reachableTargetStopIds, currentBest);
+                #pragma omp parallel for
                 for (int i = 0; i < reachableTargetStopIds.size(); i++) {
                     int stopId = reachableTargetStopIds[i];
                     int costs = getCostsToStop(stopId, optimization);
@@ -699,9 +711,11 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
         optimalMeetingPointStopName = Importer::getStopName(optimalMeetingPointStopId);
     }
     if (optimization == min_sum) {
+        meetingPointQueryResult.meetingPointMinSumStopId = optimalMeetingPointStopId;
         meetingPointQueryResult.meetingPointMinSum = optimalMeetingPointStopName;
         meetingPointQueryGTreeCSAInfo.csaTargetStopFractionMinSum = (double) csaTargetStops / Importer::stops.size();
     } else {
+        meetingPointQueryResult.meetingPointMinMaxStopId = optimalMeetingPointStopId;
         meetingPointQueryResult.meetingPointMinMax = optimalMeetingPointStopName;
         meetingPointQueryGTreeCSAInfo.csaTargetStopFractionMinMax = (double) csaTargetStops / Importer::stops.size();
     }
@@ -710,10 +724,10 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
 /*
     Get the lower bound to a node.
 */
-int GTreeQueryProcessor::getLowerBoundToNode(int nodeId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization) {
+int GTreeQueryProcessor::getLowerBoundToNode(int nodeId, Optimization optimization) {
     int lowerBound = 0;
     for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
-        int duration = gTree->getMinimalDurationToNode(meetingPointQuery.sourceStopIds[i], nodeId, queryPointAndNodeToBorderStopDurations);
+        int duration = gTree->getMinimalDurationToNode(meetingPointQuery.sourceStopIds[i], nodeId, queryPointAndNodeToBorderStopDurations[i]);
         if (duration == INT_MAX) {
             return INT_MAX;
         }
@@ -731,10 +745,10 @@ int GTreeQueryProcessor::getLowerBoundToNode(int nodeId, map<pair<int, int>, vec
 /*
     Get the costs to a stop.
 */
-int GTreeQueryProcessor::getApproximatedCostsToStop(int stopId, map<pair<int, int>, vector<pair<int, int>>> &queryPointAndNodeToBorderStopDurations, Optimization optimization) {
+int GTreeQueryProcessor::getApproximatedCostsToStop(int stopId, Optimization optimization) {
     int costs = 0;
     for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
-        int duration = gTree->getMinimalDurationToStop(meetingPointQuery.sourceStopIds[i], stopId, queryPointAndNodeToBorderStopDurations);
+        int duration = gTree->getMinimalDurationToStop(meetingPointQuery.sourceStopIds[i], stopId, queryPointAndNodeToBorderStopDurations[i]);
         if (duration == INT_MAX) {
             return INT_MAX;
         }
@@ -800,9 +814,9 @@ vector<Journey> GTreeQueryProcessor::getJourneys(Optimization optimization) {
     vector<Journey> journeys;
     int targetStopId;
     if (optimization == min_sum) {
-        targetStopId = Importer::getStopId(meetingPointQueryResult.meetingPointMinSum);
+        targetStopId = meetingPointQueryResult.meetingPointMinSumStopId;
     } else {
-        targetStopId = Importer::getStopId(meetingPointQueryResult.meetingPointMinMax);
+        targetStopId = meetingPointQueryResult.meetingPointMinMaxStopId;
     }
     for (int i = 0; i < csas.size(); i++) {
         Journey journey = csas[i]->createJourney(targetStopId);
@@ -827,6 +841,7 @@ void RaptorQueryProcessor::processRaptorQuery() {
 
     while (true) {
         bool allFinished = true;
+        #pragma omp parallel for
         for (int i = 0; i < raptors.size(); i++) {
             if(!raptors[i]->isFinished()) {
                 raptors[i]->processRaptorRound();
@@ -863,6 +878,7 @@ void RaptorQueryProcessor::processRaptorQuery() {
         }
 
         if (minMeetingTime != INT_MAX) {
+            meetingPointQueryResult.meetingPointStopId = meetingStopId;
             meetingPointQueryResult.meetingPoint = Importer::getStopName(meetingStopId);
             meetingPointQueryResult.meetingTime = TimeConverter::convertSecondsToTime(minMeetingTime, true);
             meetingPointQueryResult.durationInSeconds = minMeetingTime - meetingPointQuery.sourceTime;
