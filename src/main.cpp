@@ -119,12 +119,14 @@ int main(int argc, const char *argv[]) {
       lastStopId = Creator::networkGraph.vertices.size();
     }
 
-    GTree* networkGTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
     vector<int> stopIds = vector<int>(0);
     for (int i = firstStopId; i < lastStopId; i++) {
       stopIds.push_back(Creator::networkGraph.vertices[i].stopId);
     }
-    GTreeController::calculateBorderDistancesOfStopIdsAndExportTree(networkGTreePointer, stopIds, dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
+
+    GTree* networkGTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf, stopIds);
+    
+    // GTreeController::calculateBorderDistancesOfStopIdsAndExportTree(networkGTreePointer, stopIds, dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
 
     CliController::runCli(dataType, networkGTreePointer);
   }

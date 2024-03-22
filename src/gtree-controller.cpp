@@ -8,7 +8,7 @@
 #include <iostream>
 #include <fstream>
 
-GTree* GTreeController::createOrLoadNetworkGTree(DataType dataType, int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf) {
+GTree* GTreeController::createOrLoadNetworkGTree(DataType dataType, int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf, vector<int> stopIds) {
     string dataTypeString = Importer::getDataTypeString(dataType);
     string folderPath = FOLDER_PREFIX + "graphs/" + dataTypeString + "/";
 
@@ -27,6 +27,7 @@ GTree* GTreeController::createOrLoadNetworkGTree(DataType dataType, int numberOf
     } else {
         file.close();
         GTree* gTree = Creator::createNetworkGTree(numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf, false);
+        gTree->calculateBorderDistancesOfStopIds(stopIds);
         gTree->exportTreeAsJson(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
         return gTree;
     }
