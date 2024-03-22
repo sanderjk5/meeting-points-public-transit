@@ -83,7 +83,7 @@ int main(int argc, const char *argv[]) {
 
   if (startExperiments){
     // Real experiments
-    vector<int> numberOfSourceStops = {2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40, 50, 75, 100, 150, 200};
+    vector<int> numberOfSourceStops = {2, 3, 5, 10, 25, 50, 100};
 
     // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 1000, 25, 0.90);
 
@@ -101,32 +101,21 @@ int main(int argc, const char *argv[]) {
     
     int numberOfChildrenPerNode;
     int maxNumberOfVerticesPerLeaf;
-    int firstStopId = 0;
-    int lastStopId = Creator::networkGraph.vertices.size();
     if(dataType == vvs_j24){
-      numberOfChildrenPerNode = 2;
+      numberOfChildrenPerNode = 4;
       maxNumberOfVerticesPerLeaf = 64;
     } else if (dataType == schienenfernverkehr_de) {
       numberOfChildrenPerNode = 2;
       maxNumberOfVerticesPerLeaf = 32;
     } else if (dataType == schienenregionalverkehr_de || dataType == schienenfern_und_regionalverkehr_de) {
-      numberOfChildrenPerNode = 2;
+      numberOfChildrenPerNode = 4;
       maxNumberOfVerticesPerLeaf = 128;
     } else if (dataType == gesamt_de) {
-      numberOfChildrenPerNode = 4;
+      numberOfChildrenPerNode = 8;
       maxNumberOfVerticesPerLeaf = 256;
-      firstStopId = 0;
-      lastStopId = Creator::networkGraph.vertices.size();
     }
 
-    vector<int> stopIds = vector<int>(0);
-    for (int i = firstStopId; i < lastStopId; i++) {
-      stopIds.push_back(Creator::networkGraph.vertices[i].stopId);
-    }
-
-    GTree* networkGTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf, stopIds);
-    
-    // GTreeController::calculateBorderDistancesOfStopIdsAndExportTree(networkGTreePointer, stopIds, dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
+    GTree* networkGTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
 
     CliController::runCli(dataType, networkGTreePointer);
   }

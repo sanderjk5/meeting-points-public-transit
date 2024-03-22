@@ -204,83 +204,104 @@ bool GTree::isVertexInNode(int stopId, int nodeId) {
 /*
     Save the information of the tree in a json file such that it can be loaded.
 */
-void GTree::exportTreeAsJson(DataType dataType, int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf) {
+void GTree::exportTreeAsJson(DataType dataType, int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf, int numberOfFiles) {
     cout << "Exporting G-tree as json file..." << endl;
+
+    vector<GNode*> nodes = vector<GNode*>(0);
+    vector<GNode*> tmpNodes = vector<GNode*>(0);
+    nodes.push_back(this->root);
+    tmpNodes.push_back(this->root);
+
+    // get all nodes of the tree
+    while(tmpNodes.size() > 0){
+        GNode* node = tmpNodes[0];
+        tmpNodes.erase(tmpNodes.begin());
+        for (int i = 0; i < node->children.size(); i++) {
+            nodes.push_back(node->children[i]);
+            tmpNodes.push_back(node->children[i]);
+        }
+    }
+
+    // calculate the number of nodes per file
+    int nodesPerFile = nodes.size() / (numberOfFiles - 1);
+
+    cout << "Number of nodes: " << nodes.size() << endl;
+    cout << "Number of nodes per file: " << nodesPerFile << endl;
 
     string dataTypeString = Importer::getDataTypeString(dataType);
     string folderPath = FOLDER_PREFIX + "graphs/" + dataTypeString + "/";
 
-    string fileName = folderPath + "g-tree-" + to_string(numberOfChildrenPerNode) + "-" + to_string(maxNumberOfVerticesPerLeaf);
-    if (USE_FOOTPATHS) {
-        fileName += "-with-footpaths";
-    }
-    fileName += ".json";
-
-    // delete the file if it already exists
-    remove(fileName.c_str());
-
-    ofstream file;
-    file.open(fileName);
-
-    file << "{\n";
-    file << "  \"dataType\": \"" << dataTypeString << "\",\n";
-    file << "  \"numberOfChildrenPerNode\": " << numberOfChildrenPerNode << ",\n";
-    file << "  \"maxNumberOfVerticesPerLeaf\": " << maxNumberOfVerticesPerLeaf << ",\n";
-    file << "  \"nodes\": [\n";
-
-    vector<GNode*> nodes = vector<GNode*>(0);
-    nodes.push_back(this->root);
-    
-    while(nodes.size() > 0){
-        GNode* node = nodes[0];
-        nodes.erase(nodes.begin());
-        file << "    {\n";
-        file << "      \"nodeId\": " << node->nodeId << ",\n";
-        if (node->nodeId == 0) {
-            file << "      \"parent\": null,\n";
-        } else {
-            file << "      \"parent\": " << node->parent->nodeId << ",\n";
+    for (int fileId = 0; fileId < numberOfFiles; fileId++) {
+        string fileName = folderPath + "g-tree-" + to_string(numberOfChildrenPerNode) + "-" + to_string(maxNumberOfVerticesPerLeaf);
+        if (USE_FOOTPATHS) {
+            fileName += "-with-footpaths";
         }
+        fileName += "-" + to_string(fileId) + ".json";
 
-        file << "      \"stopIds\": [";
-        for (int i = 0; i < node->stopIds.size(); i++) {
-            file << node->stopIds[i];
-            if (i < node->stopIds.size() - 1) {
-                file << ", ";
+        // delete the file if it already exists
+        remove(fileName.c_str());
+
+        ofstream file;
+        file.open(fileName);
+
+        file << "{\n";
+        file << "  \"dataType\": \"" << dataTypeString << "\",\n";
+        file << "  \"numberOfChildrenPerNode\": " << numberOfChildrenPerNode << ",\n";
+        file << "  \"maxNumberOfVerticesPerLeaf\": " << maxNumberOfVerticesPerLeaf << ",\n";
+        file << "  \"numberOfNodes\": " << nodes.size() << ",\n";
+        file << "  \"nodes\": [\n";
+
+        for (int nodeIndex = fileId * nodesPerFile; nodeIndex < (fileId + 1) * nodesPerFile && nodeIndex < nodes.size(); nodeIndex++) {
+            GNode* node = nodes[nodeIndex];
+
+            file << "    {\n";
+            file << "      \"nodeId\": " << node->nodeId << ",\n";
+            if (node->nodeId == 0) {
+                file << "      \"parent\": null,\n";
+            } else {
+                file << "      \"parent\": " << node->parent->nodeId << ",\n";
             }
-        }
-        file << "],\n";
 
-        file << "      \"borderStopIds\": [";
-        for (int i = 0; i < node->borderStopIds.size(); i++) {
-            file << node->borderStopIds[i];
-            if (i < node->borderStopIds.size() - 1) {
-                file << ", ";
+            file << "      \"stopIds\": [";
+            for (int i = 0; i < node->stopIds.size(); i++) {
+                file << node->stopIds[i];
+                if (i < node->stopIds.size() - 1) {
+                    file << ", ";
+                }
             }
-        }
-        file << "],\n";
+            file << "],\n";
 
-        file << "      \"borderDurations\": [\n";
-        for (auto const& entry : node->borderDurations) {
-            file << "        {\"source\": " << entry.first.first << ", \"target\": " << entry.first.second << ", \"duration\": " << entry.second << "}";
-            file << ",\n";
-        }
-        file << "      ]\n";
+            file << "      \"borderStopIds\": [";
+            for (int i = 0; i < node->borderStopIds.size(); i++) {
+                file << node->borderStopIds[i];
+                if (i < node->borderStopIds.size() - 1) {
+                    file << ", ";
+                }
+            }
+            file << "],\n";
 
-        for (int i = 0; i < node->children.size(); i++) {
-            nodes.push_back(node->children[i]);
-        }
+            file << "      \"borderDurations\": [\n";
+            for (auto const& entry : node->borderDurations) {
+                file << "        {\"source\": " << entry.first.first << ", \"target\": " << entry.first.second << ", \"duration\": " << entry.second << "}";
+                file << ",\n";
+            }
+            file << "      ]\n";
 
-        file << "    }";
-        if (nodes.size() > 0) {
-            file << ",";
+            for (int i = 0; i < node->children.size(); i++) {
+                nodes.push_back(node->children[i]);
+            }
+
+            file << "    }";
+            if (nodes.size() > 0) {
+                file << ",";
+            }
+            file << "\n";
         }
-        file << "\n";
+        file << "  ]\n";
+
+        file << "}\n";
+        file.close();
     }
-    file << "  ]\n";
-
-    file << "}\n";
-    file.close();
 
     cout << "G-tree exported.\n" << endl;
 }
@@ -288,62 +309,69 @@ void GTree::exportTreeAsJson(DataType dataType, int numberOfChildrenPerNode, int
 /*
     Import the G-tree from a json file.
 */
-void GTree::importTreeFromJson(DataType dataType, int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf) {
+void GTree::importTreeFromJson(DataType dataType, int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf, int numberOfFiles) {
     cout << "Importing G-tree from json file..." << endl;
     string dataTypeString = Importer::getDataTypeString(dataType);
     string folderPath = FOLDER_PREFIX + "graphs/" + dataTypeString + "/";
 
-    string fileName = folderPath + "g-tree-" + to_string(numberOfChildrenPerNode) + "-" + to_string(maxNumberOfVerticesPerLeaf);
-    if (USE_FOOTPATHS) {
-        fileName += "-with-footpaths";
-    }
-    fileName += ".json";
+    for (int fileId = 0; fileId < numberOfFiles; fileId++) {
+        string fileName = folderPath + "g-tree-" + to_string(numberOfChildrenPerNode) + "-" + to_string(maxNumberOfVerticesPerLeaf);
+        if (USE_FOOTPATHS) {
+            fileName += "-with-footpaths";
+        }
+        fileName += "-" + to_string(fileId) + ".json";
 
-    ifstream file;
-    file.open(fileName);
-    Json::Value root;
-    file >> root;
+        ifstream file;
+        file.open(fileName);
+        Json::Value root;
+        file >> root;
 
-    string dataTypeStringFromFile = root["dataType"].asString();
-    int numberOfChildrenPerNodeFromFile = root["numberOfChildrenPerNode"].asInt();
-    int maxNumberOfVerticesPerLeafFromFile = root["maxNumberOfVerticesPerLeaf"].asInt();
+        string dataTypeStringFromFile = root["dataType"].asString();
+        int numberOfChildrenPerNodeFromFile = root["numberOfChildrenPerNode"].asInt();
+        int maxNumberOfVerticesPerLeafFromFile = root["maxNumberOfVerticesPerLeaf"].asInt();
 
-    if (dataTypeString != dataTypeStringFromFile || numberOfChildrenPerNode != numberOfChildrenPerNodeFromFile || maxNumberOfVerticesPerLeaf != maxNumberOfVerticesPerLeafFromFile) {
-        cout << "The G-tree could not be imported. The parameters do not match." << endl;
-        return;
-    }
-
-    Json::Value nodes = root["nodes"];
-
-    this->nodeOfNodeId = vector<GNode*>(nodes.size(), nullptr);
-
-    for (int i = 0; i < nodes.size(); i++) {
-        Json::Value node = nodes[i];
-        GNode* gNode = new GNode();
-        gNode->nodeId = node["nodeId"].asInt();
-
-        if (node["parent"].isNull()) {
-            gNode->parent = nullptr;
-        } else {
-            gNode->parent = nodeOfNodeId[node["parent"].asInt()];
+        if (dataTypeString != dataTypeStringFromFile || numberOfChildrenPerNode != numberOfChildrenPerNodeFromFile || maxNumberOfVerticesPerLeaf != maxNumberOfVerticesPerLeafFromFile) {
+            cout << "The G-tree could not be imported. The parameters do not match." << endl;
+            return;
         }
 
-        for (int j = 0; j < node["stopIds"].size(); j++) {
-            gNode->stopIds.push_back(node["stopIds"][j].asInt());
+        if (fileId == 0) {
+            int numberOfNodes = root["numberOfNodes"].asInt();
+            this->nodeOfNodeId = vector<GNode*>(numberOfNodes, nullptr);
+        }
+        
+        Json::Value nodes = root["nodes"];
+
+        for (int i = 0; i < nodes.size(); i++) {
+            Json::Value node = nodes[i];
+            GNode* gNode = new GNode();
+            gNode->nodeId = node["nodeId"].asInt();
+
+            if (node["parent"].isNull()) {
+                gNode->parent = nullptr;
+            } else {
+                gNode->parent = nodeOfNodeId[node["parent"].asInt()];
+            }
+
+            for (int j = 0; j < node["stopIds"].size(); j++) {
+                gNode->stopIds.push_back(node["stopIds"][j].asInt());
+            }
+
+            for (int j = 0; j < node["borderStopIds"].size(); j++) {
+                gNode->borderStopIds.push_back(node["borderStopIds"][j].asInt());
+            }
+
+            for (int j = 0; j < node["borderDurations"].size(); j++) {
+                Json::Value borderDuration = node["borderDurations"][j];
+                gNode->borderDurations[make_pair(borderDuration["source"].asInt(), borderDuration["target"].asInt())] = borderDuration["duration"].asInt();
+            }
+
+            gNode->children = vector<GNode*>(0);
+
+            this->nodeOfNodeId[gNode->nodeId] = gNode;
         }
 
-        for (int j = 0; j < node["borderStopIds"].size(); j++) {
-            gNode->borderStopIds.push_back(node["borderStopIds"][j].asInt());
-        }
-
-        for (int j = 0; j < node["borderDurations"].size(); j++) {
-            Json::Value borderDuration = node["borderDurations"][j];
-            gNode->borderDurations[make_pair(borderDuration["source"].asInt(), borderDuration["target"].asInt())] = borderDuration["duration"].asInt();
-        }
-
-        gNode->children = vector<GNode*>(0);
-
-        this->nodeOfNodeId[gNode->nodeId] = gNode;
+        file.close();
     }
 
     this->nodeOfStopId = vector<GNode*>(Importer::stops.size(), nullptr);
@@ -361,8 +389,6 @@ void GTree::importTreeFromJson(DataType dataType, int numberOfChildrenPerNode, i
             }
         }
     }
-
-    file.close();
 
     cout << "G-tree imported.\n" << endl;
 }
