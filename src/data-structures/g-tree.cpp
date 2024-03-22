@@ -225,9 +225,6 @@ void GTree::exportTreeAsJson(DataType dataType, int numberOfChildrenPerNode, int
     // calculate the number of nodes per file
     int nodesPerFile = nodes.size() / (numberOfFiles - 1);
 
-    cout << "Number of nodes: " << nodes.size() << endl;
-    cout << "Number of nodes per file: " << nodesPerFile << endl;
-
     string dataTypeString = Importer::getDataTypeString(dataType);
     string folderPath = FOLDER_PREFIX + "graphs/" + dataTypeString + "/";
 
