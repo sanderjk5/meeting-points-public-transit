@@ -14,7 +14,7 @@ GTree* GTreeController::createOrLoadNetworkGTree(DataType dataType, int numberOf
         stopIds.push_back(Creator::networkGraph.vertices[i].stopId);
     }
 
-    int numberOfFiles = 5;
+    int numberOfFiles = 2;
     if (dataType == gesamt_de) {
         numberOfFiles = 100;
     }
