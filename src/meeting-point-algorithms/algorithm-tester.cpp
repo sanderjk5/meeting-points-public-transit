@@ -248,9 +248,6 @@ AverageRunTimeAndAccuracy GTreeAlgorithmTester::getAverageRunTimeAndAccuracy(Dat
 
         accuracyMinSum.push_back(1 - relativeDifferenceMinSum);
         accuracyMinMax.push_back(1 - relativeDifferenceMinMax);
-
-        delete gTreeQueryProcessorCSA;
-        delete gTreeQueryProcessorApproximation;
     }
 
     cout << "test 2" << endl;
