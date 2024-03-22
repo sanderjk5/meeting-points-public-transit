@@ -100,6 +100,10 @@ void ExperimentController::findBestGTreeParameters(DataType dataType, int number
     Test and compare the different algorithms with a set of queries. The results are written to a file.
 */
 void ExperimentController::testAndCompareAlgorithmsRandom(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSourceStops) {
-    GTree* networkGTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, 2, 128);
+    vector<int> stopIds = vector<int>(0);
+    for (int i = 0; i < Creator::networkGraph.vertices.size(); i++) {
+        stopIds.push_back(Creator::networkGraph.vertices[i].stopId);
+    }
+    GTree* networkGTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, 2, 128, stopIds);
     AlgorithmComparer::compareAlgorithmsRandom(dataType, networkGTreePointer, numberOfSuccessfulQueries, numberOfSourceStops, true, true);
 }
