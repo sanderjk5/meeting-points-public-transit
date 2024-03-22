@@ -218,20 +218,26 @@ AverageRunTimeAndAccuracy GTreeAlgorithmTester::getAverageRunTimeAndAccuracy(Dat
     int successfulQueryCounter = 0;
 
     while (successfulQueryCounter < numberOfSuccessfulQueries) {
+        cout << successfulQueryCounter << endl;
+        cout << "new query" << endl;
         MeetingPointQuery meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSourceStops);
+        PrintHelper::printMeetingPointQuery(meetingPointQuery);
 
+        cout << "gtree csa" << endl;
         GTreeQueryProcessor gTreeQueryProcessorCSA = GTreeQueryProcessor(meetingPointQuery, gTree);
         gTreeQueryProcessorCSA.processGTreeQuery(true);
+        cout << "get gtree csa result" << endl;
         MeetingPointQueryResult meetingPointQueryResultGTreeCSA = gTreeQueryProcessorCSA.getMeetingPointQueryResult();
         
+        cout << "gtree approximation" << endl;
         GTreeQueryProcessor gTreeQueryProcessorApproximation = GTreeQueryProcessor(meetingPointQuery, gTree);
         gTreeQueryProcessorApproximation.processGTreeQuery();
+        cout << "get gtree approximation result" << endl;
         MeetingPointQueryResult meetingPointQueryResultApprox = gTreeQueryProcessorApproximation.getMeetingPointQueryResult();
 
+        cout << "check if queries were successful" << endl;
         bool gTreeCSAQuerySuccessful = meetingPointQueryResultGTreeCSA.meetingPointMinSum != "" && meetingPointQueryResultGTreeCSA.meetingPointMinMax != "";
         bool gTreeApproximationQuerySuccessful = meetingPointQueryResultApprox.meetingPointMinSum != "" && meetingPointQueryResultApprox.meetingPointMinMax != "";
-        
-        cout << successfulQueryCounter << endl;
 
         if (!gTreeCSAQuerySuccessful || !gTreeApproximationQuerySuccessful) {
             continue;
@@ -247,11 +253,17 @@ AverageRunTimeAndAccuracy GTreeAlgorithmTester::getAverageRunTimeAndAccuracy(Dat
         queryTimesCSA.push_back((double) meetingPointQueryResultGTreeCSA.queryTime);
         queryTimesApproximation.push_back((double) meetingPointQueryResultApprox.queryTime);
 
+        cout << "got query times" << endl;
+
         int differenceMinSum = meetingPointQueryResultApprox.minSumDurationInSeconds - meetingPointQueryResultGTreeCSA.minSumDurationInSeconds;
         int differenceMinMax = meetingPointQueryResultApprox.minMaxDurationInSeconds - meetingPointQueryResultGTreeCSA.minMaxDurationInSeconds;
 
+        cout << "got differences" << endl;
+
         double relativeDifferenceMinSum = (double) differenceMinSum / meetingPointQueryResultApprox.minSumDurationInSeconds;
         double relativeDifferenceMinMax = (double) differenceMinMax / meetingPointQueryResultApprox.minMaxDurationInSeconds;
+
+        cout << "got relative differences" << endl;
 
         accuracyMinSum.push_back(1 - relativeDifferenceMinSum);
         accuracyMinMax.push_back(1 - relativeDifferenceMinMax);
