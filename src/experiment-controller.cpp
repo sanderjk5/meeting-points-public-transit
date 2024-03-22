@@ -43,7 +43,11 @@ void ExperimentController::findBestGTreeParameters(DataType dataType, int number
     
     for (int numberOfChildrenPerNode : numberOfChildrenPerNodeParams) {
         for (int maxNumberOfVerticesPerLeaf : maxNumberOfVerticesPerLeafParams) {
-            GTree* gTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
+            vector<int> stopIds = vector<int>(0);
+            for (int i = 0; i < Creator::networkGraph.vertices.size(); i++) {
+                stopIds.push_back(Creator::networkGraph.vertices[i].stopId);
+            }
+            GTree* gTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf, stopIds);
 
             AverageRunTimeAndAccuracy averageRunTimeAndAccuracy = GTreeAlgorithmTester::getAverageRunTimeAndAccuracy(dataType, gTreePointer, numberOfSourceStops, numberOfSuccessfulQueries);
 
