@@ -580,6 +580,16 @@ void GTreeQueryProcessor::processGTreeQuery(bool useCSA) {
             for(int i = 0; i < csas.size(); i++){
                 csas[i]->setTargetStopIds(targetStopIds);
                 csas[i]->processCSA();
+
+                // don't calculate the real durations if the meeting point is not reachable
+                for (int j = 0; j < targetStopIds.size(); j++) {
+                    int targetStopId = targetStopIds[j];
+                    if (csas[i]->getEarliestArrivalTime(targetStopId) == INT_MAX) {
+                        meetingPointQueryResult.meetingPointMinSum = "";
+                        meetingPointQueryResult.meetingPointMinMax = "";
+                        return;
+                    }
+                }
             }
         }
 
