@@ -32,7 +32,7 @@ int main(int argc, const char *argv[]) {
   // DataType dataType = schienenfern_und_regionalverkehr_de;
   // DataType dataType = gesamt_de;
 
-  bool startExperiments = true;
+  bool startExperiments = false;
 
   if (argc > 1){
     if (strcmp(argv[1], "vvs") == 0){
@@ -87,7 +87,7 @@ int main(int argc, const char *argv[]) {
 
     // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 1000, 25, 0.90);
 
-    ExperimentController::findBestGTreeParameters(dataType, 10, 5);
+    ExperimentController::findBestGTreeParameters(dataType, 10, 1000);
     // ExperimentController::testAndCompareAlgorithmsRandom(dataType, 1000, numberOfSourceStops);
 
     // Test experiments
