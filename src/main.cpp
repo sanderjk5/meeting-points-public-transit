@@ -83,7 +83,7 @@ int main(int argc, const char *argv[]) {
 
   if (startExperiments){
     // Real experiments
-    vector<int> numberOfSourceStops = {50, 100, 200};
+    vector<int> numberOfSourceStops = {100};
 
     // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 1000, 25, 0.90);
 
