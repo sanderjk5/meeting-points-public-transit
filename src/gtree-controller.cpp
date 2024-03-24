@@ -16,7 +16,7 @@ GTree* GTreeController::createOrLoadNetworkGTree(DataType dataType, int numberOf
 
     int numberOfFiles = 2;
     if (dataType == gesamt_de) {
-        numberOfFiles = 100;
+        numberOfFiles = 200;
     } else if (dataType == schienenregionalverkehr_de || dataType == schienenfern_und_regionalverkehr_de) {
         numberOfFiles = 5;
     }
