@@ -223,7 +223,7 @@ void GTree::exportTreeAsJson(DataType dataType, int numberOfChildrenPerNode, int
     }
 
     // calculate the number of nodes per file
-    int nodesPerFile = nodes.size() / (numberOfFiles - 1);
+    int nodesPerFile = ((nodes.size() - 1) / (numberOfFiles - 1)) + 1;
 
     string dataTypeString = Importer::getDataTypeString(dataType);
     string folderPath = FOLDER_PREFIX + "graphs/" + dataTypeString + "/";
@@ -248,7 +248,17 @@ void GTree::exportTreeAsJson(DataType dataType, int numberOfChildrenPerNode, int
         file << "  \"numberOfNodes\": " << nodes.size() << ",\n";
         file << "  \"nodes\": [\n";
 
-        for (int nodeIndex = fileId * nodesPerFile; nodeIndex < (fileId + 1) * nodesPerFile && nodeIndex < nodes.size(); nodeIndex++) {
+        int lowerNodeIndex = (fileId - 1) * nodesPerFile;
+        int upperNodeIndex = (fileId) * nodesPerFile;
+
+        if (fileId == 0) {
+            lowerNodeIndex = 0;
+            upperNodeIndex = 1;
+        } else if (fileId == 1) {
+            lowerNodeIndex = 1;
+        }
+
+        for (int nodeIndex = lowerNodeIndex; nodeIndex < upperNodeIndex && nodeIndex < nodes.size(); nodeIndex++) {
             GNode* node = nodes[nodeIndex];
 
             file << "    {\n";
@@ -284,14 +294,7 @@ void GTree::exportTreeAsJson(DataType dataType, int numberOfChildrenPerNode, int
             }
             file << "      ]\n";
 
-            for (int i = 0; i < node->children.size(); i++) {
-                nodes.push_back(node->children[i]);
-            }
-
-            file << "    }";
-            if (nodes.size() > 0) {
-                file << ",";
-            }
+            file << "    },";
             file << "\n";
         }
         file << "  ]\n";
