@@ -83,7 +83,7 @@ int main(int argc, const char *argv[]) {
 
   if (startExperiments){
     // Real experiments
-    vector<int> numberOfSourceStops = {50};
+    vector<int> numberOfSourceStops = {2, 3, 5, 10, 25};
 
     // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 1000, 25, 0.90);
 
@@ -111,7 +111,7 @@ int main(int argc, const char *argv[]) {
       numberOfChildrenPerNode = 4;
       maxNumberOfVerticesPerLeaf = 128;
     } else if (dataType == gesamt_de) {
-      numberOfChildrenPerNode = 8;
+      numberOfChildrenPerNode = 4;
       maxNumberOfVerticesPerLeaf = 256;
     }
 

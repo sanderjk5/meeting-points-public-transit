@@ -489,6 +489,11 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
                 continue;
             }
 
+            if (meetingPointQueryResultRaptor.durationSumInSeconds < meetingPointQueryResultNaive.minSumDurationInSeconds || meetingPointQueryResultRaptor.durationInSeconds < meetingPointQueryResultNaive.minMaxDurationInSeconds) {
+                successfulQueriesRaptor--;
+                continue;
+            }
+
             successfulQueryCounter++;
 
             queryTimesNaive.push_back((double) meetingPointQueryResultNaive.queryTime);
