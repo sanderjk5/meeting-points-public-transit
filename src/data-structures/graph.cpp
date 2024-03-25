@@ -1,9 +1,13 @@
 #include "graph.h"
 
+#include <../constants.h>
+#include <../data-handling/importer.h>
+
 #include <limits.h>
 
 #include <vector>
 #include <queue>
+#include <fstream>
 
 /*
     Use Dijkstra's algorithm to calculate the minimal distance to a target node from a source stop.
@@ -56,4 +60,48 @@ vector<int> Graph::getDistances(int sourceStopId, vector<int> targetStopIds) {
     }
 
     return distances;
+}
+
+
+void Graph::exportGraph(DataType dataType) {
+    string dataTypeString = Importer::getDataTypeString(dataType);
+    string folderPath = FOLDER_PREFIX + "graphs/" + dataTypeString + "/";
+    string fileName = folderPath + "graph";
+    if (USE_FOOTPATHS) {
+        fileName += "-with-footpaths";
+    }
+    fileName += ".txt";
+
+    remove(fileName.c_str());
+
+    ofstream file;
+    file.open(fileName);
+
+    int numberOfVertices = this->vertices.size();
+    int numberOfEdges = 0;
+    for (int i = 0; i < this->adjacencyList.size(); i++) {
+        numberOfEdges += this->adjacencyList[i].size();
+    }
+
+    // header
+    file << to_string(numberOfVertices) << " " << to_string(numberOfEdges / 2) << " " << "001" << endl;
+
+    // vertices
+    for(int i = 0; i < this->vertices.size(); i++) {
+        string line;
+        for (int j = 0; j < this->adjacencyList[i].size(); j++) {
+            int targetStopId = this->adjacencyList[i][j].targetStopId + 1;
+            int edgeWeight = this->adjacencyList[i][j].ewgt;
+            if (edgeWeight == 0) {
+                edgeWeight = 1;
+            }
+            line += to_string(targetStopId) + " " + to_string(edgeWeight);
+            if (j < this->adjacencyList[i].size() - 1) {
+                line += " ";
+            }
+        }
+        file << line << endl;
+    }
+
+    file.close();
 }

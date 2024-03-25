@@ -1,6 +1,7 @@
 #ifndef CMAKE_GRAPH_H
 #define CMAKE_GRAPH_H
 
+#include <../data-handling/importer.h>
 #include <vector>
 #include <map>
 
@@ -35,6 +36,7 @@ class Graph {
         map<int, int> indexToCoarserGraphIndex;
 
         vector<int> getDistances(int sourceStopId, vector<int> targetStopIds);
+        void exportGraph(DataType dataType);
 };
 
 #endif //CMAKE_GRAPH_H

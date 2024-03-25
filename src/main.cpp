@@ -80,10 +80,11 @@ int main(int argc, const char *argv[]) {
   }
 
   Creator::createNetworkGraph();
+  Creator::networkGraph.exportGraph(dataType);
 
   if (startExperiments){
     // Real experiments
-    vector<int> numberOfSourceStops = {2, 3, 5, 10, 25};
+    vector<int> numberOfSourceStops = {50};
 
     // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 1000, 25, 0.90);
 
