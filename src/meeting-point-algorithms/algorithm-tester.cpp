@@ -693,10 +693,10 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
             cout << "Minimum visited connections fraction: " << Calculator::getMinimum(csaVisitedConnectionsFraction) << endl;
 
             cout << "\nGTree Approximation information:" << endl;
-            cout << "Average target stop fraction min sum: " << Calculator::getAverage(visitedNodesAvgFraction) << endl;
-            cout << "Median target stop fraction min sum: " << Calculator::getMedian(visitedNodesAvgFraction) << endl;
-            cout << "Maximum target stop fraction min sum: " << Calculator::getMaximum(visitedNodesAvgFraction) << endl;
-            cout << "Minimum target stop fraction min sum: " << Calculator::getMinimum(visitedNodesAvgFraction) << endl;
+            cout << "Average target stop fraction: " << Calculator::getAverage(visitedNodesAvgFraction) << endl;
+            cout << "Median target stop fraction: " << Calculator::getMedian(visitedNodesAvgFraction) << endl;
+            cout << "Maximum target stop fraction: " << Calculator::getMaximum(visitedNodesAvgFraction) << endl;
+            cout << "Minimum target stop fraction: " << Calculator::getMinimum(visitedNodesAvgFraction) << endl;
 
             cout << "\nMax transfers:" << endl;
             cout << "Average max transfers naive: " << Calculator::getAverage(maxTransfersNaive) << endl;

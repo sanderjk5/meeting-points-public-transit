@@ -10,6 +10,7 @@
 #include"constants.h"
 #include"limits.h"
 #include <cstring>
+#include <chrono>
 
 #include "experiment-controller.h"
 #include "cli-controller.h"
@@ -84,7 +85,7 @@ int main(int argc, const char *argv[]) {
 
   if (startExperiments){
     // Real experiments
-    vector<int> numberOfSourceStops = {2, 3, 5, 10};
+    vector<int> numberOfSourceStops = {2, 3, 5, 10, 25};
 
     // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 1000, 25, 0.90);
 
@@ -117,6 +118,23 @@ int main(int argc, const char *argv[]) {
     }
 
     GTree* networkGTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
+
+    vector<int> sourceStopIds = {};
+    for (int i = 0; i < 50; i++) {
+      sourceStopIds.push_back(rand() % Creator::networkGraph.vertices.size());
+    }
+    vector<int> allStopIds = vector<int>();
+    for (int i = 0; i < Creator::networkGraph.vertices.size(); i++){
+      allStopIds.push_back(i);
+    }
+
+    auto start = chrono::high_resolution_clock::now();
+    #pragma omp parallel for
+    for (int i = 0; i < sourceStopIds.size(); i++){
+      Creator::networkGraph.getDistances(sourceStopIds[i], allStopIds);
+    }
+    auto end = chrono::high_resolution_clock::now();
+    cout << "Time to get distances: " << chrono::duration_cast<chrono::milliseconds>(end - start).count() << "ms" << endl;
 
     CliController::runCli(dataType, networkGTreePointer);
   }
