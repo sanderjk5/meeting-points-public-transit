@@ -656,7 +656,7 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
     int optimalMeetingPointStopId = -1;
     int currentBest = INT_MAX;
 
-    int alpha = 1;
+    double alpha = 1;
     if(!useCSA) {
         alpha = GTREE_APPROXIMATION_ALPHA;
     }
