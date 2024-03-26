@@ -37,7 +37,7 @@ class Graph {
 
         vector<int> getDistances(int sourceStopId, vector<int> targetStopIds);
         void exportGraph(DataType dataType);
-        void importPartition(DataType dataType);
+        void importPartition(DataType dataType, int numberOfPartitions);
 };
 
 #endif //CMAKE_GRAPH_H
