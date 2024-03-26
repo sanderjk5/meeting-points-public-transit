@@ -656,6 +656,11 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
     int optimalMeetingPointStopId = -1;
     int currentBest = INT_MAX;
 
+    int alpha = 1;
+    if(!useCSA) {
+        alpha = GTREE_APPROXIMATION_ALPHA;
+    }
+
     int csaTargetStops = 0;
 
     // Calculate the initial lower bound of the root node
@@ -680,7 +685,7 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
                 GNode* childNode = currentNode->children[i];
                 int childNodeId = childNode->nodeId;
                 int childLowerBound = getLowerBoundToNode(childNodeId, optimization);
-                if (childLowerBound < currentBest) {
+                if (childLowerBound < currentBest * alpha) {
                     pq.push(make_pair(childLowerBound, childNodeId));
                 }
             }

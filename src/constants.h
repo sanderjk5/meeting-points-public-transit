@@ -11,6 +11,8 @@ constexpr int MIN_COARSE_GRAPH_VERTEX_DIFF = 10;
 constexpr int KL_ITERATIONS = 100;
 constexpr int KL_MAX_UNUSED_SWAPS = 300;
 
+constexpr int GTREE_APPROXIMATION_ALPHA = 0.6;
+
 constexpr int NUMBER_OF_DAYS = 4;
 
 constexpr bool USE_FOOTPATHS = true;
