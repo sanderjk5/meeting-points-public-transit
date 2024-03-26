@@ -117,8 +117,6 @@ int main(int argc, const char *argv[]) {
       maxNumberOfVerticesPerLeaf = 512;
     }
 
-    GTree* networkGTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
-
     vector<int> sourceStopIds = {};
     for (int i = 0; i < 50; i++) {
       sourceStopIds.push_back(rand() % Creator::networkGraph.vertices.size());
@@ -135,6 +133,8 @@ int main(int argc, const char *argv[]) {
     }
     auto end = chrono::high_resolution_clock::now();
     cout << "Time to get distances: " << chrono::duration_cast<chrono::milliseconds>(end - start).count() << "ms" << endl;
+
+    GTree* networkGTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
 
     CliController::runCli(dataType, networkGTreePointer);
   }
