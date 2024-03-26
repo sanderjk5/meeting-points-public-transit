@@ -11,7 +11,7 @@ constexpr int MIN_COARSE_GRAPH_VERTEX_DIFF = 10;
 constexpr int KL_ITERATIONS = 100;
 constexpr int KL_MAX_UNUSED_SWAPS = 300;
 
-constexpr double GTREE_APPROXIMATION_ALPHA = 0.6;
+constexpr double GTREE_APPROXIMATION_ALPHA = 1;
 
 constexpr int NUMBER_OF_DAYS = 4;
 
