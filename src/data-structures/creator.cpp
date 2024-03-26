@@ -11,6 +11,7 @@
 #include <chrono>
 #include <cmath>
 #include <algorithm>
+#include <fstream>
 
 using namespace std;
 
@@ -118,7 +119,7 @@ void Creator::createNetworkGraph() {
 /*
     Use the network graph to create the network g-tree.
 */
-GTree* Creator::createNetworkGTree(int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf, bool withDistances) {
+GTree* Creator::createNetworkGTree(DataType dataType, int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf, bool withDistances) {
     cout << "Creating network g-tree..." << endl;
 
     // Start the timer
@@ -130,8 +131,34 @@ GTree* Creator::createNetworkGTree(int numberOfChildrenPerNode, int maxNumberOfV
     int depth = (log(leafs) / log(numberOfChildrenPerNode)) + 1;
     leafs = pow(numberOfChildrenPerNode, depth);
 
+    bool createPartition = false;
+
+    string dataTypeString = Importer::getDataTypeString(dataType);
+    string folderPath = FOLDER_PREFIX + "graphs/" + dataTypeString + "/";
+    string fileName = folderPath + "partition";
+    if (USE_FOOTPATHS) {
+        fileName += "-with-footpaths";
+    }
+    fileName += "-" + to_string(leafs) + ".txt";
+
+    ifstream file;
+    file.open(fileName);
+
+    if (!file.is_open()) {
+        createPartition = true;
+    }
+
+    file.close();
+
     // Partitionate the network graph and create the network g-tree
-    vector<Graph> graphs = partitionateGraph(networkGraph, leafs, maxNumberOfVerticesPerLeaf);
+    vector<Graph> graphs;
+    if (createPartition) {
+        graphs = partitionateGraph(networkGraph, leafs, maxNumberOfVerticesPerLeaf);
+    } else {
+        cout << "Use partition from file." << endl;
+        networkGraph.importPartition(dataType, leafs);
+        graphs = splitPartitionatedGraph(networkGraph);
+    }
     cout << "Partitionated the graph into " << graphs.size() << " partitions." << endl;
     GTree* networkGTree = createGTree(networkGraph, graphs, numberOfChildrenPerNode, depth, withDistances);
 
@@ -434,43 +461,35 @@ void Creator::refineGraphs(vector<Graph> &graphs) {
     Split the partitionated graph into two graphs.
 */
 vector<Graph> Creator::splitPartitionatedGraph(Graph &graph) {
-    vector<Graph> graphs = vector<Graph>(2, Graph());
+    int numberOfPartitions = 0;
+    for (int i = 0; i < graph.partition.size(); i++) {
+        if (graph.partition[i] > numberOfPartitions) {
+            numberOfPartitions = graph.partition[i];
+        }
+    }
+    numberOfPartitions++;
 
-    vector<int> indices = vector<int>(2, 0);
-    vector<map<int, int>> oldToNewIndex = vector<map<int, int>>(2, map<int, int>());
+    vector<Graph> graphs = vector<Graph>(numberOfPartitions, Graph());
+
+    vector<int> indices = vector<int>(numberOfPartitions, 0);
+    vector<map<int, int>> oldToNewIndex = vector<map<int, int>>(numberOfPartitions, map<int, int>());
 
     for (int i = 0; i < graph.vertices.size(); i++) {
-        if (graph.partition[i] == 0) {
-            oldToNewIndex[0][i] = indices[0];
-            indices[0]++;
-            graphs[0].vertices.push_back(graph.vertices[i]);
-            vector<Edge> adjacencyList = vector<Edge>(0);
-            for (int j = 0; j < graph.adjacencyList[i].size(); j++) {
-                if(graph.partition[graph.adjacencyList[i][j].targetStopId] != 0){
-                    continue;
-                }
-                Edge edge;
-                edge.targetStopId = graph.adjacencyList[i][j].targetStopId;
-                edge.ewgt = graph.adjacencyList[i][j].ewgt;
-                adjacencyList.push_back(edge);
+        int partition = graph.partition[i];
+        oldToNewIndex[partition][i] = indices[partition];
+        indices[partition]++;
+        graphs[partition].vertices.push_back(graph.vertices[i]);
+        vector<Edge> adjacencyList = vector<Edge>(0);
+        for (int j = 0; j < graph.adjacencyList[i].size(); j++) {
+            if(graph.partition[graph.adjacencyList[i][j].targetStopId] != partition){
+                continue;
             }
-            graphs[0].adjacencyList.push_back(adjacencyList);
-        } else {
-            oldToNewIndex[1][i] = indices[1];
-            indices[1]++;
-            graphs[1].vertices.push_back(graph.vertices[i]);
-            vector<Edge> adjacencyList = vector<Edge>(0);
-            for (int j = 0; j < graph.adjacencyList[i].size(); j++) {
-                if(graph.partition[graph.adjacencyList[i][j].targetStopId] != 1){
-                    continue;
-                }
-                Edge edge;
-                edge.targetStopId = graph.adjacencyList[i][j].targetStopId;
-                edge.ewgt = graph.adjacencyList[i][j].ewgt;
-                adjacencyList.push_back(edge);
-            }
-            graphs[1].adjacencyList.push_back(adjacencyList);
+            Edge edge;
+            edge.targetStopId = graph.adjacencyList[i][j].targetStopId;
+            edge.ewgt = graph.adjacencyList[i][j].ewgt;
+            adjacencyList.push_back(edge);
         }
+        graphs[partition].adjacencyList.push_back(adjacencyList);
     }
 
     // map the target stop ids of the edges

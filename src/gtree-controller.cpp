@@ -38,7 +38,7 @@ GTree* GTreeController::createOrLoadNetworkGTree(DataType dataType, int numberOf
         return gTree;
     } else {
         file.close();
-        GTree* gTree = Creator::createNetworkGTree(numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf, false);
+        GTree* gTree = Creator::createNetworkGTree(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf, false);
         gTree->calculateBorderDistancesOfStopIds(stopIds);
         gTree->exportTreeAsJson(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf, numberOfFiles);
         return gTree;

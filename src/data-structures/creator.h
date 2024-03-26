@@ -14,7 +14,7 @@ class Creator {
 
         static Graph networkGraph;
         static void createNetworkGraph();
-        static GTree* createNetworkGTree(int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf, bool withDistances = true);
+        static GTree* createNetworkGTree(DataType dataType, int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf, bool withDistances = true);
 
     private:
         static vector<Graph> partitionateGraph(Graph graph, int numberOfPartitions, int maxNumberOfVerticesInGraph);

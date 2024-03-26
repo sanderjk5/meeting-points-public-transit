@@ -8,6 +8,7 @@
 #include <vector>
 #include <queue>
 #include <fstream>
+#include <iostream>
 
 /*
     Use Dijkstra's algorithm to calculate the minimal distance to a target node from a source stop.
@@ -101,6 +102,35 @@ void Graph::exportGraph(DataType dataType) {
             }
         }
         file << line << endl;
+    }
+
+    file.close();
+}
+
+void Graph::importPartition(DataType dataType, int numberOfPartitions) {
+    cout << "Importing partition" << endl;
+    string dataTypeString = Importer::getDataTypeString(dataType);
+    string folderPath = FOLDER_PREFIX + "graphs/" + dataTypeString + "/";
+    string fileName = folderPath + "partition";
+    if (USE_FOOTPATHS) {
+        fileName += "-with-footpaths";
+    }
+    fileName += "-" + to_string(numberOfPartitions) + ".txt";
+
+    ifstream file;
+    file.open(fileName);
+
+    if (!file.is_open()) {
+        cout << "Could not open file " << fileName << endl;
+        return;
+    }
+
+    int numberOfVertices = this->vertices.size();
+
+    this->partition = vector<int>(numberOfVertices);
+
+    for (int i = 0; i < numberOfVertices; i++) {
+        file >> this->partition[i];
     }
 
     file.close();
