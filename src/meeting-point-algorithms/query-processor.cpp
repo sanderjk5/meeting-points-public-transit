@@ -736,8 +736,14 @@ void GTreeQueryProcessor::processGTreeQueryWithOptimization(Optimization optimiz
 */
 int GTreeQueryProcessor::getLowerBoundToNode(int nodeId, Optimization optimization) {
     int lowerBound = 0;
+    vector<int> durations = vector<int>(meetingPointQuery.sourceStopIds.size(), 0);
+    #pragma omp parallel for
     for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
-        int duration = gTree->getMinimalDurationToNode(meetingPointQuery.sourceStopIds[i], nodeId, queryPointAndNodeToBorderStopDurations[i]);
+        durations[i] = gTree->getMinimalDurationToNode(meetingPointQuery.sourceStopIds[i], nodeId, queryPointAndNodeToBorderStopDurations[i]); 
+    }
+
+    for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
+        int duration = durations[i];
         if (duration == INT_MAX) {
             return INT_MAX;
         }
@@ -757,8 +763,14 @@ int GTreeQueryProcessor::getLowerBoundToNode(int nodeId, Optimization optimizati
 */
 int GTreeQueryProcessor::getApproximatedCostsToStop(int stopId, Optimization optimization) {
     int costs = 0;
+    vector<int> durations = vector<int>(meetingPointQuery.sourceStopIds.size(), 0);
+    #pragma omp parallel for
     for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
-        int duration = gTree->getMinimalDurationToStop(meetingPointQuery.sourceStopIds[i], stopId, queryPointAndNodeToBorderStopDurations[i]);
+        durations[i] = gTree->getMinimalDurationToStop(meetingPointQuery.sourceStopIds[i], stopId, queryPointAndNodeToBorderStopDurations[i]); 
+    }
+
+    for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
+        int duration = durations[i];
         if (duration == INT_MAX) {
             return INT_MAX;
         }
