@@ -460,7 +460,7 @@ void RaptorAlgorithmTester::compareRaptorAlgorithms(DataType dataType, int numbe
             roundsToNoImprovement.push_back((double) meetingPointQueryResultRaptorNoImprovement.maxTransfersMinMax + 1);
             roundsToOptimalResult.push_back((double) meetingPointQueryResultRaptorOptimal.maxTransfersMinSum + 1);
             roundsToOptimalResult.push_back((double) meetingPointQueryResultRaptorOptimal.maxTransfersMinMax + 1);
-            totalRoundsOptimalResult.push_back((double) raptorQueryProcessorOptimal.transfers + 1);
+            totalRoundsOptimalResult.push_back((double) raptorQueryProcessorOptimal.transfers);
 
             int differenceMinSumRaptorFirst = meetingPointQueryResultRaptorFirst.minSumDurationInSeconds - meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds;
             int differenceMinMaxRaptorFirst = meetingPointQueryResultRaptorFirst.minMaxDurationInSeconds - meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds;

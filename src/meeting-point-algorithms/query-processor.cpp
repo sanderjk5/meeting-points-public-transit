@@ -1013,6 +1013,7 @@ bool RaptorQueryProcessor::processRaptorRound() {
         meetingPointQueryResult.minSumDuration = TimeConverter::convertSecondsToTime(minDurationMinSum, false);
         meetingPointQueryResult.minSumDurationInSeconds = minDurationMinSum;
         meetingPointQueryResult.maxTransfersMinSum = transfers;
+        lastRoundMeetingPointMinSum = meetingPointMinSum;
     }
 
     if (meetingPointMinMax != lastRoundMeetingPointMinMax) {
@@ -1022,6 +1023,7 @@ bool RaptorQueryProcessor::processRaptorRound() {
         meetingPointQueryResult.minMaxDuration = TimeConverter::convertSecondsToTime(minDurationMinMax, false);
         meetingPointQueryResult.minMaxDurationInSeconds = minDurationMinMax;
         meetingPointQueryResult.maxTransfersMinMax = transfers;
+        lastRoundMeetingPointMinMax = meetingPointMinMax;
     }
 
     transfers++;
