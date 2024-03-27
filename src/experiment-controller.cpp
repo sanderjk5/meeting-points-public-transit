@@ -99,3 +99,7 @@ void ExperimentController::testAndCompareAlgorithmsRandom(DataType dataType, int
     GTree* networkGTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, 4, 64);
     AlgorithmComparer::compareAlgorithmsRandom(dataType, networkGTreePointer, numberOfSuccessfulQueries, numberOfSourceStops, true, true);
 }
+
+void ExperimentController::compareRaptorAlgorithms(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSourceStops) {
+    RaptorAlgorithmTester::compareRaptorAlgorithms(dataType, numberOfSuccessfulQueries, numberOfSourceStops, true);
+}

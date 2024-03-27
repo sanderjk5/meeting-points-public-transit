@@ -265,10 +265,10 @@ void RaptorAlgorithmTester::testRaptorAlgorithmRandom(int numberOfSuccessfulQuer
         MeetingPointQuery meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSources);
         
         RaptorQueryProcessor raptorQueryProcessor = RaptorQueryProcessor(meetingPointQuery);
-        raptorQueryProcessor.processRaptorQuery();
-        MeetingPointQueryRaptorResult meetingPointQueryResult = raptorQueryProcessor.getMeetingPointQueryResult();
+        raptorQueryProcessor.processRaptorQueryUntilFirstResult();
+        MeetingPointQueryResult meetingPointQueryResult = raptorQueryProcessor.getMeetingPointQueryResult();
 
-        if (meetingPointQueryResult.meetingPoint == "") {
+        if (meetingPointQueryResult.meetingPointMinSum == "" || meetingPointQueryResult.meetingPointMinMax == "") {
             if(printOnlySuccessful) {
                 continue;
             }
@@ -277,7 +277,7 @@ void RaptorAlgorithmTester::testRaptorAlgorithmRandom(int numberOfSuccessfulQuer
         }
 
         PrintHelper::printMeetingPointQuery(meetingPointQuery);
-        PrintHelper::printMeetingPointQueryRaptorResult(meetingPointQueryResult);
+        PrintHelper::printMeetingPointQueryResult(meetingPointQueryResult);
     }
 
     double rateOfSuccessfulQueries = (double) successfulQueryCounter / numberOfSuccessfulQueries;
@@ -289,10 +289,445 @@ void RaptorAlgorithmTester::testRaptorAlgorithm(MeetingPointQuery meetingPointQu
     PrintHelper::printMeetingPointQuery(meetingPointQuery);
 
     RaptorQueryProcessor raptorQueryProcessor = RaptorQueryProcessor(meetingPointQuery);
-    raptorQueryProcessor.processRaptorQuery();
-    MeetingPointQueryRaptorResult meetingPointQueryResult = raptorQueryProcessor.getMeetingPointQueryResult();
+    raptorQueryProcessor.processRaptorQueryUntilFirstResult();
+    MeetingPointQueryResult meetingPointQueryResult = raptorQueryProcessor.getMeetingPointQueryResult();
     
-    PrintHelper::printMeetingPointQueryRaptorResult(meetingPointQueryResult);
+    PrintHelper::printMeetingPointQueryResult(meetingPointQueryResult);
+}
+
+void RaptorAlgorithmTester::compareRaptorAlgorithms(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSources, bool loadOrStoreQueries) {
+    string dataTypeString = Importer::getDataTypeString(dataType);
+    string folderPathResults = FOLDER_PREFIX + "tests/" + dataTypeString + "/results/";
+    string folderPathQueries = FOLDER_PREFIX + "tests/" + dataTypeString + "/queries/";
+
+    time_t now = time(0);
+    tm *ltm = localtime(&now);
+    string timestamp = to_string(1900 + ltm->tm_year) + "-" + to_string(1 + ltm->tm_mon) + "-" + to_string(ltm->tm_mday) + "-" + to_string(ltm->tm_hour) + "-" + to_string(ltm->tm_min) + "-" + to_string(ltm->tm_sec);
+    
+    string resultsFileName = folderPathResults + "raptor-results-" + timestamp + ".csv";    
+
+    std::ofstream resultsFile (resultsFileName, std::ofstream::out);
+    resultsFile << "numberOfSourceStops,avgMinSumDuration,avgMinMaxDuration,medianMinSumDuration,medianMinMaxDuration,maxMinSumDuration";
+    resultsFile << ",maxMinMaxDuration,minMinSumDuration,minMinMaxDuration";
+
+    resultsFile << ",avgQueryTimeRaptorFirst,avgQueryTimeRaptorNoImprovement,avgQueryTimeRaptorOptimalResult";
+    resultsFile << ",medianQueryTimeRaptorFirst,medianQueryTimeRaptorNoImprovement,medianQueryTimeRaptorOptimalResult";
+    resultsFile << ",maxQueryTimeRaptorFirst,maxQueryTimeRaptorNoImprovement,maxQueryTimeRaptorOptimalResult";
+    resultsFile << ",minQueryTimeRaptorFirst,minQueryTimeRaptorNoImprovement,minQueryTimeRaptorOptimalResult";
+
+    resultsFile << ",avgQueryTimeOneRound,avgQueryTimeTwoRounds,avgQueryTimeThreeRounds,avgQueryTimeFourRounds,avgQueryTimeFiveRounds,avgQueryTimeSixRounds";
+    resultsFile << ",medianQueryTimeOneRound,medianQueryTimeTwoRounds,medianQueryTimeThreeRounds,medianQueryTimeFourRounds,medianQueryTimeFiveRounds,medianQueryTimeSixRounds";
+    resultsFile << ",maxQueryTimeOneRound,maxQueryTimeTwoRounds,maxQueryTimeThreeRounds,maxQueryTimeFourRounds,maxQueryTimeFiveRounds,maxQueryTimeSixRounds";
+    resultsFile << ",minQueryTimeOneRound,minQueryTimeTwoRounds,minQueryTimeThreeRounds,minQueryTimeFourRounds,minQueryTimeFiveRounds,minQueryTimeSixRounds";
+
+    resultsFile << ",avgRoundsToFirstResult,avgRoundsToNoImprovement,avgRoundsToOptimalResult";
+    resultsFile << ",medianRoundsToFirstResult,medianRoundsToNoImprovement,medianRoundsToOptimalResult";
+    resultsFile << ",maxRoundsToFirstResult,maxRoundsToNoImprovement,maxRoundsToOptimalResult";
+    resultsFile << ",minRoundsToFirstResult,minRoundsToNoImprovement,minRoundsToOptimalResult";
+
+    resultsFile << ",fractionOfOptimalResultsMinSumRaptorFirst,fractionOfOptimalResultsMinMaxRaptorFirst";
+    resultsFile << ",fractionOfLessThan10PercentRelDiffMinSumRaptorFirst,fractionOfLessThan10PercentRelDiffMinMaxRaptorFirst";
+
+    resultsFile << ",fractionOfOptimalResultsMinSumRaptorNoImprovement,fractionOfOptimalResultsMinMaxRaptorNoImprovement";
+    resultsFile << ",fractionOfLessThan10PercentRelDiffMinSumRaptorNoImprovement,fractionOfLessThan10PercentRelDiffMinMaxRaptorNoImprovement";
+
+    resultsFile << ",fractionOfOptimalResultsMinSumRaptorOneRound,fractionOfOptimalResultsMinMaxRaptorOneRound";
+    resultsFile << ",fractionOfLessThan10PercentRelDiffMinSumRaptorOneRound,fractionOfLessThan10PercentRelDiffMinMaxRaptorOneRound";
+    resultsFile << ",fractionOfNoResultRaptorOneRound";
+    resultsFile << ",fractionOfOptimalResultsMinSumRaptorTwoRounds,fractionOfOptimalResultsMinMaxRaptorTwoRounds";
+    resultsFile << ",fractionOfLessThan10PercentRelDiffMinSumRaptorTwoRounds,fractionOfLessThan10PercentRelDiffMinMaxRaptorTwoRounds";
+    resultsFile << ",fractionOfNoResultRaptorTwoRounds";
+    resultsFile << ",fractionOfOptimalResultsMinSumRaptorThreeRounds,fractionOfOptimalResultsMinMaxRaptorThreeRounds";
+    resultsFile << ",fractionOfLessThan10PercentRelDiffMinSumRaptorThreeRounds,fractionOfLessThan10PercentRelDiffMinMaxRaptorThreeRounds";
+    resultsFile << ",fractionOfNoResultRaptorThreeRounds";
+    resultsFile << ",fractionOfOptimalResultsMinSumRaptorFourRounds,fractionOfOptimalResultsMinMaxRaptorFourRounds";
+    resultsFile << ",fractionOfLessThan10PercentRelDiffMinSumRaptorFourRounds,fractionOfLessThan10PercentRelDiffMinMaxRaptorFourRounds";
+    resultsFile << ",fractionOfNoResultRaptorFourRounds";
+    resultsFile << ",fractionOfOptimalResultsMinSumRaptorFiveRounds,fractionOfOptimalResultsMinMaxRaptorFiveRounds";
+    resultsFile << ",fractionOfLessThan10PercentRelDiffMinSumRaptorFiveRounds,fractionOfLessThan10PercentRelDiffMinMaxRaptorFiveRounds";
+    resultsFile << ",fractionOfNoResultRaptorFiveRounds";
+    resultsFile << ",fractionOfOptimalResultsMinSumRaptorSixRounds,fractionOfOptimalResultsMinMaxRaptorSixRounds";
+    resultsFile << ",fractionOfLessThan10PercentRelDiffMinSumRaptorSixRounds,fractionOfLessThan10PercentRelDiffMinMaxRaptorSixRounds";
+    resultsFile << ",fractionOfNoResultRaptorSixRounds\n";
+
+    for (int i = 0; i < numberOfSources.size(); i++) {
+        int numberOfSourceStops = numberOfSources[i];
+
+        cout << "\nProcess queries for " << numberOfSourceStops << " source stops..." << endl;
+
+        string numberOfSourceStopsString = "";
+        if (numberOfSourceStops < 10) {
+            numberOfSourceStopsString = "00" + to_string(numberOfSourceStops);
+        } else if (numberOfSourceStops < 100) {
+            numberOfSourceStopsString = "0" + to_string(numberOfSourceStops);
+        } else {
+            numberOfSourceStopsString = to_string(numberOfSourceStops);
+        }
+
+        std::ofstream queriesInfoFile;
+        vector<MeetingPointQuery> meetingPointQueries;
+        if (loadOrStoreQueries) {
+            string filePath = folderPathQueries + "meeting-point-query-" + numberOfSourceStopsString + "-" + to_string(numberOfSuccessfulQueries) + ".csv";
+            std::ifstream file(filePath);
+            if (file.is_open()) {
+                std::string line;
+                while (std::getline(file, line)) {
+                    meetingPointQueries.push_back(QueryGenerator::parseMeetingPointQuery(line, numberOfSourceStops));
+                }
+            } else {
+                queriesInfoFile.open(filePath, std::ofstream::out);
+            }
+        }
+
+        int queryCounter = 0;
+        int successfulQueryCounter = 0;
+
+        vector<double> minSumDurations;
+        vector<double> minMaxDurations;
+
+        vector<double> queryTimesRaptorFirst;
+        vector<double> queryTimesRaptorNoImprovement;
+        vector<double> queryTimesRaptorOptimalResult;
+
+        vector<vector<double>> queryTimesRaptorRounds = vector<vector<double>>(6, vector<double>());
+
+        vector<double> roundsToFirstResult;
+        vector<double> roundsToNoImprovement;
+
+        vector<int> resultsCounterRaptorFirst = vector<int>(4, 0);
+        vector<int> resultsCounterRaptorNoImprovement = vector<int>(4, 0);
+
+        vector<vector<int>> resultCountersRaptorRounds = vector<vector<int>>(6, vector<int>(5, 0));
+
+        while(successfulQueryCounter < numberOfSuccessfulQueries) {
+            queryCounter++;
+
+            MeetingPointQuery meetingPointQuery;
+            if (loadOrStoreQueries && meetingPointQueries.size() > 0) {
+                meetingPointQuery = meetingPointQueries[successfulQueryCounter];
+            } else {
+                meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSourceStops);
+            }
+
+            RaptorQueryProcessor raptorQueryProcessorOptimal = RaptorQueryProcessor(meetingPointQuery);
+            raptorQueryProcessorOptimal.processRaptorQuery();
+            MeetingPointQueryResult meetingPointQueryResultRaptorOptimal = raptorQueryProcessorOptimal.getMeetingPointQueryResult();
+
+            if (meetingPointQueryResultRaptorOptimal.meetingPointMinSum == "" || meetingPointQueryResultRaptorOptimal.meetingPointMinMax == "") {
+                continue;
+            }
+
+            successfulQueryCounter++;
+
+            NaiveQueryProcessor naiveQueryProcessor = NaiveQueryProcessor(meetingPointQuery);
+            naiveQueryProcessor.processNaiveQuery();
+            MeetingPointQueryResult meetingPointQueryResultNaive = naiveQueryProcessor.getMeetingPointQueryResult();
+
+            // cout << meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds << " " << meetingPointQueryResultNaive.minSumDurationInSeconds << endl;
+            // cout << meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds << " " << meetingPointQueryResultNaive.minMaxDurationInSeconds << endl;
+
+            RaptorQueryProcessor raptorQueryProcessorFirst = RaptorQueryProcessor(meetingPointQuery);
+            raptorQueryProcessorFirst.processRaptorQueryUntilFirstResult();
+            MeetingPointQueryResult meetingPointQueryResultRaptorFirst = raptorQueryProcessorFirst.getMeetingPointQueryResult();
+
+            RaptorQueryProcessor raptorQueryProcessorNoImprovement = RaptorQueryProcessor(meetingPointQuery);
+            raptorQueryProcessorNoImprovement.processRaptorQueryUntilResultDoesntImprove(both);
+            MeetingPointQueryResult meetingPointQueryResultRaptorNoImprovement = raptorQueryProcessorNoImprovement.getMeetingPointQueryResult();
+
+            auto queryDurationRounds = 0;
+            RaptorQueryProcessor raptorQueryProcessorRounds = RaptorQueryProcessor(meetingPointQuery);
+            raptorQueryProcessorRounds.initializeRaptors();
+            vector<MeetingPointQueryResult> meetingPointQueryResultsRounds;
+            for (int i = 0; i < 6; i++) {
+                raptorQueryProcessorRounds.processRaptorRound();
+                MeetingPointQueryResult meetingPointQueryResultRound = raptorQueryProcessorRounds.getMeetingPointQueryResult();
+                queryDurationRounds += raptorQueryProcessorRounds.durationOfLastRound;
+                meetingPointQueryResultsRounds.push_back(meetingPointQueryResultRound);
+                queryTimesRaptorRounds[i].push_back((double) queryDurationRounds);
+            }
+
+            minSumDurations.push_back((double) meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds);
+            minMaxDurations.push_back((double) meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds);
+
+            queryTimesRaptorFirst.push_back((double) meetingPointQueryResultRaptorFirst.queryTime);
+            queryTimesRaptorNoImprovement.push_back((double) meetingPointQueryResultRaptorNoImprovement.queryTime);
+            queryTimesRaptorOptimalResult.push_back((double) meetingPointQueryResultRaptorOptimal.queryTime);
+
+            roundsToFirstResult.push_back((double) meetingPointQueryResultRaptorFirst.maxTransfersMinSum);
+            roundsToNoImprovement.push_back((double) meetingPointQueryResultRaptorNoImprovement.maxTransfersMinSum);
+
+            int differenceMinSumRaptorFirst = meetingPointQueryResultRaptorFirst.minSumDurationInSeconds - meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds;
+            int differenceMinMaxRaptorFirst = meetingPointQueryResultRaptorFirst.minMaxDurationInSeconds - meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds;
+
+            double relativeDifferenceMinSumRaptorFirst = (double) differenceMinSumRaptorFirst / meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds;
+            double relativeDifferenceMinMaxRaptorFirst = (double) differenceMinMaxRaptorFirst / meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds;
+
+            if (differenceMinSumRaptorFirst == 0) {
+                resultsCounterRaptorFirst[0]++;
+            } 
+
+            if (differenceMinMaxRaptorFirst == 0) {
+                resultsCounterRaptorFirst[1]++;
+            } 
+            
+            if (relativeDifferenceMinSumRaptorFirst < 0.1) {
+                resultsCounterRaptorFirst[2]++;
+            }
+            
+            if (relativeDifferenceMinMaxRaptorFirst < 0.1) {
+                resultsCounterRaptorFirst[3]++;
+            }
+
+            int differenceMinSumRaptorNoImprovement = meetingPointQueryResultRaptorNoImprovement.minSumDurationInSeconds - meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds;
+            int differenceMinMaxRaptorNoImprovement = meetingPointQueryResultRaptorNoImprovement.minMaxDurationInSeconds - meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds;
+
+            double relativeDifferenceMinSumRaptorNoImprovement = (double) differenceMinSumRaptorNoImprovement / meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds;
+            double relativeDifferenceMinMaxRaptorNoImprovement = (double) differenceMinMaxRaptorNoImprovement / meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds;
+
+            if (differenceMinSumRaptorNoImprovement == 0) {
+                resultsCounterRaptorNoImprovement[0]++;
+            } 
+
+            if (differenceMinMaxRaptorNoImprovement == 0) {
+                resultsCounterRaptorNoImprovement[1]++;
+            } 
+            
+            if (relativeDifferenceMinSumRaptorNoImprovement < 0.1) {
+                resultsCounterRaptorNoImprovement[2]++;
+            }  
+            
+            if (relativeDifferenceMinMaxRaptorNoImprovement < 0.1) {
+                resultsCounterRaptorNoImprovement[3]++;
+            }
+
+            for (int i = 0; i < 6; i++) {
+                bool foundResult = meetingPointQueryResultsRounds[i].meetingPointMinSum != "" && meetingPointQueryResultsRounds[i].meetingPointMinMax != "";
+
+                if (!foundResult) {
+                    resultCountersRaptorRounds[i][4]++;
+                    continue;
+                }
+
+                int differenceMinSumRaptorRound = meetingPointQueryResultsRounds[i].minSumDurationInSeconds - meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds;
+                int differenceMinMaxRaptorRound = meetingPointQueryResultsRounds[i].minMaxDurationInSeconds - meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds;
+
+                double relativeDifferenceMinSumRaptorRound = (double) differenceMinSumRaptorRound / meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds;
+                double relativeDifferenceMinMaxRaptorRound = (double) differenceMinMaxRaptorRound / meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds;
+
+                if (differenceMinSumRaptorRound == 0) {
+                    resultCountersRaptorRounds[i][0]++;
+                } 
+
+                if (differenceMinMaxRaptorRound == 0) {
+                    resultCountersRaptorRounds[i][1]++;
+                } 
+                
+                if (relativeDifferenceMinSumRaptorRound < 0.1) {
+                    resultCountersRaptorRounds[i][2]++;
+                }
+  
+                if (relativeDifferenceMinMaxRaptorRound < 0.1) {
+                    resultCountersRaptorRounds[i][3]++;
+                }
+            }
+
+            string sourceStopNames = "";
+            for (int j = 0; j < meetingPointQuery.sourceStopIds.size()-1; j++) {
+                sourceStopNames += Importer::getStopName(meetingPointQuery.sourceStopIds[j]) + "-";
+            }
+            sourceStopNames += Importer::getStopName(meetingPointQuery.sourceStopIds[meetingPointQuery.sourceStopIds.size()-1]);
+
+            if (loadOrStoreQueries && meetingPointQueries.size() == 0) {
+                for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
+                    queriesInfoFile << meetingPointQuery.sourceStopIds[i] << ",";
+                }
+                queriesInfoFile << meetingPointQuery.sourceTime << "," << meetingPointQuery.weekday << "\n";
+            }
+
+            // Print progress every 20% of the queries
+            if (successfulQueryCounter % (numberOfSuccessfulQueries / 5) == 0) {
+                cout << "Progress: " << successfulQueryCounter << " / " << numberOfSuccessfulQueries << endl;
+            }
+        }
+
+        if (loadOrStoreQueries && meetingPointQueries.size() == 0) {
+            queriesInfoFile.close();
+        }
+
+        double avgMinSumDuration = Calculator::getAverage(minSumDurations) / 60;
+        double avgMinMaxDuration = Calculator::getAverage(minMaxDurations) / 60;
+        double medianMinSumDuration = Calculator::getMedian(minSumDurations) / 60;
+        double medianMinMaxDuration = Calculator::getMedian(minMaxDurations) / 60;
+        double maxMinSumDuration = Calculator::getMaximum(minSumDurations) / 60;
+        double maxMinMaxDuration = Calculator::getMaximum(minMaxDurations) / 60;
+        double minMinSumDuration = Calculator::getMinimum(minSumDurations) / 60;
+        double minMinMaxDuration = Calculator::getMinimum(minMaxDurations) / 60;
+
+        double avgQueryTimeRaptorFirst = Calculator::getAverage(queryTimesRaptorFirst);
+        double avgQueryTimeRaptorNoImprovement = Calculator::getAverage(queryTimesRaptorNoImprovement);
+        double avgQueryTimeRaptorOptimalResult = Calculator::getAverage(queryTimesRaptorOptimalResult);
+        double medianQueryTimeRaptorFirst = Calculator::getMedian(queryTimesRaptorFirst);
+        double medianQueryTimeRaptorNoImprovement = Calculator::getMedian(queryTimesRaptorNoImprovement);
+        double medianQueryTimeRaptorOptimalResult = Calculator::getMedian(queryTimesRaptorOptimalResult);
+        double maxQueryTimeRaptorFirst = Calculator::getMaximum(queryTimesRaptorFirst);
+        double maxQueryTimeRaptorNoImprovement = Calculator::getMaximum(queryTimesRaptorNoImprovement);
+        double maxQueryTimeRaptorOptimalResult = Calculator::getMaximum(queryTimesRaptorOptimalResult);
+        double minQueryTimeRaptorFirst = Calculator::getMinimum(queryTimesRaptorFirst);
+        double minQueryTimeRaptorNoImprovement = Calculator::getMinimum(queryTimesRaptorNoImprovement);
+        double minQueryTimeRaptorOptimalResult = Calculator::getMinimum(queryTimesRaptorOptimalResult);
+
+        vector<double> avgQueryTimesRaptorRounds;
+        vector<double> medianQueryTimesRaptorRounds;
+        vector<double> maxQueryTimesRaptorRounds;
+        vector<double> minQueryTimesRaptorRounds;
+
+        for (int i = 0; i < 6; i++) {
+            avgQueryTimesRaptorRounds.push_back(Calculator::getAverage(queryTimesRaptorRounds[i]));
+            medianQueryTimesRaptorRounds.push_back(Calculator::getMedian(queryTimesRaptorRounds[i]));
+            maxQueryTimesRaptorRounds.push_back(Calculator::getMaximum(queryTimesRaptorRounds[i]));
+            minQueryTimesRaptorRounds.push_back(Calculator::getMinimum(queryTimesRaptorRounds[i]));
+        }
+
+        double avgRoundsToFirstResult = Calculator::getAverage(roundsToFirstResult);
+        double avgRoundsToNoImprovement = Calculator::getAverage(roundsToNoImprovement);
+        double medianRoundsToFirstResult = Calculator::getMedian(roundsToFirstResult);
+        double medianRoundsToNoImprovement = Calculator::getMedian(roundsToNoImprovement);
+        double maxRoundsToFirstResult = Calculator::getMaximum(roundsToFirstResult);
+        double maxRoundsToNoImprovement = Calculator::getMaximum(roundsToNoImprovement);
+        double minRoundsToFirstResult = Calculator::getMinimum(roundsToFirstResult);
+        double minRoundsToNoImprovement = Calculator::getMinimum(roundsToNoImprovement);
+
+        vector<double> resultFractionsRaptorFirst;
+        for (int i = 0; i < 4; i++) {
+            resultFractionsRaptorFirst.push_back((double) resultsCounterRaptorFirst[i] / numberOfSuccessfulQueries);
+        }
+
+        vector<double> resultFractionsRaptorNoImprovement;
+        for (int i = 0; i < 4; i++) {
+            resultFractionsRaptorNoImprovement.push_back((double) resultsCounterRaptorNoImprovement[i] / numberOfSuccessfulQueries);
+        }
+
+        vector<vector<double>> resultFractionsRaptorRounds;
+        for (int i = 0; i < 6; i++) {
+            vector<double> resultFractionsRaptorRound;
+            for (int j = 0; j < 5; j++) {
+                resultFractionsRaptorRound.push_back((double) resultCountersRaptorRounds[i][j] / numberOfSuccessfulQueries);
+            }
+            resultFractionsRaptorRounds.push_back(resultFractionsRaptorRound);
+        }
+
+        resultsFile << numberOfSourceStops << "," << avgMinSumDuration << "," << avgMinMaxDuration << "," << medianMinSumDuration << "," << medianMinMaxDuration << "," << maxMinSumDuration;
+        resultsFile << "," << maxMinMaxDuration << "," << minMinSumDuration << "," << minMinMaxDuration;
+        resultsFile << "," << avgQueryTimeRaptorFirst << "," << avgQueryTimeRaptorNoImprovement << "," << avgQueryTimeRaptorOptimalResult;
+        resultsFile << "," << medianQueryTimeRaptorFirst << "," << medianQueryTimeRaptorNoImprovement << "," << medianQueryTimeRaptorOptimalResult;
+        resultsFile << "," << maxQueryTimeRaptorFirst << "," << maxQueryTimeRaptorNoImprovement << "," << maxQueryTimeRaptorOptimalResult;
+        resultsFile << "," << minQueryTimeRaptorFirst << "," << minQueryTimeRaptorNoImprovement << "," << minQueryTimeRaptorOptimalResult;
+        resultsFile << "," << avgQueryTimesRaptorRounds[0] << "," << avgQueryTimesRaptorRounds[1] << "," << avgQueryTimesRaptorRounds[2] << "," << avgQueryTimesRaptorRounds[3] << "," << avgQueryTimesRaptorRounds[4] << "," << avgQueryTimesRaptorRounds[5];
+        resultsFile << "," << medianQueryTimesRaptorRounds[0] << "," << medianQueryTimesRaptorRounds[1] << "," << medianQueryTimesRaptorRounds[2] << "," << medianQueryTimesRaptorRounds[3] << "," << medianQueryTimesRaptorRounds[4] << "," << medianQueryTimesRaptorRounds[5];
+        resultsFile << "," << maxQueryTimesRaptorRounds[0] << "," << maxQueryTimesRaptorRounds[1] << "," << maxQueryTimesRaptorRounds[2] << "," << maxQueryTimesRaptorRounds[3] << "," << maxQueryTimesRaptorRounds[4] << "," << maxQueryTimesRaptorRounds[5];
+        resultsFile << "," << minQueryTimesRaptorRounds[0] << "," << minQueryTimesRaptorRounds[1] << "," << minQueryTimesRaptorRounds[2] << "," << minQueryTimesRaptorRounds[3] << "," << minQueryTimesRaptorRounds[4] << "," << minQueryTimesRaptorRounds[5];
+        resultsFile << "," << avgRoundsToFirstResult << "," << avgRoundsToNoImprovement << "," << medianRoundsToFirstResult << "," << medianRoundsToNoImprovement << "," << maxRoundsToFirstResult << "," << maxRoundsToNoImprovement << "," << minRoundsToFirstResult << "," << minRoundsToNoImprovement;
+        resultsFile << "," << resultFractionsRaptorFirst[0] << "," << resultFractionsRaptorFirst[1] << "," << resultFractionsRaptorFirst[2] << "," << resultFractionsRaptorFirst[3];
+        resultsFile << "," << resultFractionsRaptorNoImprovement[0] << "," << resultFractionsRaptorNoImprovement[1] << "," << resultFractionsRaptorNoImprovement[2] << "," << resultFractionsRaptorNoImprovement[3];
+        for (int i = 0; i < 6; i++) {
+            resultsFile << "," << resultFractionsRaptorRounds[i][0] << "," << resultFractionsRaptorRounds[i][1] << "," << resultFractionsRaptorRounds[i][2] << "," << resultFractionsRaptorRounds[i][3] << "," << resultFractionsRaptorRounds[i][4];
+        }
+        resultsFile << "\n";
+
+        cout << "Rate of successful queries: " << (double) successfulQueryCounter / numberOfSuccessfulQueries << endl;
+
+        cout << "\nAverage min sum duration: " << avgMinSumDuration << endl;
+        cout << "Average min max duration: " << avgMinMaxDuration << endl;
+        cout << "Median min sum duration: " << medianMinSumDuration << endl;
+        cout << "Median min max duration: " << medianMinMaxDuration << endl;
+        cout << "Max min sum duration: " << maxMinSumDuration << endl;
+        cout << "Max min max duration: " << maxMinMaxDuration << endl;
+        cout << "Min min sum duration: " << minMinSumDuration << endl;
+        cout << "Min min max duration: " << minMinMaxDuration << endl;
+
+        cout << "\nAverage query time raptor first: " << avgQueryTimeRaptorFirst << endl;
+        cout << "Average query time raptor no improvement: " << avgQueryTimeRaptorNoImprovement << endl;
+        cout << "Average query time raptor optimal result: " << avgQueryTimeRaptorOptimalResult << endl;
+        cout << "Median query time raptor first: " << medianQueryTimeRaptorFirst << endl;
+        cout << "Median query time raptor no improvement: " << medianQueryTimeRaptorNoImprovement << endl;
+        cout << "Median query time raptor optimal result: " << medianQueryTimeRaptorOptimalResult << endl;
+        cout << "Max query time raptor first: " << maxQueryTimeRaptorFirst << endl;
+        cout << "Max query time raptor no improvement: " << maxQueryTimeRaptorNoImprovement << endl;
+        cout << "Max query time raptor optimal result: " << maxQueryTimeRaptorOptimalResult << endl;
+        cout << "Min query time raptor first: " << minQueryTimeRaptorFirst << endl;
+        cout << "Min query time raptor no improvement: " << minQueryTimeRaptorNoImprovement << endl;
+        cout << "Min query time raptor optimal result: " << minQueryTimeRaptorOptimalResult << endl;
+
+        cout << "\nAverage query time raptor one round: " << avgQueryTimesRaptorRounds[0] << endl;
+        cout << "Average query time raptor two rounds: " << avgQueryTimesRaptorRounds[1] << endl;
+        cout << "Average query time raptor three rounds: " << avgQueryTimesRaptorRounds[2] << endl;
+        cout << "Average query time raptor four rounds: " << avgQueryTimesRaptorRounds[3] << endl;
+        cout << "Average query time raptor five rounds: " << avgQueryTimesRaptorRounds[4] << endl;
+        cout << "Average query time raptor six rounds: " << avgQueryTimesRaptorRounds[5] << endl;
+        cout << "Median query time raptor one round: " << medianQueryTimesRaptorRounds[0] << endl;
+        cout << "Median query time raptor two rounds: " << medianQueryTimesRaptorRounds[1] << endl;
+        cout << "Median query time raptor three rounds: " << medianQueryTimesRaptorRounds[2] << endl;
+        cout << "Median query time raptor four rounds: " << medianQueryTimesRaptorRounds[3] << endl;
+        cout << "Median query time raptor five rounds: " << medianQueryTimesRaptorRounds[4] << endl;
+        cout << "Median query time raptor six rounds: " << medianQueryTimesRaptorRounds[5] << endl;
+
+        cout << "\nAverage rounds to first result: " << avgRoundsToFirstResult << endl;
+        cout << "Average rounds to no improvement: " << avgRoundsToNoImprovement << endl;
+        cout << "Median rounds to first result: " << medianRoundsToFirstResult << endl;
+        cout << "Median rounds to no improvement: " << medianRoundsToNoImprovement << endl;
+        cout << "Max rounds to first result: " << maxRoundsToFirstResult << endl;
+        cout << "Max rounds to no improvement: " << maxRoundsToNoImprovement << endl;
+        cout << "Min rounds to first result: " << minRoundsToFirstResult << endl;
+        cout << "Min rounds to no improvement: " << minRoundsToNoImprovement << endl;
+
+        cout << "\nFraction of optimal results min sum raptor first: " << resultFractionsRaptorFirst[0] << endl;
+        cout << "Fraction of optimal results min max raptor first: " << resultFractionsRaptorFirst[1] << endl;
+        cout << "Fraction of less than 10% relative difference min sum raptor first: " << resultFractionsRaptorFirst[2] << endl;
+        cout << "Fraction of less than 10% relative difference min max raptor first: " << resultFractionsRaptorFirst[3] << endl;
+
+        cout << "\nFraction of optimal results min sum raptor no improvement: " << resultFractionsRaptorNoImprovement[0] << endl;
+        cout << "Fraction of optimal results min max raptor no improvement: " << resultFractionsRaptorNoImprovement[1] << endl;
+        cout << "Fraction of less than 10% relative difference min sum raptor no improvement: " << resultFractionsRaptorNoImprovement[2] << endl;
+        cout << "Fraction of less than 10% relative difference min max raptor no improvement: " << resultFractionsRaptorNoImprovement[3] << endl;
+
+        cout << "\nFraction of optimal results min sum raptor one round: " << resultFractionsRaptorRounds[0][0] << endl;
+        cout << "Fraction of optimal results min max raptor one round: " << resultFractionsRaptorRounds[0][1] << endl;
+        cout << "Fraction of less than 10% relative difference min sum raptor one round: " << resultFractionsRaptorRounds[0][2] << endl;
+        cout << "Fraction of less than 10% relative difference min max raptor one round: " << resultFractionsRaptorRounds[0][3] << endl;
+        cout << "Fraction of no result raptor one round: " << resultFractionsRaptorRounds[0][4] << endl;
+
+        cout << "\nFraction of optimal results min sum raptor two rounds: " << resultFractionsRaptorRounds[1][0] << endl;
+        cout << "Fraction of optimal results min max raptor two rounds: " << resultFractionsRaptorRounds[1][1] << endl;
+        cout << "Fraction of less than 10% relative difference min sum raptor two rounds: " << resultFractionsRaptorRounds[1][2] << endl;
+        cout << "Fraction of less than 10% relative difference min max raptor two rounds: " << resultFractionsRaptorRounds[1][3] << endl;
+        cout << "Fraction of no result raptor two rounds: " << resultFractionsRaptorRounds[1][4] << endl;
+
+        cout << "\nFraction of optimal results min sum raptor three rounds: " << resultFractionsRaptorRounds[2][0] << endl;
+        cout << "Fraction of optimal results min max raptor three rounds: " << resultFractionsRaptorRounds[2][1] << endl;
+        cout << "Fraction of less than 10% relative difference min sum raptor three rounds: " << resultFractionsRaptorRounds[2][2] << endl;
+        cout << "Fraction of less than 10% relative difference min max raptor three rounds: " << resultFractionsRaptorRounds[2][3] << endl;
+        cout << "Fraction of no result raptor three rounds: " << resultFractionsRaptorRounds[2][4] << endl;
+
+        cout << "\nFraction of optimal results min sum raptor four rounds: " << resultFractionsRaptorRounds[3][0] << endl;
+        cout << "Fraction of optimal results min max raptor four rounds: " << resultFractionsRaptorRounds[3][1] << endl;
+        cout << "Fraction of less than 10% relative difference min sum raptor four rounds: " << resultFractionsRaptorRounds[3][2] << endl;
+        cout << "Fraction of less than 10% relative difference min max raptor four rounds: " << resultFractionsRaptorRounds[3][3] << endl;
+        cout << "Fraction of no result raptor four rounds: " << resultFractionsRaptorRounds[3][4] << endl;
+
+        cout << "\nFraction of optimal results min sum raptor five rounds: " << resultFractionsRaptorRounds[4][0] << endl;
+        cout << "Fraction of optimal results min max raptor five rounds: " << resultFractionsRaptorRounds[4][1] << endl;
+        cout << "Fraction of less than 10% relative difference min sum raptor five rounds: " << resultFractionsRaptorRounds[4][2] << endl;
+        cout << "Fraction of less than 10% relative difference min max raptor five rounds: " << resultFractionsRaptorRounds[4][3] << endl;
+        cout << "Fraction of no result raptor five rounds: " << resultFractionsRaptorRounds[4][4] << endl;
+
+        cout << "\nFraction of optimal results min sum raptor six rounds: " << resultFractionsRaptorRounds[5][0] << endl;
+        cout << "Fraction of optimal results min max raptor six rounds: " << resultFractionsRaptorRounds[5][1] << endl;
+        cout << "Fraction of less than 10% relative difference min sum raptor six rounds: " << resultFractionsRaptorRounds[5][2] << endl;
+        cout << "Fraction of less than 10% relative difference min max raptor six rounds: " << resultFractionsRaptorRounds[5][3] << endl;
+        cout << "Fraction of no result raptor six rounds: " << resultFractionsRaptorRounds[5][4] << endl;
+
+        cout << "\n\n";
+    }  
 }
 
 /*
@@ -456,14 +891,14 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
             MeetingPointQueryResult meetingPointQueryResultGTreeApproximation = gTreeQueryProcessorApproximation.getMeetingPointQueryResult();
 
             RaptorQueryProcessor raptorQueryProcessor = RaptorQueryProcessor(meetingPointQuery);
-            raptorQueryProcessor.processRaptorQuery();
-            MeetingPointQueryRaptorResult meetingPointQueryResultRaptor = raptorQueryProcessor.getMeetingPointQueryResult();
+            raptorQueryProcessor.processRaptorQueryUntilFirstResult();
+            MeetingPointQueryResult meetingPointQueryResultRaptor = raptorQueryProcessor.getMeetingPointQueryResult();
 
             bool naiveQuerySuccessful = meetingPointQueryResultNaive.meetingPointMinSum != "" && meetingPointQueryResultNaive.meetingPointMinMax != "";
             bool naiveKeyStopQuerySuccessful = meetingPointQueryResultNaiveKeyStop.meetingPointMinSum != "" && meetingPointQueryResultNaiveKeyStop.meetingPointMinMax != "";
             bool gTreeCSAQuerySuccessful = meetingPointQueryResultGTreeCSA.meetingPointMinSum != "" && meetingPointQueryResultGTreeCSA.meetingPointMinMax != "";
             bool gTreeApproximationQuerySuccessful = meetingPointQueryResultGTreeApproximation.meetingPointMinSum != "" && meetingPointQueryResultGTreeApproximation.meetingPointMinMax != "";
-            bool raptorQuerySuccessful = meetingPointQueryResultRaptor.meetingPoint != "";
+            bool raptorQuerySuccessful = meetingPointQueryResultRaptor.meetingPointMinSum != "" && meetingPointQueryResultRaptor.meetingPointMinMax != "";
 
             if (naiveQuerySuccessful) {
                 successfulQueriesNaive++;
@@ -489,7 +924,7 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
                 continue;
             }
 
-            if (meetingPointQueryResultRaptor.durationSumInSeconds < meetingPointQueryResultNaive.minSumDurationInSeconds || meetingPointQueryResultRaptor.durationInSeconds < meetingPointQueryResultNaive.minMaxDurationInSeconds) {
+            if (meetingPointQueryResultRaptor.minSumDurationInSeconds < meetingPointQueryResultNaive.minSumDurationInSeconds || meetingPointQueryResultRaptor.minMaxDurationInSeconds < meetingPointQueryResultNaive.minMaxDurationInSeconds) {
                 successfulQueriesRaptor--;
                 continue;
             }
@@ -516,7 +951,8 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
             maxTransfersGTreeCSA.push_back(meetingPointQueryResultGTreeCSA.maxTransfersMinMax);
             maxTransfersGTreeApproximation.push_back(meetingPointQueryResultGTreeApproximation.maxTransfersMinSum);
             maxTransfersGTreeApproximation.push_back(meetingPointQueryResultGTreeApproximation.maxTransfersMinMax);
-            maxTransfersRaptor.push_back(meetingPointQueryResultRaptor.maxNumberOfTransfers);
+            maxTransfersRaptor.push_back(meetingPointQueryResultRaptor.maxTransfersMinSum);
+            maxTransfersRaptor.push_back(meetingPointQueryResultRaptor.maxTransfersMinMax);
 
             int differenceMinSumGTree = meetingPointQueryResultGTreeApproximation.minSumDurationInSeconds - meetingPointQueryResultNaive.minSumDurationInSeconds;
             int differenceMinMaxGTree = meetingPointQueryResultGTreeApproximation.minMaxDurationInSeconds - meetingPointQueryResultNaive.minMaxDurationInSeconds;
@@ -548,14 +984,14 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
             accuracyMinSumKeyStop.push_back(accuracyMinSumValKeyStop);
             accuracyMinMaxKeyStop.push_back(accuracyMinMaxValKeyStop);
 
-            int differenceMinSumRaptor = meetingPointQueryResultRaptor.durationSumInSeconds - meetingPointQueryResultNaive.minSumDurationInSeconds;
-            int differenceMinMaxRaptor = meetingPointQueryResultRaptor.durationInSeconds - meetingPointQueryResultNaive.minMaxDurationInSeconds;
+            int differenceMinSumRaptor = meetingPointQueryResultRaptor.minSumDurationInSeconds - meetingPointQueryResultNaive.minSumDurationInSeconds;
+            int differenceMinMaxRaptor = meetingPointQueryResultRaptor.minMaxDurationInSeconds - meetingPointQueryResultNaive.minMaxDurationInSeconds;
 
             absolutDifferenceMinSumRaptor.push_back((double) differenceMinSumRaptor / 60);
             absolutDifferenceMinMaxRaptor.push_back((double) differenceMinMaxRaptor / 60);
 
-            double relativeDifferenceMinSumRaptor = (double) differenceMinSumRaptor / meetingPointQueryResultRaptor.durationSumInSeconds;
-            double relativeDifferenceMinMaxRaptor = (double) differenceMinMaxRaptor / meetingPointQueryResultRaptor.durationInSeconds;
+            double relativeDifferenceMinSumRaptor = (double) differenceMinSumRaptor / meetingPointQueryResultRaptor.minSumDurationInSeconds;
+            double relativeDifferenceMinMaxRaptor = (double) differenceMinMaxRaptor / meetingPointQueryResultRaptor.minMaxDurationInSeconds;
 
             double accuracyMinSumValRaptor = 1 - relativeDifferenceMinSumRaptor;
             double accuracyMinMaxValRaptor = 1 - relativeDifferenceMinMaxRaptor;
@@ -581,7 +1017,7 @@ void AlgorithmComparer::compareAlgorithmsRandom(DataType dataType, GTree* gTree,
             queriesFile << "," << meetingPointQueryResultNaiveKeyStop.maxTransfersMinSum << "," << meetingPointQueryResultNaiveKeyStop.maxTransfersMinMax;
             queriesFile << "," << meetingPointQueryResultGTreeCSA.maxTransfersMinSum << "," << meetingPointQueryResultGTreeCSA.maxTransfersMinMax;
             queriesFile << "," << meetingPointQueryResultGTreeApproximation.maxTransfersMinSum << "," << meetingPointQueryResultGTreeApproximation.maxTransfersMinMax;
-            queriesFile << "," << meetingPointQueryResultRaptor.maxNumberOfTransfers;
+            queriesFile << "," << meetingPointQueryResultRaptor.maxTransfersMinMax;
             queriesFile  << "," << differenceMinSumGTree << "," << differenceMinMaxGTree;
             queriesFile  << "," << accuracyMinSumValGTree << "," << accuracyMinMaxValGTree;
             queriesFile  << "," << differenceMinSumKeyStop << "," << differenceMinMaxKeyStop;
@@ -815,8 +1251,8 @@ void AlgorithmComparer::compareAlgorithms(DataType dataType, GTree* gTree, Meeti
     MeetingPointQueryResult meetingPointQueryResultGTreeApproximation = gTreeQueryProcessorApproximation.getMeetingPointQueryResult();
 
     RaptorQueryProcessor raptorQueryProcessor = RaptorQueryProcessor(meetingPointQuery);
-    raptorQueryProcessor.processRaptorQuery();
-    MeetingPointQueryRaptorResult meetingPointQueryResultRaptor = raptorQueryProcessor.getMeetingPointQueryResult();
+    raptorQueryProcessor.processRaptorQueryUntilFirstResult();
+    MeetingPointQueryResult meetingPointQueryResultRaptor = raptorQueryProcessor.getMeetingPointQueryResult();
 
     PrintHelper::printMeetingPointQuery(meetingPointQuery);
     cout << "Naive: " << endl;
@@ -836,7 +1272,7 @@ void AlgorithmComparer::compareAlgorithms(DataType dataType, GTree* gTree, Meeti
     PrintHelper::printGTreeApproxInfo(gTreeQueryProcessorApproximation);
 
     cout << "Raptor: " << endl;
-    PrintHelper::printMeetingPointQueryRaptorResult(meetingPointQueryResultRaptor);
+    PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultRaptor);
 
     bool naiveQuerySuccessful = meetingPointQueryResultNaive.meetingPointMinSum != "" && meetingPointQueryResultNaive.meetingPointMinMax != "";
     bool naiveKeyStopQuerySuccessful = true;
@@ -845,7 +1281,7 @@ void AlgorithmComparer::compareAlgorithms(DataType dataType, GTree* gTree, Meeti
     }
     bool gTreeCSAQuerySuccessful = meetingPointQueryResultGTreeCSA.meetingPointMinSum != "" && meetingPointQueryResultGTreeCSA.meetingPointMinMax != "";
     bool gTreeApproximationQuerySuccessful = meetingPointQueryResultGTreeApproximation.meetingPointMinSum != "" && meetingPointQueryResultGTreeApproximation.meetingPointMinMax != "";
-    bool raptorQuerySuccessful = meetingPointQueryResultRaptor.meetingPoint != "";
+    bool raptorQuerySuccessful = meetingPointQueryResultRaptor.meetingPointMinSum != "" && meetingPointQueryResultRaptor.meetingPointMinMax != "";
 
     if(naiveQuerySuccessful && gTreeApproximationQuerySuccessful) {
         double absolutDifferenceMinSumGTree = (double) (meetingPointQueryResultGTreeApproximation.minSumDurationInSeconds - meetingPointQueryResultNaive.minSumDurationInSeconds);
@@ -876,10 +1312,10 @@ void AlgorithmComparer::compareAlgorithms(DataType dataType, GTree* gTree, Meeti
     }
 
     if (naiveQuerySuccessful && raptorQuerySuccessful) {
-        double absolutDifferenceMinSumRaptor = (double) (meetingPointQueryResultRaptor.durationSumInSeconds - meetingPointQueryResultNaive.minSumDurationInSeconds);
-        double absolutDifferenceMinMaxRaptor = (double) (meetingPointQueryResultRaptor.durationInSeconds - meetingPointQueryResultNaive.minMaxDurationInSeconds);
-        double accuracyMinSumRaptor = (double) 1 - (absolutDifferenceMinSumRaptor / meetingPointQueryResultRaptor.durationSumInSeconds);
-        double accuracyMinMaxRaptor = (double) 1 - (absolutDifferenceMinMaxRaptor / meetingPointQueryResultRaptor.durationInSeconds);
+        double absolutDifferenceMinSumRaptor = (double) (meetingPointQueryResultRaptor.minSumDurationInSeconds - meetingPointQueryResultNaive.minSumDurationInSeconds);
+        double absolutDifferenceMinMaxRaptor = (double) (meetingPointQueryResultRaptor.minMaxDurationInSeconds - meetingPointQueryResultNaive.minMaxDurationInSeconds);
+        double accuracyMinSumRaptor = (double) 1 - (absolutDifferenceMinSumRaptor / meetingPointQueryResultRaptor.minSumDurationInSeconds);
+        double accuracyMinMaxRaptor = (double) 1 - (absolutDifferenceMinMaxRaptor / meetingPointQueryResultRaptor.minMaxDurationInSeconds);
 
         cout << "\nResult differences (Raptor):" << endl;
         cout << "Absolut difference min sum: " << absolutDifferenceMinSumRaptor / 60 << " minutes" << endl;
@@ -952,16 +1388,6 @@ void PrintHelper::printMeetingPointQueryResult(MeetingPointQueryResult meetingPo
     }
     cout << "Min sum - meeting point: " << meetingPointQueryResult.meetingPointMinSum << ", meeting time: " << meetingPointQueryResult.meetingTimeMinSum << ",  travel time sum: " << meetingPointQueryResult.minSumDuration << ", max transfers: " << meetingPointQueryResult.maxTransfersMinSum << endl;
     cout << "Min max - meeting point: " << meetingPointQueryResult.meetingPointMinMax << ", meeting time: " << meetingPointQueryResult.meetingTimeMinMax << ", travel time max: " << meetingPointQueryResult.minMaxDuration << ", max transfers: " << meetingPointQueryResult.maxTransfersMinMax << endl;
-    cout << "Query time: " << meetingPointQueryResult.queryTime << " milliseconds \n" << endl;
-}
-
-void PrintHelper::printMeetingPointQueryRaptorResult(MeetingPointQueryRaptorResult meetingPointQueryResult) {
-    if (meetingPointQueryResult.meetingPoint == "") {
-        cout << "No meeting point found" << endl;
-        cout << "Query time: " << meetingPointQueryResult.queryTime << " milliseconds \n" << endl;
-        return;
-    }
-    cout << "Min max transfers - meeting point: " << meetingPointQueryResult.meetingPoint << ", meeting time: " << meetingPointQueryResult.meetingTime << ",  travel time (max): " << meetingPointQueryResult.duration << ",  travel time (sum): " << meetingPointQueryResult.durationSum << ", max transfers: " << meetingPointQueryResult.maxNumberOfTransfers << endl;
     cout << "Query time: " << meetingPointQueryResult.queryTime << " milliseconds \n" << endl;
 }
 

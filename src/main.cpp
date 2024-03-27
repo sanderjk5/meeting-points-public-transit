@@ -85,15 +85,17 @@ int main(int argc, const char *argv[]) {
 
   if (startExperiments){
     // Real experiments
-    vector<int> numberOfSourceStops = {2, 3, 5, 10, 25};
+    // vector<int> numberOfSourceStops = {2, 3, 5, 10, 25};
 
     // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 1000, 25, 0.90);
 
     // ExperimentController::findBestGTreeParameters(dataType, 10, 100);
-    ExperimentController::testAndCompareAlgorithmsRandom(dataType, 1000, numberOfSourceStops);
+    // ExperimentController::testAndCompareAlgorithmsRandom(dataType, 1000, numberOfSourceStops);
 
     // Test experiments
-    // vector<int> numberOfSourceStops = {2};
+    vector<int> numberOfSourceStops = {2, 5, 10, 25, 50};
+
+    ExperimentController::compareRaptorAlgorithms(dataType, 1000, numberOfSourceStops);
 
     // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 10, 30, 0.90);
 
@@ -116,23 +118,6 @@ int main(int argc, const char *argv[]) {
       numberOfChildrenPerNode = 4;
       maxNumberOfVerticesPerLeaf = 512;
     }
-
-    vector<int> sourceStopIds = {};
-    for (int i = 0; i < 50; i++) {
-      sourceStopIds.push_back(rand() % Creator::networkGraph.vertices.size());
-    }
-    vector<int> allStopIds = vector<int>();
-    for (int i = 0; i < Creator::networkGraph.vertices.size(); i++){
-      allStopIds.push_back(i);
-    }
-
-    auto start = chrono::high_resolution_clock::now();
-    #pragma omp parallel for
-    for (int i = 0; i < sourceStopIds.size(); i++){
-      Creator::networkGraph.getDistances(sourceStopIds[i], allStopIds);
-    }
-    auto end = chrono::high_resolution_clock::now();
-    cout << "Time to get distances: " << chrono::duration_cast<chrono::milliseconds>(end - start).count() << "ms" << endl;
 
     GTree* networkGTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
 

@@ -51,6 +51,7 @@ class RaptorAlgorithmTester {
 
         static void testRaptorAlgorithmRandom(int numberOfSuccessfulQueries, int numberOfSources, bool printOnlySuccessful = false);
         static void testRaptorAlgorithm(MeetingPointQuery meetingPointQuery);
+        static void compareRaptorAlgorithms(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSources, bool loadOrStoreQueries);
 };
 
 class AlgorithmComparer {
@@ -69,7 +70,6 @@ class PrintHelper {
 
         static void printMeetingPointQuery(MeetingPointQuery meetingPointQuery);
         static void printMeetingPointQueryResult(MeetingPointQueryResult meetingPointQueryResult);
-        static void printMeetingPointQueryRaptorResult(MeetingPointQueryRaptorResult meetingPointQueryResult);
         static void printGTreeCSAInfo(MeetingPointQueryGTreeCSAInfo meetingPointQueryGTreeCSAInfo);
         static void printGTreeApproxInfo(GTreeQueryProcessor gTreeQueryProcessor);
         static void printJourney(Journey journey);

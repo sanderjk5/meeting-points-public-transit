@@ -33,18 +33,6 @@ struct MeetingPointQueryResult {
     double queryTime;
 };
 
-struct MeetingPointQueryRaptorResult {
-    int meetingPointStopId;
-    string meetingPoint;
-    string meetingTime;
-    string duration;
-    string durationSum;
-    int durationInSeconds;
-    int durationSumInSeconds;
-    int maxNumberOfTransfers;
-    double queryTime;
-};
-
 struct MeetingPointQueryGTreeCSAInfo {
     double csaTargetStopFractionMinSum;
     double csaTargetStopFractionMinMax;
@@ -53,7 +41,8 @@ struct MeetingPointQueryGTreeCSAInfo {
 
 enum Optimization {
     min_sum,
-    min_max
+    min_max,
+    both
 };
 
 /*
@@ -135,13 +124,19 @@ class RaptorQueryProcessor {
         };
         ~RaptorQueryProcessor(){};
 
+        void initializeRaptors();
+        void processRaptorQueryUntilFirstResult();
+        void processRaptorQueryUntilResultDoesntImprove(Optimization optimization);
         void processRaptorQuery();
-        MeetingPointQueryRaptorResult getMeetingPointQueryResult();
+        bool processRaptorRound();
+        MeetingPointQueryResult getMeetingPointQueryResult();
+        double durationOfLastRound;
 
     private:
         MeetingPointQuery meetingPointQuery;
-        MeetingPointQueryRaptorResult meetingPointQueryResult;
+        MeetingPointQueryResult meetingPointQueryResult;
         vector<Raptor*> raptors;
+        int transfers;
 };
 
 /*
