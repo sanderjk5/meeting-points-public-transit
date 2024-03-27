@@ -137,8 +137,8 @@ class RaptorQueryProcessor {
         MeetingPointQuery meetingPointQuery;
         MeetingPointQueryResult meetingPointQueryResult;
         vector<Raptor*> raptors;
-        int lastRoundMeetingPointMinSum;
-        int lastRoundMeetingPointMinMax;
+        int lastRoundMinSumDuration;
+        int lastRoundMinMaxDuration;
 };
 
 /*
