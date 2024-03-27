@@ -419,9 +419,9 @@ void RaptorAlgorithmTester::compareRaptorAlgorithms(DataType dataType, int numbe
 
             successfulQueryCounter++;
 
-            NaiveQueryProcessor naiveQueryProcessor = NaiveQueryProcessor(meetingPointQuery);
-            naiveQueryProcessor.processNaiveQuery();
-            MeetingPointQueryResult meetingPointQueryResultNaive = naiveQueryProcessor.getMeetingPointQueryResult();
+            // NaiveQueryProcessor naiveQueryProcessor = NaiveQueryProcessor(meetingPointQuery);
+            // naiveQueryProcessor.processNaiveQuery();
+            // MeetingPointQueryResult meetingPointQueryResultNaive = naiveQueryProcessor.getMeetingPointQueryResult();
 
             // cout << meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds << " " << meetingPointQueryResultNaive.minSumDurationInSeconds << endl;
             // cout << meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds << " " << meetingPointQueryResultNaive.minMaxDurationInSeconds << endl;
