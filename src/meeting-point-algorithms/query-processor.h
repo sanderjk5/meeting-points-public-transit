@@ -131,12 +131,14 @@ class RaptorQueryProcessor {
         bool processRaptorRound();
         MeetingPointQueryResult getMeetingPointQueryResult();
         double durationOfLastRound;
+        int transfers;
 
     private:
         MeetingPointQuery meetingPointQuery;
         MeetingPointQueryResult meetingPointQueryResult;
         vector<Raptor*> raptors;
-        int transfers;
+        int lastRoundMeetingPointMinSum;
+        int lastRoundMeetingPointMinMax;
 };
 
 /*

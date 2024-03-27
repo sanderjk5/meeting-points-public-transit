@@ -320,10 +320,10 @@ void RaptorAlgorithmTester::compareRaptorAlgorithms(DataType dataType, int numbe
     resultsFile << ",maxQueryTimeOneRound,maxQueryTimeTwoRounds,maxQueryTimeThreeRounds,maxQueryTimeFourRounds,maxQueryTimeFiveRounds,maxQueryTimeSixRounds";
     resultsFile << ",minQueryTimeOneRound,minQueryTimeTwoRounds,minQueryTimeThreeRounds,minQueryTimeFourRounds,minQueryTimeFiveRounds,minQueryTimeSixRounds";
 
-    resultsFile << ",avgRoundsToFirstResult,avgRoundsToNoImprovement,avgRoundsToOptimalResult";
-    resultsFile << ",medianRoundsToFirstResult,medianRoundsToNoImprovement,medianRoundsToOptimalResult";
-    resultsFile << ",maxRoundsToFirstResult,maxRoundsToNoImprovement,maxRoundsToOptimalResult";
-    resultsFile << ",minRoundsToFirstResult,minRoundsToNoImprovement,minRoundsToOptimalResult";
+    resultsFile << ",avgRoundsToFirstResult,avgRoundsToNoImprovement,avgRoundsToOptimalResult,avgTotalRoundsOptimalResult";
+    resultsFile << ",medianRoundsToFirstResult,medianRoundsToNoImprovement,medianRoundsToOptimalResult,medianTotalRoundsOptimalResult";
+    resultsFile << ",maxRoundsToFirstResult,maxRoundsToNoImprovement,maxRoundsToOptimalResult,maxTotalRoundsOptimalResult";
+    resultsFile << ",minRoundsToFirstResult,minRoundsToNoImprovement,minRoundsToOptimalResult,minTotalRoundsOptimalResult";
 
     resultsFile << ",fractionOfOptimalResultsMinSumRaptorFirst,fractionOfOptimalResultsMinMaxRaptorFirst";
     resultsFile << ",fractionOfLessThan10PercentRelDiffMinSumRaptorFirst,fractionOfLessThan10PercentRelDiffMinMaxRaptorFirst";
@@ -393,6 +393,8 @@ void RaptorAlgorithmTester::compareRaptorAlgorithms(DataType dataType, int numbe
 
         vector<double> roundsToFirstResult;
         vector<double> roundsToNoImprovement;
+        vector<double> roundsToOptimalResult;
+        vector<double> totalRoundsOptimalResult;
 
         vector<int> resultsCounterRaptorFirst = vector<int>(4, 0);
         vector<int> resultsCounterRaptorNoImprovement = vector<int>(4, 0);
@@ -455,6 +457,10 @@ void RaptorAlgorithmTester::compareRaptorAlgorithms(DataType dataType, int numbe
 
             roundsToFirstResult.push_back((double) meetingPointQueryResultRaptorFirst.maxTransfersMinSum);
             roundsToNoImprovement.push_back((double) meetingPointQueryResultRaptorNoImprovement.maxTransfersMinSum);
+            roundsToNoImprovement.push_back((double) meetingPointQueryResultRaptorNoImprovement.maxTransfersMinMax);
+            roundsToOptimalResult.push_back((double) meetingPointQueryResultRaptorOptimal.maxTransfersMinSum);
+            roundsToOptimalResult.push_back((double) meetingPointQueryResultRaptorOptimal.maxTransfersMinMax);
+            totalRoundsOptimalResult.push_back((double) raptorQueryProcessorOptimal.transfers);
 
             int differenceMinSumRaptorFirst = meetingPointQueryResultRaptorFirst.minSumDurationInSeconds - meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds;
             int differenceMinMaxRaptorFirst = meetingPointQueryResultRaptorFirst.minMaxDurationInSeconds - meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds;
@@ -590,12 +596,20 @@ void RaptorAlgorithmTester::compareRaptorAlgorithms(DataType dataType, int numbe
 
         double avgRoundsToFirstResult = Calculator::getAverage(roundsToFirstResult);
         double avgRoundsToNoImprovement = Calculator::getAverage(roundsToNoImprovement);
+        double avgRoundsToOptimalResult = Calculator::getAverage(roundsToOptimalResult);
+        double avgTotalRoundsOptimalResult = Calculator::getAverage(totalRoundsOptimalResult);
         double medianRoundsToFirstResult = Calculator::getMedian(roundsToFirstResult);
         double medianRoundsToNoImprovement = Calculator::getMedian(roundsToNoImprovement);
+        double medianRoundsToOptimalResult = Calculator::getMedian(roundsToOptimalResult);
+        double medianTotalRoundsOptimalResult = Calculator::getMedian(totalRoundsOptimalResult);
         double maxRoundsToFirstResult = Calculator::getMaximum(roundsToFirstResult);
         double maxRoundsToNoImprovement = Calculator::getMaximum(roundsToNoImprovement);
+        double maxRoundsToOptimalResult = Calculator::getMaximum(roundsToOptimalResult);
+        double maxTotalRoundsOptimalResult = Calculator::getMaximum(totalRoundsOptimalResult);
         double minRoundsToFirstResult = Calculator::getMinimum(roundsToFirstResult);
         double minRoundsToNoImprovement = Calculator::getMinimum(roundsToNoImprovement);
+        double minRoundsToOptimalResult = Calculator::getMinimum(roundsToOptimalResult);
+        double minTotalRoundsOptimalResult = Calculator::getMinimum(totalRoundsOptimalResult);
 
         vector<double> resultFractionsRaptorFirst;
         for (int i = 0; i < 4; i++) {
@@ -626,7 +640,10 @@ void RaptorAlgorithmTester::compareRaptorAlgorithms(DataType dataType, int numbe
         resultsFile << "," << medianQueryTimesRaptorRounds[0] << "," << medianQueryTimesRaptorRounds[1] << "," << medianQueryTimesRaptorRounds[2] << "," << medianQueryTimesRaptorRounds[3] << "," << medianQueryTimesRaptorRounds[4] << "," << medianQueryTimesRaptorRounds[5];
         resultsFile << "," << maxQueryTimesRaptorRounds[0] << "," << maxQueryTimesRaptorRounds[1] << "," << maxQueryTimesRaptorRounds[2] << "," << maxQueryTimesRaptorRounds[3] << "," << maxQueryTimesRaptorRounds[4] << "," << maxQueryTimesRaptorRounds[5];
         resultsFile << "," << minQueryTimesRaptorRounds[0] << "," << minQueryTimesRaptorRounds[1] << "," << minQueryTimesRaptorRounds[2] << "," << minQueryTimesRaptorRounds[3] << "," << minQueryTimesRaptorRounds[4] << "," << minQueryTimesRaptorRounds[5];
-        resultsFile << "," << avgRoundsToFirstResult << "," << avgRoundsToNoImprovement << "," << medianRoundsToFirstResult << "," << medianRoundsToNoImprovement << "," << maxRoundsToFirstResult << "," << maxRoundsToNoImprovement << "," << minRoundsToFirstResult << "," << minRoundsToNoImprovement;
+        resultsFile << "," << avgRoundsToFirstResult << "," << avgRoundsToNoImprovement << "," << avgRoundsToOptimalResult << "," << avgTotalRoundsOptimalResult;
+        resultsFile << "," << medianRoundsToFirstResult << "," << medianRoundsToNoImprovement << "," << medianRoundsToOptimalResult << "," << medianTotalRoundsOptimalResult;
+        resultsFile << "," << maxRoundsToFirstResult << "," << maxRoundsToNoImprovement << "," << maxRoundsToOptimalResult << "," << maxTotalRoundsOptimalResult;
+        resultsFile << "," << minRoundsToFirstResult << "," << minRoundsToNoImprovement << "," << minRoundsToOptimalResult << "," << minTotalRoundsOptimalResult;
         resultsFile << "," << resultFractionsRaptorFirst[0] << "," << resultFractionsRaptorFirst[1] << "," << resultFractionsRaptorFirst[2] << "," << resultFractionsRaptorFirst[3];
         resultsFile << "," << resultFractionsRaptorNoImprovement[0] << "," << resultFractionsRaptorNoImprovement[1] << "," << resultFractionsRaptorNoImprovement[2] << "," << resultFractionsRaptorNoImprovement[3];
         for (int i = 0; i < 6; i++) {
@@ -673,12 +690,20 @@ void RaptorAlgorithmTester::compareRaptorAlgorithms(DataType dataType, int numbe
 
         cout << "\nAverage rounds to first result: " << avgRoundsToFirstResult << endl;
         cout << "Average rounds to no improvement: " << avgRoundsToNoImprovement << endl;
+        cout << "Average rounds to optimal result: " << avgRoundsToOptimalResult << endl;
+        cout << "Average total rounds: " << avgTotalRoundsOptimalResult << endl;
         cout << "Median rounds to first result: " << medianRoundsToFirstResult << endl;
         cout << "Median rounds to no improvement: " << medianRoundsToNoImprovement << endl;
+        cout << "Median rounds to optimal result: " << medianRoundsToOptimalResult << endl;
+        cout << "Median total rounds: " << medianTotalRoundsOptimalResult << endl;
         cout << "Max rounds to first result: " << maxRoundsToFirstResult << endl;
         cout << "Max rounds to no improvement: " << maxRoundsToNoImprovement << endl;
+        cout << "Max rounds to optimal result: " << maxRoundsToOptimalResult << endl;
+        cout << "Max total rounds: " << maxTotalRoundsOptimalResult << endl;
         cout << "Min rounds to first result: " << minRoundsToFirstResult << endl;
         cout << "Min rounds to no improvement: " << minRoundsToNoImprovement << endl;
+        cout << "Min rounds to optimal result: " << minRoundsToOptimalResult << endl;
+        cout << "Min total rounds: " << minTotalRoundsOptimalResult << endl;
 
         cout << "\nFraction of optimal results min sum raptor first: " << resultFractionsRaptorFirst[0] << endl;
         cout << "Fraction of optimal results min max raptor first: " << resultFractionsRaptorFirst[1] << endl;
