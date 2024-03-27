@@ -455,12 +455,12 @@ void RaptorAlgorithmTester::compareRaptorAlgorithms(DataType dataType, int numbe
             queryTimesRaptorNoImprovement.push_back((double) meetingPointQueryResultRaptorNoImprovement.queryTime);
             queryTimesRaptorOptimalResult.push_back((double) meetingPointQueryResultRaptorOptimal.queryTime);
 
-            roundsToFirstResult.push_back((double) meetingPointQueryResultRaptorFirst.maxTransfersMinSum);
-            roundsToNoImprovement.push_back((double) meetingPointQueryResultRaptorNoImprovement.maxTransfersMinSum);
-            roundsToNoImprovement.push_back((double) meetingPointQueryResultRaptorNoImprovement.maxTransfersMinMax);
-            roundsToOptimalResult.push_back((double) meetingPointQueryResultRaptorOptimal.maxTransfersMinSum);
-            roundsToOptimalResult.push_back((double) meetingPointQueryResultRaptorOptimal.maxTransfersMinMax);
-            totalRoundsOptimalResult.push_back((double) raptorQueryProcessorOptimal.transfers);
+            roundsToFirstResult.push_back((double) meetingPointQueryResultRaptorFirst.maxTransfersMinSum + 1);
+            roundsToNoImprovement.push_back((double) meetingPointQueryResultRaptorNoImprovement.maxTransfersMinSum + 1);
+            roundsToNoImprovement.push_back((double) meetingPointQueryResultRaptorNoImprovement.maxTransfersMinMax + 1);
+            roundsToOptimalResult.push_back((double) meetingPointQueryResultRaptorOptimal.maxTransfersMinSum + 1);
+            roundsToOptimalResult.push_back((double) meetingPointQueryResultRaptorOptimal.maxTransfersMinMax + 1);
+            totalRoundsOptimalResult.push_back((double) raptorQueryProcessorOptimal.transfers + 1);
 
             int differenceMinSumRaptorFirst = meetingPointQueryResultRaptorFirst.minSumDurationInSeconds - meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds;
             int differenceMinMaxRaptorFirst = meetingPointQueryResultRaptorFirst.minMaxDurationInSeconds - meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds;
