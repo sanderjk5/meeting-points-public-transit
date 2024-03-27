@@ -39,12 +39,19 @@ void NaiveQueryProcessor::processNaiveQuery() {
 
     auto start = std::chrono::high_resolution_clock::now();
 
+    RaptorQueryProcessor raptorQueryProcessor = RaptorQueryProcessor(meetingPointQuery);
+    raptorQueryProcessor.processRaptorQueryUntilFirstResult();
+    MeetingPointQueryResult meetingPointQueryResultRaptor = raptorQueryProcessor.getMeetingPointQueryResult();
+
+    int maxDepartureTime = meetingPointQuery.sourceTime + meetingPointQueryResultRaptor.minSumDurationInSeconds;
+
     for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
         CSAQuery query;
         query.sourceStopId = meetingPointQuery.sourceStopIds[i];
         query.sourceTime = meetingPointQuery.sourceTime;
         query.weekday = meetingPointQuery.weekday;
         CSA* csa = new CSA(query);
+        csa->setMaxDepartureTime(maxDepartureTime);
         csas.push_back(csa);
     }
 
