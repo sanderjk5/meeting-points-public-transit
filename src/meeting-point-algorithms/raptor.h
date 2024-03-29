@@ -52,6 +52,8 @@ class Raptor {
         vector<int> currentEarliestArrivalTimes;
         vector<bool> currentMarkedStops;
 
+        double numberOfExpandedRoutes;
+
     private:
         RaptorQuery query;
         int currentRound;
@@ -59,7 +61,6 @@ class Raptor {
         vector<bool> previousMarkedStops;
         
         vector<int> minStopSequencePerRoute;
-        vector<int> tripIndexPerRoute;
         vector<pair<int, int>> q;
         bool isFinishedFlag;
 
@@ -87,6 +88,8 @@ class RaptorPQ {
         vector<int>* getEarliestArrivalTimes();
         int getEarliestArrivalTime(int stopId);
         Journey createJourney(int targetStopId);
+
+        double numberOfExpandedRoutes;
 
     private:
         RaptorQuery query;

@@ -130,6 +130,8 @@ class RaptorQueryProcessor {
         int transfers;
         vector<Raptor*> raptors;
 
+        double numberOfExpandedRoutes;
+
     private:
         MeetingPointQuery meetingPointQuery;
         MeetingPointQueryResult meetingPointQueryResult;
@@ -147,6 +149,8 @@ class RaptorPQQueryProcessor {
         void processRaptorPQQuery(Optimization optimization);
         MeetingPointQueryResult getMeetingPointQueryResult();
         vector<Journey> getJourneys(Optimization optimization);
+
+        double numberOfExpandedRoutes;
 
     private:
         MeetingPointQuery meetingPointQuery;

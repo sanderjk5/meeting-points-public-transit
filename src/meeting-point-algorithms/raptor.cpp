@@ -61,7 +61,6 @@ void Raptor::processRaptorRound() {
     previousEarliestArrivalTimes = currentEarliestArrivalTimes;
     previousMarkedStops = currentMarkedStops;
     currentMarkedStops = vector<bool>(Importer::stops.size(), false);
-    tripIndexPerRoute = vector<int>(Importer::routes.size(), -1);
 
     fillQ();
     traverseRoutes();
@@ -98,6 +97,8 @@ void Raptor::fillQ() {
 
 void Raptor::traverseRoutes() {
     for (int i = 0; i < q.size(); i++) {
+        numberOfExpandedRoutes++;
+
         int routeId = q[i].first;
         int stopSequence = q[i].second;
 
@@ -171,7 +172,6 @@ TripInfo Raptor::getEarliestTripWithDayOffset(int routeId, int stopId, int stopS
             }
 
             if (stopTime.departureTime + dayOffset > earliestDepartureTime) {
-                tripIndexPerRoute[routeId] = i;
                 TripInfo tripInfo = {tripId, dayOffset, stopTime.departureTime + dayOffset};
                 return tripInfo;
             }
@@ -367,7 +367,7 @@ void RaptorPQ::addRoutesToQueue(vector<int> stopIds, int excludeRouteId) {
                 lowerBound += heuristic;
             } else if (optimization == min_max) {
                 double secondPart = (double) lowerBound + heuristic;
-                secondPart =  secondPart / numberOfSourceStopIds;
+                secondPart = secondPart / numberOfSourceStopIds;
                 lowerBound = max(lowerBound, secondPart);
             }
 
@@ -375,9 +375,10 @@ void RaptorPQ::addRoutesToQueue(vector<int> stopIds, int excludeRouteId) {
                 lowestLowerBoundPerRoute[routeId] = lowerBound;
                 newRoutes.insert(routeId);
             }
+
             if (stopSequence < firstStopSequencePerRoute[routeId]) {
                 firstStopSequencePerRoute[routeId] = stopSequence;
-            }
+            }            
         }
     }
 
@@ -401,6 +402,8 @@ void RaptorPQ::traverseRoute() {
     if (lowerBound != lowestLowerBoundPerRoute[routeId] || firstStopSequencePerRoute[routeId] == INT_MAX) {
         return;
     }
+
+    numberOfExpandedRoutes++;
 
     vector<int>* stops = &Importer::stopsOfARoute[routeId];
     int currentTripId = -1;

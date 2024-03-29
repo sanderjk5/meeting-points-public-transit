@@ -896,6 +896,11 @@ void RaptorQueryProcessor::processRaptorQueryUntilFirstResult() {
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     meetingPointQueryResult.queryTime = duration;
+
+    numberOfExpandedRoutes = 0;
+    for (int i = 0; i < raptors.size(); i++) {
+        numberOfExpandedRoutes += raptors[i]->numberOfExpandedRoutes;
+    }
 }
 
 void RaptorQueryProcessor::processRaptorQuery() {
@@ -913,6 +918,11 @@ void RaptorQueryProcessor::processRaptorQuery() {
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     meetingPointQueryResult.queryTime = duration;
+
+    numberOfExpandedRoutes = 0;
+    for (int i = 0; i < raptors.size(); i++) {
+        numberOfExpandedRoutes += raptors[i]->numberOfExpandedRoutes;
+    }
 }
 
 void RaptorQueryProcessor::processRaptorQueryUntilResultDoesntImprove(Optimization optimization) {
@@ -1086,7 +1096,6 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
 
     #pragma omp parallel for
     for (int i = 0; i < raptorPQs.size(); i++) {
-        raptorPQs[i]->transformRaptorToRaptorPQ(raptorQueryProcessor.raptors[i]);
         if (optimization == min_sum || optimization == both) {
             int upperBound = meetingPointQuery.sourceTime + meetingPointQueryResultRaptor.minSumDurationInSeconds;
             raptorPQs[i]->setCurrentBest(upperBound);
@@ -1095,6 +1104,7 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
             raptorPQs[i]->setCurrentBest(upperBound);
         }
         raptorPQs[i]->initializeHeuristic(sourceStopIdToAllStops, meetingPointQuery.sourceStopIds);
+        raptorPQs[i]->transformRaptorToRaptorPQ(raptorQueryProcessor.raptors[i]);
         raptorPQs[i]->processRaptorPQ();
     }
 
@@ -1167,6 +1177,11 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     meetingPointQueryResult.queryTime = duration;
+
+    numberOfExpandedRoutes = 0;
+    for (int i = 0; i < raptorPQs.size(); i++) {
+        numberOfExpandedRoutes += raptorPQs[i]->numberOfExpandedRoutes;
+    }
 }
 
 MeetingPointQueryResult RaptorPQQueryProcessor::getMeetingPointQueryResult() {
