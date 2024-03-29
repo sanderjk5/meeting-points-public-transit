@@ -50,8 +50,16 @@ class RaptorAlgorithmTester {
         ~RaptorAlgorithmTester(){};
 
         static void testRaptorAlgorithmRandom(int numberOfSuccessfulQueries, int numberOfSources, bool printOnlySuccessful = false);
-        static void testRaptorAlgorithm(MeetingPointQuery meetingPointQuery);
+        static void testRaptorAlgorithm(MeetingPointQuery meetingPointQuery, bool printJourneys = true);
         static void compareRaptorAlgorithms(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSources, bool loadOrStoreQueries);
+};
+
+class RaptorPQAlgorithmTester {
+    public:
+        explicit RaptorPQAlgorithmTester(){};
+        ~RaptorPQAlgorithmTester(){};
+
+        static void testRaptorPQAlgorithm(MeetingPointQuery meetingPointQuery, bool printJourneys = true);
 };
 
 class AlgorithmComparer {
@@ -60,7 +68,9 @@ class AlgorithmComparer {
         ~AlgorithmComparer(){};
 
         static void compareAlgorithmsRandom(DataType dataType, GTree* gTree, int numberOfSuccessfulQueries, vector<int> numberOfSources, bool printResults = false, bool loadOrStoreQueries = false);
+        static void compareAlgorithmsWithoutGTreesRandom(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSources, bool printResults = false, bool loadOrStoreQueries = false);
         static void compareAlgorithms(DataType dataType, GTree* gTree, MeetingPointQuery meetingPointQuery);
+        static void compareAlgorithmsWithoutGTree(DataType dataType, MeetingPointQuery meetingPointQuery);
 };
 
 class PrintHelper {

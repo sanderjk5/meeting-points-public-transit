@@ -6,6 +6,7 @@
 #include "csa.h" 
 #include "raptor.h" 
 #include "journey.h"
+#include "optimization.h"
 
 #include <vector>
 #include <map>
@@ -37,12 +38,6 @@ struct MeetingPointQueryGTreeCSAInfo {
     double csaTargetStopFractionMinSum;
     double csaTargetStopFractionMinMax;
     double csaVisitedConnectionsFraction;
-};
-
-enum Optimization {
-    min_sum,
-    min_max,
-    both
 };
 
 /*
@@ -130,15 +125,33 @@ class RaptorQueryProcessor {
         void processRaptorQuery();
         bool processRaptorRound();
         MeetingPointQueryResult getMeetingPointQueryResult();
+        vector<Journey> getJourneys(Optimization optimization);
         double durationOfLastRound;
         int transfers;
+        vector<Raptor*> raptors;
 
     private:
         MeetingPointQuery meetingPointQuery;
         MeetingPointQueryResult meetingPointQueryResult;
-        vector<Raptor*> raptors;
         int lastRoundMinSumDuration;
         int lastRoundMinMaxDuration;
+};
+
+class RaptorPQQueryProcessor {
+    public:
+        explicit RaptorPQQueryProcessor(MeetingPointQuery meetingPointQuery){
+            this->meetingPointQuery = meetingPointQuery;
+        };
+        ~RaptorPQQueryProcessor(){};
+
+        void processRaptorPQQuery(Optimization optimization);
+        MeetingPointQueryResult getMeetingPointQueryResult();
+        vector<Journey> getJourneys(Optimization optimization);
+
+    private:
+        MeetingPointQuery meetingPointQuery;
+        MeetingPointQueryResult meetingPointQueryResult;
+        vector<RaptorPQ*> raptorPQs;
 };
 
 /*

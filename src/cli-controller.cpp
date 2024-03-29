@@ -94,9 +94,9 @@ void CliController::runCli(DataType dataType, GTree* gTree) {
         bool validAlgorithm = false;
         string algorithm;
         while(!validAlgorithm) {
-            cout << "Which algorithm do you want to use? \nThe options are (enter the abbrevation): compare all algorithms (a), naive csa algorithm (n), naive algorithm with key stops (k), gtree approximation algorithm (g), gtree algorithm with csa (c), raptor algorithm (r)." << endl;
+            cout << "Which algorithm do you want to use? \nThe options are (enter the abbrevation): compare all algorithms (a), naive csa algorithm (n), naive algorithm with key stops (k), gtree approximation algorithm (g), gtree algorithm with csa (c), raptor algorithm (r), raptor pq algorithm (q)." << endl;
             getline(cin, algorithm);
-            if (algorithm == "a" || algorithm == "n" || algorithm == "k" || algorithm == "g" || algorithm == "c" || algorithm == "r") {
+            if (algorithm == "a" || algorithm == "n" || algorithm == "k" || algorithm == "g" || algorithm == "c" || algorithm == "r" || algorithm == "q") {
                 validAlgorithm = true;
             } else {
                 cout << "Invalid algorithm. Please enter the abbrevation of a valid algorithm." << endl;
@@ -106,18 +106,21 @@ void CliController::runCli(DataType dataType, GTree* gTree) {
         cout << "\nRunning the query..." << endl;
 
         if (algorithm == "a") {
-            AlgorithmComparer::compareAlgorithms(dataType, gTree, query);
+            // AlgorithmComparer::compareAlgorithms(dataType, gTree, query);
+            AlgorithmComparer::compareAlgorithmsWithoutGTree(dataType, query);
         }
         else if (algorithm == "n") {
             NaiveAlgorithmTester::testNaiveAlgorithm(query, true);
         } else if (algorithm == "k") {
             NaiveKeyStopAlgorithmTester::testNaiveKeyStopAlgorithm(dataType, query, true);
-        } else if (algorithm == "g") {
-            GTreeAlgorithmTester::testGTreeAlgorithm(gTree, query, false, true);
-        } else if (algorithm == "c") {
-            GTreeAlgorithmTester::testGTreeAlgorithm(gTree, query, true, true);
+        // } else if (algorithm == "g") {
+        //     GTreeAlgorithmTester::testGTreeAlgorithm(gTree, query, false, true);
+        // } else if (algorithm == "c") {
+        //     GTreeAlgorithmTester::testGTreeAlgorithm(gTree, query, true, true);
         } else if (algorithm == "r") {
             RaptorAlgorithmTester::testRaptorAlgorithm(query);
+        } else if (algorithm == "q") {
+            RaptorPQAlgorithmTester::testRaptorPQAlgorithm(query);
         }
 
         cout << "\nDo you want to run another query? (y/N)" << endl;

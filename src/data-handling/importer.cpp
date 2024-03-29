@@ -546,9 +546,9 @@ void Importer::generateSortedConnections() {
             connection.arrivalStopId = currentStopTime.stopId;
             connection.arrivalTime = currentStopTime.arrivalTime;
             // If the arrival time is the same as the departure time, the the arrival time is increased by 30 seconds.
-            if (currentStopTime.arrivalTime == previousStopTime.departureTime){
-                connection.arrivalTime += 30;
-            }
+            // if (currentStopTime.arrivalTime == previousStopTime.departureTime){
+            //     connection.arrivalTime += 30;
+            // }
             connection.tripId = tripId;
 
             connections.push_back(connection);
