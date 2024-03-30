@@ -1094,11 +1094,12 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
         raptorPQs.push_back(raptorPQ);
     }
 
+    cout << "upper bound min sum: " << meetingPointQueryResultRaptor.minSumDurationInSeconds << ", upper bound min max: " << meetingPointQueryResultRaptor.minMaxDurationInSeconds << endl;
+
+
     #pragma omp parallel for
     for (int i = 0; i < raptorPQs.size(); i++) {
         raptorPQs[i]->initializeHeuristic(sourceStopIdToAllStops, meetingPointQuery.sourceStopIds);
-        // raptorPQs[i]->initializeRaptorPQ();
-        raptorPQs[i]->transformRaptorToRaptorPQ(raptorQueryProcessor.raptors[i]);
         if (optimization == min_sum) {
             int upperBound = meetingPointQueryResultRaptor.minSumDurationInSeconds;
             raptorPQs[i]->setCurrentBest(upperBound);
@@ -1106,6 +1107,8 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
             int upperBound = meetingPointQueryResultRaptor.minMaxDurationInSeconds;
             raptorPQs[i]->setCurrentBest(upperBound);
         }
+        // raptorPQs[i]->initializeRaptorPQ();
+        raptorPQs[i]->transformRaptorToRaptorPQ(raptorQueryProcessor.raptors[i]);
         raptorPQs[i]->processRaptorPQ();
     }
 

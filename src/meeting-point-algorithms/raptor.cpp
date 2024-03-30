@@ -317,7 +317,6 @@ void RaptorPQ::initializeRaptorPQ() {
 
     firstStopSequencePerRoute = vector<int>(Importer::routes.size(), INT_MAX);
     lowestLowerBoundPerRoute = vector<double>(Importer::routes.size(), DBL_MAX);
-    currentBest = INT_MAX;
 
     extendedSourceStopIds = vector<int>();
     journeyPointers = vector<JourneyPointerRaptor>(Importer::stops.size(), JourneyPointerRaptor());
@@ -366,6 +365,10 @@ void RaptorPQ::addRoutesToQueue(vector<int> stopIds, int excludeRouteId) {
             lowerBound = max(lowerBound, secondPart);
         }
 
+        if (lowerBound > currentBest) {
+            continue;
+        }
+
         vector<RouteSequencePair>* routes = &Importer::routesOfAStop[stopId];
         for (int j = 0; j < routes->size(); j++) {
             int routeId = (*routes)[j].routeId;
@@ -406,6 +409,8 @@ void RaptorPQ::traverseRoute() {
         return;
     }
 
+    // cout << "lower bound: " << lowerBound << ", current best: " << currentBest << ", queue size: " << pq.size() << endl;
+
     numberOfExpandedRoutes++;
 
     vector<int>* stops = &Importer::stopsOfARoute[routeId];
@@ -436,7 +441,7 @@ void RaptorPQ::traverseRoute() {
 
                 int newArrivalTime = arrivalTime + Importer::footPaths[j].duration;
 
-                if (newArrivalTime < earliestArrivalTimes[Importer::footPaths[j].arrivalStopId]) {
+                if (newArrivalTime < earliestArrivalTimes[Importer::footPaths[j].arrivalStopId] && newArrivalTime < currentBest + query.sourceTime) {
                     earliestArrivalTimes[Importer::footPaths[j].arrivalStopId] = newArrivalTime;
                     journeyPointers[Importer::footPaths[j].arrivalStopId] = JourneyPointerRaptor{enterTripAtStop, stopId, currentTripDepartureTime, newArrivalTime, currentTripId};
                     arrivalStops.push_back(Importer::footPaths[j].arrivalStopId);

@@ -6,6 +6,7 @@
 #include <journey.h>
 #include <vector>
 #include <queue>
+#include <limits.h>
 
 struct RaptorQuery {
     int sourceStopId;
@@ -75,6 +76,7 @@ class RaptorPQ {
         explicit RaptorPQ(RaptorQuery query, Optimization optimization){
             this->query = query;
             this->optimization = optimization;
+            this->currentBest = INT_MAX;
         };
         ~RaptorPQ(){};
 
