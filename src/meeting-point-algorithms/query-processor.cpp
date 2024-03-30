@@ -1096,15 +1096,16 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
 
     #pragma omp parallel for
     for (int i = 0; i < raptorPQs.size(); i++) {
-        if (optimization == min_sum || optimization == both) {
-            int upperBound = meetingPointQuery.sourceTime + meetingPointQueryResultRaptor.minSumDurationInSeconds;
+        raptorPQs[i]->initializeHeuristic(sourceStopIdToAllStops, meetingPointQuery.sourceStopIds);
+        // raptorPQs[i]->initializeRaptorPQ();
+        raptorPQs[i]->transformRaptorToRaptorPQ(raptorQueryProcessor.raptors[i]);
+        if (optimization == min_sum) {
+            int upperBound = meetingPointQueryResultRaptor.minSumDurationInSeconds;
             raptorPQs[i]->setCurrentBest(upperBound);
         } else {
-            int upperBound = meetingPointQuery.sourceTime + meetingPointQueryResultRaptor.minMaxDurationInSeconds;
+            int upperBound = meetingPointQueryResultRaptor.minMaxDurationInSeconds;
             raptorPQs[i]->setCurrentBest(upperBound);
         }
-        raptorPQs[i]->initializeHeuristic(sourceStopIdToAllStops, meetingPointQuery.sourceStopIds);
-        raptorPQs[i]->transformRaptorToRaptorPQ(raptorQueryProcessor.raptors[i]);
         raptorPQs[i]->processRaptorPQ();
     }
 

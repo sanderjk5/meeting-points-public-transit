@@ -248,6 +248,7 @@ void RaptorPQ::initializeHeuristic(map<int, vector<int>> sourceStopIdsToAllStops
             baseHeuristic += sourceStopIdsToAllStops[s1][s2];
         }
     }
+    cout << "base heuristic: " << baseHeuristic << endl;
 }
 
 bool RaptorPQ::isFinished() {
@@ -297,9 +298,9 @@ void RaptorPQ::transformRaptorToRaptorPQ(Raptor* raptor) {
 
     firstStopSequencePerRoute = vector<int>(Importer::routes.size(), INT_MAX);
     lowestLowerBoundPerRoute = vector<double>(Importer::routes.size(), DBL_MAX);
-    currentBest = INT_MAX;
 
     vector<int> arrivalStops;
+    
     for (int i = 0; i < raptor->currentMarkedStops.size(); i++) {
         if (raptor->currentMarkedStops[i]) {
             arrivalStops.push_back(i);
@@ -308,6 +309,7 @@ void RaptorPQ::transformRaptorToRaptorPQ(Raptor* raptor) {
     addRoutesToQueue(arrivalStops, -1);
 
     isFinishedFlag = false;
+    numberOfExpandedRoutes = 0;
 }
 
 void RaptorPQ::initializeRaptorPQ() {
@@ -335,6 +337,7 @@ void RaptorPQ::initializeRaptorPQ() {
     addRoutesToQueue(arrivalStops, -1);
 
     isFinishedFlag = false;
+    numberOfExpandedRoutes = 0;
 }
 
 void RaptorPQ::addRoutesToQueue(vector<int> stopIds, int excludeRouteId) {
@@ -342,34 +345,34 @@ void RaptorPQ::addRoutesToQueue(vector<int> stopIds, int excludeRouteId) {
 
     for (int i = 0; i < stopIds.size(); i++) {
         int stopId = stopIds[i];
+        double lowerBound = earliestArrivalTimes[stopId] - query.sourceTime;
+
+        // calculate clique heuristic
+        double heuristic = baseHeuristic;
+        for (int j = 0; j < sourceStopIds.size(); j++) {
+            int s1 = sourceStopIds[j];
+            if (s1 == query.sourceStopId) {
+                continue;
+            }
+            heuristic += sourceStopIdsToAllStops[s1][stopId];
+        }
+        heuristic = heuristic / (numberOfSourceStopIds - 1);
+
+        if (optimization == min_sum || optimization == both) {
+            lowerBound += heuristic;
+        } else if (optimization == min_max) {
+            double secondPart = (double) lowerBound + heuristic;
+            secondPart = secondPart / numberOfSourceStopIds;
+            lowerBound = max(lowerBound, secondPart);
+        }
+
         vector<RouteSequencePair>* routes = &Importer::routesOfAStop[stopId];
-        for (int i = 0; i < routes->size(); i++) {
-            int routeId = (*routes)[i].routeId;
+        for (int j = 0; j < routes->size(); j++) {
+            int routeId = (*routes)[j].routeId;
             if (routeId == excludeRouteId) {
                 continue;
             }
-            int stopSequence = (*routes)[i].stopSequence;
-
-            double lowerBound = earliestArrivalTimes[stopId];
-
-            // calculate clique heuristic
-            double heuristic = baseHeuristic;
-            for (int j = 0; j < sourceStopIds.size(); j++) {
-                int s1 = sourceStopIds[j];
-                if (s1 == query.sourceStopId) {
-                    continue;
-                }
-                heuristic += sourceStopIdsToAllStops[s1][stopId];
-            }
-            heuristic = heuristic / (numberOfSourceStopIds - 1);
-
-            if (optimization == min_sum || optimization == both) {
-                lowerBound += heuristic;
-            } else if (optimization == min_max) {
-                double secondPart = (double) lowerBound + heuristic;
-                secondPart = secondPart / numberOfSourceStopIds;
-                lowerBound = max(lowerBound, secondPart);
-            }
+            int stopSequence = (*routes)[j].stopSequence;
 
             if (lowerBound < lowestLowerBoundPerRoute[routeId]) {
                 lowestLowerBoundPerRoute[routeId] = lowerBound;
@@ -388,7 +391,7 @@ void RaptorPQ::addRoutesToQueue(vector<int> stopIds, int excludeRouteId) {
 }
 
 void RaptorPQ::traverseRoute() {
-    int lowerBound = pq.top().first;
+    double lowerBound = pq.top().first;
 
     if (lowerBound > currentBest) {
         cout << "optimization: " << optimization << ", queue size: " << pq.size() << endl;

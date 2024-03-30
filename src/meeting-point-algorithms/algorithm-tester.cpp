@@ -1773,19 +1773,19 @@ void AlgorithmComparer::compareAlgorithmsWithoutGTree(DataType dataType, Meeting
 
     cout << "Raptor Until First Result: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultRaptor);
-    cout << "Number of expanded routes: " << raptorQueryProcessor.numberOfExpandedRoutes << endl;
+    cout << "Average number of expanded routes: " << raptorQueryProcessor.numberOfExpandedRoutes / meetingPointQuery.sourceStopIds.size() << endl;
 
     cout << "Raptor Optimal Result: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultRaptorOptimal);
-    cout << "Number of expanded routes: " << raptorQueryProcessorOptimal.numberOfExpandedRoutes << endl;
+    cout << "Average number of expanded routes: " << raptorQueryProcessorOptimal.numberOfExpandedRoutes / meetingPointQuery.sourceStopIds.size() << endl;
 
     cout << "Raptor PQ - Min Sum: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultRaptorPQMinSum);
-    cout << "Number of expanded routes: " << raptorPQQueryProcessorMinSum.numberOfExpandedRoutes << endl;
+    cout << "Average number of expanded routes: " << raptorPQQueryProcessorMinSum.numberOfExpandedRoutes / meetingPointQuery.sourceStopIds.size() << endl;
 
     cout << "Raptor PQ - Min Max: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultRaptorPQMinMax);
-    cout << "Number of expanded routes: " << raptorPQQueryProcessorMinMax.numberOfExpandedRoutes << endl;
+    cout << "Average number of expanded routes: " << raptorPQQueryProcessorMinMax.numberOfExpandedRoutes / meetingPointQuery.sourceStopIds.size() << endl;
 
     bool naiveQuerySuccessful = meetingPointQueryResultNaive.meetingPointMinSum != "" && meetingPointQueryResultNaive.meetingPointMinMax != "";
     bool naiveKeyStopQuerySuccessful = true;
