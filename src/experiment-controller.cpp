@@ -104,3 +104,7 @@ void ExperimentController::testAndCompareAlgorithmsRandom(DataType dataType, int
 void ExperimentController::compareRaptorAlgorithms(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSourceStops) {
     RaptorAlgorithmTester::compareRaptorAlgorithms(dataType, numberOfSuccessfulQueries, numberOfSourceStops, true);
 }
+
+void ExperimentController::compareRaptorPQAlgorithms(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSourceStops) {
+    RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(dataType, numberOfSuccessfulQueries, numberOfSourceStops, true);
+}

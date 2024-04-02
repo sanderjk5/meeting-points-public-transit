@@ -901,6 +901,7 @@ void RaptorQueryProcessor::processRaptorQueryUntilFirstResult() {
     for (int i = 0; i < raptors.size(); i++) {
         numberOfExpandedRoutes += raptors[i]->numberOfExpandedRoutes;
     }
+    numberOfExpandedRoutes = numberOfExpandedRoutes / raptors.size();
 }
 
 void RaptorQueryProcessor::processRaptorQuery() {
@@ -923,6 +924,7 @@ void RaptorQueryProcessor::processRaptorQuery() {
     for (int i = 0; i < raptors.size(); i++) {
         numberOfExpandedRoutes += raptors[i]->numberOfExpandedRoutes;
     }
+    numberOfExpandedRoutes = numberOfExpandedRoutes / raptors.size();
 }
 
 void RaptorQueryProcessor::processRaptorQueryUntilResultDoesntImprove(Optimization optimization) {
@@ -962,6 +964,12 @@ void RaptorQueryProcessor::processRaptorQueryUntilResultDoesntImprove(Optimizati
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     meetingPointQueryResult.queryTime = duration;
+
+    numberOfExpandedRoutes = 0;
+    for (int i = 0; i < raptors.size(); i++) {
+        numberOfExpandedRoutes += raptors[i]->numberOfExpandedRoutes;
+    }
+    numberOfExpandedRoutes = numberOfExpandedRoutes / raptors.size();
 }
 
 bool RaptorQueryProcessor::processRaptorRound() {
@@ -1068,15 +1076,20 @@ vector<Journey> RaptorQueryProcessor::getJourneys(Optimization optimization) {
 void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
     map<int, vector<int>> sourceStopIdToAllStops;
 
-    vector<int> allStopIds = vector<int>(Importer::stops.size());
-    for (int i = 0; i < Importer::stops.size(); i++) {
+    for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
+        sourceStopIdToAllStops[meetingPointQuery.sourceStopIds[i]] = vector<int>(Creator::networkGraph.vertices.size(), INT_MAX);
+    }
+
+    vector<int> allStopIds = vector<int>(Creator::networkGraph.vertices.size());
+    for (int i = 0; i < Creator::networkGraph.vertices.size(); i++) {
         allStopIds[i] = i;
     }
 
     #pragma omp parallel for
     for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
         int sourceStopId = meetingPointQuery.sourceStopIds[i];
-        sourceStopIdToAllStops[sourceStopId] = Creator::networkGraph.getDistances(sourceStopId, allStopIds);
+        vector<int> distances = Creator::networkGraph.getDistances(sourceStopId, allStopIds);
+        sourceStopIdToAllStops[sourceStopId] = distances;
     }
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -1094,7 +1107,7 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
         raptorPQs.push_back(raptorPQ);
     }
 
-    cout << "upper bound min sum: " << meetingPointQueryResultRaptor.minSumDurationInSeconds << ", upper bound min max: " << meetingPointQueryResultRaptor.minMaxDurationInSeconds << endl;
+    // cout << "upper bound min sum: " << meetingPointQueryResultRaptor.minSumDurationInSeconds << ", upper bound min max: " << meetingPointQueryResultRaptor.minMaxDurationInSeconds << endl;
 
 
     #pragma omp parallel for
@@ -1186,6 +1199,7 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
     for (int i = 0; i < raptorPQs.size(); i++) {
         numberOfExpandedRoutes += raptorPQs[i]->numberOfExpandedRoutes;
     }
+    numberOfExpandedRoutes = numberOfExpandedRoutes / raptorPQs.size();
 }
 
 MeetingPointQueryResult RaptorPQQueryProcessor::getMeetingPointQueryResult() {

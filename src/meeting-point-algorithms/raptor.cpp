@@ -44,6 +44,7 @@ void Raptor::initializeRaptor() {
     q = vector<pair<int, int>>();
 
     isFinishedFlag = false;
+    numberOfExpandedRoutes = 0;
 }
 
 void Raptor::processRaptor() {
@@ -235,12 +236,12 @@ void RaptorPQ::initializeHeuristic(map<int, vector<int>> sourceStopIdsToAllStops
     this->numberOfSourceStopIds = sourceStopIds.size();
 
     baseHeuristic = 0;
-    for (int i = 0; i < sourceStopIds.size(); i++) {
+    for (int i = 0; i < numberOfSourceStopIds; i++) {
         int s1 = sourceStopIds[i];
         if (s1 == query.sourceStopId) {
             continue;
         }
-        for (int j = i+1; j < sourceStopIds.size(); j++) {
+        for (int j = i+1; j < numberOfSourceStopIds; j++) {
             int s2 = sourceStopIds[j];
             if (s2 == query.sourceStopId) {
                 continue;
@@ -248,7 +249,7 @@ void RaptorPQ::initializeHeuristic(map<int, vector<int>> sourceStopIdsToAllStops
             baseHeuristic += sourceStopIdsToAllStops[s1][s2];
         }
     }
-    cout << "base heuristic: " << baseHeuristic << endl;
+    // cout << "base heuristic: " << baseHeuristic << endl;
 }
 
 bool RaptorPQ::isFinished() {
@@ -397,7 +398,7 @@ void RaptorPQ::traverseRoute() {
     double lowerBound = pq.top().first;
 
     if (lowerBound > currentBest) {
-        cout << "optimization: " << optimization << ", queue size: " << pq.size() << endl;
+        // cout << "optimization: " << optimization << ", queue size: " << pq.size() << endl;
         isFinishedFlag = true;
         return;
     }
