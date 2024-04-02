@@ -33,7 +33,7 @@ int main(int argc, const char *argv[]) {
   // DataType dataType = schienenfern_und_regionalverkehr_de;
   // DataType dataType = gesamt_de;
 
-  bool startExperiments = true;
+  bool startExperiments = false;
 
   if (argc > 1){
     if (strcmp(argv[1], "vvs") == 0){
@@ -94,10 +94,11 @@ int main(int argc, const char *argv[]) {
 
     // Test experiments
     vector<int> numberOfSourceStops = {2, 5, 10, 25};
+    // vector<int> numberOfSourceStops = {2, 10};
 
     // ExperimentController::compareRaptorAlgorithms(dataType, 100, numberOfSourceStops);
 
-    ExperimentController::compareRaptorPQAlgorithms(dataType, 200, numberOfSourceStops);
+    ExperimentController::compareRaptorPQAlgorithms(dataType, 100, numberOfSourceStops);
 
     // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 10, 30, 0.90);
 
@@ -122,14 +123,6 @@ int main(int argc, const char *argv[]) {
     }
 
     // GTree* networkGTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
-
-    // vector<int> sourceStopIds = {1973, 1123, 886, 829, 1577, 1365, 3677, 2425, 993, 1670};
-    // MeetingPointQuery meetingPointQuery;
-    // meetingPointQuery.sourceStopIds = sourceStopIds;
-    // meetingPointQuery.sourceTime = 11167;
-    // meetingPointQuery.weekday = 2;
-
-    // AlgorithmComparer::compareAlgorithmsWithoutGTree(vvs_j24, meetingPointQuery);
 
     CliController::runCli(dataType, nullptr);
   }

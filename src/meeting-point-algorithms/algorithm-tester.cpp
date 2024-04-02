@@ -1027,7 +1027,6 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
         resultsFile << "," << maxNumberOfExpandedRoutesRaptorFirst << "," << maxNumberOfExpandedRoutesRaptorOptimalResult << "," << maxNumberOfExpandedRoutesRaptorPQMinSum << "," << maxNumberOfExpandedRoutesRaptorPQMinMax;
         resultsFile << "," << minNumberOfExpandedRoutesRaptorFirst << "," << minNumberOfExpandedRoutesRaptorOptimalResult << "," << minNumberOfExpandedRoutesRaptorPQMinSum << "," << minNumberOfExpandedRoutesRaptorPQMinMax;
         resultsFile << "," << resultFractionsRaptorFirst[0] << "," << resultFractionsRaptorFirst[1] << "," << resultFractionsRaptorFirst[2] << "," << resultFractionsRaptorFirst[3] << "\n";
-        resultsFile << "\n";
 
         cout << "Rate of successful queries: " << (double) successfulQueryCounter / numberOfSuccessfulQueries << endl;
 
