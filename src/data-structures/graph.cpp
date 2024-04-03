@@ -216,6 +216,8 @@ void Graph::importGraphWithCH(DataType dataType) {
     this->vertices = vector<Vertex>(numberOfVertices);
     this->adjacencyList = vector<vector<Edge>>(numberOfVertices);
 
+    this->stopIdsSortedByLevel = vector<Vertex>(numberOfVertices);
+
     for (int i = 0; i < numberOfVertices; i++) {
         Vertex vertex;
 
@@ -233,6 +235,7 @@ void Graph::importGraphWithCH(DataType dataType) {
 
         ss >> numberString;
         vertex.level = stoi(numberString);
+        stopIdsSortedByLevel[vertex.level] = i;
 
         while (ss >> numberString) {
             int targetStopId = stoi(numberString) - 1;
@@ -270,8 +273,6 @@ void Graph::createContractionHierarchie() {
         edgeDifferences[i] = edgeDifference;
     }
 
-    cout << "Calculated initial edge differences" << endl;
-
     for (int i = 0; i < this->vertices.size(); i++) {
         pq.push(make_pair(edgeDifferences[i], i));
     }
@@ -293,10 +294,6 @@ void Graph::createContractionHierarchie() {
 
         this->vertices[vertexIndex].level = currentLevel;
         stopIdsSortedByLevel.push_back(vertexIndex);
-
-        if (currentLevel % 2000 == 0) {
-            cout << "Current Level: " << currentLevel << endl;
-        }
 
         vector<Shortcut> shortcuts = updatedEdgeDifferenceAndShortcuts.second;
 
@@ -495,7 +492,7 @@ map<int, vector<int>> Graph::getDistancesWithPhast(vector<int> sourceStopIds) {
 
     auto end = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
-    cout << "Phast completed in " << duration.count() << "ms.\n" << endl;
+    // cout << "Phast completed in " << duration.count() << "ms.\n" << endl;
 
     return distances;
 }
