@@ -216,7 +216,7 @@ void Graph::importGraphWithCH(DataType dataType) {
     this->vertices = vector<Vertex>(numberOfVertices);
     this->adjacencyList = vector<vector<Edge>>(numberOfVertices);
 
-    this->stopIdsSortedByLevel = vector<Vertex>(numberOfVertices);
+    this->stopIdsSortedByLevel = vector<int>(numberOfVertices);
 
     for (int i = 0; i < numberOfVertices; i++) {
         Vertex vertex;
