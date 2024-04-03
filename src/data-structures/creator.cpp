@@ -17,6 +17,29 @@ using namespace std;
 
 Graph Creator::networkGraph = Graph();
 
+void Creator::loadOrCreateNetworkGraph(DataType dataType) {
+    string dataTypeString = Importer::getDataTypeString(dataType);
+    string folderPath = FOLDER_PREFIX + "graphs/" + dataTypeString + "/";
+    string fileName = folderPath + "graph-withCH";
+    if (USE_FOOTPATHS) {
+        fileName += "-with-footpaths";
+    }
+    fileName += ".txt";
+
+    ifstream file;
+    file.open(fileName);
+
+    if (!file.is_open()) {
+        createNetworkGraph();
+        networkGraph.createContractionHierarchie();
+        networkGraph.exportGraphWithCH(dataType);
+    } else {
+        networkGraph.importGraphWithCH(dataType);
+    }
+
+    file.close();
+}
+
 /*
     Create the network graph by iterating over the connections and creating the edges.
 */

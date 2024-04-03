@@ -13,10 +13,12 @@ class Creator {
         ~Creator(){};
 
         static Graph networkGraph;
-        static void createNetworkGraph();
+        static void loadOrCreateNetworkGraph(DataType dataType);
+        
         static GTree* createNetworkGTree(DataType dataType, int numberOfChildrenPerNode, int maxNumberOfVerticesPerLeaf, bool withDistances = true);
 
     private:
+        static void createNetworkGraph();
         static vector<Graph> partitionateGraph(Graph graph, int numberOfPartitions, int maxNumberOfVerticesInGraph);
         static vector<Graph> coarseGraph(Graph &graph, int maxNumberOfVerticesInGraph);
         static void partitionateCoarsedGraph(Graph &graph, int klIterations);

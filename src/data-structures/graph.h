@@ -48,6 +48,9 @@ class Graph {
         void exportGraph(DataType dataType);
         void importPartition(DataType dataType, int numberOfPartitions);
 
+        void exportGraphWithCH(DataType dataType);
+        void importGraphWithCH(DataType dataType);
+
         void createContractionHierarchie();
 
         map<int, vector<int>> getDistancesWithPhast(vector<int> sourceStopIds);

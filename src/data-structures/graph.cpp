@@ -5,11 +5,15 @@
 
 #include <limits.h>
 
+#include <map>
 #include <vector>
 #include <queue>
 #include <fstream>
 #include <iostream>
 #include <chrono>
+#include <sstream>
+
+using namespace std;
 
 /*
     Use Dijkstra's algorithm to calculate the minimal distance to a target node from a source stop.
@@ -108,6 +112,52 @@ void Graph::exportGraph(DataType dataType) {
     file.close();
 }
 
+void Graph::exportGraphWithCH(DataType dataType) {
+    cout << "Exporting graph with CH..." << endl;
+    string dataTypeString = Importer::getDataTypeString(dataType);
+    string folderPath = FOLDER_PREFIX + "graphs/" + dataTypeString + "/";
+    string fileName = folderPath + "graph-withCH";
+    if (USE_FOOTPATHS) {
+        fileName += "-with-footpaths";
+    }
+    fileName += ".txt";
+
+    remove(fileName.c_str());
+
+    ofstream file;
+    file.open(fileName);
+
+    int numberOfVertices = this->vertices.size();
+    int numberOfEdges = 0;
+    for (int i = 0; i < this->adjacencyList.size(); i++) {
+        numberOfEdges += this->adjacencyList[i].size();
+    }
+
+    // header
+    file << to_string(numberOfVertices) << " " << to_string(numberOfEdges) << endl;
+
+    // vertices
+    for(int i = 0; i < this->vertices.size(); i++) {
+        string line;
+        line += to_string(this->vertices[i].level) + " ";
+        for (int j = 0; j < this->adjacencyList[i].size(); j++) {
+            int targetStopId = this->adjacencyList[i][j].targetStopId + 1;
+            int edgeWeight = this->adjacencyList[i][j].ewgt;
+            if (edgeWeight == 0) {
+                edgeWeight = 1;
+            }
+            line += to_string(targetStopId) + " " + to_string(edgeWeight);
+            if (j < this->adjacencyList[i].size() - 1) {
+                line += " ";
+            }
+        }
+        file << line << endl;
+    }
+
+    file.close();
+    cout << "Graph with CH exported.\n" << endl;
+}
+
 void Graph::importPartition(DataType dataType, int numberOfPartitions) {
     cout << "Importing partition" << endl;
     string dataTypeString = Importer::getDataTypeString(dataType);
@@ -135,6 +185,73 @@ void Graph::importPartition(DataType dataType, int numberOfPartitions) {
     }
 
     file.close();
+}
+
+void Graph::importGraphWithCH(DataType dataType) {
+    cout << "Importing graph with CH..." << endl;
+    string dataTypeString = Importer::getDataTypeString(dataType);
+    string folderPath = FOLDER_PREFIX + "graphs/" + dataTypeString + "/";
+    string fileName = folderPath + "graph-withCH";
+    if (USE_FOOTPATHS) {
+        fileName += "-with-footpaths";
+    }
+    fileName += ".txt";
+
+    ifstream file;
+    file.open(fileName);
+
+    if (!file.is_open()) {
+        cout << "Could not open file " << fileName << endl;
+        return;
+    }
+
+    string line;
+    getline(file, line);
+
+    stringstream ss(line);
+    string nofVerticesString;
+    ss >> nofVerticesString;
+    int numberOfVertices = stoi(nofVerticesString);
+
+    this->vertices = vector<Vertex>(numberOfVertices);
+    this->adjacencyList = vector<vector<Edge>>(numberOfVertices);
+
+    for (int i = 0; i < numberOfVertices; i++) {
+        Vertex vertex;
+
+        this->adjacencyList[i] = vector<Edge>();
+
+        getline(file, line);
+        string numberString;
+        stringstream ss(line);
+
+        vertex.stopId = i;
+        vertex.vwgt = 1;
+        
+        vertex.cewgt = 0;
+        vertex.adjwgt = 0;
+
+        ss >> numberString;
+        vertex.level = stoi(numberString);
+
+        while (ss >> numberString) {
+            int targetStopId = stoi(numberString) - 1;
+            ss >> numberString;
+            int edgeWeight = stoi(numberString);
+            Edge edge;
+            edge.targetStopId = targetStopId;
+            edge.ewgt = edgeWeight;
+            this->adjacencyList[i].push_back(edge);
+            vertex.adjwgt += edgeWeight;
+        }
+
+        vertex.nedges = this->adjacencyList[i].size();
+
+        this->vertices[i] = vertex;
+    }
+
+    file.close();
+    cout << "Graph with CH imported.\n" << endl;
 }
 
 void Graph::createContractionHierarchie() {
@@ -216,6 +333,12 @@ pair<int, vector<Shortcut>> Graph::calculateEdgeDifferenceAndGetShortcuts(int ve
     // find the shortcuts that would be created by contracting the vertex
     for (int i = 0; i < this->adjacencyList[vertexIndex].size(); i++) {
         int sourceStopId = this->adjacencyList[vertexIndex][i].targetStopId;
+
+        if (this->vertices[sourceStopId].level != -1){
+            contractedNeighborsCounter++;
+            continue;
+        }
+
         map<int, int> distancesViaVertex;
         int maxDistance = -1;
 
@@ -223,7 +346,6 @@ pair<int, vector<Shortcut>> Graph::calculateEdgeDifferenceAndGetShortcuts(int ve
             int targetStopId = this->adjacencyList[vertexIndex][j].targetStopId;
 
             if (this->vertices[targetStopId].level != -1) {
-                contractedNeighborsCounter++;
                 continue;
             }
 

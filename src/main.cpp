@@ -80,9 +80,7 @@ int main(int argc, const char *argv[]) {
     Importer::import(folderName, true, gesamt_de);
   }
 
-  Creator::createNetworkGraph();
-  Creator::networkGraph.exportGraph(dataType);
-  Creator::networkGraph.createContractionHierarchie();
+  Creator::loadOrCreateNetworkGraph(dataType);
 
   if (startExperiments){
     // Real experiments
