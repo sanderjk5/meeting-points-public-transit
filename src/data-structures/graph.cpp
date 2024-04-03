@@ -143,11 +143,20 @@ void Graph::createContractionHierarchie() {
 
     stopIdsSortedByLevel = vector<int>();
 
+    vector<int> edgeDifferences = vector<int>(this->vertices.size(), 0);
+
     priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
 
+    #pragma omp parallel for
     for (int i = 0; i < this->vertices.size(); i++) {
         int edgeDifference = this->calculateEdgeDifferenceAndGetShortcuts(i).first;
-        pq.push(make_pair(edgeDifference, i));
+        edgeDifferences[i] = edgeDifference;
+    }
+
+    cout << "Calculated initial edge differences" << endl;
+
+    for (int i = 0; i < this->vertices.size(); i++) {
+        pq.push(make_pair(edgeDifferences[i], i));
     }
 
     int currentLevel = 0;
@@ -167,6 +176,10 @@ void Graph::createContractionHierarchie() {
 
         this->vertices[vertexIndex].level = currentLevel;
         stopIdsSortedByLevel.push_back(vertexIndex);
+
+        if (currentLevel % 2000 == 0) {
+            cout << "Current Level: " << currentLevel << endl;
+        }
 
         vector<Shortcut> shortcuts = updatedEdgeDifferenceAndShortcuts.second;
 
