@@ -299,6 +299,7 @@ void RaptorPQ::transformRaptorToRaptorPQ(Raptor* raptor) {
 
     firstStopSequencePerRoute = vector<int>(Importer::routes.size(), INT_MAX);
     lowestLowerBoundPerRoute = vector<double>(Importer::routes.size(), DBL_MAX);
+    markedStopsPerRoute = vector<set<int>>(Importer::routes.size(), set<int>());
 
     vector<int> arrivalStops;
     
@@ -318,6 +319,7 @@ void RaptorPQ::initializeRaptorPQ() {
 
     firstStopSequencePerRoute = vector<int>(Importer::routes.size(), INT_MAX);
     lowestLowerBoundPerRoute = vector<double>(Importer::routes.size(), DBL_MAX);
+    markedStopsPerRoute = vector<set<int>>(Importer::routes.size(), set<int>());
 
     extendedSourceStopIds = vector<int>();
     journeyPointers = vector<JourneyPointerRaptor>(Importer::stops.size(), JourneyPointerRaptor());
@@ -385,7 +387,9 @@ void RaptorPQ::addRoutesToQueue(vector<int> stopIds, int excludeRouteId) {
 
             if (stopSequence < firstStopSequencePerRoute[routeId]) {
                 firstStopSequencePerRoute[routeId] = stopSequence;
-            }            
+            }    
+
+            // markedStopsPerRoute[routeId].insert(stopId);        
         }
     }
 
@@ -398,7 +402,6 @@ void RaptorPQ::traverseRoute() {
     double lowerBound = pq.top().first;
 
     if (lowerBound > currentBest) {
-        // cout << "optimization: " << optimization << ", queue size: " << pq.size() << endl;
         isFinishedFlag = true;
         return;
     }
@@ -409,8 +412,6 @@ void RaptorPQ::traverseRoute() {
     if (lowerBound != lowestLowerBoundPerRoute[routeId] || firstStopSequencePerRoute[routeId] == INT_MAX) {
         return;
     }
-
-    // cout << "lower bound: " << lowerBound << ", current best: " << currentBest << ", queue size: " << pq.size() << endl;
 
     numberOfExpandedRoutes++;
 
@@ -452,6 +453,10 @@ void RaptorPQ::traverseRoute() {
             addRoutesToQueue(arrivalStops, routeId);
         }
 
+        // check if stop is in markedStops set of route
+        // bool stopIsMarked = markedStopsPerRoute[routeId].find(stopId) != markedStopsPerRoute[routeId].end();
+
+        // if (stopIsMarked && (currentTripId == -1 || previousEarliestArrivalTime < stopTime.departureTime + currentDayOffset)) {
         if (currentTripId == -1 || previousEarliestArrivalTime < stopTime.departureTime + currentDayOffset) {
             TripInfo tripInfo = getEarliestTripWithDayOffset(routeId, stopId, i, previousEarliestArrivalTime);
             if (tripInfo.tripId != -1) {
@@ -465,6 +470,7 @@ void RaptorPQ::traverseRoute() {
 
     firstStopSequencePerRoute[routeId] = INT_MAX;
     lowestLowerBoundPerRoute[routeId] = INT_MAX;
+    // markedStopsPerRoute[routeId] = set<int>();
 }
 
 TripInfo RaptorPQ::getEarliestTripWithDayOffset(int routeId, int stopId, int stopSequence, int previousEarliestArrivalTime) {

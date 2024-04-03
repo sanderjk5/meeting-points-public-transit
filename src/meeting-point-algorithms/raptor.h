@@ -5,6 +5,7 @@
 #include "optimization.h"
 #include <journey.h>
 #include <vector>
+#include <set>
 #include <queue>
 #include <limits.h>
 
@@ -99,6 +100,7 @@ class RaptorPQ {
         priority_queue<pair<double, int>, vector<pair<double, int>>, greater<pair<double, int>>> pq;
         vector<int> firstStopSequencePerRoute;
         vector<double> lowestLowerBoundPerRoute;
+        vector<set<int>> markedStopsPerRoute;
 
         int currentBest;
         Optimization optimization;

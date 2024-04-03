@@ -13,12 +13,21 @@ struct Vertex {
     int nedges; // the size of the adjacency list of the vertex
     int cewgt; // the weight of the edges that have been contracted to create the vertex (in the vertex is a multinode)
     int adjwgt; // the sum of the weights of the edges in the adjacency list of the vertex
+
+    int level; // the level of the vertex in the contraction hierachie
 };
 
 struct Edge {
     int targetStopId; // the id of the target stop
     int ewgt; // the weight of the edge
 };
+
+struct Shortcut {
+    int sourceStopId; // the id of the source stop
+    int targetStopId; // the id of the target stop
+    int ewgt; // the weight of the shortcut
+};
+
 
 /*
     A graph that represents the public transit network.
@@ -38,6 +47,16 @@ class Graph {
         vector<int> getDistances(int sourceStopId, vector<int> targetStopIds);
         void exportGraph(DataType dataType);
         void importPartition(DataType dataType, int numberOfPartitions);
+
+        void createContractionHierarchie();
+
+        map<int, vector<int>> getDistancesWithPhast(vector<int> sourceStopIds);
+
+    private:
+        pair<int, vector<Shortcut>> calculateEdgeDifferenceAndGetShortcuts(int vertexIndex);
+        vector<int> getDistancesForCHCreation(int sourceStopId, int excludeStopId, int maxDistance);
+
+        vector<int> stopIdsSortedByLevel;
 };
 
 #endif //CMAKE_GRAPH_H

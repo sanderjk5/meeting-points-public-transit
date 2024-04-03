@@ -1076,23 +1076,25 @@ vector<Journey> RaptorQueryProcessor::getJourneys(Optimization optimization) {
 void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
     map<int, vector<int>> sourceStopIdToAllStops;
 
-    for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
-        sourceStopIdToAllStops[meetingPointQuery.sourceStopIds[i]] = vector<int>(Creator::networkGraph.vertices.size(), INT_MAX);
-    }
+    // for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
+    //     sourceStopIdToAllStops[meetingPointQuery.sourceStopIds[i]] = vector<int>(Creator::networkGraph.vertices.size(), INT_MAX);
+    // }
 
-    vector<int> allStopIds = vector<int>(Creator::networkGraph.vertices.size());
-    for (int i = 0; i < Creator::networkGraph.vertices.size(); i++) {
-        allStopIds[i] = i;
-    }
+    // vector<int> allStopIds = vector<int>(Creator::networkGraph.vertices.size());
+    // for (int i = 0; i < Creator::networkGraph.vertices.size(); i++) {
+    //     allStopIds[i] = i;
+    // }
 
-    #pragma omp parallel for
-    for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
-        int sourceStopId = meetingPointQuery.sourceStopIds[i];
-        vector<int> distances = Creator::networkGraph.getDistances(sourceStopId, allStopIds);
-        sourceStopIdToAllStops[sourceStopId] = distances;
-    }
+    // #pragma omp parallel for
+    // for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
+    //     int sourceStopId = meetingPointQuery.sourceStopIds[i];
+    //     vector<int> distances = Creator::networkGraph.getDistances(sourceStopId, allStopIds);
+    //     sourceStopIdToAllStops[sourceStopId] = distances;
+    // }
 
     auto start = std::chrono::high_resolution_clock::now();
+    
+    sourceStopIdToAllStops = Creator::networkGraph.getDistancesWithPhast(meetingPointQuery.sourceStopIds);
 
     RaptorQueryProcessor raptorQueryProcessor = RaptorQueryProcessor(meetingPointQuery);
     raptorQueryProcessor.processRaptorQueryUntilFirstResult();

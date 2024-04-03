@@ -91,6 +91,7 @@ void Creator::createNetworkGraph() {
         vertex.nedges = networkGraph.adjacencyList[i].size();
         vertex.cewgt = 0;
         vertex.adjwgt = 0;
+        vertex.level = -1;
 
         for (int j = 0; j < networkGraph.adjacencyList[i].size(); j++) {
             vertex.adjwgt += networkGraph.adjacencyList[i][j].ewgt;

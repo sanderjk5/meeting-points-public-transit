@@ -82,6 +82,7 @@ int main(int argc, const char *argv[]) {
 
   Creator::createNetworkGraph();
   Creator::networkGraph.exportGraph(dataType);
+  Creator::networkGraph.createContractionHierarchie();
 
   if (startExperiments){
     // Real experiments
