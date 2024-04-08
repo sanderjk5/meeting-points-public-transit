@@ -892,6 +892,8 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
             raptorQueryProcessorOptimal.processRaptorQuery();
             MeetingPointQueryResult meetingPointQueryResultRaptorOptimal = raptorQueryProcessorOptimal.getMeetingPointQueryResult();
 
+            cout << "Calculated raptor optimal result" << endl;
+
             if (meetingPointQueryResultRaptorOptimal.meetingPointMinSum == "" || meetingPointQueryResultRaptorOptimal.meetingPointMinMax == "") {
                 continue;
             }
@@ -902,13 +904,19 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
             raptorQueryProcessorFirst.processRaptorQueryUntilFirstResult();
             MeetingPointQueryResult meetingPointQueryResultRaptorFirst = raptorQueryProcessorFirst.getMeetingPointQueryResult();
 
+            cout << "Calculated raptor first result" << endl;
+
             RaptorPQQueryProcessor raptorPQMinSumQueryProcessor = RaptorPQQueryProcessor(meetingPointQuery);
             raptorPQMinSumQueryProcessor.processRaptorPQQuery(min_sum);
             MeetingPointQueryResult meetingPointQueryResultRaptorPQMinSum = raptorPQMinSumQueryProcessor.getMeetingPointQueryResult();
 
+            cout << "Calculated raptor pq min sum result" << endl;
+
             RaptorPQQueryProcessor raptorPQMinMaxQueryProcessor = RaptorPQQueryProcessor(meetingPointQuery);
             raptorPQMinMaxQueryProcessor.processRaptorPQQuery(min_max);
             MeetingPointQueryResult meetingPointQueryResultRaptorPQMinMax = raptorPQMinMaxQueryProcessor.getMeetingPointQueryResult();
+
+            cout << "Calculated raptor pq min max result" << endl;
 
             minSumDurations.push_back((double) meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds);
             minMaxDurations.push_back((double) meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds);

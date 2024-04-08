@@ -1094,7 +1094,9 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
 
     auto start = std::chrono::high_resolution_clock::now();
     
+    cout << "Getting distances" << endl;
     sourceStopIdToAllStops = Creator::networkGraph.getDistancesWithPhast(meetingPointQuery.sourceStopIds);
+    cout << "Got the distances" << endl;
 
     RaptorQueryProcessor raptorQueryProcessor = RaptorQueryProcessor(meetingPointQuery);
     raptorQueryProcessor.processRaptorQueryUntilFirstResult();
