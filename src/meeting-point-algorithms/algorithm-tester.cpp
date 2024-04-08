@@ -888,11 +888,14 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
                 meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSourceStops);
             }
 
+            PrintHelper::printMeetingPointQuery(meetingPointQuery);
+
             RaptorQueryProcessor raptorQueryProcessorOptimal = RaptorQueryProcessor(meetingPointQuery);
             raptorQueryProcessorOptimal.processRaptorQuery();
             MeetingPointQueryResult meetingPointQueryResultRaptorOptimal = raptorQueryProcessorOptimal.getMeetingPointQueryResult();
 
             if (meetingPointQueryResultRaptorOptimal.meetingPointMinSum == "" || meetingPointQueryResultRaptorOptimal.meetingPointMinMax == "") {
+                cout << "No result for optimal RAPTOR query." << endl;
                 continue;
             }
 
@@ -962,6 +965,8 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
             if (successfulQueryCounter % (numberOfSuccessfulQueries / 5) == 0) {
                 cout << "Progress: " << successfulQueryCounter << " / " << numberOfSuccessfulQueries << endl;
             }
+
+            cout << "Query " << successfulQueryCounter << " successful." << endl;
         }
 
         if (loadOrStoreQueries && meetingPointQueries.size() == 0) {
