@@ -876,6 +876,11 @@ void RaptorQueryProcessor::initializeRaptors() {
 }
 
 void RaptorQueryProcessor::processRaptorQueryUntilFirstResult() {
+    for (Raptor* raptor : raptors) {
+        delete raptor;
+    }
+    raptors.clear();
+
     auto start = std::chrono::high_resolution_clock::now();
 
     initializeRaptors();
@@ -905,6 +910,11 @@ void RaptorQueryProcessor::processRaptorQueryUntilFirstResult() {
 }
 
 void RaptorQueryProcessor::processRaptorQuery() {
+    for (Raptor* raptor : raptors) {
+        delete raptor;
+    }
+    raptors.clear();
+
     auto start = std::chrono::high_resolution_clock::now();
 
     initializeRaptors();
@@ -928,6 +938,11 @@ void RaptorQueryProcessor::processRaptorQuery() {
 }
 
 void RaptorQueryProcessor::processRaptorQueryUntilResultDoesntImprove(Optimization optimization) {
+    for (Raptor* raptor : raptors) {
+        delete raptor;
+    }
+    raptors.clear();
+
     auto start = std::chrono::high_resolution_clock::now();
 
     initializeRaptors();
@@ -973,6 +988,11 @@ void RaptorQueryProcessor::processRaptorQueryUntilResultDoesntImprove(Optimizati
 }
 
 bool RaptorQueryProcessor::processRaptorRound() {
+    for (Raptor* raptor : raptors) {
+        delete raptor;
+    }
+    raptors.clear();
+    
     auto start = std::chrono::high_resolution_clock::now();
 
     bool allFinished = true;
@@ -1074,6 +1094,11 @@ vector<Journey> RaptorQueryProcessor::getJourneys(Optimization optimization) {
 }
 
 void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
+    for (RaptorPQ* raptor : raptorPQs) {
+        delete raptor;
+    }
+    raptorPQs.clear();
+
     map<int, vector<int>> sourceStopIdToAllStops;
 
     // for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
@@ -1094,9 +1119,7 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
 
     auto start = std::chrono::high_resolution_clock::now();
     
-    cout << "Getting distances" << endl;
     sourceStopIdToAllStops = Creator::networkGraph.getDistancesWithPhast(meetingPointQuery.sourceStopIds);
-    cout << "Got the distances" << endl;
 
     RaptorQueryProcessor raptorQueryProcessor = RaptorQueryProcessor(meetingPointQuery);
     raptorQueryProcessor.processRaptorQueryUntilFirstResult();

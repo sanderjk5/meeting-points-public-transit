@@ -888,13 +888,9 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
                 meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSourceStops);
             }
 
-            cout << "Loaded query" << endl;
-
             RaptorQueryProcessor raptorQueryProcessorOptimal = RaptorQueryProcessor(meetingPointQuery);
             raptorQueryProcessorOptimal.processRaptorQuery();
             MeetingPointQueryResult meetingPointQueryResultRaptorOptimal = raptorQueryProcessorOptimal.getMeetingPointQueryResult();
-
-            cout << "Calculated raptor optimal result" << endl;
 
             if (meetingPointQueryResultRaptorOptimal.meetingPointMinSum == "" || meetingPointQueryResultRaptorOptimal.meetingPointMinMax == "") {
                 continue;
@@ -906,19 +902,13 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
             raptorQueryProcessorFirst.processRaptorQueryUntilFirstResult();
             MeetingPointQueryResult meetingPointQueryResultRaptorFirst = raptorQueryProcessorFirst.getMeetingPointQueryResult();
 
-            cout << "Calculated raptor first result" << endl;
-
             RaptorPQQueryProcessor raptorPQMinSumQueryProcessor = RaptorPQQueryProcessor(meetingPointQuery);
             raptorPQMinSumQueryProcessor.processRaptorPQQuery(min_sum);
             MeetingPointQueryResult meetingPointQueryResultRaptorPQMinSum = raptorPQMinSumQueryProcessor.getMeetingPointQueryResult();
 
-            cout << "Calculated raptor pq min sum result" << endl;
-
             RaptorPQQueryProcessor raptorPQMinMaxQueryProcessor = RaptorPQQueryProcessor(meetingPointQuery);
             raptorPQMinMaxQueryProcessor.processRaptorPQQuery(min_max);
             MeetingPointQueryResult meetingPointQueryResultRaptorPQMinMax = raptorPQMinMaxQueryProcessor.getMeetingPointQueryResult();
-
-            cout << "Calculated raptor pq min max result" << endl;
 
             minSumDurations.push_back((double) meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds);
             minMaxDurations.push_back((double) meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds);
@@ -932,8 +922,6 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
             numberOfExpandedRoutesRaptorOptimalResult.push_back((double) raptorQueryProcessorOptimal.numberOfExpandedRoutes);
             numberOfExpandedRoutesRaptorPQMinSum.push_back((double) raptorPQMinSumQueryProcessor.numberOfExpandedRoutes);
             numberOfExpandedRoutesRaptorPQMinMax.push_back((double) raptorPQMinMaxQueryProcessor.numberOfExpandedRoutes);
-
-            cout << "stored query times and nof expanded routes" << endl;
 
             int differenceMinSumRaptorFirst = meetingPointQueryResultRaptorFirst.minSumDurationInSeconds - meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds;
             int differenceMinMaxRaptorFirst = meetingPointQueryResultRaptorFirst.minMaxDurationInSeconds - meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds;
@@ -957,8 +945,6 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
                 resultsCounterRaptorFirst[3]++;
             }
 
-            cout << "Stored query results" << endl;
-
             string sourceStopNames = "";
             for (int j = 0; j < meetingPointQuery.sourceStopIds.size()-1; j++) {
                 sourceStopNames += Importer::getStopName(meetingPointQuery.sourceStopIds[j]) + "-";
@@ -971,8 +957,6 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
                 }
                 queriesInfoFile << meetingPointQuery.sourceTime << "," << meetingPointQuery.weekday << "\n";
             }
-
-            cout << "stored query info" << endl;
 
             // Print progress every 20% of the queries
             if (successfulQueryCounter % (numberOfSuccessfulQueries / 5) == 0) {
