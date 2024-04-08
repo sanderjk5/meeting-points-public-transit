@@ -888,6 +888,8 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
                 meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSourceStops);
             }
 
+            cout << "Loaded query" << endl;
+
             RaptorQueryProcessor raptorQueryProcessorOptimal = RaptorQueryProcessor(meetingPointQuery);
             raptorQueryProcessorOptimal.processRaptorQuery();
             MeetingPointQueryResult meetingPointQueryResultRaptorOptimal = raptorQueryProcessorOptimal.getMeetingPointQueryResult();
@@ -931,6 +933,8 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
             numberOfExpandedRoutesRaptorPQMinSum.push_back((double) raptorPQMinSumQueryProcessor.numberOfExpandedRoutes);
             numberOfExpandedRoutesRaptorPQMinMax.push_back((double) raptorPQMinMaxQueryProcessor.numberOfExpandedRoutes);
 
+            cout << "stored query times and nof expanded routes" << endl;
+
             int differenceMinSumRaptorFirst = meetingPointQueryResultRaptorFirst.minSumDurationInSeconds - meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds;
             int differenceMinMaxRaptorFirst = meetingPointQueryResultRaptorFirst.minMaxDurationInSeconds - meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds;
 
@@ -953,6 +957,8 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
                 resultsCounterRaptorFirst[3]++;
             }
 
+            cout << "Stored query results" << endl;
+
             string sourceStopNames = "";
             for (int j = 0; j < meetingPointQuery.sourceStopIds.size()-1; j++) {
                 sourceStopNames += Importer::getStopName(meetingPointQuery.sourceStopIds[j]) + "-";
@@ -965,6 +971,8 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
                 }
                 queriesInfoFile << meetingPointQuery.sourceTime << "," << meetingPointQuery.weekday << "\n";
             }
+
+            cout << "stored query info" << endl;
 
             // Print progress every 20% of the queries
             if (successfulQueryCounter % (numberOfSuccessfulQueries / 5) == 0) {
