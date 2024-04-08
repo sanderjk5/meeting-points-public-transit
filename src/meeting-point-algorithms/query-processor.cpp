@@ -910,11 +910,6 @@ void RaptorQueryProcessor::processRaptorQueryUntilFirstResult() {
 }
 
 void RaptorQueryProcessor::processRaptorQuery() {
-    for (Raptor* raptor : raptors) {
-        delete raptor;
-    }
-    raptors.clear();
-
     auto start = std::chrono::high_resolution_clock::now();
 
     initializeRaptors();
@@ -935,14 +930,14 @@ void RaptorQueryProcessor::processRaptorQuery() {
         numberOfExpandedRoutes += raptors[i]->numberOfExpandedRoutes;
     }
     numberOfExpandedRoutes = numberOfExpandedRoutes / raptors.size();
-}
 
-void RaptorQueryProcessor::processRaptorQueryUntilResultDoesntImprove(Optimization optimization) {
     for (Raptor* raptor : raptors) {
         delete raptor;
     }
     raptors.clear();
+}
 
+void RaptorQueryProcessor::processRaptorQueryUntilResultDoesntImprove(Optimization optimization) {
     auto start = std::chrono::high_resolution_clock::now();
 
     initializeRaptors();
@@ -985,14 +980,14 @@ void RaptorQueryProcessor::processRaptorQueryUntilResultDoesntImprove(Optimizati
         numberOfExpandedRoutes += raptors[i]->numberOfExpandedRoutes;
     }
     numberOfExpandedRoutes = numberOfExpandedRoutes / raptors.size();
-}
 
-bool RaptorQueryProcessor::processRaptorRound() {
     for (Raptor* raptor : raptors) {
         delete raptor;
     }
     raptors.clear();
-    
+}
+
+bool RaptorQueryProcessor::processRaptorRound() {
     auto start = std::chrono::high_resolution_clock::now();
 
     bool allFinished = true;
@@ -1094,11 +1089,6 @@ vector<Journey> RaptorQueryProcessor::getJourneys(Optimization optimization) {
 }
 
 void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
-    for (RaptorPQ* raptor : raptorPQs) {
-        delete raptor;
-    }
-    raptorPQs.clear();
-
     map<int, vector<int>> sourceStopIdToAllStops;
 
     // for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
@@ -1227,6 +1217,11 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
         numberOfExpandedRoutes += raptorPQs[i]->numberOfExpandedRoutes;
     }
     numberOfExpandedRoutes = numberOfExpandedRoutes / raptorPQs.size();
+
+    for (RaptorPQ* raptor : raptorPQs) {
+        delete raptor;
+    }
+    raptorPQs.clear();
 }
 
 MeetingPointQueryResult RaptorPQQueryProcessor::getMeetingPointQueryResult() {
