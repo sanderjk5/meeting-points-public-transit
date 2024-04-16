@@ -42,7 +42,7 @@ struct PQEntry {
     }
 
     bool operator<(const PQEntry& other) const {
-        return lowerBound < other.lowerBound;
+        return lowerBound > other.lowerBound;
     }
 };
 

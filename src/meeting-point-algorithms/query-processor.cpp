@@ -1242,11 +1242,11 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
         durationTraverseRoute += raptorPQs[i]->durationTraverseRoute;
     }
     numberOfExpandedRoutes = numberOfExpandedRoutes / raptorPQs.size();
-    durationInitHeuristic = durationInitHeuristic / raptorPQs.size();
-    durationTransformRaptorToRaptorPQ = durationTransformRaptorToRaptorPQ / raptorPQs.size();
-    durationAddRoutesToQueue = durationAddRoutesToQueue / raptorPQs.size();
-    durationGetEarliestTripWithDayOffset = durationGetEarliestTripWithDayOffset / raptorPQs.size();
-    durationTraverseRoute = durationTraverseRoute / raptorPQs.size();
+    durationInitHeuristic = durationInitHeuristic / (raptorPQs.size() * 1000);
+    durationTransformRaptorToRaptorPQ = durationTransformRaptorToRaptorPQ / (raptorPQs.size() * 1000);
+    durationAddRoutesToQueue = durationAddRoutesToQueue / (raptorPQs.size() * 1000);
+    durationGetEarliestTripWithDayOffset = durationGetEarliestTripWithDayOffset / (raptorPQs.size() * 1000);
+    durationTraverseRoute = durationTraverseRoute / (raptorPQs.size() * 1000);
 
     for (RaptorPQ* raptor : raptorPQs) {
         delete raptor;
@@ -1399,11 +1399,11 @@ void RaptorPQParallelQueryProcessor::processRaptorPQParallelQuery(Optimization o
     meetingPointQueryResult.queryTime = duration;
 
     numberOfExpandedRoutes = raptorPQParallel->numberOfExpandedRoutes / meetingPointQuery.sourceStopIds.size();
-    durationInitHeuristic = raptorPQParallel->durationInitHeuristic / meetingPointQuery.sourceStopIds.size();
-    durationTransformRaptorToRaptorPQ = raptorPQParallel->durationTransformRaptorToRaptorPQ / meetingPointQuery.sourceStopIds.size();
-    durationAddRoutesToQueue = raptorPQParallel->durationAddRoutesToQueue / meetingPointQuery.sourceStopIds.size();
-    durationGetEarliestTripWithDayOffset = raptorPQParallel->durationGetEarliestTripWithDayOffset / meetingPointQuery.sourceStopIds.size();
-    durationTraverseRoute = raptorPQParallel->durationTraverseRoute / meetingPointQuery.sourceStopIds.size();
+    durationInitHeuristic = raptorPQParallel->durationInitHeuristic / (meetingPointQuery.sourceStopIds.size() * 1000);
+    durationTransformRaptorToRaptorPQ = raptorPQParallel->durationTransformRaptorToRaptorPQ / (meetingPointQuery.sourceStopIds.size() * 1000);
+    durationAddRoutesToQueue = raptorPQParallel->durationAddRoutesToQueue / (meetingPointQuery.sourceStopIds.size() * 1000);
+    durationGetEarliestTripWithDayOffset = raptorPQParallel->durationGetEarliestTripWithDayOffset / (meetingPointQuery.sourceStopIds.size() * 1000);
+    durationTraverseRoute = raptorPQParallel->durationTraverseRoute / (meetingPointQuery.sourceStopIds.size() * 1000);
 }
 
 MeetingPointQueryResult RaptorPQParallelQueryProcessor::getMeetingPointQueryResult() {

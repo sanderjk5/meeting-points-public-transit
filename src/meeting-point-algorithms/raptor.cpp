@@ -253,7 +253,7 @@ void RaptorPQ::initializeHeuristic(map<int, vector<int>> sourceStopIdsToAllStops
         }
     }
     auto end = chrono::high_resolution_clock::now();
-    durationInitHeuristic = chrono::duration_cast<chrono::milliseconds>(end - start).count();
+    durationInitHeuristic = chrono::duration_cast<chrono::microseconds>(end - start).count();
     // cout << "base heuristic: " << baseHeuristic << endl;
 }
 
@@ -319,7 +319,7 @@ void RaptorPQ::transformRaptorToRaptorPQ(Raptor* raptor) {
     isFinishedFlag = false;
     numberOfExpandedRoutes = 0;
     auto end = chrono::high_resolution_clock::now();
-    durationTransformRaptorToRaptorPQ = chrono::duration_cast<chrono::milliseconds>(end - start).count();
+    durationTransformRaptorToRaptorPQ = chrono::duration_cast<chrono::microseconds>(end - start).count();
 }
 
 void RaptorPQ::initializeRaptorPQ() {
@@ -407,7 +407,7 @@ void RaptorPQ::addRoutesToQueue(set<int> stopIds, int excludeRouteId) {
     }
 
     auto end = chrono::high_resolution_clock::now();
-    durationAddRoutesToQueue += chrono::duration_cast<chrono::milliseconds>(end - start).count();
+    durationAddRoutesToQueue += chrono::duration_cast<chrono::microseconds>(end - start).count();
 }
 
 void RaptorPQ::traverseRoute() {
@@ -488,7 +488,7 @@ void RaptorPQ::traverseRoute() {
     lowestLowerBoundPerRoute[routeId] = INT_MAX;
     // markedStopsPerRoute[routeId] = set<int>();
     auto end = chrono::high_resolution_clock::now();
-    durationTraverseRoute += chrono::duration_cast<chrono::milliseconds>(end - start).count();
+    durationTraverseRoute += chrono::duration_cast<chrono::microseconds>(end - start).count();
 }
 
 TripInfo RaptorPQ::getEarliestTripWithDayOffset(int routeId, int stopId, int stopSequence, int previousEarliestArrivalTime) {
@@ -526,7 +526,7 @@ TripInfo RaptorPQ::getEarliestTripWithDayOffset(int routeId, int stopId, int sto
     }
 
     auto end = chrono::high_resolution_clock::now();
-    durationGetEarliestTripWithDayOffset += chrono::duration_cast<chrono::milliseconds>(end - start).count();
+    durationGetEarliestTripWithDayOffset += chrono::duration_cast<chrono::microseconds>(end - start).count();
 
     return {-1, -1, -1};
 } 
@@ -563,7 +563,7 @@ void RaptorPQParallel::transformRaptorsToRaptorPQs(vector<Raptor*> raptors) {
         addRoutesToQueue(arrivalStops, -1, i);
     }
     auto end = chrono::high_resolution_clock::now();
-    durationTransformRaptorToRaptorPQ = chrono::duration_cast<chrono::milliseconds>(end - start).count();
+    durationTransformRaptorToRaptorPQ = chrono::duration_cast<chrono::microseconds>(end - start).count();
 }
 
 void RaptorPQParallel::initializeHeuristics(map<int, vector<int>> sourceStopIdsToAllStops, vector<int> sourceStopIds) {
@@ -591,7 +591,7 @@ void RaptorPQParallel::initializeHeuristics(map<int, vector<int>> sourceStopIdsT
         }
     }
     auto end = chrono::high_resolution_clock::now();
-    durationInitHeuristic = chrono::duration_cast<chrono::milliseconds>(end - start).count();
+    durationInitHeuristic = chrono::duration_cast<chrono::microseconds>(end - start).count();
 }
 
 void RaptorPQParallel::processRaptorPQ() {
@@ -719,7 +719,7 @@ void RaptorPQParallel::traverseRoute() {
     firstStopSequencePerRoute[raptorIndex][routeId] = INT_MAX;
     lowestLowerBoundPerRoute[raptorIndex][routeId] = INT_MAX;
     auto end = chrono::high_resolution_clock::now();
-    durationTraverseRoute += chrono::duration_cast<chrono::milliseconds>(end - start).count();
+    durationTraverseRoute += chrono::duration_cast<chrono::microseconds>(end - start).count();
 }
 
 void RaptorPQParallel::addRoutesToQueue(set<int> stopIds, int excludeRouteId, int raptorIndex) {
@@ -778,7 +778,7 @@ void RaptorPQParallel::addRoutesToQueue(set<int> stopIds, int excludeRouteId, in
     }
 
     auto end = chrono::high_resolution_clock::now();
-    durationAddRoutesToQueue += chrono::duration_cast<chrono::milliseconds>(end - start).count();
+    durationAddRoutesToQueue += chrono::duration_cast<chrono::microseconds>(end - start).count();
 }
 
 TripInfo RaptorPQParallel::getEarliestTripWithDayOffset(int routeId, int stopId, int stopSequence, int previousEarliestArrivalTime) {
@@ -816,7 +816,7 @@ TripInfo RaptorPQParallel::getEarliestTripWithDayOffset(int routeId, int stopId,
     }
 
     auto end = chrono::high_resolution_clock::now();
-    durationGetEarliestTripWithDayOffset += chrono::duration_cast<chrono::milliseconds>(end - start).count();
+    durationGetEarliestTripWithDayOffset += chrono::duration_cast<chrono::microseconds>(end - start).count();
 
     return {-1, -1, -1};
 } 
