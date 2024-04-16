@@ -435,6 +435,7 @@ map<int, vector<int>> Graph::getDistancesWithPhast(vector<int> sourceStopIds) {
     for (int i = 0; i < sourceStopIds.size(); i++) {
         int sourceStopId = sourceStopIds[i];
         distances[sourceStopId] = vector<int>(this->vertices.size(), INT_MAX);
+        distances[sourceStopId][sourceStopId] = 0;
     }
 
     // perform upward searches from the source stops
@@ -449,14 +450,14 @@ map<int, vector<int>> Graph::getDistancesWithPhast(vector<int> sourceStopIds) {
             int u = pq.top().second;
             pq.pop();
 
-            for (int i = 0; i < this->adjacencyList[u].size(); i++) {
-                int v = this->adjacencyList[u][i].targetStopId;
+            for (int j = 0; j < this->adjacencyList[u].size(); j++) {
+                int v = this->adjacencyList[u][j].targetStopId;
 
                 if (this->vertices[v].level <= this->vertices[u].level) {
                     continue;
                 }
 
-                int weight = this->adjacencyList[u][i].ewgt;
+                int weight = this->adjacencyList[u][j].ewgt;
 
                 if (distances[sourceStopId][v] > distances[sourceStopId][u] + weight) {
                     distances[sourceStopId][v] = distances[sourceStopId][u] + weight;
@@ -482,6 +483,10 @@ map<int, vector<int>> Graph::getDistancesWithPhast(vector<int> sourceStopIds) {
 
             for (int k = 0; k < sourceStopIds.size(); k++) {
                 int sourceStopId = sourceStopIds[k];
+
+                if (distances[sourceStopId][targetStopId] == INT_MAX) {
+                    continue;
+                }
 
                 if (distances[sourceStopId][vertexIndex] > distances[sourceStopId][targetStopId] + weight) {
                     distances[sourceStopId][vertexIndex] = distances[sourceStopId][targetStopId] + weight;
