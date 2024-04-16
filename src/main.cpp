@@ -97,7 +97,7 @@ int main(int argc, const char *argv[]) {
 
     // ExperimentController::compareRaptorAlgorithms(dataType, 100, numberOfSourceStops);
 
-    ExperimentController::compareRaptorPQAlgorithms(dataType, 20, numberOfSourceStops);
+    ExperimentController::compareRaptorPQAlgorithms(dataType, 12, numberOfSourceStops);
 
     // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 10, 30, 0.90);
 
