@@ -1110,11 +1110,17 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
     auto start = std::chrono::high_resolution_clock::now();
     
     sourceStopIdToAllStops = Creator::networkGraph.getDistancesWithPhast(meetingPointQuery.sourceStopIds);
-
+    auto endPhast = std::chrono::high_resolution_clock::now();
+    durationPhast = std::chrono::duration_cast<std::chrono::milliseconds>(endPhast - start).count();
+    
+    auto startRaptorFirstResult = std::chrono::high_resolution_clock::now();
     RaptorQueryProcessor raptorQueryProcessor = RaptorQueryProcessor(meetingPointQuery);
     raptorQueryProcessor.processRaptorQueryUntilFirstResult();
     MeetingPointQueryResult meetingPointQueryResultRaptor = raptorQueryProcessor.getMeetingPointQueryResult();
+    auto endRaptorFirstResult = std::chrono::high_resolution_clock::now();
+    durationRaptorFirstResult = std::chrono::duration_cast<std::chrono::milliseconds>(endRaptorFirstResult - startRaptorFirstResult).count();
 
+    auto initRaptorPQs = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
         RaptorQuery query;
         query.sourceStopId = meetingPointQuery.sourceStopIds[i];
@@ -1123,10 +1129,12 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
         RaptorPQ* raptorPQ = new RaptorPQ(query, optimization);
         raptorPQs.push_back(raptorPQ);
     }
+    auto endInitRaptorPQs = std::chrono::high_resolution_clock::now();
+    durationInitRaptorPQs = std::chrono::duration_cast<std::chrono::milliseconds>(endInitRaptorPQs - initRaptorPQs).count();
 
     // cout << "upper bound min sum: " << meetingPointQueryResultRaptor.minSumDurationInSeconds << ", upper bound min max: " << meetingPointQueryResultRaptor.minMaxDurationInSeconds << endl;
 
-
+    auto startRaptorPQ = std::chrono::high_resolution_clock::now();
     #pragma omp parallel for
     for (int i = 0; i < raptorPQs.size(); i++) {
         raptorPQs[i]->initializeHeuristic(sourceStopIdToAllStops, meetingPointQuery.sourceStopIds);
@@ -1141,6 +1149,10 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
         raptorPQs[i]->transformRaptorToRaptorPQ(raptorQueryProcessor.raptors[i]);
         raptorPQs[i]->processRaptorPQ();
     }
+    auto endRaptorPQ = std::chrono::high_resolution_clock::now();
+    durationRaptorPQs = std::chrono::duration_cast<std::chrono::milliseconds>(endRaptorPQ - startRaptorPQ).count();
+
+    auto startCreateResult = std::chrono::high_resolution_clock::now();
 
     int minSum = INT_MAX;
     int minMax = INT_MAX;
@@ -1208,15 +1220,33 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
         meetingPointQueryResult.maxTransfersMinMax = maxTransfersMinMax;
     }
 
+    auto endCreateResult = std::chrono::high_resolution_clock::now();
+    durationCreateResult = std::chrono::duration_cast<std::chrono::milliseconds>(endCreateResult - startCreateResult).count();
+
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     meetingPointQueryResult.queryTime = duration;
 
     numberOfExpandedRoutes = 0;
+    durationInitHeuristic = 0;
+    durationTransformRaptorToRaptorPQ = 0;
+    durationAddRoutesToQueue = 0;
+    durationGetEarliestTripWithDayOffset = 0;
+    durationTraverseRoute = 0;
     for (int i = 0; i < raptorPQs.size(); i++) {
         numberOfExpandedRoutes += raptorPQs[i]->numberOfExpandedRoutes;
+        durationInitHeuristic += raptorPQs[i]->durationInitHeuristic;
+        durationTransformRaptorToRaptorPQ += raptorPQs[i]->durationTransformRaptorToRaptorPQ;
+        durationAddRoutesToQueue += raptorPQs[i]->durationAddRoutesToQueue;
+        durationGetEarliestTripWithDayOffset += raptorPQs[i]->durationGetEarliestTripWithDayOffset;
+        durationTraverseRoute += raptorPQs[i]->durationTraverseRoute;
     }
     numberOfExpandedRoutes = numberOfExpandedRoutes / raptorPQs.size();
+    durationInitHeuristic = durationInitHeuristic / (raptorPQs.size() * 1000);
+    durationTransformRaptorToRaptorPQ = durationTransformRaptorToRaptorPQ / (raptorPQs.size() * 1000);
+    durationAddRoutesToQueue = durationAddRoutesToQueue / (raptorPQs.size() * 1000);
+    durationGetEarliestTripWithDayOffset = durationGetEarliestTripWithDayOffset / (raptorPQs.size() * 1000);
+    durationTraverseRoute = durationTraverseRoute / (raptorPQs.size() * 1000);
 
     for (RaptorPQ* raptor : raptorPQs) {
         delete raptor;
@@ -1240,5 +1270,153 @@ vector<Journey> RaptorPQQueryProcessor::getJourneys(Optimization optimization) {
         Journey journey = raptorPQs[i]->createJourney(targetStopId);
         journeys.push_back(journey);
     }
+    return journeys;
+}
+
+void RaptorPQParallelQueryProcessor::processRaptorPQParallelQuery(Optimization optimization) {
+    map<int, vector<int>> sourceStopIdToAllStops;
+
+    auto start = std::chrono::high_resolution_clock::now();
+    
+    sourceStopIdToAllStops = Creator::networkGraph.getDistancesWithPhast(meetingPointQuery.sourceStopIds);
+    auto endPhast = std::chrono::high_resolution_clock::now();
+    durationPhast = std::chrono::duration_cast<std::chrono::milliseconds>(endPhast - start).count();
+    
+    auto startRaptorFirstResult = std::chrono::high_resolution_clock::now();
+    RaptorQueryProcessor raptorQueryProcessor = RaptorQueryProcessor(meetingPointQuery);
+    raptorQueryProcessor.processRaptorQueryUntilFirstResult();
+    MeetingPointQueryResult meetingPointQueryResultRaptor = raptorQueryProcessor.getMeetingPointQueryResult();
+    auto endRaptorFirstResult = std::chrono::high_resolution_clock::now();
+    durationRaptorFirstResult = std::chrono::duration_cast<std::chrono::milliseconds>(endRaptorFirstResult - startRaptorFirstResult).count();
+
+    auto initRaptorPQs = std::chrono::high_resolution_clock::now();
+    vector<RaptorQuery> queries = vector<RaptorQuery>(meetingPointQuery.sourceStopIds.size());
+    for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
+        RaptorQuery query;
+        query.sourceStopId = meetingPointQuery.sourceStopIds[i];
+        query.sourceTime = meetingPointQuery.sourceTime;
+        query.weekday = meetingPointQuery.weekday;
+        queries[i] = query;
+    }
+    raptorPQParallel = new RaptorPQParallel(queries, optimization);
+    auto endInitRaptorPQs = std::chrono::high_resolution_clock::now();
+    durationInitRaptorPQs = std::chrono::duration_cast<std::chrono::milliseconds>(endInitRaptorPQs - initRaptorPQs).count();
+
+    // cout << "upper bound min sum: " << meetingPointQueryResultRaptor.minSumDurationInSeconds << ", upper bound min max: " << meetingPointQueryResultRaptor.minMaxDurationInSeconds << endl;
+
+    auto startRaptorPQ = std::chrono::high_resolution_clock::now();
+
+    raptorPQParallel->initializeHeuristics(sourceStopIdToAllStops, meetingPointQuery.sourceStopIds);
+    if (optimization == min_sum) {
+        int upperBound = meetingPointQueryResultRaptor.minSumDurationInSeconds;
+        raptorPQParallel->setCurrentBest(upperBound);
+    } else {
+        int upperBound = meetingPointQueryResultRaptor.minMaxDurationInSeconds;
+        raptorPQParallel->setCurrentBest(upperBound);
+    }
+    raptorPQParallel->transformRaptorsToRaptorPQs(raptorQueryProcessor.raptors);
+    raptorPQParallel->processRaptorPQ();
+
+    auto endRaptorPQ = std::chrono::high_resolution_clock::now();
+    durationRaptorPQs = std::chrono::duration_cast<std::chrono::milliseconds>(endRaptorPQ - startRaptorPQ).count();
+
+    auto startCreateResult = std::chrono::high_resolution_clock::now();
+
+    int minSum = INT_MAX;
+    int minMax = INT_MAX;
+
+    int stopIdMinSum = -1;
+    int stopIdMinMax = -1;
+
+    // Calculate the sum of the earliest arrival times for all stops and the maximum earliest arrival time for all stops
+    for (int i = 0; i < Importer::stops.size(); i++) {
+        int sum = 0;
+        int max = 0;
+        int arrivalTime = 0;
+        vector<int> earliestArrivalTimes = raptorPQParallel->getEarliestArrivalTimes(i);
+        for (int j = 0; j < earliestArrivalTimes.size(); j++) {
+            int earliestArrivalTime = earliestArrivalTimes[j];
+            if (earliestArrivalTime == INT_MAX) {
+                sum = INT_MAX;
+                max = INT_MAX;
+                break;
+            }
+
+            int duration = earliestArrivalTime - meetingPointQuery.sourceTime;
+            sum += duration;
+            if (duration > max) {
+                max = duration;
+                arrivalTime = earliestArrivalTime;
+            }
+        }
+
+        if (sum < minSum) {
+            meetingPointQueryResult.meetingPointMinSumStopId = i;
+            meetingPointQueryResult.meetingPointMinSum = Importer::getStopName(i);
+            meetingPointQueryResult.meetingTimeMinSum = TimeConverter::convertSecondsToTime(arrivalTime, true);
+            meetingPointQueryResult.minSumDuration = TimeConverter::convertSecondsToTime(sum, false);
+            meetingPointQueryResult.minSumDurationInSeconds = sum;
+            stopIdMinSum = i;
+            minSum = sum;
+        }
+        if (max < minMax) {
+            meetingPointQueryResult.meetingPointMinMaxStopId = i;
+            meetingPointQueryResult.meetingPointMinMax = Importer::getStopName(i);
+            meetingPointQueryResult.meetingTimeMinMax = TimeConverter::convertSecondsToTime(arrivalTime, true);
+            meetingPointQueryResult.minMaxDuration = TimeConverter::convertSecondsToTime(max, false);
+            meetingPointQueryResult.minMaxDurationInSeconds = max;
+            stopIdMinMax = i;
+            minMax = max;
+        }
+    }
+
+    if (stopIdMinSum != -1 && stopIdMinMax != -1) {
+        int maxTransfersMinSum = 0;
+        int maxTransfersMinMax = 0;
+        vector<Journey> journeysMinSum = raptorPQParallel->createJourneys(stopIdMinSum);
+        vector<Journey> journeysMinMax = raptorPQParallel->createJourneys(stopIdMinMax);
+        for (int i = 0; i < journeysMinSum.size(); i++) {
+            Journey journeyMinSum = journeysMinSum[i];
+            Journey journeyMinMax = journeysMinMax[i];
+
+            if (journeyMinSum.legs.size() > 1 && journeyMinSum.legs.size() - 1 > maxTransfersMinSum) {
+                maxTransfersMinSum = journeyMinSum.legs.size() - 1;
+            }
+
+            if (journeyMinMax.legs.size() > 1 && journeyMinMax.legs.size() - 1 > maxTransfersMinMax) {
+                maxTransfersMinMax = journeyMinMax.legs.size() - 1;
+            }
+        }
+        meetingPointQueryResult.maxTransfersMinSum = maxTransfersMinSum;
+        meetingPointQueryResult.maxTransfersMinMax = maxTransfersMinMax;
+    }
+
+    auto endCreateResult = std::chrono::high_resolution_clock::now();
+    durationCreateResult = std::chrono::duration_cast<std::chrono::milliseconds>(endCreateResult - startCreateResult).count();
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    meetingPointQueryResult.queryTime = duration;
+
+    numberOfExpandedRoutes = raptorPQParallel->numberOfExpandedRoutes / meetingPointQuery.sourceStopIds.size();
+    durationInitHeuristic = raptorPQParallel->durationInitHeuristic / (meetingPointQuery.sourceStopIds.size() * 1000);
+    durationTransformRaptorToRaptorPQ = raptorPQParallel->durationTransformRaptorToRaptorPQ / (meetingPointQuery.sourceStopIds.size() * 1000);
+    durationAddRoutesToQueue = raptorPQParallel->durationAddRoutesToQueue / (meetingPointQuery.sourceStopIds.size() * 1000);
+    durationGetEarliestTripWithDayOffset = raptorPQParallel->durationGetEarliestTripWithDayOffset / (meetingPointQuery.sourceStopIds.size() * 1000);
+    durationTraverseRoute = raptorPQParallel->durationTraverseRoute / (meetingPointQuery.sourceStopIds.size() * 1000);
+}
+
+MeetingPointQueryResult RaptorPQParallelQueryProcessor::getMeetingPointQueryResult() {
+    return meetingPointQueryResult; 
+}
+
+vector<Journey> RaptorPQParallelQueryProcessor::getJourneys(Optimization optimization) {
+    int targetStopId;
+    if (optimization == min_sum) {
+        targetStopId = meetingPointQueryResult.meetingPointMinSumStopId;
+    } else {
+        targetStopId = meetingPointQueryResult.meetingPointMinMaxStopId;
+    }
+    vector<Journey> journeys = raptorPQParallel->createJourneys(targetStopId);
     return journeys;
 }

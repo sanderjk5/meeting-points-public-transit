@@ -151,11 +151,52 @@ class RaptorPQQueryProcessor {
         vector<Journey> getJourneys(Optimization optimization);
 
         double numberOfExpandedRoutes;
+        double durationPhast;
+        double durationRaptorFirstResult;
+        double durationInitRaptorPQs;
+        double durationRaptorPQs;
+        double durationCreateResult;
+
+        double durationInitHeuristic;
+        double durationTransformRaptorToRaptorPQ;
+        double durationAddRoutesToQueue;
+        double durationGetEarliestTripWithDayOffset;
+        double durationTraverseRoute;
 
     private:
         MeetingPointQuery meetingPointQuery;
         MeetingPointQueryResult meetingPointQueryResult;
         vector<RaptorPQ*> raptorPQs;
+};
+
+class RaptorPQParallelQueryProcessor {
+    public:
+        explicit RaptorPQParallelQueryProcessor(MeetingPointQuery meetingPointQuery){
+            this->meetingPointQuery = meetingPointQuery;
+        };
+        ~RaptorPQParallelQueryProcessor(){};
+
+        void processRaptorPQParallelQuery(Optimization optimization);
+        MeetingPointQueryResult getMeetingPointQueryResult();
+        vector<Journey> getJourneys(Optimization optimization);
+
+        double numberOfExpandedRoutes;
+        double durationPhast;
+        double durationRaptorFirstResult;
+        double durationInitRaptorPQs;
+        double durationRaptorPQs;
+        double durationCreateResult;
+
+        double durationInitHeuristic;
+        double durationTransformRaptorToRaptorPQ;
+        double durationAddRoutesToQueue;
+        double durationGetEarliestTripWithDayOffset;
+        double durationTraverseRoute;
+
+    private:
+        MeetingPointQuery meetingPointQuery;
+        MeetingPointQueryResult meetingPointQueryResult;
+        RaptorPQParallel* raptorPQParallel;
 };
 
 /*
