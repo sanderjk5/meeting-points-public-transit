@@ -519,6 +519,8 @@ TripInfo RaptorPQ::getEarliestTripWithDayOffset(int routeId, int stopId, int sto
 
             if (stopTime.departureTime + dayOffset > earliestDepartureTime) {
                 TripInfo tripInfo = {tripId, dayOffset, stopTime.departureTime + dayOffset};
+                auto end = chrono::high_resolution_clock::now();
+                durationGetEarliestTripWithDayOffset += chrono::duration_cast<chrono::microseconds>(end - start).count();
                 return tripInfo;
             }
         }
