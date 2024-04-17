@@ -547,6 +547,9 @@ void RaptorPQParallel::transformRaptorsToRaptorPQs(vector<shared_ptr<Raptor>> ra
     firstStopSequencePerRoute = vector<vector<int>>(raptors.size());
     lowestLowerBoundPerRoute = vector<vector<double>>(raptors.size());
 
+    vector<set<int>> routesPerRatorIndex = vector<set<int>>(raptors.size());
+
+    #pragma omp parallel for
     for (int i = 0; i < raptors.size(); i++) {
         shared_ptr<Raptor> raptor = raptors[i];
         earliestArrivalTimes[i] = raptor->currentEarliestArrivalTimes;
@@ -562,7 +565,11 @@ void RaptorPQParallel::transformRaptorsToRaptorPQs(vector<shared_ptr<Raptor>> ra
                 arrivalStops.insert(j);
             }
         }
-        addRoutesToQueue(arrivalStops, -1, i);
+        routesPerRatorIndex[i] = getNewRoutes(arrivalStops, -1, i);
+    }
+
+    for (int i = 0; i < raptors.size(); i++) {
+        addRoutesToQueue(routesPerRatorIndex[i], i);
     }
     auto end = chrono::high_resolution_clock::now();
     durationTransformRaptorToRaptorPQ = chrono::duration_cast<chrono::microseconds>(end - start).count();
@@ -720,7 +727,11 @@ void RaptorPQParallel::traverseRoute() {
         }
     }
 
-    addRoutesToQueue(arrivalStops, routeId, raptorIndex);
+    auto startAddRoutes = chrono::high_resolution_clock::now();
+    set<int> newRoutes = getNewRoutes(arrivalStops, routeId, raptorIndex);
+    addRoutesToQueue(newRoutes, raptorIndex);
+    auto endAddRoutes = chrono::high_resolution_clock::now();
+    durationAddRoutesToQueue += chrono::duration_cast<chrono::microseconds>(endAddRoutes - startAddRoutes).count();
     updateCurrentBest(arrivalStops);
 
     firstStopSequencePerRoute[raptorIndex][routeId] = INT_MAX;
@@ -729,8 +740,7 @@ void RaptorPQParallel::traverseRoute() {
     durationTraverseRoute += chrono::duration_cast<chrono::microseconds>(end - start).count();
 }
 
-void RaptorPQParallel::addRoutesToQueue(set<int> stopIds, int excludeRouteId, int raptorIndex) {
-    auto start = chrono::high_resolution_clock::now();
+set<int> RaptorPQParallel::getNewRoutes(set<int> stopIds, int excludeRouteId, int raptorIndex) {
     set<int> newRoutes;
 
     for (set<int>::iterator it = stopIds.begin(); it != stopIds.end(); it++) {
@@ -779,13 +789,14 @@ void RaptorPQParallel::addRoutesToQueue(set<int> stopIds, int excludeRouteId, in
         }
     }
 
-    for (set<int>::iterator it = newRoutes.begin(); it != newRoutes.end(); it++) {
+    return newRoutes;
+}
+
+void RaptorPQParallel::addRoutesToQueue(set<int> routes, int raptorIndex) {
+    for (set<int>::iterator it = routes.begin(); it != routes.end(); it++) {
         PQEntry pqEntry = PQEntry(lowestLowerBoundPerRoute[raptorIndex][*it], *it, raptorIndex);
         pq.push(pqEntry);
     }
-
-    auto end = chrono::high_resolution_clock::now();
-    durationAddRoutesToQueue += chrono::duration_cast<chrono::microseconds>(end - start).count();
 }
 
 TripInfo RaptorPQParallel::getEarliestTripWithDayOffset(int routeId, int stopId, int stopSequence, int previousEarliestArrivalTime) {

@@ -201,7 +201,8 @@ class RaptorPQParallel {
         vector<double> baseHeuristics;
         
         void traverseRoute();
-        void addRoutesToQueue(set<int> stopIds, int excludeRouteId, int raptorIndex);
+        set<int> getNewRoutes(set<int> stopIds, int excludeRouteId, int raptorIndex);
+        void addRoutesToQueue(set<int> routes, int raptorIndex);
         TripInfo getEarliestTripWithDayOffset(int routeId, int stopId, int stopSequence, int previousEarliestArrivalTime);
         void updateCurrentBest(set<int> stopIds);
 };
