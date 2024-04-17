@@ -13,6 +13,7 @@
 #include <vector>
 #include <set>
 #include <cmath>
+#include <memory>
 
 #include <chrono>
 
@@ -297,7 +298,7 @@ Journey RaptorPQ::createJourney(int targetStopId) {
     return journey;
 }
 
-void RaptorPQ::transformRaptorToRaptorPQ(Raptor* raptor) {
+void RaptorPQ::transformRaptorToRaptorPQ(shared_ptr<Raptor> raptor) {
     auto start = chrono::high_resolution_clock::now();
     earliestArrivalTimes = raptor->currentEarliestArrivalTimes;
     journeyPointers = raptor->journeyPointers;
@@ -535,7 +536,7 @@ void RaptorPQParallel::setCurrentBest(int currentBest) {
     this->currentBest = currentBest;
 }
 
-void RaptorPQParallel::transformRaptorsToRaptorPQs(vector<Raptor*> raptors) {
+void RaptorPQParallel::transformRaptorsToRaptorPQs(vector<shared_ptr<Raptor>> raptors) {
     auto start = chrono::high_resolution_clock::now();
 
     earliestArrivalTimes = vector<vector<int>>(raptors.size());
@@ -546,7 +547,7 @@ void RaptorPQParallel::transformRaptorsToRaptorPQs(vector<Raptor*> raptors) {
 
     
     for (int i = 0; i < raptors.size(); i++) {
-        Raptor* raptor = raptors[i];
+        shared_ptr<Raptor> raptor = raptors[i];
         earliestArrivalTimes[i] = raptor->currentEarliestArrivalTimes;
         journeyPointers[i] = raptor->journeyPointers;
         extendedSourceStopIds[i] = raptor->extendedSourceStopIds;
@@ -574,6 +575,7 @@ void RaptorPQParallel::initializeHeuristics(map<int, vector<int>> sourceStopIdsT
 
     this->baseHeuristics = vector<double>(sourceStopIds.size(), 0);
 
+    #pragma omp parallel for
     for (int i = 0; i < numberOfSourceStopIds; i++) {
         int querySourceStopId = sourceStopIds[i];
         for (int j = 0; j < numberOfSourceStopIds; j++) {

@@ -19,6 +19,7 @@
 #include <queue>
 #include <map>
 #include <algorithm>
+#include <memory>
 
 #include <vector>
 #include <string>
@@ -33,11 +34,6 @@ using namespace std;
 
 */
 void NaiveQueryProcessor::processNaiveQuery() {
-    for (CSA* csa : csas) {
-        delete csa;
-    }
-    csas.clear();
-
     auto start = std::chrono::high_resolution_clock::now();
 
     // RaptorQueryProcessor raptorQueryProcessor = RaptorQueryProcessor(meetingPointQuery);
@@ -51,7 +47,7 @@ void NaiveQueryProcessor::processNaiveQuery() {
         query.sourceStopId = meetingPointQuery.sourceStopIds[i];
         query.sourceTime = meetingPointQuery.sourceTime;
         query.weekday = meetingPointQuery.weekday;
-        CSA* csa = new CSA(query);
+        shared_ptr<CSA> csa = shared_ptr<CSA> (new CSA(query));
         // csa->setMaxDepartureTime(maxDepartureTime);
         csas.push_back(csa);
     }
@@ -335,11 +331,6 @@ vector<int> NaiveKeyStopQueryProcessor::getKeyStops(DataType dataType, int numbe
 
 */
 void NaiveKeyStopQueryProcessor::processNaiveKeyStopQuery(vector<int> keyStops) {
-    for (CSA* csa : csas) {
-        delete csa;
-    }
-    csas.clear();
-
     auto start = std::chrono::high_resolution_clock::now();
 
     for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
@@ -348,7 +339,7 @@ void NaiveKeyStopQueryProcessor::processNaiveKeyStopQuery(vector<int> keyStops) 
         query.targetStopIds = keyStops;
         query.sourceTime = meetingPointQuery.sourceTime;
         query.weekday = meetingPointQuery.weekday;
-        CSA* csa = new CSA(query);
+        shared_ptr<CSA> csa = shared_ptr<CSA> (new CSA(query));
         csas.push_back(csa);
     }
 
@@ -532,17 +523,12 @@ MeetingPointQuery QueryGenerator::parseMeetingPointQuery(string line, int number
     Otherwise, approximate durations are calculated. In this case are the real durations calculated after the algorithm.
 */
 void GTreeQueryProcessor::processGTreeQuery(bool useCSA) {
-    for (CSA* csa : csas) {
-        delete csa;
-    }
-    csas.clear();
-
     for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
         CSAQuery query;
         query.sourceStopId = meetingPointQuery.sourceStopIds[i];
         query.sourceTime = meetingPointQuery.sourceTime;
         query.weekday = meetingPointQuery.weekday;
-        CSA* csa = new CSA(query);
+        shared_ptr<CSA> csa = shared_ptr<CSA> (new CSA(query));
         csas.push_back(csa);
     }
 
@@ -866,7 +852,7 @@ void RaptorQueryProcessor::initializeRaptors() {
         query.sourceStopId = meetingPointQuery.sourceStopIds[i];
         query.sourceTime = meetingPointQuery.sourceTime;
         query.weekday = meetingPointQuery.weekday;
-        Raptor* raptor = new Raptor(query);
+        shared_ptr<Raptor> raptor = shared_ptr<Raptor> (new Raptor(query));
         raptors.push_back(raptor);
     }
 
@@ -876,11 +862,6 @@ void RaptorQueryProcessor::initializeRaptors() {
 }
 
 void RaptorQueryProcessor::processRaptorQueryUntilFirstResult() {
-    for (Raptor* raptor : raptors) {
-        delete raptor;
-    }
-    raptors.clear();
-
     auto start = std::chrono::high_resolution_clock::now();
 
     initializeRaptors();
@@ -930,11 +911,6 @@ void RaptorQueryProcessor::processRaptorQuery() {
         numberOfExpandedRoutes += raptors[i]->numberOfExpandedRoutes;
     }
     numberOfExpandedRoutes = numberOfExpandedRoutes / raptors.size();
-
-    for (Raptor* raptor : raptors) {
-        delete raptor;
-    }
-    raptors.clear();
 }
 
 void RaptorQueryProcessor::processRaptorQueryUntilResultDoesntImprove(Optimization optimization) {
@@ -980,11 +956,6 @@ void RaptorQueryProcessor::processRaptorQueryUntilResultDoesntImprove(Optimizati
         numberOfExpandedRoutes += raptors[i]->numberOfExpandedRoutes;
     }
     numberOfExpandedRoutes = numberOfExpandedRoutes / raptors.size();
-
-    for (Raptor* raptor : raptors) {
-        delete raptor;
-    }
-    raptors.clear();
 }
 
 bool RaptorQueryProcessor::processRaptorRound() {
@@ -1126,7 +1097,7 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
         query.sourceStopId = meetingPointQuery.sourceStopIds[i];
         query.sourceTime = meetingPointQuery.sourceTime;
         query.weekday = meetingPointQuery.weekday;
-        RaptorPQ* raptorPQ = new RaptorPQ(query, optimization);
+        shared_ptr<RaptorPQ> raptorPQ = shared_ptr<RaptorPQ> (new RaptorPQ(query, optimization));
         raptorPQs.push_back(raptorPQ);
     }
     auto endInitRaptorPQs = std::chrono::high_resolution_clock::now();
@@ -1247,11 +1218,6 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
     durationAddRoutesToQueue = durationAddRoutesToQueue / (raptorPQs.size() * 1000);
     durationGetEarliestTripWithDayOffset = durationGetEarliestTripWithDayOffset / (raptorPQs.size() * 1000);
     durationTraverseRoute = durationTraverseRoute / (raptorPQs.size() * 1000);
-
-    for (RaptorPQ* raptor : raptorPQs) {
-        delete raptor;
-    }
-    raptorPQs.clear();
 }
 
 MeetingPointQueryResult RaptorPQQueryProcessor::getMeetingPointQueryResult() {
@@ -1298,7 +1264,7 @@ void RaptorPQParallelQueryProcessor::processRaptorPQParallelQuery(Optimization o
         query.weekday = meetingPointQuery.weekday;
         queries[i] = query;
     }
-    raptorPQParallel = new RaptorPQParallel(queries, optimization);
+    raptorPQParallel = shared_ptr<RaptorPQParallel> (new RaptorPQParallel(queries, optimization));
     auto endInitRaptorPQs = std::chrono::high_resolution_clock::now();
     durationInitRaptorPQs = std::chrono::duration_cast<std::chrono::milliseconds>(endInitRaptorPQs - initRaptorPQs).count();
 

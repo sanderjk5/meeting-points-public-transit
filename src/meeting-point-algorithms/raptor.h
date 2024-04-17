@@ -8,6 +8,7 @@
 #include <set>
 #include <queue>
 #include <limits.h>
+#include <memory>
 
 struct RaptorQuery {
     int sourceStopId;
@@ -101,7 +102,7 @@ class RaptorPQ {
         ~RaptorPQ(){};
 
         void initializeRaptorPQ();
-        void transformRaptorToRaptorPQ(Raptor* raptor);
+        void transformRaptorToRaptorPQ(shared_ptr<Raptor> raptor);
         void setCurrentBest(int currentBest);
         void initializeHeuristic(map<int, vector<int>> sourceStopIdsToAllStops, vector<int> sourceStopIds);
         void processRaptorPQ();
@@ -161,7 +162,7 @@ class RaptorPQParallel {
         };
         ~RaptorPQParallel(){};
 
-        void transformRaptorsToRaptorPQs(vector<Raptor*> raptors);
+        void transformRaptorsToRaptorPQs(vector<shared_ptr<Raptor>> raptors);
         void setCurrentBest(int currentBest);
         void initializeHeuristics(map<int, vector<int>> sourceStopIdsToAllStops, vector<int> sourceStopIds);
         void processRaptorPQ();

@@ -8,9 +8,10 @@
 #include <../data-structures/g-tree.h>
 #include <../constants.h>
 #include <algorithm>
-
+#include <memory>
 #include <iostream>
 #include <fstream>
+
 
 using namespace std;
 
@@ -946,9 +947,9 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
                 meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSourceStops);
             }
 
-            RaptorQueryProcessor raptorQueryProcessorOptimal = RaptorQueryProcessor(meetingPointQuery);
-            raptorQueryProcessorOptimal.processRaptorQuery();
-            MeetingPointQueryResult meetingPointQueryResultRaptorOptimal = raptorQueryProcessorOptimal.getMeetingPointQueryResult();
+            unique_ptr<RaptorQueryProcessor> raptorQueryProcessorOptimal = unique_ptr<RaptorQueryProcessor> (new RaptorQueryProcessor(meetingPointQuery));
+            raptorQueryProcessorOptimal->processRaptorQuery();
+            MeetingPointQueryResult meetingPointQueryResultRaptorOptimal = raptorQueryProcessorOptimal->getMeetingPointQueryResult();
 
             if (meetingPointQueryResultRaptorOptimal.meetingPointMinSum == "" || meetingPointQueryResultRaptorOptimal.meetingPointMinMax == "") {
                 continue;
@@ -956,25 +957,25 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
 
             successfulQueryCounter++;
 
-            RaptorQueryProcessor raptorQueryProcessorFirst = RaptorQueryProcessor(meetingPointQuery);
-            raptorQueryProcessorFirst.processRaptorQueryUntilFirstResult();
-            MeetingPointQueryResult meetingPointQueryResultRaptorFirst = raptorQueryProcessorFirst.getMeetingPointQueryResult();
+            unique_ptr<RaptorQueryProcessor> raptorQueryProcessorFirst = unique_ptr<RaptorQueryProcessor> (new RaptorQueryProcessor(meetingPointQuery));
+            raptorQueryProcessorFirst->processRaptorQueryUntilFirstResult();
+            MeetingPointQueryResult meetingPointQueryResultRaptorFirst = raptorQueryProcessorFirst->getMeetingPointQueryResult();
 
-            RaptorPQQueryProcessor raptorPQMinSumQueryProcessor = RaptorPQQueryProcessor(meetingPointQuery);
-            raptorPQMinSumQueryProcessor.processRaptorPQQuery(min_sum);
-            MeetingPointQueryResult meetingPointQueryResultRaptorPQMinSum = raptorPQMinSumQueryProcessor.getMeetingPointQueryResult();
+            unique_ptr<RaptorPQQueryProcessor> raptorPQMinSumQueryProcessor = unique_ptr<RaptorPQQueryProcessor> (new RaptorPQQueryProcessor(meetingPointQuery));
+            raptorPQMinSumQueryProcessor->processRaptorPQQuery(min_sum);
+            MeetingPointQueryResult meetingPointQueryResultRaptorPQMinSum = raptorPQMinSumQueryProcessor->getMeetingPointQueryResult();
 
-            RaptorPQQueryProcessor raptorPQMinMaxQueryProcessor = RaptorPQQueryProcessor(meetingPointQuery);
-            raptorPQMinMaxQueryProcessor.processRaptorPQQuery(min_max);
-            MeetingPointQueryResult meetingPointQueryResultRaptorPQMinMax = raptorPQMinMaxQueryProcessor.getMeetingPointQueryResult();
+            unique_ptr<RaptorPQQueryProcessor> raptorPQMinMaxQueryProcessor = unique_ptr<RaptorPQQueryProcessor> (new RaptorPQQueryProcessor(meetingPointQuery));
+            raptorPQMinMaxQueryProcessor->processRaptorPQQuery(min_max);
+            MeetingPointQueryResult meetingPointQueryResultRaptorPQMinMax = raptorPQMinMaxQueryProcessor->getMeetingPointQueryResult();
 
-            RaptorPQParallelQueryProcessor raptorPQParallelMinSumQueryProcessor = RaptorPQParallelQueryProcessor(meetingPointQuery);
-            raptorPQParallelMinSumQueryProcessor.processRaptorPQParallelQuery(min_sum);
-            MeetingPointQueryResult meetingPointQueryResultRaptorPQParallelMinSum = raptorPQParallelMinSumQueryProcessor.getMeetingPointQueryResult();
+            unique_ptr<RaptorPQParallelQueryProcessor> raptorPQParallelMinSumQueryProcessor = unique_ptr<RaptorPQParallelQueryProcessor> (new RaptorPQParallelQueryProcessor(meetingPointQuery));
+            raptorPQParallelMinSumQueryProcessor->processRaptorPQParallelQuery(min_sum);
+            MeetingPointQueryResult meetingPointQueryResultRaptorPQParallelMinSum = raptorPQParallelMinSumQueryProcessor->getMeetingPointQueryResult();
 
-            RaptorPQParallelQueryProcessor raptorPQParallelMinMaxQueryProcessor = RaptorPQParallelQueryProcessor(meetingPointQuery);
-            raptorPQParallelMinMaxQueryProcessor.processRaptorPQParallelQuery(min_max);
-            MeetingPointQueryResult meetingPointQueryResultRaptorPQParallelMinMax = raptorPQParallelMinMaxQueryProcessor.getMeetingPointQueryResult();
+            unique_ptr<RaptorPQParallelQueryProcessor> raptorPQParallelMinMaxQueryProcessor = unique_ptr<RaptorPQParallelQueryProcessor> (new RaptorPQParallelQueryProcessor(meetingPointQuery));
+            raptorPQParallelMinMaxQueryProcessor->processRaptorPQParallelQuery(min_max);
+            MeetingPointQueryResult meetingPointQueryResultRaptorPQParallelMinMax = raptorPQParallelMinMaxQueryProcessor->getMeetingPointQueryResult();
 
             minSumDurations.push_back((double) meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds);
             minMaxDurations.push_back((double) meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds);

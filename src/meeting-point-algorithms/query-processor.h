@@ -11,6 +11,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <memory>
 
 struct MeetingPointQuery {
     vector<int> sourceStopIds;
@@ -58,7 +59,7 @@ class NaiveQueryProcessor {
     private:
         MeetingPointQuery meetingPointQuery;
         MeetingPointQueryResult meetingPointQueryResult;
-        vector<CSA*> csas;
+        vector<shared_ptr<CSA>> csas;
 };
 
 class NaiveKeyStopQueryProcessor {
@@ -77,7 +78,7 @@ class NaiveKeyStopQueryProcessor {
     private:
         MeetingPointQuery meetingPointQuery;
         MeetingPointQueryResult meetingPointQueryResult;
-        vector<CSA*> csas;
+        vector<shared_ptr<CSA>> csas;
 };
 
 /*
@@ -103,7 +104,7 @@ class GTreeQueryProcessor {
         MeetingPointQueryResult meetingPointQueryResult;
         MeetingPointQueryGTreeCSAInfo meetingPointQueryGTreeCSAInfo;
         vector<map<int, vector<pair<int, int>>>> queryPointAndNodeToBorderStopDurations;
-        vector<CSA*> csas;
+        vector<shared_ptr<CSA>> csas;
 
         void processGTreeQueryWithOptimization(Optimization optimization, bool useCSA);
         int getLowerBoundToNode(int nodeId, Optimization optimization);
@@ -128,7 +129,7 @@ class RaptorQueryProcessor {
         vector<Journey> getJourneys(Optimization optimization);
         double durationOfLastRound;
         int transfers;
-        vector<Raptor*> raptors;
+        vector<shared_ptr<Raptor>> raptors;
 
         double numberOfExpandedRoutes;
 
@@ -166,7 +167,7 @@ class RaptorPQQueryProcessor {
     private:
         MeetingPointQuery meetingPointQuery;
         MeetingPointQueryResult meetingPointQueryResult;
-        vector<RaptorPQ*> raptorPQs;
+        vector<shared_ptr<RaptorPQ>> raptorPQs;
 };
 
 class RaptorPQParallelQueryProcessor {
@@ -196,7 +197,7 @@ class RaptorPQParallelQueryProcessor {
     private:
         MeetingPointQuery meetingPointQuery;
         MeetingPointQueryResult meetingPointQueryResult;
-        RaptorPQParallel* raptorPQParallel;
+        shared_ptr<RaptorPQParallel> raptorPQParallel;
 };
 
 /*
