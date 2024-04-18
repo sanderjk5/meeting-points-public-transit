@@ -841,6 +841,8 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
     resultsFile << ",avgDurationGetEarliestTripWithDayOffsetMinSum,avgDurationGetEarliestTripWithDayOffsetMinMax,avgDurationGetEarliestTripWithDayOffsetParallelMinSum,avgDurationGetEarliestTripWithDayOffsetParallelMinMax";
     resultsFile << ",avgDurationTraverseRouteMinSum,avgDurationTraverseRouteMinMax,avgDurationTraverseRouteParallelMinSum,avgDurationTraverseRouteParallelMinMax";
 
+    resultsFile << ",avgAlternativeHeuristicImprovementCounter,avgAlternativeHeuristicNoImprovementCounter";
+
     resultsFile << ",fractionOfOptimalResultsMinSumRaptorFirst,fractionOfOptimalResultsMinMaxRaptorFirst";
     resultsFile << ",fractionOfLessThan10PercentRelDiffMinSumRaptorFirst,fractionOfLessThan10PercentRelDiffMinMaxRaptorFirst\n";
 
@@ -934,6 +936,9 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
         vector<double> durationTraverseRouteMinMax;
         vector<double> durationTraverseRouteParallelMinSum;
         vector<double> durationTraverseRouteParallelMinMax;
+
+        vector<double> alternativeHeuristicImprovementCounter;
+        vector<double> alternativeHeuristicNoImprovementCounter;
 
         vector<int> resultsCounterRaptorFirst = vector<int>(4, 0);
 
@@ -1035,6 +1040,9 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
             durationTraverseRouteMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationTraverseRoute);
             durationTraverseRouteParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationTraverseRoute);
             durationTraverseRouteParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->durationTraverseRoute);
+
+            alternativeHeuristicImprovementCounter.push_back((double) raptorPQMinMaxQueryProcessor->altHeuristicImprovementCounter);
+            alternativeHeuristicNoImprovementCounter.push_back((double) raptorPQMinMaxQueryProcessor->noHeuristicImprovementCounter);
 
             int differenceMinSumRaptorFirst = meetingPointQueryResultRaptorFirst.minSumDurationInSeconds - meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds;
             int differenceMinMaxRaptorFirst = meetingPointQueryResultRaptorFirst.minMaxDurationInSeconds - meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds;
@@ -1182,6 +1190,9 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
         double minQueryTimeRaptorPQParallelMinSum = Calculator::getMinimum(queryTimesRaptorPQParallelMinSum);
         double minQueryTimeRaptorPQParallelMinMax = Calculator::getMinimum(queryTimesRaptorPQParallelMinMax);
 
+        double avgAlternativeHeuristicImprovementCounter = Calculator::getAverage(alternativeHeuristicImprovementCounter);
+        double avgAlternativeHeuristicNoImprovementCounter = Calculator::getAverage(alternativeHeuristicNoImprovementCounter);
+
         vector<double> resultFractionsRaptorFirst;
         for (int i = 0; i < 4; i++) {
             resultFractionsRaptorFirst.push_back((double) resultsCounterRaptorFirst[i] / numberOfSuccessfulQueries);
@@ -1207,6 +1218,7 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
         resultsFile << "," << avgDurationAddRoutesToQueueMinSum << "," << avgDurationAddRoutesToQueueMinMax << "," << avgDurationAddRoutesToQueueParallelMinSum << "," << avgDurationAddRoutesToQueueParallelMinMax;
         resultsFile << "," << avgDurationGetEarliestTripWithDayOffsetMinSum << "," << avgDurationGetEarliestTripWithDayOffsetMinMax << "," << avgDurationGetEarliestTripWithDayOffsetParallelMinSum << "," << avgDurationGetEarliestTripWithDayOffsetParallelMinMax;
         resultsFile << "," << avgDurationTraverseRouteMinSum << "," << avgDurationTraverseRouteMinMax << "," << avgDurationTraverseRouteParallelMinSum << "," << avgDurationTraverseRouteParallelMinMax;
+        resultsFile << "," << avgAlternativeHeuristicImprovementCounter << "," << avgAlternativeHeuristicNoImprovementCounter;
         resultsFile << "," << resultFractionsRaptorFirst[0] << "," << resultFractionsRaptorFirst[1] << "," << resultFractionsRaptorFirst[2] << "," << resultFractionsRaptorFirst[3] << "\n";
 
         cout << "Rate of successful queries: " << (double) successfulQueryCounter / numberOfSuccessfulQueries << endl;
@@ -1311,6 +1323,9 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
         cout << "Average duration traverse route min max: " << avgDurationTraverseRouteMinMax << endl;
         cout << "Average duration traverse route parallel min sum: " << avgDurationTraverseRouteParallelMinSum << endl;
         cout << "Average duration traverse route parallel min max: " << avgDurationTraverseRouteParallelMinMax << endl;
+
+        cout << "\nAverage alternative heuristic improvement counter: " << avgAlternativeHeuristicImprovementCounter << endl;
+        cout << "Average alternative heuristic no improvement counter: " << avgAlternativeHeuristicNoImprovementCounter << endl;
 
         cout << "\nFraction of optimal results min sum raptor first: " << resultFractionsRaptorFirst[0] << endl;
         cout << "Fraction of optimal results min max raptor first: " << resultFractionsRaptorFirst[1] << endl;
@@ -2298,27 +2313,29 @@ void AlgorithmComparer::compareAlgorithmsWithoutGTree(DataType dataType, Meeting
 
     cout << "Raptor Until First Result: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultRaptor);
-    cout << "Average number of expanded routes: " << raptorQueryProcessor.numberOfExpandedRoutes / meetingPointQuery.sourceStopIds.size() << endl;
+    cout << "Average number of expanded routes: " << raptorQueryProcessor.numberOfExpandedRoutes << endl;
 
     cout << "Raptor Optimal Result: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultRaptorOptimal);
-    cout << "Average number of expanded routes: " << raptorQueryProcessorOptimal.numberOfExpandedRoutes / meetingPointQuery.sourceStopIds.size() << endl;
+    cout << "Average number of expanded routes: " << raptorQueryProcessorOptimal.numberOfExpandedRoutes << endl;
 
     cout << "Raptor PQ - Min Sum: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultRaptorPQMinSum);
-    cout << "Average number of expanded routes: " << raptorPQQueryProcessorMinSum.numberOfExpandedRoutes / meetingPointQuery.sourceStopIds.size() << endl;
+    cout << "Average number of expanded routes: " << raptorPQQueryProcessorMinSum.numberOfExpandedRoutes << endl;
 
     cout << "Raptor PQ - Min Max: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultRaptorPQMinMax);
-    cout << "Average number of expanded routes: " << raptorPQQueryProcessorMinMax.numberOfExpandedRoutes / meetingPointQuery.sourceStopIds.size() << endl;
+    cout << "Average number of expanded routes: " << raptorPQQueryProcessorMinMax.numberOfExpandedRoutes << endl;
+    cout << "Alternative heuristic improvement counter: " << raptorPQQueryProcessorMinMax.altHeuristicImprovementCounter << endl;
+    cout << "Alternative heuristic no improvement counter: " << raptorPQQueryProcessorMinMax.noHeuristicImprovementCounter << endl;
 
     cout << "Raptor PQ Parallel - Min Sum: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultRaptorPQParallelMinSum);
-    cout << "Average number of expanded routes: " << raptorPQParallelQueryProcessorMinSum.numberOfExpandedRoutes / meetingPointQuery.sourceStopIds.size() << endl;
+    cout << "Average number of expanded routes: " << raptorPQParallelQueryProcessorMinSum.numberOfExpandedRoutes << endl;
 
     cout << "Raptor PQ Parallel - Min Max: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultRaptorPQParallelMinMax);
-    cout << "Average number of expanded routes: " << raptorPQParallelQueryProcessorMinMax.numberOfExpandedRoutes / meetingPointQuery.sourceStopIds.size() << endl;
+    cout << "Average number of expanded routes: " << raptorPQParallelQueryProcessorMinMax.numberOfExpandedRoutes << endl;
 
     bool naiveQuerySuccessful = meetingPointQueryResultNaive.meetingPointMinSum != "" && meetingPointQueryResultNaive.meetingPointMinMax != "";
     bool naiveKeyStopQuerySuccessful = true;

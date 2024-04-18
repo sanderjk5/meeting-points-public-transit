@@ -98,6 +98,8 @@ class RaptorPQ {
             this->durationAddRoutesToQueue = 0;
             this->durationGetEarliestTripWithDayOffset = 0;
             this->durationTraverseRoute = 0;
+            this->altHeuristicImprovementCounter = 0;
+            this->noHeuristicImprovementCounter = 0;
         };
         ~RaptorPQ(){};
 
@@ -119,6 +121,9 @@ class RaptorPQ {
         double durationAddRoutesToQueue;
         double durationGetEarliestTripWithDayOffset;
         double durationTraverseRoute;
+
+        int altHeuristicImprovementCounter;
+        int noHeuristicImprovementCounter;
 
     private:
         RaptorQuery query;

@@ -164,6 +164,9 @@ class RaptorPQQueryProcessor {
         double durationGetEarliestTripWithDayOffset;
         double durationTraverseRoute;
 
+        int altHeuristicImprovementCounter;
+        int noHeuristicImprovementCounter;
+
     private:
         MeetingPointQuery meetingPointQuery;
         MeetingPointQueryResult meetingPointQueryResult;
