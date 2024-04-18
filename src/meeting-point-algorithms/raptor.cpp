@@ -251,7 +251,7 @@ void RaptorPQ::initializeHeuristic(vector<int> sourceStopIds) {
                 continue;
             }
             auto startPhast = chrono::high_resolution_clock::now();
-            #pragma omp critical
+            // #pragma omp critical
             {
                 baseHeuristic += Creator::networkGraph.getDistance(s1, s2);
             }
@@ -373,7 +373,7 @@ void RaptorPQ::addRoutesToQueue(set<int> stopIds, int excludeRouteId) {
                 continue;
             }
             auto startPhast = chrono::high_resolution_clock::now();
-            #pragma omp critical
+            // #pragma omp critical
             {
                 heuristic += Creator::networkGraph.getDistance(s1, stopId);
             }
@@ -608,7 +608,7 @@ void RaptorPQParallel::initializeHeuristics(vector<int> sourceStopIds) {
                     continue;
                 }
                 auto startPhast = chrono::high_resolution_clock::now();
-                #pragma omp critical
+                // #pragma omp critical
                 {
                     baseHeuristics[i] += Creator::networkGraph.getDistance(s1, s2);
                 }
@@ -772,7 +772,7 @@ set<int> RaptorPQParallel::getNewRoutes(set<int> stopIds, int excludeRouteId, in
                 continue;
             }
             auto startPhast = chrono::high_resolution_clock::now();
-            #pragma omp critical
+            // #pragma omp critical
             {
                 heuristic += Creator::networkGraph.getDistance(s1, stopId);
             }

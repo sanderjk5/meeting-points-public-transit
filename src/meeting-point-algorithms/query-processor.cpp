@@ -1078,8 +1078,8 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
 
     auto start = std::chrono::high_resolution_clock::now();
     
-    Creator::networkGraph.calculateUpWardDistances(meetingPointQuery.sourceStopIds);
-    // Creator::networkGraph.getDistancesWithPhast(meetingPointQuery.sourceStopIds);
+    // Creator::networkGraph.calculateUpWardDistances(meetingPointQuery.sourceStopIds);
+    Creator::networkGraph.getDistancesWithPhast(meetingPointQuery.sourceStopIds);
     
     auto startRaptorFirstResult = std::chrono::high_resolution_clock::now();
     RaptorQueryProcessor raptorQueryProcessor = RaptorQueryProcessor(meetingPointQuery);
@@ -1241,8 +1241,8 @@ vector<Journey> RaptorPQQueryProcessor::getJourneys(Optimization optimization) {
 void RaptorPQParallelQueryProcessor::processRaptorPQParallelQuery(Optimization optimization) {
     auto start = std::chrono::high_resolution_clock::now();
     
-    Creator::networkGraph.calculateUpWardDistances(meetingPointQuery.sourceStopIds);
-    // Creator::networkGraph.getDistancesWithPhast(meetingPointQuery.sourceStopIds);
+    // Creator::networkGraph.calculateUpWardDistances(meetingPointQuery.sourceStopIds);
+    Creator::networkGraph.getDistancesWithPhast(meetingPointQuery.sourceStopIds);
     
     auto startRaptorFirstResult = std::chrono::high_resolution_clock::now();
     RaptorQueryProcessor raptorQueryProcessor = RaptorQueryProcessor(meetingPointQuery);

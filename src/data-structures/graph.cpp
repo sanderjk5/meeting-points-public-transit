@@ -543,6 +543,7 @@ void Graph::getDistancesWithPhast(vector<int> sourceStopIds) {
 
     auto end = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
+    phastDuration = duration.count();
     // cout << "Phast completed in " << duration.count() << "ms.\n" << endl;
 
     p = distances;
