@@ -2,6 +2,7 @@
 
 #include "../data-handling/importer.h"
 #include "../data-handling/converter.h"
+#include "../data-structures/creator.h"
 #include "journey.h"
 #include "optimization.h"
 #include "../constants.h"
@@ -233,9 +234,8 @@ void RaptorPQ::setCurrentBest(int currentBest) {
     this->currentBest = currentBest;
 }
 
-void RaptorPQ::initializeHeuristic(map<int, vector<int>> sourceStopIdsToAllStops, vector<int> sourceStopIds) {
+void RaptorPQ::initializeHeuristic(vector<int> sourceStopIds) {
     auto start = chrono::high_resolution_clock::now();
-    this->sourceStopIdsToAllStops = sourceStopIdsToAllStops;
     this->sourceStopIds = sourceStopIds;
     this->numberOfSourceStopIds = sourceStopIds.size();
 
@@ -250,7 +250,13 @@ void RaptorPQ::initializeHeuristic(map<int, vector<int>> sourceStopIdsToAllStops
             if (s2 == query.sourceStopId) {
                 continue;
             }
-            baseHeuristic += sourceStopIdsToAllStops[s1][s2];
+            auto startPhast = chrono::high_resolution_clock::now();
+            #pragma omp critical
+            {
+                baseHeuristic += Creator::networkGraph.getDistance(s1, s2);
+            }
+            auto endPhast = chrono::high_resolution_clock::now();
+            Creator::networkGraph.phastGetDistancesDuration += chrono::duration_cast<chrono::microseconds>(endPhast - startPhast).count();
         }
     }
     auto end = chrono::high_resolution_clock::now();
@@ -366,7 +372,13 @@ void RaptorPQ::addRoutesToQueue(set<int> stopIds, int excludeRouteId) {
             if (s1 == query.sourceStopId) {
                 continue;
             }
-            heuristic += sourceStopIdsToAllStops[s1][stopId];
+            auto startPhast = chrono::high_resolution_clock::now();
+            #pragma omp critical
+            {
+                heuristic += Creator::networkGraph.getDistance(s1, stopId);
+            }
+            auto endPhast = chrono::high_resolution_clock::now();
+            Creator::networkGraph.phastGetDistancesDuration += chrono::duration_cast<chrono::microseconds>(endPhast - startPhast).count();
         }
         heuristic = heuristic / (numberOfSourceStopIds - 1);
 
@@ -575,9 +587,8 @@ void RaptorPQParallel::transformRaptorsToRaptorPQs(vector<shared_ptr<Raptor>> ra
     durationTransformRaptorToRaptorPQ = chrono::duration_cast<chrono::microseconds>(end - start).count();
 }
 
-void RaptorPQParallel::initializeHeuristics(map<int, vector<int>> sourceStopIdsToAllStops, vector<int> sourceStopIds) {
+void RaptorPQParallel::initializeHeuristics(vector<int> sourceStopIds) {
     auto start = chrono::high_resolution_clock::now();
-    this->sourceStopIdsToAllStops = sourceStopIdsToAllStops;
     this->sourceStopIds = sourceStopIds;
     this->numberOfSourceStopIds = sourceStopIds.size();
 
@@ -596,7 +607,13 @@ void RaptorPQParallel::initializeHeuristics(map<int, vector<int>> sourceStopIdsT
                 if (s2 == querySourceStopId) {
                     continue;
                 }
-                baseHeuristics[i] += sourceStopIdsToAllStops[s1][s2];
+                auto startPhast = chrono::high_resolution_clock::now();
+                #pragma omp critical
+                {
+                    baseHeuristics[i] += Creator::networkGraph.getDistance(s1, s2);
+                }
+                auto endPhast = chrono::high_resolution_clock::now();
+                Creator::networkGraph.phastGetDistancesDuration += chrono::duration_cast<chrono::microseconds>(endPhast - startPhast).count();
             }
         }
     }
@@ -754,7 +771,13 @@ set<int> RaptorPQParallel::getNewRoutes(set<int> stopIds, int excludeRouteId, in
             if (s1 == queries[raptorIndex].sourceStopId) {
                 continue;
             }
-            heuristic += sourceStopIdsToAllStops[s1][stopId];
+            auto startPhast = chrono::high_resolution_clock::now();
+            #pragma omp critical
+            {
+                heuristic += Creator::networkGraph.getDistance(s1, stopId);
+            }
+            auto endPhast = chrono::high_resolution_clock::now();
+            Creator::networkGraph.phastGetDistancesDuration += chrono::duration_cast<chrono::microseconds>(endPhast - startPhast).count();
         }
         heuristic = heuristic / (numberOfSourceStopIds - 1);
 

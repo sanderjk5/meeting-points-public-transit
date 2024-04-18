@@ -44,6 +44,9 @@ class Graph {
         vector<int> matchings;
         map<int, int> indexToCoarserGraphIndex;
 
+        double phastDuration;
+        double phastGetDistancesDuration;
+
         vector<int> getDistances(int sourceStopId, vector<int> targetStopIds);
         void exportGraph(DataType dataType);
         void importPartition(DataType dataType, int numberOfPartitions);
@@ -53,13 +56,18 @@ class Graph {
 
         void createContractionHierarchie();
 
-        map<int, vector<int>> getDistancesWithPhast(vector<int> sourceStopIds);
+        void calculateUpWardDistances(vector<int> sourceStopIds);
+        int getDistance(int sourceStopId, int targetStopId);
+        void getDistancesWithPhast(vector<int> sourceStopIds);
 
     private:
         pair<int, vector<Shortcut>> calculateEdgeDifferenceAndGetShortcuts(int vertexIndex);
         vector<int> getDistancesForCHCreation(int sourceStopId, int excludeStopId, int maxDistance);
 
         vector<int> stopIdsSortedByLevel;
+
+        map<int, vector<int>> b;
+        map<int, vector<int>> p;
 };
 
 #endif //CMAKE_GRAPH_H

@@ -12,6 +12,10 @@
 #include <iostream>
 #include <chrono>
 #include <sstream>
+#include <chrono>
+#include <thread>
+
+#include <omp.h>
 
 using namespace std;
 
@@ -428,14 +432,43 @@ vector<int> Graph::getDistancesForCHCreation(int sourceStopId, int excludeStopId
     return distances;
 }
 
-map<int, vector<int>> Graph::getDistancesWithPhast(vector<int> sourceStopIds) {
+int Graph::getDistance(int sourceStopId, int targetStopId) {
+    if (p[sourceStopId][targetStopId] == -1) {
+        p[sourceStopId][targetStopId] = b[sourceStopId][targetStopId];
+
+        for (int i = 0; i < this->adjacencyList[targetStopId].size(); i++) {
+            if (this->vertices[this->adjacencyList[targetStopId][i].targetStopId].level < this->vertices[targetStopId].level) {
+                continue;
+            }
+
+            int weight = this->adjacencyList[targetStopId][i].ewgt;
+            int distance = getDistance(sourceStopId, this->adjacencyList[targetStopId][i].targetStopId);
+
+            if (distance == INT_MAX) {
+                continue;
+            }
+
+            p[sourceStopId][targetStopId] = min(p[sourceStopId][targetStopId], distance + weight);
+        }
+    }
+    
+    return p[sourceStopId][targetStopId];
+}
+
+void Graph::calculateUpWardDistances(vector<int> sourceStopIds) {
+    phastDuration = 0;
+
     auto start = chrono::high_resolution_clock::now();
+
+    b.clear();
+    p.clear();
     map<int, vector<int>> distances;
 
     for (int i = 0; i < sourceStopIds.size(); i++) {
         int sourceStopId = sourceStopIds[i];
         distances[sourceStopId] = vector<int>(this->vertices.size(), INT_MAX);
         distances[sourceStopId][sourceStopId] = 0;
+        p[sourceStopId] = vector<int>(this->vertices.size(), -1);
     }
 
     // perform upward searches from the source stops
@@ -466,6 +499,18 @@ map<int, vector<int>> Graph::getDistancesWithPhast(vector<int> sourceStopIds) {
             }
         }
     }
+
+    b = distances;
+    auto end = chrono::high_resolution_clock::now();
+    phastDuration += chrono::duration_cast<chrono::microseconds>(end - start).count();
+}
+
+void Graph::getDistancesWithPhast(vector<int> sourceStopIds) {
+    auto start = chrono::high_resolution_clock::now();
+    
+    calculateUpWardDistances(sourceStopIds);
+
+    map<int, vector<int>> distances = b;
 
     // perform downward scans from the highest level
     for (int i = stopIdsSortedByLevel.size() - 2; i >= 0; i--) {
@@ -499,5 +544,5 @@ map<int, vector<int>> Graph::getDistancesWithPhast(vector<int> sourceStopIds) {
     auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
     // cout << "Phast completed in " << duration.count() << "ms.\n" << endl;
 
-    return distances;
+    p = distances;
 }

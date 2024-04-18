@@ -1060,8 +1060,6 @@ vector<Journey> RaptorQueryProcessor::getJourneys(Optimization optimization) {
 }
 
 void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
-    map<int, vector<int>> sourceStopIdToAllStops;
-
     // for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
     //     sourceStopIdToAllStops[meetingPointQuery.sourceStopIds[i]] = vector<int>(Creator::networkGraph.vertices.size(), INT_MAX);
     // }
@@ -1080,9 +1078,8 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
 
     auto start = std::chrono::high_resolution_clock::now();
     
-    sourceStopIdToAllStops = Creator::networkGraph.getDistancesWithPhast(meetingPointQuery.sourceStopIds);
-    auto endPhast = std::chrono::high_resolution_clock::now();
-    durationPhast = std::chrono::duration_cast<std::chrono::milliseconds>(endPhast - start).count();
+    Creator::networkGraph.calculateUpWardDistances(meetingPointQuery.sourceStopIds);
+    // Creator::networkGraph.getDistancesWithPhast(meetingPointQuery.sourceStopIds);
     
     auto startRaptorFirstResult = std::chrono::high_resolution_clock::now();
     RaptorQueryProcessor raptorQueryProcessor = RaptorQueryProcessor(meetingPointQuery);
@@ -1108,7 +1105,7 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
     auto startRaptorPQ = std::chrono::high_resolution_clock::now();
     #pragma omp parallel for
     for (int i = 0; i < raptorPQs.size(); i++) {
-        raptorPQs[i]->initializeHeuristic(sourceStopIdToAllStops, meetingPointQuery.sourceStopIds);
+        raptorPQs[i]->initializeHeuristic(meetingPointQuery.sourceStopIds);
         if (optimization == min_sum) {
             int upperBound = meetingPointQueryResultRaptor.minSumDurationInSeconds;
             raptorPQs[i]->setCurrentBest(upperBound);
@@ -1218,6 +1215,8 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
     durationAddRoutesToQueue = durationAddRoutesToQueue / (raptorPQs.size() * 1000);
     durationGetEarliestTripWithDayOffset = durationGetEarliestTripWithDayOffset / (raptorPQs.size() * 1000);
     durationTraverseRoute = durationTraverseRoute / (raptorPQs.size() * 1000);
+
+    durationPhast = (Creator::networkGraph.phastDuration + Creator::networkGraph.phastGetDistancesDuration) / 1000;
 }
 
 MeetingPointQueryResult RaptorPQQueryProcessor::getMeetingPointQueryResult() {
@@ -1240,13 +1239,10 @@ vector<Journey> RaptorPQQueryProcessor::getJourneys(Optimization optimization) {
 }
 
 void RaptorPQParallelQueryProcessor::processRaptorPQParallelQuery(Optimization optimization) {
-    map<int, vector<int>> sourceStopIdToAllStops;
-
     auto start = std::chrono::high_resolution_clock::now();
     
-    sourceStopIdToAllStops = Creator::networkGraph.getDistancesWithPhast(meetingPointQuery.sourceStopIds);
-    auto endPhast = std::chrono::high_resolution_clock::now();
-    durationPhast = std::chrono::duration_cast<std::chrono::milliseconds>(endPhast - start).count();
+    Creator::networkGraph.calculateUpWardDistances(meetingPointQuery.sourceStopIds);
+    // Creator::networkGraph.getDistancesWithPhast(meetingPointQuery.sourceStopIds);
     
     auto startRaptorFirstResult = std::chrono::high_resolution_clock::now();
     RaptorQueryProcessor raptorQueryProcessor = RaptorQueryProcessor(meetingPointQuery);
@@ -1272,7 +1268,7 @@ void RaptorPQParallelQueryProcessor::processRaptorPQParallelQuery(Optimization o
 
     auto startRaptorPQ = std::chrono::high_resolution_clock::now();
 
-    raptorPQParallel->initializeHeuristics(sourceStopIdToAllStops, meetingPointQuery.sourceStopIds);
+    raptorPQParallel->initializeHeuristics(meetingPointQuery.sourceStopIds);
     if (optimization == min_sum) {
         int upperBound = meetingPointQueryResultRaptor.minSumDurationInSeconds;
         raptorPQParallel->setCurrentBest(upperBound);
@@ -1370,6 +1366,8 @@ void RaptorPQParallelQueryProcessor::processRaptorPQParallelQuery(Optimization o
     durationAddRoutesToQueue = raptorPQParallel->durationAddRoutesToQueue / (meetingPointQuery.sourceStopIds.size() * 1000);
     durationGetEarliestTripWithDayOffset = raptorPQParallel->durationGetEarliestTripWithDayOffset / (meetingPointQuery.sourceStopIds.size() * 1000);
     durationTraverseRoute = raptorPQParallel->durationTraverseRoute / (meetingPointQuery.sourceStopIds.size() * 1000);
+
+    durationPhast = (Creator::networkGraph.phastDuration + Creator::networkGraph.phastGetDistancesDuration) / 1000;
 }
 
 MeetingPointQueryResult RaptorPQParallelQueryProcessor::getMeetingPointQueryResult() {

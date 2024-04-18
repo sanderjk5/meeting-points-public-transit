@@ -104,7 +104,7 @@ class RaptorPQ {
         void initializeRaptorPQ();
         void transformRaptorToRaptorPQ(shared_ptr<Raptor> raptor);
         void setCurrentBest(int currentBest);
-        void initializeHeuristic(map<int, vector<int>> sourceStopIdsToAllStops, vector<int> sourceStopIds);
+        void initializeHeuristic(vector<int> sourceStopIds);
         void processRaptorPQ();
         bool isFinished();
 
@@ -138,7 +138,6 @@ class RaptorPQ {
         vector<JourneyPointerRaptor> journeyPointers;
         vector<int> extendedSourceStopIds;
 
-        map<int, vector<int>> sourceStopIdsToAllStops;
         vector<int> sourceStopIds;
         int numberOfSourceStopIds;
         double baseHeuristic;
@@ -164,7 +163,7 @@ class RaptorPQParallel {
 
         void transformRaptorsToRaptorPQs(vector<shared_ptr<Raptor>> raptors);
         void setCurrentBest(int currentBest);
-        void initializeHeuristics(map<int, vector<int>> sourceStopIdsToAllStops, vector<int> sourceStopIds);
+        void initializeHeuristics(vector<int> sourceStopIds);
         void processRaptorPQ();
 
         vector<int> getEarliestArrivalTimes(int stopId);
@@ -195,7 +194,6 @@ class RaptorPQParallel {
         vector<vector<JourneyPointerRaptor>> journeyPointers;
         vector<vector<int>> extendedSourceStopIds;
 
-        map<int, vector<int>> sourceStopIdsToAllStops;
         vector<int> sourceStopIds;
         int numberOfSourceStopIds;
         vector<double> baseHeuristics;
