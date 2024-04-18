@@ -457,6 +457,7 @@ int Graph::getDistance(int sourceStopId, int targetStopId) {
 
 void Graph::calculateUpWardDistances(vector<int> sourceStopIds) {
     phastDuration = 0;
+    phastGetDistancesDuration = 0;
 
     auto start = chrono::high_resolution_clock::now();
 
