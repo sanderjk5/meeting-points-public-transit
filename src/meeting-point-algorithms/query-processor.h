@@ -140,6 +140,29 @@ class RaptorQueryProcessor {
         int lastRoundMinMaxDuration;
 };
 
+class RaptorBoundQueryProcessor {
+    public:
+        explicit RaptorBoundQueryProcessor(MeetingPointQuery meetingPointQuery){
+            this->meetingPointQuery = meetingPointQuery;
+        };
+        ~RaptorBoundQueryProcessor(){};
+
+        void processRaptorBoundQuery(Optimization optimization);
+        MeetingPointQueryResult getMeetingPointQueryResult();
+        vector<Journey> getJourneys(Optimization optimization);
+
+        double numberOfExpandedRoutes;
+        double durationPhast;
+        double durationInitRaptorBounds;
+        double durationRaptorBounds;
+        double durationCreateResult;
+
+    private:
+        MeetingPointQuery meetingPointQuery;
+        MeetingPointQueryResult meetingPointQueryResult;
+        vector<shared_ptr<RaptorBound>> raptorBounds;
+};
+
 class RaptorPQQueryProcessor {
     public:
         explicit RaptorPQQueryProcessor(MeetingPointQuery meetingPointQuery){
