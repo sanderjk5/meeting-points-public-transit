@@ -361,12 +361,16 @@ void RaptorPQ::addRoutesToQueue(set<int> stopIds, int excludeRouteId) {
 
         // calculate clique heuristic
         double heuristic = baseHeuristic;
+        double maxDist = 0;
         for (int j = 0; j < sourceStopIds.size(); j++) {
             int s1 = sourceStopIds[j];
             if (s1 == query.sourceStopId) {
                 continue;
             }
             heuristic += sourceStopIdsToAllStops[s1][stopId];
+            if (sourceStopIdsToAllStops[s1][stopId] > maxDist) {
+                maxDist = sourceStopIdsToAllStops[s1][stopId];
+            }
         }
         heuristic = heuristic / (numberOfSourceStopIds - 1);
 
@@ -375,7 +379,17 @@ void RaptorPQ::addRoutesToQueue(set<int> stopIds, int excludeRouteId) {
         } else if (optimization == min_max) {
             double secondPart = (double) lowerBound + heuristic;
             secondPart = secondPart / numberOfSourceStopIds;
-            lowerBound = max(lowerBound, secondPart);
+
+            double alternativeHeuristic = (double) lowerBound + maxDist;
+            alternativeHeuristic = alternativeHeuristic / 2;
+
+            if (alternativeHeuristic > lowerBound && alternativeHeuristic > secondPart) {
+                altHeuristicImprovementCounter++;
+                lowerBound = alternativeHeuristic;
+            } else {
+                lowerBound = max(lowerBound, secondPart);
+                noHeuristicImprovementCounter++;
+            }
         }
 
         if (lowerBound > currentBest) {
@@ -746,6 +760,7 @@ set<int> RaptorPQParallel::getNewRoutes(set<int> stopIds, int excludeRouteId, in
     for (set<int>::iterator it = stopIds.begin(); it != stopIds.end(); it++) {
         int stopId = *it;
         double lowerBound = earliestArrivalTimes[raptorIndex][stopId] - queries[raptorIndex].sourceTime;
+        double maxDist = 0;
 
         // calculate clique heuristic
         double heuristic = baseHeuristics[raptorIndex];
@@ -755,15 +770,29 @@ set<int> RaptorPQParallel::getNewRoutes(set<int> stopIds, int excludeRouteId, in
                 continue;
             }
             heuristic += sourceStopIdsToAllStops[s1][stopId];
+            if (sourceStopIdsToAllStops[s1][stopId] > maxDist) {
+                maxDist = sourceStopIdsToAllStops[s1][stopId];
+            }
         }
         heuristic = heuristic / (numberOfSourceStopIds - 1);
 
+        
         if (optimization == min_sum || optimization == both) {
             lowerBound += heuristic;
         } else if (optimization == min_max) {
             double secondPart = (double) lowerBound + heuristic;
             secondPart = secondPart / numberOfSourceStopIds;
-            lowerBound = max(lowerBound, secondPart);
+
+            double alternativeHeuristic = (double) lowerBound + maxDist;
+            alternativeHeuristic = alternativeHeuristic / 2;
+
+            if (alternativeHeuristic > lowerBound && alternativeHeuristic > secondPart) {
+                altHeuristicImprovementCounter++;
+                lowerBound = alternativeHeuristic;
+            } else {
+                lowerBound = max(lowerBound, secondPart);
+                noHeuristicImprovementCounter++;
+            }
         }
 
         if (lowerBound > currentBest) {

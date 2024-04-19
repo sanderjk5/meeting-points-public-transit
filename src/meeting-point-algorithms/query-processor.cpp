@@ -1062,22 +1062,6 @@ vector<Journey> RaptorQueryProcessor::getJourneys(Optimization optimization) {
 void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
     map<int, vector<int>> sourceStopIdToAllStops;
 
-    // for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
-    //     sourceStopIdToAllStops[meetingPointQuery.sourceStopIds[i]] = vector<int>(Creator::networkGraph.vertices.size(), INT_MAX);
-    // }
-
-    // vector<int> allStopIds = vector<int>(Creator::networkGraph.vertices.size());
-    // for (int i = 0; i < Creator::networkGraph.vertices.size(); i++) {
-    //     allStopIds[i] = i;
-    // }
-
-    // #pragma omp parallel for
-    // for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
-    //     int sourceStopId = meetingPointQuery.sourceStopIds[i];
-    //     vector<int> distances = Creator::networkGraph.getDistances(sourceStopId, allStopIds);
-    //     sourceStopIdToAllStops[sourceStopId] = distances;
-    // }
-
     auto start = std::chrono::high_resolution_clock::now();
     
     sourceStopIdToAllStops = Creator::networkGraph.getDistancesWithPhast(meetingPointQuery.sourceStopIds);
@@ -1204,6 +1188,8 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
     durationAddRoutesToQueue = 0;
     durationGetEarliestTripWithDayOffset = 0;
     durationTraverseRoute = 0;
+    altHeuristicImprovementCounter = 0;
+    noHeuristicImprovementCounter = 0;
     for (int i = 0; i < raptorPQs.size(); i++) {
         numberOfExpandedRoutes += raptorPQs[i]->numberOfExpandedRoutes;
         durationInitHeuristic += raptorPQs[i]->durationInitHeuristic;
@@ -1211,6 +1197,10 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
         durationAddRoutesToQueue += raptorPQs[i]->durationAddRoutesToQueue;
         durationGetEarliestTripWithDayOffset += raptorPQs[i]->durationGetEarliestTripWithDayOffset;
         durationTraverseRoute += raptorPQs[i]->durationTraverseRoute;
+        if (optimization == min_max) {
+            altHeuristicImprovementCounter += raptorPQs[i]->altHeuristicImprovementCounter;
+            noHeuristicImprovementCounter += raptorPQs[i]->noHeuristicImprovementCounter;
+        }
     }
     numberOfExpandedRoutes = numberOfExpandedRoutes / raptorPQs.size();
     durationInitHeuristic = durationInitHeuristic / (raptorPQs.size() * 1000);
@@ -1218,6 +1208,9 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
     durationAddRoutesToQueue = durationAddRoutesToQueue / (raptorPQs.size() * 1000);
     durationGetEarliestTripWithDayOffset = durationGetEarliestTripWithDayOffset / (raptorPQs.size() * 1000);
     durationTraverseRoute = durationTraverseRoute / (raptorPQs.size() * 1000);
+    altHeuristicImprovementCounter = altHeuristicImprovementCounter / raptorPQs.size();
+    noHeuristicImprovementCounter = noHeuristicImprovementCounter / raptorPQs.size();
+    altHeuristicImprovementFraction = (double) altHeuristicImprovementCounter / (altHeuristicImprovementCounter + noHeuristicImprovementCounter);
 }
 
 MeetingPointQueryResult RaptorPQQueryProcessor::getMeetingPointQueryResult() {
@@ -1370,6 +1363,9 @@ void RaptorPQParallelQueryProcessor::processRaptorPQParallelQuery(Optimization o
     durationAddRoutesToQueue = raptorPQParallel->durationAddRoutesToQueue / (meetingPointQuery.sourceStopIds.size() * 1000);
     durationGetEarliestTripWithDayOffset = raptorPQParallel->durationGetEarliestTripWithDayOffset / (meetingPointQuery.sourceStopIds.size() * 1000);
     durationTraverseRoute = raptorPQParallel->durationTraverseRoute / (meetingPointQuery.sourceStopIds.size() * 1000);
+    altHeuristicImprovementCounter = raptorPQParallel->altHeuristicImprovementCounter / meetingPointQuery.sourceStopIds.size();
+    noHeuristicImprovementCounter = raptorPQParallel->noHeuristicImprovementCounter / meetingPointQuery.sourceStopIds.size();
+    altHeuristicImprovementFraction = (double) altHeuristicImprovementCounter / (altHeuristicImprovementCounter + noHeuristicImprovementCounter);
 }
 
 MeetingPointQueryResult RaptorPQParallelQueryProcessor::getMeetingPointQueryResult() {
