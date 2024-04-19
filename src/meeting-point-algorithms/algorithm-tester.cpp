@@ -841,7 +841,8 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
     resultsFile << ",avgDurationGetEarliestTripWithDayOffsetMinSum,avgDurationGetEarliestTripWithDayOffsetMinMax,avgDurationGetEarliestTripWithDayOffsetParallelMinSum,avgDurationGetEarliestTripWithDayOffsetParallelMinMax";
     resultsFile << ",avgDurationTraverseRouteMinSum,avgDurationTraverseRouteMinMax,avgDurationTraverseRouteParallelMinSum,avgDurationTraverseRouteParallelMinMax";
 
-    resultsFile << ",avgAlternativeHeuristicImprovementCounter,avgAlternativeHeuristicNoImprovementCounter";
+    resultsFile << ",avgAlternativeHeuristicImprovementCounterRaptorPQ,avgAlternativeHeuristicNoImprovementCounterRaptorPQ,avgAlternativeHeuristicImprovementFractionRaptorPQ";
+    resultsFile << ",avgAlternativeHeuristicImprovementCounterRaptorPQParallel,avgAlternativeHeuristicNoImprovementCounterRaptorPQParallel,avgAlternativeHeuristicImprovementFractionRaptorPQParallel";
 
     resultsFile << ",fractionOfOptimalResultsMinSumRaptorFirst,fractionOfOptimalResultsMinMaxRaptorFirst";
     resultsFile << ",fractionOfLessThan10PercentRelDiffMinSumRaptorFirst,fractionOfLessThan10PercentRelDiffMinMaxRaptorFirst\n";
@@ -939,6 +940,10 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
 
         vector<double> alternativeHeuristicImprovementCounter;
         vector<double> alternativeHeuristicNoImprovementCounter;
+        vector<double> alternativeHeuristicImprovementFraction;
+        vector<double> alternativeHeuristicImprovementCounterParallel;
+        vector<double> alternativeHeuristicNoImprovementCounterParallel;
+        vector<double> alternativeHeuristicImprovementFractionParallel;
 
         vector<int> resultsCounterRaptorFirst = vector<int>(4, 0);
 
@@ -1043,6 +1048,10 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
 
             alternativeHeuristicImprovementCounter.push_back((double) raptorPQMinMaxQueryProcessor->altHeuristicImprovementCounter);
             alternativeHeuristicNoImprovementCounter.push_back((double) raptorPQMinMaxQueryProcessor->noHeuristicImprovementCounter);
+            alternativeHeuristicImprovementFraction.push_back((double) raptorPQMinMaxQueryProcessor->altHeuristicImprovementFraction);
+            alternativeHeuristicImprovementCounterParallel.push_back((double) raptorPQParallelMinMaxQueryProcessor->altHeuristicImprovementCounter);
+            alternativeHeuristicNoImprovementCounterParallel.push_back((double) raptorPQParallelMinMaxQueryProcessor->noHeuristicImprovementCounter);
+            alternativeHeuristicImprovementFractionParallel.push_back((double) raptorPQParallelMinMaxQueryProcessor->altHeuristicImprovementFraction);
 
             int differenceMinSumRaptorFirst = meetingPointQueryResultRaptorFirst.minSumDurationInSeconds - meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds;
             int differenceMinMaxRaptorFirst = meetingPointQueryResultRaptorFirst.minMaxDurationInSeconds - meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds;
@@ -1192,6 +1201,10 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
 
         double avgAlternativeHeuristicImprovementCounter = Calculator::getAverage(alternativeHeuristicImprovementCounter);
         double avgAlternativeHeuristicNoImprovementCounter = Calculator::getAverage(alternativeHeuristicNoImprovementCounter);
+        double avgAlternativeHeuristicImprovementFraction = Calculator::getAverage(alternativeHeuristicImprovementFraction);
+        double avgAlternativeHeuristicImprovementCounterParallel = Calculator::getAverage(alternativeHeuristicImprovementCounterParallel);
+        double avgAlternativeHeuristicNoImprovementCounterParallel = Calculator::getAverage(alternativeHeuristicNoImprovementCounterParallel);
+        double avgAlternativeHeuristicImprovementFractionParallel = Calculator::getAverage(alternativeHeuristicImprovementFractionParallel);
 
         vector<double> resultFractionsRaptorFirst;
         for (int i = 0; i < 4; i++) {
@@ -1218,7 +1231,8 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
         resultsFile << "," << avgDurationAddRoutesToQueueMinSum << "," << avgDurationAddRoutesToQueueMinMax << "," << avgDurationAddRoutesToQueueParallelMinSum << "," << avgDurationAddRoutesToQueueParallelMinMax;
         resultsFile << "," << avgDurationGetEarliestTripWithDayOffsetMinSum << "," << avgDurationGetEarliestTripWithDayOffsetMinMax << "," << avgDurationGetEarliestTripWithDayOffsetParallelMinSum << "," << avgDurationGetEarliestTripWithDayOffsetParallelMinMax;
         resultsFile << "," << avgDurationTraverseRouteMinSum << "," << avgDurationTraverseRouteMinMax << "," << avgDurationTraverseRouteParallelMinSum << "," << avgDurationTraverseRouteParallelMinMax;
-        resultsFile << "," << avgAlternativeHeuristicImprovementCounter << "," << avgAlternativeHeuristicNoImprovementCounter;
+        resultsFile << "," << avgAlternativeHeuristicImprovementCounter << "," << avgAlternativeHeuristicNoImprovementCounter << "," << avgAlternativeHeuristicImprovementFraction;
+        resultsFile << "," << avgAlternativeHeuristicImprovementCounterParallel << "," << avgAlternativeHeuristicNoImprovementCounterParallel << "," << avgAlternativeHeuristicImprovementFractionParallel;
         resultsFile << "," << resultFractionsRaptorFirst[0] << "," << resultFractionsRaptorFirst[1] << "," << resultFractionsRaptorFirst[2] << "," << resultFractionsRaptorFirst[3] << "\n";
 
         cout << "Rate of successful queries: " << (double) successfulQueryCounter / numberOfSuccessfulQueries << endl;
@@ -1326,6 +1340,10 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
 
         cout << "\nAverage alternative heuristic improvement counter: " << avgAlternativeHeuristicImprovementCounter << endl;
         cout << "Average alternative heuristic no improvement counter: " << avgAlternativeHeuristicNoImprovementCounter << endl;
+        cout << "Average alternative heuristic improvement fraction: " << avgAlternativeHeuristicImprovementFraction << endl;
+        cout << "Average alternative heuristic improvement counter parallel: " << avgAlternativeHeuristicImprovementCounterParallel << endl;
+        cout << "Average alternative heuristic no improvement counter parallel: " << avgAlternativeHeuristicNoImprovementCounterParallel << endl;
+        cout << "Average alternative heuristic improvement fraction parallel: " << avgAlternativeHeuristicImprovementFractionParallel << endl;
 
         cout << "\nFraction of optimal results min sum raptor first: " << resultFractionsRaptorFirst[0] << endl;
         cout << "Fraction of optimal results min max raptor first: " << resultFractionsRaptorFirst[1] << endl;

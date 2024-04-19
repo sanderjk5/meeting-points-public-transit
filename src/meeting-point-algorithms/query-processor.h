@@ -166,6 +166,7 @@ class RaptorPQQueryProcessor {
 
         int altHeuristicImprovementCounter;
         int noHeuristicImprovementCounter;
+        double altHeuristicImprovementFraction;
 
     private:
         MeetingPointQuery meetingPointQuery;
@@ -196,6 +197,10 @@ class RaptorPQParallelQueryProcessor {
         double durationAddRoutesToQueue;
         double durationGetEarliestTripWithDayOffset;
         double durationTraverseRoute;
+
+        int altHeuristicImprovementCounter;
+        int noHeuristicImprovementCounter;
+        double altHeuristicImprovementFraction;
 
     private:
         MeetingPointQuery meetingPointQuery;
