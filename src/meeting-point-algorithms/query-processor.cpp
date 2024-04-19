@@ -1190,7 +1190,6 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
     durationTraverseRoute = 0;
     altHeuristicImprovementCounter = 0;
     noHeuristicImprovementCounter = 0;
-    altHeuristicImprovementFraction = 0;
     for (int i = 0; i < raptorPQs.size(); i++) {
         numberOfExpandedRoutes += raptorPQs[i]->numberOfExpandedRoutes;
         durationInitHeuristic += raptorPQs[i]->durationInitHeuristic;
@@ -1201,7 +1200,6 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
         if (optimization == min_max) {
             altHeuristicImprovementCounter += raptorPQs[i]->altHeuristicImprovementCounter;
             noHeuristicImprovementCounter += raptorPQs[i]->noHeuristicImprovementCounter;
-            altHeuristicImprovementFraction += raptorPQs[i]->altHeuristicImprovementFraction;
         }
     }
     numberOfExpandedRoutes = numberOfExpandedRoutes / raptorPQs.size();
@@ -1212,7 +1210,7 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
     durationTraverseRoute = durationTraverseRoute / (raptorPQs.size() * 1000);
     altHeuristicImprovementCounter = altHeuristicImprovementCounter / raptorPQs.size();
     noHeuristicImprovementCounter = noHeuristicImprovementCounter / raptorPQs.size();
-    altHeuristicImprovementFraction = altHeuristicImprovementFraction / raptorPQs.size();
+    altHeuristicImprovementFraction = (double) altHeuristicImprovementCounter / (altHeuristicImprovementCounter + noHeuristicImprovementCounter);
 }
 
 MeetingPointQueryResult RaptorPQQueryProcessor::getMeetingPointQueryResult() {
@@ -1367,7 +1365,7 @@ void RaptorPQParallelQueryProcessor::processRaptorPQParallelQuery(Optimization o
     durationTraverseRoute = raptorPQParallel->durationTraverseRoute / (meetingPointQuery.sourceStopIds.size() * 1000);
     altHeuristicImprovementCounter = raptorPQParallel->altHeuristicImprovementCounter / meetingPointQuery.sourceStopIds.size();
     noHeuristicImprovementCounter = raptorPQParallel->noHeuristicImprovementCounter / meetingPointQuery.sourceStopIds.size();
-    altHeuristicImprovementFraction = raptorPQParallel->altHeuristicImprovementFraction / meetingPointQuery.sourceStopIds.size();
+    altHeuristicImprovementFraction = (double) altHeuristicImprovementCounter / (altHeuristicImprovementCounter + noHeuristicImprovementCounter);
 }
 
 MeetingPointQueryResult RaptorPQParallelQueryProcessor::getMeetingPointQueryResult() {

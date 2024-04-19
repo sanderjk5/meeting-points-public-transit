@@ -93,7 +93,7 @@ int main(int argc, const char *argv[]) {
 
     // Test experiments
     vector<int> numberOfSourceStops = {5, 10, 100};
-    // vector<int> numberOfSourceStops = {10, 25};
+    // vector<int> numberOfSourceStops = {5, 10};
 
     // ExperimentController::compareRaptorAlgorithms(dataType, 100, numberOfSourceStops);
 

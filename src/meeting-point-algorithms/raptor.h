@@ -100,7 +100,6 @@ class RaptorPQ {
             this->durationTraverseRoute = 0;
             this->altHeuristicImprovementCounter = 0;
             this->noHeuristicImprovementCounter = 0;
-            this->altHeuristicImprovementFraction = 0;
         };
         ~RaptorPQ(){};
 
@@ -125,7 +124,6 @@ class RaptorPQ {
 
         int altHeuristicImprovementCounter;
         int noHeuristicImprovementCounter;
-        double altHeuristicImprovementFraction;
 
     private:
         RaptorQuery query;
@@ -168,7 +166,6 @@ class RaptorPQParallel {
             this->durationTraverseRoute = 0;
             this->altHeuristicImprovementCounter = 0;
             this->noHeuristicImprovementCounter = 0;
-            this->altHeuristicImprovementFraction = 0;
         };
         ~RaptorPQParallel(){};
 
@@ -190,7 +187,6 @@ class RaptorPQParallel {
 
         int altHeuristicImprovementCounter;
         int noHeuristicImprovementCounter;
-        double altHeuristicImprovementFraction;
 
     private:
         vector<RaptorQuery> queries;

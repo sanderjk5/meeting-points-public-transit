@@ -227,12 +227,6 @@ void RaptorPQ::processRaptorPQ() {
     while (!pq.empty() && !isFinishedFlag) {
         traverseRoute();
     }
-    int totalCounter = altHeuristicImprovementCounter + noHeuristicImprovementCounter;
-    if (totalCounter == 0) {
-        altHeuristicImprovementFraction = 0;
-    } else {
-        altHeuristicImprovementFraction = (double) altHeuristicImprovementCounter / totalCounter;
-    }
 }
 
 void RaptorPQ::setCurrentBest(int currentBest) {
@@ -627,12 +621,6 @@ void RaptorPQParallel::initializeHeuristics(map<int, vector<int>> sourceStopIdsT
 void RaptorPQParallel::processRaptorPQ() {
     while (!pq.empty() && !isFinishedFlag) {
         traverseRoute();
-    }
-    int totalCounter = altHeuristicImprovementCounter + noHeuristicImprovementCounter;
-    if (totalCounter == 0) {
-        altHeuristicImprovementFraction = 0;
-    } else {
-        altHeuristicImprovementFraction = (double) altHeuristicImprovementCounter / totalCounter;
     }
 }
 
