@@ -2344,8 +2344,6 @@ void AlgorithmComparer::compareAlgorithmsWithoutGTree(DataType dataType, Meeting
     cout << "Raptor PQ - Min Max: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultRaptorPQMinMax);
     cout << "Average number of expanded routes: " << raptorPQQueryProcessorMinMax.numberOfExpandedRoutes << endl;
-    cout << "Alternative heuristic improvement counter: " << raptorPQQueryProcessorMinMax.altHeuristicImprovementCounter << endl;
-    cout << "Alternative heuristic no improvement counter: " << raptorPQQueryProcessorMinMax.noHeuristicImprovementCounter << endl;
 
     cout << "Raptor PQ Parallel - Min Sum: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultRaptorPQParallelMinSum);
