@@ -89,6 +89,56 @@ class Raptor {
         TripInfo getEarliestTripWithDayOffset(int routeId, int stopId, int stopSequence);
 };
 
+class RaptorBound {
+    public:
+        explicit RaptorBound(RaptorQuery query, Optimization optimization){
+            this->query = query;
+            this->optimization = optimization;
+            this->initializeRaptorBound();
+        };
+        ~RaptorBound(){};
+
+        void processRaptorRound();
+        void setCurrentBest(int currentBest);
+        void initializeHeuristic(map<int, vector<int>> sourceStopIdsToAllStops, vector<int> sourceStopIds);
+
+        bool isFinished();
+
+        vector<int>* getEarliestArrivalTimes();
+        int getEarliestArrivalTime(int stopId);
+        Journey createJourney(int targetStopId);
+
+        vector<JourneyPointerRaptor> journeyPointers;
+        vector<int> extendedSourceStopIds;
+        vector<int> currentEarliestArrivalTimes;
+        vector<bool> currentMarkedStops;
+
+        double numberOfExpandedRoutes;
+
+    private:
+        RaptorQuery query;
+        int currentRound;
+        vector<int> previousEarliestArrivalTimes;
+        vector<bool> previousMarkedStops;
+        
+        vector<int> minStopSequencePerRoute;
+        vector<pair<int, int>> q;
+        bool isFinishedFlag;
+
+        int currentBest;
+        Optimization optimization;
+
+        map<int, vector<int>> sourceStopIdsToAllStops;
+        vector<int> sourceStopIds;
+        int numberOfSourceStopIds;
+        double baseHeuristic;
+
+        void initializeRaptorBound();
+        void fillQ();
+        void traverseRoutes();
+        TripInfo getEarliestTripWithDayOffset(int routeId, int stopId, int stopSequence);
+};
+
 class RaptorPQ {
     public:
         explicit RaptorPQ(RaptorQuery query, Optimization optimization){

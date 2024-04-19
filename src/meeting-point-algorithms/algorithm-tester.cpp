@@ -819,21 +819,21 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
     resultsFile << "numberOfSourceStops,avgMinSumDuration,avgMinMaxDuration,medianMinSumDuration,medianMinMaxDuration,maxMinSumDuration";
     resultsFile << ",maxMinMaxDuration,minMinSumDuration,minMinMaxDuration";
 
-    resultsFile << ",avgQueryTimeRaptorFirst,avgQueryTimeRaptorOptimalResult,avgQueryTimeRaptorPQMinSum,avgQueryTimeRaptorPQMinMax,avgQueryTimeRaptorPQParallelMinSum,avgQueryTimeRaptorPQParallelMinMax";
-    resultsFile << ",medianQueryTimeRaptorFirst,medianQueryTimeRaptorOptimalResult,medianQueryTimeRaptorPQMinSum,medianQueryTimeRaptorPQMinMax,medianQueryTimeRaptorPQParallelMinSum,medianQueryTimeRaptorPQParallelMinMax";
-    resultsFile << ",maxQueryTimeRaptorFirst,maxQueryTimeRaptorOptimalResult,maxQueryTimeRaptorPQMinSum,maxQueryTimeRaptorPQMinMax,maxQueryTimeRaptorPQParallelMinSum,maxQueryTimeRaptorPQParallelMinMax";
-    resultsFile << ",minQueryTimeRaptorFirst,minQueryTimeRaptorOptimalResult,minQueryTimeRaptorPQMinSum,minQueryTimeRaptorPQMinMax,minQueryTimeRaptorPQParallelMinSum,minQueryTimeRaptorPQParallelMinMax";
+    resultsFile << ",avgQueryTimeRaptorFirst,avgQueryTimeRaptorOptimalResult,avgQueryTimeRaptorPQMinSum,avgQueryTimeRaptorPQMinMax,avgQueryTimeRaptorPQParallelMinSum,avgQueryTimeRaptorPQParallelMinMax,avgQueryTimeRaptorBoundMinSum,avgQueryTimeRaptorBoundMinMax";
+    resultsFile << ",medianQueryTimeRaptorFirst,medianQueryTimeRaptorOptimalResult,medianQueryTimeRaptorPQMinSum,medianQueryTimeRaptorPQMinMax,medianQueryTimeRaptorPQParallelMinSum,medianQueryTimeRaptorPQParallelMinMax,medianQueryTimeRaptorBoundMinSum,medianQueryTimeRaptorBoundMinMax";
+    resultsFile << ",maxQueryTimeRaptorFirst,maxQueryTimeRaptorOptimalResult,maxQueryTimeRaptorPQMinSum,maxQueryTimeRaptorPQMinMax,maxQueryTimeRaptorPQParallelMinSum,maxQueryTimeRaptorPQParallelMinMax,maxQueryTimeRaptorBoundMinSum,maxQueryTimeRaptorBoundMinMax";
+    resultsFile << ",minQueryTimeRaptorFirst,minQueryTimeRaptorOptimalResult,minQueryTimeRaptorPQMinSum,minQueryTimeRaptorPQMinMax,minQueryTimeRaptorPQParallelMinSum,minQueryTimeRaptorPQParallelMinMax,minQueryTimeRaptorBoundMinSum,minQueryTimeRaptorBoundMinMax";
 
-    resultsFile << ",avgNumberOfExpandedRoutesRaptorFirst,avgNumberOfExpandedRoutesRaptorOptimalResult,avgNumberOfExpandedRoutesRaptorPQMinSum,avgNumberOfExpandedRoutesRaptorPQMinMax,avgNumberOfExpandedRoutesRaptorPQParallelMinSum,avgNumberOfExpandedRoutesRaptorPQParallelMinMax";
-    resultsFile << ",medianNumberOfExpandedRoutesRaptorFirst,medianNumberOfExpandedRoutesRaptorOptimalResult,medianNumberOfExpandedRoutesRaptorPQMinSum,medianNumberOfExpandedRoutesRaptorPQMinMax,medianNumberOfExpandedRoutesRaptorPQParallelMinSum,medianNumberOfExpandedRoutesRaptorPQParallelMinMax";
-    resultsFile << ",maxNumberOfExpandedRoutesRaptorFirst,maxNumberOfExpandedRoutesRaptorOptimalResult,maxNumberOfExpandedRoutesRaptorPQMinSum,maxNumberOfExpandedRoutesRaptorPQMinMax,maxNumberOfExpandedRoutesRaptorPQParallelMinSum,maxNumberOfExpandedRoutesRaptorPQParallelMinMax";
-    resultsFile << ",minNumberOfExpandedRoutesRaptorFirst,minNumberOfExpandedRoutesRaptorOptimalResult,minNumberOfExpandedRoutesRaptorPQMinSum,minNumberOfExpandedRoutesRaptorPQMinMax,minNumberOfExpandedRoutesRaptorPQParallelMinSum,minNumberOfExpandedRoutesRaptorPQParallelMinMax";
+    resultsFile << ",avgNumberOfExpandedRoutesRaptorFirst,avgNumberOfExpandedRoutesRaptorOptimalResult,avgNumberOfExpandedRoutesRaptorPQMinSum,avgNumberOfExpandedRoutesRaptorPQMinMax,avgNumberOfExpandedRoutesRaptorPQParallelMinSum,avgNumberOfExpandedRoutesRaptorPQParallelMinMax,avgNumberOfExpandedRoutesRaptorBoundMinSum,avgNumberOfExpandedRoutesRaptorBoundMinMax";
+    resultsFile << ",medianNumberOfExpandedRoutesRaptorFirst,medianNumberOfExpandedRoutesRaptorOptimalResult,medianNumberOfExpandedRoutesRaptorPQMinSum,medianNumberOfExpandedRoutesRaptorPQMinMax,medianNumberOfExpandedRoutesRaptorPQParallelMinSum,medianNumberOfExpandedRoutesRaptorPQParallelMinMax,medianNumberOfExpandedRoutesRaptorBoundMinSum,medianNumberOfExpandedRoutesRaptorBoundMinMax";
+    resultsFile << ",maxNumberOfExpandedRoutesRaptorFirst,maxNumberOfExpandedRoutesRaptorOptimalResult,maxNumberOfExpandedRoutesRaptorPQMinSum,maxNumberOfExpandedRoutesRaptorPQMinMax,maxNumberOfExpandedRoutesRaptorPQParallelMinSum,maxNumberOfExpandedRoutesRaptorPQParallelMinMax,maxNumberOfExpandedRoutesRaptorBoundMinSum,maxNumberOfExpandedRoutesRaptorBoundMinMax";
+    resultsFile << ",minNumberOfExpandedRoutesRaptorFirst,minNumberOfExpandedRoutesRaptorOptimalResult,minNumberOfExpandedRoutesRaptorPQMinSum,minNumberOfExpandedRoutesRaptorPQMinMax,minNumberOfExpandedRoutesRaptorPQParallelMinSum,minNumberOfExpandedRoutesRaptorPQParallelMinMax,minNumberOfExpandedRoutesRaptorBoundMinSum,minNumberOfExpandedRoutesRaptorBoundMinMax";
 
-    resultsFile << ",avgDurationPhastMinSum,avgDurationPhastMinMax,avgDurationPhastParallelMinSum,avgDurationPhastParallelMinMax";
+    resultsFile << ",avgDurationPhastMinSum,avgDurationPhastMinMax,avgDurationPhastParallelMinSum,avgDurationPhastParallelMinMax,avgDurationPhastBoundMinSum,avgDurationPhastBoundMinMax";
     resultsFile << ",avgDurationRaptorFirstResultMinSum,avgDurationRaptorFirstResultMinMax,avgDurationRaptorFirstResultParallelMinSum,avgDurationRaptorFirstResultParallelMinMax";
-    resultsFile << ",avgDurationInitRaptorPQsMinSum,avgDurationInitRaptorPQsMinMax,avgDurationInitRaptorPQsParallelMinSum,avgDurationInitRaptorPQsParallelMinMax";
-    resultsFile << ",avgDurationRaptorPQsMinSum,avgDurationRaptorPQsMinMax,avgDurationRaptorPQsParallelMinSum,avgDurationRaptorPQsParallelMinMax";
-    resultsFile << ",avgDurationCreateResultMinSum,avgDurationCreateResultMinMax,avgDurationCreateResultParallelMinSum,avgDurationCreateResultParallelMinMax";
+    resultsFile << ",avgDurationInitRaptorPQsMinSum,avgDurationInitRaptorPQsMinMax,avgDurationInitRaptorPQsParallelMinSum,avgDurationInitRaptorPQsParallelMinMax,avgDurationInitRaptorBoundMinSum,avgDurationInitRaptorBoundMinMax";
+    resultsFile << ",avgDurationRaptorPQsMinSum,avgDurationRaptorPQsMinMax,avgDurationRaptorPQsParallelMinSum,avgDurationRaptorPQsParallelMinMax,avgDurationRaptorBoundMinSum,avgDurationRaptorBoundMinMax";
+    resultsFile << ",avgDurationCreateResultMinSum,avgDurationCreateResultMinMax,avgDurationCreateResultParallelMinSum,avgDurationCreateResultParallelMinMax,avgDurationCreateResultBoundMinSum,avgDurationCreateResultBoundMinMax";
 
     resultsFile << ",avgDurationInitHeuristicMinSum,avgDurationInitHeuristicMinMax,avgDurationInitHeuristicParallelMinSum,avgDurationInitHeuristicParallelMinMax";
     resultsFile << ",avgDurationTransformRaptorToRaptorPQMinSum,avgDurationTransformRaptorToRaptorPQMinMax,avgDurationTransformRaptorToRaptorPQParallelMinSum,avgDurationTransformRaptorToRaptorPQParallelMinMax";
@@ -888,6 +888,8 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
         vector<double> queryTimesRaptorPQMinMax;
         vector<double> queryTimesRaptorPQParallelMinSum;
         vector<double> queryTimesRaptorPQParallelMinMax;
+        vector<double> queryTimesRaptorBoundMinSum;
+        vector<double> queryTimesRaptorBoundMinMax;
 
         vector<double> numberOfExpandedRoutesRaptorFirst;
         vector<double> numberOfExpandedRoutesRaptorOptimalResult;
@@ -895,11 +897,15 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
         vector<double> numberOfExpandedRoutesRaptorPQMinMax;
         vector<double> numberOfExpandedRoutesRaptorPQParallelMinSum;
         vector<double> numberOfExpandedRoutesRaptorPQParallelMinMax;
+        vector<double> numberOfExpandedRoutesRaptorBoundMinSum;
+        vector<double> numberOfExpandedRoutesRaptorBoundMinMax;
 
         vector<double> durationPhastMinSum;
         vector<double> durationPhastMinMax;
         vector<double> durationPhastParallelMinSum;
         vector<double> durationPhastParallelMinMax;
+        vector<double> durationPhastBoundMinSum;
+        vector<double> durationPhastBoundMinMax;
         vector<double> durationRaptorFirstResultMinSum;
         vector<double> durationRaptorFirstResultMinMax;
         vector<double> durationRaptorFirstResultParallelMinSum;
@@ -908,14 +914,20 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
         vector<double> durationInitRaptorPQsMinMax;
         vector<double> durationInitRaptorPQsParallelMinSum;
         vector<double> durationInitRaptorPQsParallelMinMax;
+        vector<double> durationInitRaptorBoundsMinSum;
+        vector<double> durationInitRaptorBoundsMinMax;
         vector<double> durationRaptorPQsMinSum;
         vector<double> durationRaptorPQsMinMax;
         vector<double> durationRaptorPQsParallelMinSum;
         vector<double> durationRaptorPQsParallelMinMax;
+        vector<double> durationRaptorBoundsMinSum;
+        vector<double> durationRaptorBoundsMinMax;
         vector<double> durationCreateResultMinSum;
         vector<double> durationCreateResultMinMax;
         vector<double> durationCreateResultParallelMinSum;
         vector<double> durationCreateResultParallelMinMax;
+        vector<double> durationCreateResultBoundMinSum;
+        vector<double> durationCreateResultBoundMinMax;
 
         vector<double> durationInitHeuristicMinSum;
         vector<double> durationInitHeuristicMinMax;
@@ -987,6 +999,14 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
             raptorPQParallelMinMaxQueryProcessor->processRaptorPQParallelQuery(min_max);
             MeetingPointQueryResult meetingPointQueryResultRaptorPQParallelMinMax = raptorPQParallelMinMaxQueryProcessor->getMeetingPointQueryResult();
 
+            unique_ptr<RaptorBoundQueryProcessor> raptorBoundMinSumQueryProcessor = unique_ptr<RaptorBoundQueryProcessor> (new RaptorBoundQueryProcessor(meetingPointQuery));
+            raptorBoundMinSumQueryProcessor->processRaptorBoundQuery(min_sum);
+            MeetingPointQueryResult meetingPointQueryResultRaptorBoundMinSum = raptorBoundMinSumQueryProcessor->getMeetingPointQueryResult();
+
+            unique_ptr<RaptorBoundQueryProcessor> raptorBoundMinMaxQueryProcessor = unique_ptr<RaptorBoundQueryProcessor> (new RaptorBoundQueryProcessor(meetingPointQuery));
+            raptorBoundMinMaxQueryProcessor->processRaptorBoundQuery(min_max);
+            MeetingPointQueryResult meetingPointQueryResultRaptorBoundMinMax = raptorBoundMinMaxQueryProcessor->getMeetingPointQueryResult();
+
             minSumDurations.push_back((double) meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds);
             minMaxDurations.push_back((double) meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds);
 
@@ -996,6 +1016,8 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
             queryTimesRaptorPQMinMax.push_back((double) meetingPointQueryResultRaptorPQMinMax.queryTime);
             queryTimesRaptorPQParallelMinSum.push_back((double) meetingPointQueryResultRaptorPQParallelMinSum.queryTime);
             queryTimesRaptorPQParallelMinMax.push_back((double) meetingPointQueryResultRaptorPQParallelMinMax.queryTime);
+            queryTimesRaptorBoundMinSum.push_back((double) meetingPointQueryResultRaptorBoundMinSum.queryTime);
+            queryTimesRaptorBoundMinMax.push_back((double) meetingPointQueryResultRaptorBoundMinMax.queryTime);
 
             numberOfExpandedRoutesRaptorFirst.push_back((double) raptorQueryProcessorFirst->numberOfExpandedRoutes);
             numberOfExpandedRoutesRaptorOptimalResult.push_back((double) raptorQueryProcessorOptimal->numberOfExpandedRoutes);
@@ -1003,11 +1025,15 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
             numberOfExpandedRoutesRaptorPQMinMax.push_back((double) raptorPQMinMaxQueryProcessor->numberOfExpandedRoutes);
             numberOfExpandedRoutesRaptorPQParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->numberOfExpandedRoutes);
             numberOfExpandedRoutesRaptorPQParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->numberOfExpandedRoutes);
+            numberOfExpandedRoutesRaptorBoundMinSum.push_back((double) raptorBoundMinSumQueryProcessor->numberOfExpandedRoutes);
+            numberOfExpandedRoutesRaptorBoundMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->numberOfExpandedRoutes);
 
             durationPhastMinSum.push_back((double) raptorPQMinSumQueryProcessor->durationPhast);
             durationPhastMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationPhast);
             durationPhastParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationPhast);
             durationPhastParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->durationPhast);
+            durationPhastBoundMinSum.push_back((double) raptorBoundMinSumQueryProcessor->durationPhast);
+            durationPhastBoundMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->durationPhast);
             durationRaptorFirstResultMinSum.push_back((double) raptorPQMinSumQueryProcessor->durationRaptorFirstResult);
             durationRaptorFirstResultMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationRaptorFirstResult);
             durationRaptorFirstResultParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationRaptorFirstResult);
@@ -1016,14 +1042,20 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
             durationInitRaptorPQsMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationInitRaptorPQs);
             durationInitRaptorPQsParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationInitRaptorPQs);
             durationInitRaptorPQsParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->durationInitRaptorPQs);
+            durationInitRaptorBoundsMinSum.push_back((double) raptorBoundMinSumQueryProcessor->durationInitRaptorBounds);
+            durationInitRaptorBoundsMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->durationInitRaptorBounds);
             durationRaptorPQsMinSum.push_back((double) raptorPQMinSumQueryProcessor->durationRaptorPQs);
             durationRaptorPQsMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationRaptorPQs);
             durationRaptorPQsParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationRaptorPQs);
             durationRaptorPQsParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->durationRaptorPQs);
+            durationRaptorBoundsMinSum.push_back((double) raptorBoundMinSumQueryProcessor->durationRaptorBounds);
+            durationRaptorBoundsMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->durationRaptorBounds);
             durationCreateResultMinSum.push_back((double) raptorPQMinSumQueryProcessor->durationCreateResult);
             durationCreateResultMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationCreateResult);
             durationCreateResultParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationCreateResult);
             durationCreateResultParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->durationCreateResult);
+            durationCreateResultBoundMinSum.push_back((double) raptorBoundMinSumQueryProcessor->durationCreateResult);
+            durationCreateResultBoundMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->durationCreateResult);
 
             durationInitHeuristicMinSum.push_back((double) raptorPQMinSumQueryProcessor->durationInitHeuristic);
             durationInitHeuristicMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationInitHeuristic);
@@ -1113,29 +1145,39 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
         double avgNumberOfExpandedRoutesRaptorPQMinMax = Calculator::getAverage(numberOfExpandedRoutesRaptorPQMinMax);
         double avgNumberOfExpandedRoutesRaptorPQParallelMinSum = Calculator::getAverage(numberOfExpandedRoutesRaptorPQParallelMinSum);
         double avgNumberOfExpandedRoutesRaptorPQParallelMinMax = Calculator::getAverage(numberOfExpandedRoutesRaptorPQParallelMinMax);
+        double avgNumberOfExpandedRoutesRaptorBoundMinSum = Calculator::getAverage(numberOfExpandedRoutesRaptorBoundMinSum);
+        double avgNumberOfExpandedRoutesRaptorBoundMinMax = Calculator::getAverage(numberOfExpandedRoutesRaptorBoundMinMax);
         double medianNumberOfExpandedRoutesRaptorFirst = Calculator::getMedian(numberOfExpandedRoutesRaptorFirst);
         double medianNumberOfExpandedRoutesRaptorOptimalResult = Calculator::getMedian(numberOfExpandedRoutesRaptorOptimalResult);
         double medianNumberOfExpandedRoutesRaptorPQMinSum = Calculator::getMedian(numberOfExpandedRoutesRaptorPQMinSum);
         double medianNumberOfExpandedRoutesRaptorPQMinMax = Calculator::getMedian(numberOfExpandedRoutesRaptorPQMinMax);
         double medianNumberOfExpandedRoutesRaptorPQParallelMinSum = Calculator::getMedian(numberOfExpandedRoutesRaptorPQParallelMinSum);
         double medianNumberOfExpandedRoutesRaptorPQParallelMinMax = Calculator::getMedian(numberOfExpandedRoutesRaptorPQParallelMinMax);
+        double medianNumberOfExpandedRoutesRaptorBoundMinSum = Calculator::getMedian(numberOfExpandedRoutesRaptorBoundMinSum);
+        double medianNumberOfExpandedRoutesRaptorBoundMinMax = Calculator::getMedian(numberOfExpandedRoutesRaptorBoundMinMax);
         double maxNumberOfExpandedRoutesRaptorFirst = Calculator::getMaximum(numberOfExpandedRoutesRaptorFirst);
         double maxNumberOfExpandedRoutesRaptorOptimalResult = Calculator::getMaximum(numberOfExpandedRoutesRaptorOptimalResult);
         double maxNumberOfExpandedRoutesRaptorPQMinSum = Calculator::getMaximum(numberOfExpandedRoutesRaptorPQMinSum);
         double maxNumberOfExpandedRoutesRaptorPQMinMax = Calculator::getMaximum(numberOfExpandedRoutesRaptorPQMinMax);
         double maxNumberOfExpandedRoutesRaptorPQParallelMinSum = Calculator::getMaximum(numberOfExpandedRoutesRaptorPQParallelMinSum);
         double maxNumberOfExpandedRoutesRaptorPQParallelMinMax = Calculator::getMaximum(numberOfExpandedRoutesRaptorPQParallelMinMax);
+        double maxNumberOfExpandedRoutesRaptorBoundMinSum = Calculator::getMaximum(numberOfExpandedRoutesRaptorBoundMinSum);
+        double maxNumberOfExpandedRoutesRaptorBoundMinMax = Calculator::getMaximum(numberOfExpandedRoutesRaptorBoundMinMax);
         double minNumberOfExpandedRoutesRaptorFirst = Calculator::getMinimum(numberOfExpandedRoutesRaptorFirst);
         double minNumberOfExpandedRoutesRaptorOptimalResult = Calculator::getMinimum(numberOfExpandedRoutesRaptorOptimalResult);
         double minNumberOfExpandedRoutesRaptorPQMinSum = Calculator::getMinimum(numberOfExpandedRoutesRaptorPQMinSum);
         double minNumberOfExpandedRoutesRaptorPQMinMax = Calculator::getMinimum(numberOfExpandedRoutesRaptorPQMinMax);
         double minNumberOfExpandedRoutesRaptorPQParallelMinSum = Calculator::getMinimum(numberOfExpandedRoutesRaptorPQParallelMinSum);
         double minNumberOfExpandedRoutesRaptorPQParallelMinMax = Calculator::getMinimum(numberOfExpandedRoutesRaptorPQParallelMinMax);
+        double minNumberOfExpandedRoutesRaptorBoundMinSum = Calculator::getMinimum(numberOfExpandedRoutesRaptorBoundMinSum);
+        double minNumberOfExpandedRoutesRaptorBoundMinMax = Calculator::getMinimum(numberOfExpandedRoutesRaptorBoundMinMax);
 
         double avgDurationPhastMinSum = Calculator::getAverage(durationPhastMinSum);
         double avgDurationPhastMinMax = Calculator::getAverage(durationPhastMinMax);
         double avgDurationPhastParallelMinSum = Calculator::getAverage(durationPhastParallelMinSum);
         double avgDurationPhastParallelMinMax = Calculator::getAverage(durationPhastParallelMinMax);
+        double avgDurationPhastBoundMinSum = Calculator::getAverage(durationPhastBoundMinSum);
+        double avgDurationPhastBoundMinMax = Calculator::getAverage(durationPhastBoundMinMax);
         double avgDurationRaptorFirstResultMinSum = Calculator::getAverage(durationRaptorFirstResultMinSum);
         double avgDurationRaptorFirstResultMinMax = Calculator::getAverage(durationRaptorFirstResultMinMax);
         double avgDurationRaptorFirstResultParallelMinSum = Calculator::getAverage(durationRaptorFirstResultParallelMinSum);
@@ -1144,14 +1186,20 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
         double avgDurationInitRaptorPQsMinMax = Calculator::getAverage(durationInitRaptorPQsMinMax);
         double avgDurationInitRaptorPQsParallelMinSum = Calculator::getAverage(durationInitRaptorPQsParallelMinSum);
         double avgDurationInitRaptorPQsParallelMinMax = Calculator::getAverage(durationInitRaptorPQsParallelMinMax);
+        double avgDurationInitRaptorBoundsMinSum = Calculator::getAverage(durationInitRaptorBoundsMinSum);
+        double avgDurationInitRaptorBoundsMinMax = Calculator::getAverage(durationInitRaptorBoundsMinMax);
         double avgDurationRaptorPQsMinSum = Calculator::getAverage(durationRaptorPQsMinSum);
         double avgDurationRaptorPQsMinMax = Calculator::getAverage(durationRaptorPQsMinMax);
         double avgDurationRaptorPQsParallelMinSum = Calculator::getAverage(durationRaptorPQsParallelMinSum);
         double avgDurationRaptorPQsParallelMinMax = Calculator::getAverage(durationRaptorPQsParallelMinMax);
+        double avgDurationRaptorBoundsMinSum = Calculator::getAverage(durationRaptorBoundsMinSum);
+        double avgDurationRaptorBoundsMinMax = Calculator::getAverage(durationRaptorBoundsMinMax);
         double avgDurationCreateResultMinSum = Calculator::getAverage(durationCreateResultMinSum);
         double avgDurationCreateResultMinMax = Calculator::getAverage(durationCreateResultMinMax);
         double avgDurationCreateResultParallelMinSum = Calculator::getAverage(durationCreateResultParallelMinSum);
         double avgDurationCreateResultParallelMinMax = Calculator::getAverage(durationCreateResultParallelMinMax);
+        double avgDurationCreateResultBoundMinSum = Calculator::getAverage(durationCreateResultBoundMinSum);
+        double avgDurationCreateResultBoundMinMax = Calculator::getAverage(durationCreateResultBoundMinMax);
 
         double avgDurationInitHeuristicMinSum = Calculator::getAverage(durationInitHeuristicMinSum);
         double avgDurationInitHeuristicMinMax = Calculator::getAverage(durationInitHeuristicMinMax);
@@ -1180,24 +1228,32 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
         double avgQueryTimeRaptorPQMinMax = Calculator::getAverage(queryTimesRaptorPQMinMax);
         double avgQueryTimeRaptorPQParallelMinSum = Calculator::getAverage(queryTimesRaptorPQParallelMinSum);
         double avgQueryTimeRaptorPQParallelMinMax = Calculator::getAverage(queryTimesRaptorPQParallelMinMax);
+        double avgQueryTimeRaptorBoundMinSum = Calculator::getAverage(queryTimesRaptorBoundMinSum);
+        double avgQueryTimeRaptorBoundMinMax = Calculator::getAverage(queryTimesRaptorBoundMinMax);
         double medianQueryTimeRaptorFirst = Calculator::getMedian(queryTimesRaptorFirst);
         double medianQueryTimeRaptorOptimalResult = Calculator::getMedian(queryTimesRaptorOptimalResult);
         double medianQueryTimeRaptorPQMinSum = Calculator::getMedian(queryTimesRaptorPQMinSum);
         double medianQueryTimeRaptorPQMinMax = Calculator::getMedian(queryTimesRaptorPQMinMax);
         double medianQueryTimeRaptorPQParallelMinSum = Calculator::getMedian(queryTimesRaptorPQParallelMinSum);
         double medianQueryTimeRaptorPQParallelMinMax = Calculator::getMedian(queryTimesRaptorPQParallelMinMax);
+        double medianQueryTimeRaptorBoundMinSum = Calculator::getMedian(queryTimesRaptorBoundMinSum);
+        double medianQueryTimeRaptorBoundMinMax = Calculator::getMedian(queryTimesRaptorBoundMinMax);
         double maxQueryTimeRaptorFirst = Calculator::getMaximum(queryTimesRaptorFirst);
         double maxQueryTimeRaptorOptimalResult = Calculator::getMaximum(queryTimesRaptorOptimalResult);
         double maxQueryTimeRaptorPQMinSum = Calculator::getMaximum(queryTimesRaptorPQMinSum);
         double maxQueryTimeRaptorPQMinMax = Calculator::getMaximum(queryTimesRaptorPQMinMax);
         double maxQueryTimeRaptorPQParallelMinSum = Calculator::getMaximum(queryTimesRaptorPQParallelMinSum);
         double maxQueryTimeRaptorPQParallelMinMax = Calculator::getMaximum(queryTimesRaptorPQParallelMinMax);
+        double maxQueryTimeRaptorBoundMinSum = Calculator::getMaximum(queryTimesRaptorBoundMinSum);
+        double maxQueryTimeRaptorBoundMinMax = Calculator::getMaximum(queryTimesRaptorBoundMinMax);
         double minQueryTimeRaptorFirst = Calculator::getMinimum(queryTimesRaptorFirst);
         double minQueryTimeRaptorOptimalResult = Calculator::getMinimum(queryTimesRaptorOptimalResult);
         double minQueryTimeRaptorPQMinSum = Calculator::getMinimum(queryTimesRaptorPQMinSum);
         double minQueryTimeRaptorPQMinMax = Calculator::getMinimum(queryTimesRaptorPQMinMax);
         double minQueryTimeRaptorPQParallelMinSum = Calculator::getMinimum(queryTimesRaptorPQParallelMinSum);
         double minQueryTimeRaptorPQParallelMinMax = Calculator::getMinimum(queryTimesRaptorPQParallelMinMax);
+        double minQueryTimeRaptorBoundMinSum = Calculator::getMinimum(queryTimesRaptorBoundMinSum);
+        double minQueryTimeRaptorBoundMinMax = Calculator::getMinimum(queryTimesRaptorBoundMinMax);
 
         double avgAlternativeHeuristicImprovementCounter = Calculator::getAverage(alternativeHeuristicImprovementCounter);
         double avgAlternativeHeuristicNoImprovementCounter = Calculator::getAverage(alternativeHeuristicNoImprovementCounter);
@@ -1213,19 +1269,19 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
 
         resultsFile << numberOfSourceStops << "," << avgMinSumDuration << "," << avgMinMaxDuration << "," << medianMinSumDuration << "," << medianMinMaxDuration << "," << maxMinSumDuration;
         resultsFile << "," << maxMinMaxDuration << "," << minMinSumDuration << "," << minMinMaxDuration;
-        resultsFile << "," << avgQueryTimeRaptorFirst << "," << avgQueryTimeRaptorOptimalResult << "," << avgQueryTimeRaptorPQMinSum << "," << avgQueryTimeRaptorPQMinMax << "," << avgQueryTimeRaptorPQParallelMinSum << "," << avgQueryTimeRaptorPQParallelMinMax;
-        resultsFile << "," << medianQueryTimeRaptorFirst << "," << medianQueryTimeRaptorOptimalResult << "," << medianQueryTimeRaptorPQMinSum << "," << medianQueryTimeRaptorPQMinMax << "," << medianQueryTimeRaptorPQParallelMinSum << "," << medianQueryTimeRaptorPQParallelMinMax;
-        resultsFile << "," << maxQueryTimeRaptorFirst << "," << maxQueryTimeRaptorOptimalResult << "," << maxQueryTimeRaptorPQMinSum << "," << maxQueryTimeRaptorPQMinMax << "," << maxQueryTimeRaptorPQParallelMinSum << "," << maxQueryTimeRaptorPQParallelMinMax;
-        resultsFile << "," << minQueryTimeRaptorFirst << "," << minQueryTimeRaptorOptimalResult << "," << minQueryTimeRaptorPQMinSum << "," << minQueryTimeRaptorPQMinMax << "," << minQueryTimeRaptorPQParallelMinSum << "," << minQueryTimeRaptorPQParallelMinMax;
-        resultsFile << "," << avgNumberOfExpandedRoutesRaptorFirst << "," << avgNumberOfExpandedRoutesRaptorOptimalResult << "," << avgNumberOfExpandedRoutesRaptorPQMinSum << "," << avgNumberOfExpandedRoutesRaptorPQMinMax << "," << avgNumberOfExpandedRoutesRaptorPQParallelMinSum << "," << avgNumberOfExpandedRoutesRaptorPQParallelMinMax;
-        resultsFile << "," << medianNumberOfExpandedRoutesRaptorFirst << "," << medianNumberOfExpandedRoutesRaptorOptimalResult << "," << medianNumberOfExpandedRoutesRaptorPQMinSum << "," << medianNumberOfExpandedRoutesRaptorPQMinMax << "," << medianNumberOfExpandedRoutesRaptorPQParallelMinSum << "," << medianNumberOfExpandedRoutesRaptorPQParallelMinMax;
-        resultsFile << "," << maxNumberOfExpandedRoutesRaptorFirst << "," << maxNumberOfExpandedRoutesRaptorOptimalResult << "," << maxNumberOfExpandedRoutesRaptorPQMinSum << "," << maxNumberOfExpandedRoutesRaptorPQMinMax << "," << maxNumberOfExpandedRoutesRaptorPQParallelMinSum << "," << maxNumberOfExpandedRoutesRaptorPQParallelMinMax;
-        resultsFile << "," << minNumberOfExpandedRoutesRaptorFirst << "," << minNumberOfExpandedRoutesRaptorOptimalResult << "," << minNumberOfExpandedRoutesRaptorPQMinSum << "," << minNumberOfExpandedRoutesRaptorPQMinMax << "," << minNumberOfExpandedRoutesRaptorPQParallelMinSum << "," << minNumberOfExpandedRoutesRaptorPQParallelMinMax;
-        resultsFile << "," << avgDurationPhastMinSum << "," << avgDurationPhastMinMax << "," << avgDurationPhastParallelMinSum << "," << avgDurationPhastParallelMinMax;
+        resultsFile << "," << avgQueryTimeRaptorFirst << "," << avgQueryTimeRaptorOptimalResult << "," << avgQueryTimeRaptorPQMinSum << "," << avgQueryTimeRaptorPQMinMax << "," << avgQueryTimeRaptorPQParallelMinSum << "," << avgQueryTimeRaptorPQParallelMinMax << "," << avgQueryTimeRaptorBoundMinSum << "," << avgQueryTimeRaptorBoundMinMax;
+        resultsFile << "," << medianQueryTimeRaptorFirst << "," << medianQueryTimeRaptorOptimalResult << "," << medianQueryTimeRaptorPQMinSum << "," << medianQueryTimeRaptorPQMinMax << "," << medianQueryTimeRaptorPQParallelMinSum << "," << medianQueryTimeRaptorPQParallelMinMax << "," << medianQueryTimeRaptorBoundMinSum << "," << medianQueryTimeRaptorBoundMinMax;
+        resultsFile << "," << maxQueryTimeRaptorFirst << "," << maxQueryTimeRaptorOptimalResult << "," << maxQueryTimeRaptorPQMinSum << "," << maxQueryTimeRaptorPQMinMax << "," << maxQueryTimeRaptorPQParallelMinSum << "," << maxQueryTimeRaptorPQParallelMinMax << "," << maxQueryTimeRaptorBoundMinSum << "," << maxQueryTimeRaptorBoundMinMax;
+        resultsFile << "," << minQueryTimeRaptorFirst << "," << minQueryTimeRaptorOptimalResult << "," << minQueryTimeRaptorPQMinSum << "," << minQueryTimeRaptorPQMinMax << "," << minQueryTimeRaptorPQParallelMinSum << "," << minQueryTimeRaptorPQParallelMinMax << "," << minQueryTimeRaptorBoundMinSum << "," << minQueryTimeRaptorBoundMinMax;
+        resultsFile << "," << avgNumberOfExpandedRoutesRaptorFirst << "," << avgNumberOfExpandedRoutesRaptorOptimalResult << "," << avgNumberOfExpandedRoutesRaptorPQMinSum << "," << avgNumberOfExpandedRoutesRaptorPQMinMax << "," << avgNumberOfExpandedRoutesRaptorPQParallelMinSum << "," << avgNumberOfExpandedRoutesRaptorPQParallelMinMax << "," << avgNumberOfExpandedRoutesRaptorBoundMinSum << "," << avgNumberOfExpandedRoutesRaptorBoundMinMax;
+        resultsFile << "," << medianNumberOfExpandedRoutesRaptorFirst << "," << medianNumberOfExpandedRoutesRaptorOptimalResult << "," << medianNumberOfExpandedRoutesRaptorPQMinSum << "," << medianNumberOfExpandedRoutesRaptorPQMinMax << "," << medianNumberOfExpandedRoutesRaptorPQParallelMinSum << "," << medianNumberOfExpandedRoutesRaptorPQParallelMinMax << "," << medianNumberOfExpandedRoutesRaptorBoundMinSum << "," << medianNumberOfExpandedRoutesRaptorBoundMinMax;
+        resultsFile << "," << maxNumberOfExpandedRoutesRaptorFirst << "," << maxNumberOfExpandedRoutesRaptorOptimalResult << "," << maxNumberOfExpandedRoutesRaptorPQMinSum << "," << maxNumberOfExpandedRoutesRaptorPQMinMax << "," << maxNumberOfExpandedRoutesRaptorPQParallelMinSum << "," << maxNumberOfExpandedRoutesRaptorPQParallelMinMax << "," << maxNumberOfExpandedRoutesRaptorBoundMinSum << "," << maxNumberOfExpandedRoutesRaptorBoundMinMax;
+        resultsFile << "," << minNumberOfExpandedRoutesRaptorFirst << "," << minNumberOfExpandedRoutesRaptorOptimalResult << "," << minNumberOfExpandedRoutesRaptorPQMinSum << "," << minNumberOfExpandedRoutesRaptorPQMinMax << "," << minNumberOfExpandedRoutesRaptorPQParallelMinSum << "," << minNumberOfExpandedRoutesRaptorPQParallelMinMax << "," << minNumberOfExpandedRoutesRaptorBoundMinSum << "," << minNumberOfExpandedRoutesRaptorBoundMinMax;
+        resultsFile << "," << avgDurationPhastMinSum << "," << avgDurationPhastMinMax << "," << avgDurationPhastParallelMinSum << "," << avgDurationPhastParallelMinMax << "," << avgDurationPhastBoundMinSum << "," << avgDurationPhastBoundMinMax;
         resultsFile << "," << avgDurationRaptorFirstResultMinSum << "," << avgDurationRaptorFirstResultMinMax << "," << avgDurationRaptorFirstResultParallelMinSum << "," << avgDurationRaptorFirstResultParallelMinMax;
-        resultsFile << "," << avgDurationInitRaptorPQsMinSum << "," << avgDurationInitRaptorPQsMinMax << "," << avgDurationInitRaptorPQsParallelMinSum << "," << avgDurationInitRaptorPQsParallelMinMax;
-        resultsFile << "," << avgDurationRaptorPQsMinSum << "," << avgDurationRaptorPQsMinMax << "," << avgDurationRaptorPQsParallelMinSum << "," << avgDurationRaptorPQsParallelMinMax;
-        resultsFile << "," << avgDurationCreateResultMinSum << "," << avgDurationCreateResultMinMax << "," << avgDurationCreateResultParallelMinSum << "," << avgDurationCreateResultParallelMinMax;
+        resultsFile << "," << avgDurationInitRaptorPQsMinSum << "," << avgDurationInitRaptorPQsMinMax << "," << avgDurationInitRaptorPQsParallelMinSum << "," << avgDurationInitRaptorPQsParallelMinMax << "," << avgDurationInitRaptorBoundsMinSum << "," << avgDurationInitRaptorBoundsMinMax;
+        resultsFile << "," << avgDurationRaptorPQsMinSum << "," << avgDurationRaptorPQsMinMax << "," << avgDurationRaptorPQsParallelMinSum << "," << avgDurationRaptorPQsParallelMinMax << "," << avgDurationRaptorBoundsMinSum << "," << avgDurationRaptorBoundsMinMax;
+        resultsFile << "," << avgDurationCreateResultMinSum << "," << avgDurationCreateResultMinMax << "," << avgDurationCreateResultParallelMinSum << "," << avgDurationCreateResultParallelMinMax << "," << avgDurationCreateResultBoundMinSum << "," << avgDurationCreateResultBoundMinMax;
         resultsFile << "," << avgDurationInitHeuristicMinSum << "," << avgDurationInitHeuristicMinMax << "," << avgDurationInitHeuristicParallelMinSum << "," << avgDurationInitHeuristicParallelMinMax;
         resultsFile << "," << avgDurationTransformRaptorToRaptorPQMinSum << "," << avgDurationTransformRaptorToRaptorPQMinMax << "," << avgDurationTransformRaptorToRaptorPQParallelMinSum << "," << avgDurationTransformRaptorToRaptorPQParallelMinMax;
         resultsFile << "," << avgDurationAddRoutesToQueueMinSum << "," << avgDurationAddRoutesToQueueMinMax << "," << avgDurationAddRoutesToQueueParallelMinSum << "," << avgDurationAddRoutesToQueueParallelMinMax;
@@ -1252,24 +1308,32 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
         cout << "Average query time raptor pq min max: " << avgQueryTimeRaptorPQMinMax << endl;
         cout << "Average query time raptor pq parallel min sum: " << avgQueryTimeRaptorPQParallelMinSum << endl;
         cout << "Average query time raptor pq parallel min max: " << avgQueryTimeRaptorPQParallelMinMax << endl;
+        cout << "Average query time raptor bound min sum: " << avgQueryTimeRaptorBoundMinSum << endl;
+        cout << "Average query time raptor bound min max: " << avgQueryTimeRaptorBoundMinMax << endl;
         cout << "Median query time raptor first: " << medianQueryTimeRaptorFirst << endl;
         cout << "Median query time raptor optimal result: " << medianQueryTimeRaptorOptimalResult << endl;
         cout << "Median query time raptor pq min sum: " << medianQueryTimeRaptorPQMinSum << endl;
         cout << "Median query time raptor pq min max: " << medianQueryTimeRaptorPQMinMax << endl;
         cout << "Median query time raptor pq parallel min sum: " << medianQueryTimeRaptorPQParallelMinSum << endl;
         cout << "Median query time raptor pq parallel min max: " << medianQueryTimeRaptorPQParallelMinMax << endl;
+        cout << "Median query time raptor bound min sum: " << medianQueryTimeRaptorBoundMinSum << endl;
+        cout << "Median query time raptor bound min max: " << medianQueryTimeRaptorBoundMinMax << endl;
         cout << "Max query time raptor first: " << maxQueryTimeRaptorFirst << endl;
         cout << "Max query time raptor optimal result: " << maxQueryTimeRaptorOptimalResult << endl;
         cout << "Max query time raptor pq min sum: " << maxQueryTimeRaptorPQMinSum << endl;
         cout << "Max query time raptor pq min max: " << maxQueryTimeRaptorPQMinMax << endl;
         cout << "Max query time raptor pq parallel min sum: " << maxQueryTimeRaptorPQParallelMinSum << endl;
         cout << "Max query time raptor pq parallel min max: " << maxQueryTimeRaptorPQParallelMinMax << endl;
+        cout << "Max query time raptor bound min sum: " << maxQueryTimeRaptorBoundMinSum << endl;
+        cout << "Max query time raptor bound min max: " << maxQueryTimeRaptorBoundMinMax << endl;
         cout << "Min query time raptor first: " << minQueryTimeRaptorFirst << endl;
         cout << "Min query time raptor optimal result: " << minQueryTimeRaptorOptimalResult << endl;
         cout << "Min query time raptor pq min sum: " << minQueryTimeRaptorPQMinSum << endl;
         cout << "Min query time raptor pq min max: " << minQueryTimeRaptorPQMinMax << endl;
         cout << "Min query time raptor pq parallel min sum: " << minQueryTimeRaptorPQParallelMinSum << endl;
         cout << "Min query time raptor pq parallel min max: " << minQueryTimeRaptorPQParallelMinMax << endl;
+        cout << "Min query time raptor bound min sum: " << minQueryTimeRaptorBoundMinSum << endl;
+        cout << "Min query time raptor bound min max: " << minQueryTimeRaptorBoundMinMax << endl;
 
         cout << "\nAverage number of expanded routes raptor first: " << avgNumberOfExpandedRoutesRaptorFirst << endl;
         cout << "Average number of expanded routes raptor optimal result: " << avgNumberOfExpandedRoutesRaptorOptimalResult << endl;
@@ -1277,29 +1341,39 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
         cout << "Average number of expanded routes raptor pq min max: " << avgNumberOfExpandedRoutesRaptorPQMinMax << endl;
         cout << "Average number of expanded routes raptor pq parallel min sum: " << avgNumberOfExpandedRoutesRaptorPQParallelMinSum << endl;
         cout << "Average number of expanded routes raptor pq parallel min max: " << avgNumberOfExpandedRoutesRaptorPQParallelMinMax << endl;
+        cout << "Average number of expanded routes raptor bound min sum: " << avgNumberOfExpandedRoutesRaptorBoundMinSum << endl;
+        cout << "Average number of expanded routes raptor bound min max: " << avgNumberOfExpandedRoutesRaptorBoundMinMax << endl;
         cout << "Median number of expanded routes raptor first: " << medianNumberOfExpandedRoutesRaptorFirst << endl;
         cout << "Median number of expanded routes raptor optimal result: " << medianNumberOfExpandedRoutesRaptorOptimalResult << endl;
         cout << "Median number of expanded routes raptor pq min sum: " << medianNumberOfExpandedRoutesRaptorPQMinSum << endl;
         cout << "Median number of expanded routes raptor pq min max: " << medianNumberOfExpandedRoutesRaptorPQMinMax << endl;
         cout << "Median number of expanded routes raptor pq parallel min sum: " << medianNumberOfExpandedRoutesRaptorPQParallelMinSum << endl;
         cout << "Median number of expanded routes raptor pq parallel min max: " << medianNumberOfExpandedRoutesRaptorPQParallelMinMax << endl;
+        cout << "Median number of expanded routes raptor bound min sum: " << medianNumberOfExpandedRoutesRaptorBoundMinSum << endl;
+        cout << "Median number of expanded routes raptor bound min max: " << medianNumberOfExpandedRoutesRaptorBoundMinMax << endl;
         cout << "Max number of expanded routes raptor first: " << maxNumberOfExpandedRoutesRaptorFirst << endl;
         cout << "Max number of expanded routes raptor optimal result: " << maxNumberOfExpandedRoutesRaptorOptimalResult << endl;
         cout << "Max number of expanded routes raptor pq min sum: " << maxNumberOfExpandedRoutesRaptorPQMinSum << endl;
         cout << "Max number of expanded routes raptor pq min max: " << maxNumberOfExpandedRoutesRaptorPQMinMax << endl;
         cout << "Max number of expanded routes raptor pq parallel min sum: " << maxNumberOfExpandedRoutesRaptorPQParallelMinSum << endl;
         cout << "Max number of expanded routes raptor pq parallel min max: " << maxNumberOfExpandedRoutesRaptorPQParallelMinMax << endl;
+        cout << "Max number of expanded routes raptor bound min sum: " << maxNumberOfExpandedRoutesRaptorBoundMinSum << endl;
+        cout << "Max number of expanded routes raptor bound min max: " << maxNumberOfExpandedRoutesRaptorBoundMinMax << endl;
         cout << "Min number of expanded routes raptor first: " << minNumberOfExpandedRoutesRaptorFirst << endl;
         cout << "Min number of expanded routes raptor optimal result: " << minNumberOfExpandedRoutesRaptorOptimalResult << endl;
         cout << "Min number of expanded routes raptor pq min sum: " << minNumberOfExpandedRoutesRaptorPQMinSum << endl;
         cout << "Min number of expanded routes raptor pq min max: " << minNumberOfExpandedRoutesRaptorPQMinMax << endl;
         cout << "Min number of expanded routes raptor pq parallel min sum: " << minNumberOfExpandedRoutesRaptorPQParallelMinSum << endl;
         cout << "Min number of expanded routes raptor pq parallel min max: " << minNumberOfExpandedRoutesRaptorPQParallelMinMax << endl;
+        cout << "Min number of expanded routes raptor bound min sum: " << minNumberOfExpandedRoutesRaptorBoundMinSum << endl;
+        cout << "Min number of expanded routes raptor bound min max: " << minNumberOfExpandedRoutesRaptorBoundMinMax << endl;
 
         cout << "\nAverage duration phast min sum: " << avgDurationPhastMinSum << endl;
         cout << "Average duration phast min max: " << avgDurationPhastMinMax << endl;
         cout << "Average duration phast parallel min sum: " << avgDurationPhastParallelMinSum << endl;
         cout << "Average duration phast parallel min max: " << avgDurationPhastParallelMinMax << endl;
+        cout << "Average duration phast bound min sum: " << avgDurationPhastBoundMinSum << endl;
+        cout << "Average duration phast bound min max: " << avgDurationPhastBoundMinMax << endl;
         cout << "Average duration raptor first result min sum: " << avgDurationRaptorFirstResultMinSum << endl;
         cout << "Average duration raptor first result min max: " << avgDurationRaptorFirstResultMinMax << endl;
         cout << "Average duration raptor first result parallel min sum: " << avgDurationRaptorFirstResultParallelMinSum << endl;
@@ -1308,14 +1382,20 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
         cout << "Average duration init raptor pqs min max: " << avgDurationInitRaptorPQsMinMax << endl;
         cout << "Average duration init raptor pqs parallel min sum: " << avgDurationInitRaptorPQsParallelMinSum << endl;
         cout << "Average duration init raptor pqs parallel min max: " << avgDurationInitRaptorPQsParallelMinMax << endl;
+        cout << "Average duration init raptor bounds min sum: " << avgDurationInitRaptorBoundsMinSum << endl;
+        cout << "Average duration init raptor bounds min max: " << avgDurationInitRaptorBoundsMinMax << endl;
         cout << "Average duration raptor pqs min sum: " << avgDurationRaptorPQsMinSum << endl;
         cout << "Average duration raptor pqs min max: " << avgDurationRaptorPQsMinMax << endl;
         cout << "Average duration raptor pqs parallel min sum: " << avgDurationRaptorPQsParallelMinSum << endl;
         cout << "Average duration raptor pqs parallel min max: " << avgDurationRaptorPQsParallelMinMax << endl;
+        cout << "Average duration raptor bounds min sum: " << avgDurationRaptorBoundsMinSum << endl;
+        cout << "Average duration raptor bounds min max: " << avgDurationRaptorBoundsMinMax << endl;
         cout << "Average duration create result min sum: " << avgDurationCreateResultMinSum << endl;
         cout << "Average duration create result min max: " << avgDurationCreateResultMinMax << endl;
         cout << "Average duration create result parallel min sum: " << avgDurationCreateResultParallelMinSum << endl;
         cout << "Average duration create result parallel min max: " << avgDurationCreateResultParallelMinMax << endl;
+        cout << "Average duration create result bound min sum: " << avgDurationCreateResultBoundMinSum << endl;
+        cout << "Average duration create result bound min max: " << avgDurationCreateResultBoundMinMax << endl;
 
         cout << "\nAverage duration init heuristic min sum: " << avgDurationInitHeuristicMinSum << endl;
         cout << "Average duration init heuristic min max: " << avgDurationInitHeuristicMinMax << endl;
@@ -2304,6 +2384,14 @@ void AlgorithmComparer::compareAlgorithmsWithoutGTree(DataType dataType, Meeting
     raptorQueryProcessorOptimal.processRaptorQuery();
     MeetingPointQueryResult meetingPointQueryResultRaptorOptimal = raptorQueryProcessorOptimal.getMeetingPointQueryResult();
 
+    RaptorBoundQueryProcessor raptorBoundQueryProcessorMinSum = RaptorBoundQueryProcessor(meetingPointQuery);
+    raptorBoundQueryProcessorMinSum.processRaptorBoundQuery(min_sum);
+    MeetingPointQueryResult meetingPointQueryResultRaptorBoundMinSum = raptorBoundQueryProcessorMinSum.getMeetingPointQueryResult();
+
+    RaptorBoundQueryProcessor raptorBoundQueryProcessorMinMax = RaptorBoundQueryProcessor(meetingPointQuery);
+    raptorBoundQueryProcessorMinMax.processRaptorBoundQuery(min_max);
+    MeetingPointQueryResult meetingPointQueryResultRaptorBoundMinMax = raptorBoundQueryProcessorMinMax.getMeetingPointQueryResult();
+
     RaptorPQQueryProcessor raptorPQQueryProcessorMinSum = RaptorPQQueryProcessor(meetingPointQuery);
     raptorPQQueryProcessorMinSum.processRaptorPQQuery(min_sum);
     MeetingPointQueryResult meetingPointQueryResultRaptorPQMinSum = raptorPQQueryProcessorMinSum.getMeetingPointQueryResult();
@@ -2336,6 +2424,14 @@ void AlgorithmComparer::compareAlgorithmsWithoutGTree(DataType dataType, Meeting
     cout << "Raptor Optimal Result: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultRaptorOptimal);
     cout << "Average number of expanded routes: " << raptorQueryProcessorOptimal.numberOfExpandedRoutes << endl;
+
+    cout << "Raptor Bound - Min Sum: " << endl;
+    PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultRaptorBoundMinSum);
+    cout << "Average number of expanded routes: " << raptorBoundQueryProcessorMinSum.numberOfExpandedRoutes << endl;
+
+    cout << "Raptor Bound - Min Max: " << endl;
+    PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultRaptorBoundMinMax);
+    cout << "Average number of expanded routes: " << raptorBoundQueryProcessorMinMax.numberOfExpandedRoutes << endl;
 
     cout << "Raptor PQ - Min Sum: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultRaptorPQMinSum);
