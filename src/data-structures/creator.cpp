@@ -78,25 +78,25 @@ void Creator::createNetworkGraph() {
             networkGraph.adjacencyList[connection.departureStopId].push_back(edge);
         }
 
-        Edge backEdge;
-        backEdge.targetStopId = connection.departureStopId;
-        backEdge.ewgt = connectionArrivalTime - connection.departureTime;
+        // Edge backEdge;
+        // backEdge.targetStopId = connection.departureStopId;
+        // backEdge.ewgt = connectionArrivalTime - connection.departureTime;
 
-        bool addBackEdge = true;
+        // bool addBackEdge = true;
 
-        for (int j = 0; j < networkGraph.adjacencyList[connection.arrivalStopId].size(); j++) {
-            if (networkGraph.adjacencyList[connection.arrivalStopId][j].targetStopId == backEdge.targetStopId) {
-                if (networkGraph.adjacencyList[connection.arrivalStopId][j].ewgt > backEdge.ewgt) {
-                    networkGraph.adjacencyList[connection.arrivalStopId][j].ewgt = backEdge.ewgt;
-                }
-                addBackEdge = false;
-                break;
-            }
-        }
+        // for (int j = 0; j < networkGraph.adjacencyList[connection.arrivalStopId].size(); j++) {
+        //     if (networkGraph.adjacencyList[connection.arrivalStopId][j].targetStopId == backEdge.targetStopId) {
+        //         if (networkGraph.adjacencyList[connection.arrivalStopId][j].ewgt > backEdge.ewgt) {
+        //             networkGraph.adjacencyList[connection.arrivalStopId][j].ewgt = backEdge.ewgt;
+        //         }
+        //         addBackEdge = false;
+        //         break;
+        //     }
+        // }
 
-        if (addBackEdge) {
-            networkGraph.adjacencyList[connection.arrivalStopId].push_back(backEdge);
-        }
+        // if (addBackEdge) {
+        //     networkGraph.adjacencyList[connection.arrivalStopId].push_back(backEdge);
+        // }
     }
 
     for (int i = 0; i < Importer::footPaths.size(); i++) {
@@ -127,6 +127,8 @@ void Creator::createNetworkGraph() {
         }
     }
 
+    int numberOfBackEdges = 0;
+
     for (int i = 0; i < networkGraph.adjacencyList.size(); i++) {
         Vertex vertex;
         vertex.stopId = i;
@@ -138,10 +140,35 @@ void Creator::createNetworkGraph() {
 
         for (int j = 0; j < networkGraph.adjacencyList[i].size(); j++) {
             vertex.adjwgt += networkGraph.adjacencyList[i][j].ewgt;
+
+            Edge edge = networkGraph.adjacencyList[i][j];
+
+            Edge backEdge;
+            backEdge.targetStopId = i;
+            backEdge.ewgt = edge.ewgt;
+
+            bool addBackEdge = true;
+
+            for (int k = 0; k < networkGraph.adjacencyList[edge.targetStopId].size(); k++) {
+                if (networkGraph.adjacencyList[edge.targetStopId][k].targetStopId == backEdge.targetStopId) {
+                    if (networkGraph.adjacencyList[edge.targetStopId][k].ewgt > backEdge.ewgt) {
+                        networkGraph.adjacencyList[edge.targetStopId][k].ewgt = backEdge.ewgt;
+                    }
+                    addBackEdge = false;
+                    break;
+                }
+            }
+
+            if (addBackEdge) {
+                networkGraph.adjacencyList[edge.targetStopId].push_back(backEdge);
+                numberOfBackEdges++;
+            }
         }
 
         networkGraph.vertices.push_back(vertex);
     }
+
+    cout << "Number of back edges: " << numberOfBackEdges << endl;
 
     // Get the number of vertices and edges
     int numberOfVertices = networkGraph.vertices.size();
