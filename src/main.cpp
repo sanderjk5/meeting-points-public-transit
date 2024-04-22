@@ -100,12 +100,12 @@ int main(int argc, const char *argv[]) {
     // ExperimentController::testAndCompareAlgorithmsRandom(dataType, 1000, numberOfSourceStops);
 
     // Test experiments
-    vector<int> numberOfSourceStops = {100};
+    vector<int> numberOfSourceStops = {2, 10, 100};
     // vector<int> numberOfSourceStops = {5, 10};
 
     // ExperimentController::compareRaptorAlgorithms(dataType, 100, numberOfSourceStops);
 
-    ExperimentController::compareRaptorPQAlgorithms(dataType, 200, numberOfSourceStops);
+    ExperimentController::compareRaptorPQAlgorithms(dataType, 20, numberOfSourceStops);
 
     // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 10, 30, 0.90);
 
