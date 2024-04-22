@@ -77,6 +77,26 @@ void Creator::createNetworkGraph() {
         if (addEdge) {
             networkGraph.adjacencyList[connection.departureStopId].push_back(edge);
         }
+
+        Edge backEdge;
+        backEdge.targetStopId = connection.departureStopId;
+        backEdge.ewgt = connectionArrivalTime - connection.departureTime;
+
+        bool addBackEdge = true;
+
+        for (int j = 0; j < networkGraph.adjacencyList[connection.arrivalStopId].size(); j++) {
+            if (networkGraph.adjacencyList[connection.arrivalStopId][j].targetStopId == backEdge.targetStopId) {
+                if (networkGraph.adjacencyList[connection.arrivalStopId][j].ewgt > backEdge.ewgt) {
+                    networkGraph.adjacencyList[connection.arrivalStopId][j].ewgt = backEdge.ewgt;
+                }
+                addBackEdge = false;
+                break;
+            }
+        }
+
+        if (addBackEdge) {
+            networkGraph.adjacencyList[connection.arrivalStopId].push_back(backEdge);
+        }
     }
 
     for (int i = 0; i < Importer::footPaths.size(); i++) {

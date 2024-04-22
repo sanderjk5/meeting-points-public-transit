@@ -243,6 +243,9 @@ void RaptorBound::initializeHeuristic(map<int, vector<int>> sourceStopIdsToAllSt
             if (s2 == query.sourceStopId) {
                 continue;
             }
+            if (sourceStopIdsToAllStops[s1][s2] == INT_MAX) {
+                continue;
+            }
             baseHeuristic += sourceStopIdsToAllStops[s1][s2];
         }
     }

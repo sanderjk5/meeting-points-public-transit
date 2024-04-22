@@ -82,6 +82,14 @@ int main(int argc, const char *argv[]) {
 
   Creator::loadOrCreateNetworkGraph(dataType);
 
+  // print number of vertices and edges
+  cout << "Number of vertices: " << Creator::networkGraph.vertices.size() << endl;
+  int edgeCount = 0;
+  for (int i = 0; i < Creator::networkGraph.adjacencyList.size(); i++){
+    edgeCount += Creator::networkGraph.adjacencyList[i].size();
+  }
+  cout << "Number of edges: " << edgeCount << "\n" << endl;
+
   if (startExperiments){
     // Real experiments
     // vector<int> numberOfSourceStops = {2, 3, 5, 10, 25};
