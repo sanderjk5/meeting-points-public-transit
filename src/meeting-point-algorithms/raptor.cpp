@@ -277,6 +277,8 @@ void RaptorBound::initializeRaptorBound() {
     isFinishedFlag = false;
     numberOfExpandedRoutes = 0;
     currentBest = INT_MAX;
+
+    heuristicPerStopId = vector<int>(Importer::stops.size(), -1);
 }
 
 void RaptorBound::processRaptorRound() {
@@ -302,20 +304,26 @@ void RaptorBound::fillQ() {
         if (previousMarkedStops[stopId]) {
             double lowerBound = currentEarliestArrivalTimes[stopId] - query.sourceTime;
 
-            // calculate clique heuristic
-            double heuristic = baseHeuristic;
-            double maxDist = 0;
-            for (int j = 0; j < sourceStopIds.size(); j++) {
-                int s1 = sourceStopIds[j];
-                if (s1 == query.sourceStopId) {
-                    continue;
+            if (heuristicPerStopId[stopId] == -1) {
+                // calculate clique heuristic
+                double heuristic = baseHeuristic;
+                double maxDist = 0;
+                for (int j = 0; j < sourceStopIds.size(); j++) {
+                    int s1 = sourceStopIds[j];
+                    if (s1 == query.sourceStopId) {
+                        continue;
+                    }
+                    heuristic += sourceStopIdsToAllStops[s1][stopId];
+                    // if (sourceStopIdsToAllStops[s1][stopId] > maxDist) {
+                    //     maxDist = sourceStopIdsToAllStops[s1][stopId];
+                    // }
                 }
-                heuristic += sourceStopIdsToAllStops[s1][stopId];
-                if (sourceStopIdsToAllStops[s1][stopId] > maxDist) {
-                    maxDist = sourceStopIdsToAllStops[s1][stopId];
-                }
+                heuristic = heuristic / (numberOfSourceStopIds - 1);
+
+                heuristicPerStopId[stopId] = heuristic;
             }
-            heuristic = heuristic / (numberOfSourceStopIds - 1);
+
+            double heuristic = heuristicPerStopId[stopId];            
 
             if (optimization == min_sum || optimization == both) {
                 lowerBound += heuristic;
@@ -323,14 +331,16 @@ void RaptorBound::fillQ() {
                 double secondPart = (double) lowerBound + heuristic;
                 secondPart = secondPart / numberOfSourceStopIds;
 
-                double alternativeHeuristic = (double) lowerBound + maxDist;
-                alternativeHeuristic = alternativeHeuristic / 2;
+                lowerBound = max(lowerBound, secondPart);
 
-                if (alternativeHeuristic > lowerBound && alternativeHeuristic > secondPart) {
-                    lowerBound = alternativeHeuristic;
-                } else {
-                    lowerBound = max(lowerBound, secondPart);
-                }
+                // double alternativeHeuristic = (double) lowerBound + maxDist;
+                // alternativeHeuristic = alternativeHeuristic / 2;
+
+                // if (alternativeHeuristic > lowerBound && alternativeHeuristic > secondPart) {
+                //     lowerBound = alternativeHeuristic;
+                // } else {
+                //     lowerBound = max(lowerBound, secondPart);
+                // }
             }
 
             if (lowerBound > currentBest) {
@@ -571,6 +581,8 @@ void RaptorPQ::transformRaptorToRaptorPQ(shared_ptr<Raptor> raptor) {
     lowestLowerBoundPerRoute = vector<double>(Importer::routes.size(), DBL_MAX);
     markedStopsPerRoute = vector<set<int>>(Importer::routes.size(), set<int>());
 
+    heuristicPerStopId = vector<int>(Importer::stops.size(), -1);
+
     set<int> arrivalStops;
     
     for (int i = 0; i < raptor->currentMarkedStops.size(); i++) {
@@ -592,6 +604,8 @@ void RaptorPQ::initializeRaptorPQ() {
     firstStopSequencePerRoute = vector<int>(Importer::routes.size(), INT_MAX);
     lowestLowerBoundPerRoute = vector<double>(Importer::routes.size(), DBL_MAX);
     markedStopsPerRoute = vector<set<int>>(Importer::routes.size(), set<int>());
+
+    heuristicPerStopId = vector<int>(Importer::stops.size(), -1);
 
     extendedSourceStopIds = vector<int>();
     journeyPointers = vector<JourneyPointerRaptor>(Importer::stops.size(), JourneyPointerRaptor());
@@ -623,19 +637,25 @@ void RaptorPQ::addRoutesToQueue(set<int> stopIds, int excludeRouteId) {
         double lowerBound = earliestArrivalTimes[stopId] - query.sourceTime;
 
         // calculate clique heuristic
-        double heuristic = baseHeuristic;
-        double maxDist = 0;
-        for (int j = 0; j < sourceStopIds.size(); j++) {
-            int s1 = sourceStopIds[j];
-            if (s1 == query.sourceStopId) {
-                continue;
+        if(heuristicPerStopId[stopId] == -1) {
+            double heuristic = baseHeuristic;
+            double maxDist = 0;
+            for (int j = 0; j < sourceStopIds.size(); j++) {
+                int s1 = sourceStopIds[j];
+                if (s1 == query.sourceStopId) {
+                    continue;
+                }
+                heuristic += sourceStopIdsToAllStops[s1][stopId];
+                // if (sourceStopIdsToAllStops[s1][stopId] > maxDist) {
+                //     maxDist = sourceStopIdsToAllStops[s1][stopId];
+                // }
             }
-            heuristic += sourceStopIdsToAllStops[s1][stopId];
-            if (sourceStopIdsToAllStops[s1][stopId] > maxDist) {
-                maxDist = sourceStopIdsToAllStops[s1][stopId];
-            }
+            heuristic = heuristic / (numberOfSourceStopIds - 1);
+
+            heuristicPerStopId[stopId] = heuristic;
         }
-        heuristic = heuristic / (numberOfSourceStopIds - 1);
+
+        double heuristic = heuristicPerStopId[stopId];
 
         if (optimization == min_sum || optimization == both) {
             lowerBound += heuristic;
@@ -643,16 +663,18 @@ void RaptorPQ::addRoutesToQueue(set<int> stopIds, int excludeRouteId) {
             double secondPart = (double) lowerBound + heuristic;
             secondPart = secondPart / numberOfSourceStopIds;
 
-            double alternativeHeuristic = (double) lowerBound + maxDist;
-            alternativeHeuristic = alternativeHeuristic / 2;
+            lowerBound = max(lowerBound, secondPart);
 
-            if (alternativeHeuristic > lowerBound && alternativeHeuristic > secondPart) {
-                altHeuristicImprovementCounter++;
-                lowerBound = alternativeHeuristic;
-            } else {
-                lowerBound = max(lowerBound, secondPart);
-                noHeuristicImprovementCounter++;
-            }
+            // double alternativeHeuristic = (double) lowerBound + maxDist;
+            // alternativeHeuristic = alternativeHeuristic / 2;
+
+            // if (alternativeHeuristic > lowerBound && alternativeHeuristic > secondPart) {
+            //     altHeuristicImprovementCounter++;
+            //     lowerBound = alternativeHeuristic;
+            // } else {
+            //     lowerBound = max(lowerBound, secondPart);
+            //     noHeuristicImprovementCounter++;
+            // }
         }
 
         if (lowerBound > currentBest) {

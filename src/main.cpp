@@ -33,7 +33,7 @@ int main(int argc, const char *argv[]) {
   // DataType dataType = schienenfern_und_regionalverkehr_de;
   // DataType dataType = gesamt_de;
 
-  bool startExperiments = false;
+  bool startExperiments = true;
 
   if (argc > 1){
     if (strcmp(argv[1], "vvs") == 0){

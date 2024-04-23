@@ -133,6 +133,8 @@ class RaptorBound {
         int numberOfSourceStopIds;
         double baseHeuristic;
 
+        vector<int> heuristicPerStopId;
+
         void initializeRaptorBound();
         void fillQ();
         void traverseRoutes();
@@ -197,6 +199,8 @@ class RaptorPQ {
         vector<int> sourceStopIds;
         int numberOfSourceStopIds;
         double baseHeuristic;
+
+        vector<int> heuristicPerStopId;
         
         void traverseRoute();
         void addRoutesToQueue(set<int> stopIds, int excludeRouteId);
