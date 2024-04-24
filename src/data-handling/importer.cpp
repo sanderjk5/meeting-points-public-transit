@@ -159,6 +159,8 @@ void Importer::importRoutes(string folderPathResults, DataType dataType) {
 
     int id = routes.size();
 
+    vector<int> routeTypesCounter = vector<int>(10, 0);
+
     while (std::getline(file, line)) {
         vector<string> fields = splitCsvLine(line);
 
@@ -176,11 +178,20 @@ void Importer::importRoutes(string folderPathResults, DataType dataType) {
             routeIdOldToNew[fields[0]] = id;
         }
 
+        int routeType = std::stoi(fields[3]);
+        routeTypesCounter[routeType]++;
+
         routes.push_back(route);
         id++;
     }
 
     file.close();
+
+    for (int i = 0; i < routeTypesCounter.size(); i++) {
+        if (routeTypesCounter[i] > 0) {
+            cout << "Route type " << i << ": " << routeTypesCounter[i] << endl;
+        }
+    }
 
     cout << "Imported " << routes.size() << " routes." << endl;
 }
