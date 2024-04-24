@@ -845,7 +845,16 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
     resultsFile << ",avgAlternativeHeuristicImprovementCounterRaptorPQParallel,avgAlternativeHeuristicNoImprovementCounterRaptorPQParallel,avgAlternativeHeuristicImprovementFractionRaptorPQParallel";
 
     resultsFile << ",fractionOfOptimalResultsMinSumRaptorFirst,fractionOfOptimalResultsMinMaxRaptorFirst";
-    resultsFile << ",fractionOfLessThan10PercentRelDiffMinSumRaptorFirst,fractionOfLessThan10PercentRelDiffMinMaxRaptorFirst\n";
+    resultsFile << ",fractionOfLessThan10PercentRelDiffMinSumRaptorFirst,fractionOfLessThan10PercentRelDiffMinMaxRaptorFirst";
+
+    resultsFile << ",avgLowerBoundSmallerCounterRaptorPQMinSum,avgLowerBoundGreaterCounterRaptorPQMinSum,avgLowerBoundSmallerFractionRaptorPQMinSum";
+    resultsFile << ",avgLowerBoundAbsDiffRaptorPQMinSum,avgLowerBoundRelDiffRaptorPQMinSum";
+    resultsFile << ",avgLowerBoundSmallerCounterRaptorPQMinMax,avgLowerBoundGreaterCounterRaptorPQMinMax,avgLowerBoundSmallerFractionRaptorPQMinMax";
+    resultsFile << ",avgLowerBoundAbsDiffRaptorPQMinMax,avgLowerBoundRelDiffRaptorPQMinMax";
+    resultsFile << ",avgLowerBoundSmallerCounterRaptorBoundMinSum,avgLowerBoundGreaterCounterRaptorBoundMinSum,avgLowerBoundSmallerFractionRaptorBoundMinSum";
+    resultsFile << ",avgLowerBoundAbsDiffRaptorBoundMinSum,avgLowerBoundRelDiffRaptorBoundMinSum";
+    resultsFile << ",avgLowerBoundSmallerCounterRaptorBoundMinMax,avgLowerBoundGreaterCounterRaptorBoundMinMax,avgLowerBoundSmallerFractionRaptorBoundMinMax";
+    resultsFile << ",avgLowerBoundAbsDiffRaptorBoundMinMax,avgLowerBoundRelDiffRaptorBoundMinMax\n";
 
     for (int i = 0; i < numberOfSources.size(); i++) {
         int numberOfSourceStops = numberOfSources[i];
@@ -958,6 +967,30 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
         vector<double> alternativeHeuristicImprovementFractionParallel;
 
         vector<int> resultsCounterRaptorFirst = vector<int>(4, 0);
+
+        vector<double> lowerBoundSmallerCounterRaptorPQMinSum;
+        vector<double> lowerBoundGreaterCounterRaptorPQMinSum;
+        vector<double> lowerBoundSmallerFractionRaptorPQMinSum;
+        vector<double> lowerBoundAbsDiffRaptorPQMinSum;
+        vector<double> lowerBoundRelDiffRaptorPQMinSum;
+
+        vector<double> lowerBoundSmallerCounterRaptorPQMinMax;
+        vector<double> lowerBoundGreaterCounterRaptorPQMinMax;
+        vector<double> lowerBoundSmallerFractionRaptorPQMinMax;
+        vector<double> lowerBoundAbsDiffRaptorPQMinMax;
+        vector<double> lowerBoundRelDiffRaptorPQMinMax;
+
+        vector<double> lowerBoundSmallerCounterRaptorBoundMinSum;
+        vector<double> lowerBoundGreaterCounterRaptorBoundMinSum;
+        vector<double> lowerBoundSmallerFractionRaptorBoundMinSum;
+        vector<double> lowerBoundAbsDiffRaptorBoundMinSum;
+        vector<double> lowerBoundRelDiffRaptorBoundMinSum;
+
+        vector<double> lowerBoundSmallerCounterRaptorBoundMinMax;
+        vector<double> lowerBoundGreaterCounterRaptorBoundMinMax;
+        vector<double> lowerBoundSmallerFractionRaptorBoundMinMax;
+        vector<double> lowerBoundAbsDiffRaptorBoundMinMax;
+        vector<double> lowerBoundRelDiffRaptorBoundMinMax;
 
         while(successfulQueryCounter < numberOfSuccessfulQueries) {
             queryCounter++;
@@ -1106,6 +1139,30 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
             if (relativeDifferenceMinMaxRaptorFirst < 0.1) {
                 resultsCounterRaptorFirst[3]++;
             }
+
+            lowerBoundSmallerCounterRaptorPQMinSum.push_back((double) raptorPQMinSumQueryProcessor->lowerBoundSmallerCounter);
+            lowerBoundGreaterCounterRaptorPQMinSum.push_back((double) raptorPQMinSumQueryProcessor->lowerBoundGreaterCounter);
+            lowerBoundSmallerFractionRaptorPQMinSum.push_back((double) raptorPQMinSumQueryProcessor->lowerBoundSmallerFraction);
+            lowerBoundAbsDiffRaptorPQMinSum.push_back((double) raptorPQMinSumQueryProcessor->lowerBoundAbsDiff);
+            lowerBoundRelDiffRaptorPQMinSum.push_back((double) raptorPQMinSumQueryProcessor->lowerBoundRelDiff);
+
+            lowerBoundSmallerCounterRaptorPQMinMax.push_back((double) raptorPQMinMaxQueryProcessor->lowerBoundSmallerCounter);
+            lowerBoundGreaterCounterRaptorPQMinMax.push_back((double) raptorPQMinMaxQueryProcessor->lowerBoundGreaterCounter);
+            lowerBoundSmallerFractionRaptorPQMinMax.push_back((double) raptorPQMinMaxQueryProcessor->lowerBoundSmallerFraction);
+            lowerBoundAbsDiffRaptorPQMinMax.push_back((double) raptorPQMinMaxQueryProcessor->lowerBoundAbsDiff);
+            lowerBoundRelDiffRaptorPQMinMax.push_back((double) raptorPQMinMaxQueryProcessor->lowerBoundRelDiff);
+
+            lowerBoundSmallerCounterRaptorBoundMinSum.push_back((double) raptorBoundMinSumQueryProcessor->lowerBoundSmallerCounter);
+            lowerBoundGreaterCounterRaptorBoundMinSum.push_back((double) raptorBoundMinSumQueryProcessor->lowerBoundGreaterCounter);
+            lowerBoundSmallerFractionRaptorBoundMinSum.push_back((double) raptorBoundMinSumQueryProcessor->lowerBoundSmallerFraction);
+            lowerBoundAbsDiffRaptorBoundMinSum.push_back((double) raptorBoundMinSumQueryProcessor->lowerBoundAbsDiff);
+            lowerBoundRelDiffRaptorBoundMinSum.push_back((double) raptorBoundMinSumQueryProcessor->lowerBoundRelDiff);
+
+            lowerBoundSmallerCounterRaptorBoundMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->lowerBoundSmallerCounter);
+            lowerBoundGreaterCounterRaptorBoundMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->lowerBoundGreaterCounter);
+            lowerBoundSmallerFractionRaptorBoundMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->lowerBoundSmallerFraction);
+            lowerBoundAbsDiffRaptorBoundMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->lowerBoundAbsDiff);
+            lowerBoundRelDiffRaptorBoundMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->lowerBoundRelDiff);
 
             string sourceStopNames = "";
             for (int j = 0; j < meetingPointQuery.sourceStopIds.size()-1; j++) {
@@ -1267,6 +1324,30 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
             resultFractionsRaptorFirst.push_back((double) resultsCounterRaptorFirst[i] / numberOfSuccessfulQueries);
         }
 
+        double avgLowerBoundSmallerCounterRaptorPQMinSum = Calculator::getAverage(lowerBoundSmallerCounterRaptorPQMinSum);
+        double avgLowerBoundGreaterCounterRaptorPQMinSum = Calculator::getAverage(lowerBoundGreaterCounterRaptorPQMinSum);
+        double avgLowerBoundSmallerFractionRaptorPQMinSum = Calculator::getAverage(lowerBoundSmallerFractionRaptorPQMinSum);
+        double avgLowerBoundAbsDiffRaptorPQMinSum = Calculator::getAverage(lowerBoundAbsDiffRaptorPQMinSum);
+        double avgLowerBoundRelDiffRaptorPQMinSum = Calculator::getAverage(lowerBoundRelDiffRaptorPQMinSum);
+
+        double avgLowerBoundSmallerCounterRaptorPQMinMax = Calculator::getAverage(lowerBoundSmallerCounterRaptorPQMinMax);
+        double avgLowerBoundGreaterCounterRaptorPQMinMax = Calculator::getAverage(lowerBoundGreaterCounterRaptorPQMinMax);
+        double avgLowerBoundSmallerFractionRaptorPQMinMax = Calculator::getAverage(lowerBoundSmallerFractionRaptorPQMinMax);
+        double avgLowerBoundAbsDiffRaptorPQMinMax = Calculator::getAverage(lowerBoundAbsDiffRaptorPQMinMax);
+        double avgLowerBoundRelDiffRaptorPQMinMax = Calculator::getAverage(lowerBoundRelDiffRaptorPQMinMax);
+
+        double avgLowerBoundSmallerCounterRaptorBoundMinSum = Calculator::getAverage(lowerBoundSmallerCounterRaptorBoundMinSum);
+        double avgLowerBoundGreaterCounterRaptorBoundMinSum = Calculator::getAverage(lowerBoundGreaterCounterRaptorBoundMinSum);
+        double avgLowerBoundSmallerFractionRaptorBoundMinSum = Calculator::getAverage(lowerBoundSmallerFractionRaptorBoundMinSum);
+        double avgLowerBoundAbsDiffRaptorBoundMinSum = Calculator::getAverage(lowerBoundAbsDiffRaptorBoundMinSum);
+        double avgLowerBoundRelDiffRaptorBoundMinSum = Calculator::getAverage(lowerBoundRelDiffRaptorBoundMinSum);
+
+        double avgLowerBoundSmallerCounterRaptorBoundMinMax = Calculator::getAverage(lowerBoundSmallerCounterRaptorBoundMinMax);
+        double avgLowerBoundGreaterCounterRaptorBoundMinMax = Calculator::getAverage(lowerBoundGreaterCounterRaptorBoundMinMax);
+        double avgLowerBoundSmallerFractionRaptorBoundMinMax = Calculator::getAverage(lowerBoundSmallerFractionRaptorBoundMinMax);
+        double avgLowerBoundAbsDiffRaptorBoundMinMax = Calculator::getAverage(lowerBoundAbsDiffRaptorBoundMinMax);
+        double avgLowerBoundRelDiffRaptorBoundMinMax = Calculator::getAverage(lowerBoundRelDiffRaptorBoundMinMax);
+
         resultsFile << numberOfSourceStops << "," << avgMinSumDuration << "," << avgMinMaxDuration << "," << medianMinSumDuration << "," << medianMinMaxDuration << "," << maxMinSumDuration;
         resultsFile << "," << maxMinMaxDuration << "," << minMinSumDuration << "," << minMinMaxDuration;
         resultsFile << "," << avgQueryTimeRaptorFirst << "," << avgQueryTimeRaptorOptimalResult << "," << avgQueryTimeRaptorPQMinSum << "," << avgQueryTimeRaptorPQMinMax << "," << avgQueryTimeRaptorPQParallelMinSum << "," << avgQueryTimeRaptorPQParallelMinMax << "," << avgQueryTimeRaptorBoundMinSum << "," << avgQueryTimeRaptorBoundMinMax;
@@ -1289,7 +1370,11 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
         resultsFile << "," << avgDurationTraverseRouteMinSum << "," << avgDurationTraverseRouteMinMax << "," << avgDurationTraverseRouteParallelMinSum << "," << avgDurationTraverseRouteParallelMinMax;
         resultsFile << "," << avgAlternativeHeuristicImprovementCounter << "," << avgAlternativeHeuristicNoImprovementCounter << "," << avgAlternativeHeuristicImprovementFraction;
         resultsFile << "," << avgAlternativeHeuristicImprovementCounterParallel << "," << avgAlternativeHeuristicNoImprovementCounterParallel << "," << avgAlternativeHeuristicImprovementFractionParallel;
-        resultsFile << "," << resultFractionsRaptorFirst[0] << "," << resultFractionsRaptorFirst[1] << "," << resultFractionsRaptorFirst[2] << "," << resultFractionsRaptorFirst[3] << "\n";
+        resultsFile << "," << resultFractionsRaptorFirst[0] << "," << resultFractionsRaptorFirst[1] << "," << resultFractionsRaptorFirst[2] << "," << resultFractionsRaptorFirst[3];
+        resultsFile << "," << avgLowerBoundSmallerCounterRaptorPQMinSum << "," << avgLowerBoundGreaterCounterRaptorPQMinSum << "," << avgLowerBoundSmallerFractionRaptorPQMinSum << "," << avgLowerBoundAbsDiffRaptorPQMinSum << "," << avgLowerBoundRelDiffRaptorPQMinSum;
+        resultsFile << "," << avgLowerBoundSmallerCounterRaptorPQMinMax << "," << avgLowerBoundGreaterCounterRaptorPQMinMax << "," << avgLowerBoundSmallerFractionRaptorPQMinMax << "," << avgLowerBoundAbsDiffRaptorPQMinMax << "," << avgLowerBoundRelDiffRaptorPQMinMax;
+        resultsFile << "," << avgLowerBoundSmallerCounterRaptorBoundMinSum << "," << avgLowerBoundGreaterCounterRaptorBoundMinSum << "," << avgLowerBoundSmallerFractionRaptorBoundMinSum << "," << avgLowerBoundAbsDiffRaptorBoundMinSum << "," << avgLowerBoundRelDiffRaptorBoundMinSum;
+        resultsFile << "," << avgLowerBoundSmallerCounterRaptorBoundMinMax << "," << avgLowerBoundGreaterCounterRaptorBoundMinMax << "," << avgLowerBoundSmallerFractionRaptorBoundMinMax << "," << avgLowerBoundAbsDiffRaptorBoundMinMax << "," << avgLowerBoundRelDiffRaptorBoundMinMax << "\n";
 
         cout << "Rate of successful queries: " << (double) successfulQueryCounter / numberOfSuccessfulQueries << endl;
 
@@ -1429,6 +1514,27 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
         cout << "Fraction of optimal results min max raptor first: " << resultFractionsRaptorFirst[1] << endl;
         cout << "Fraction of less than 10% relative difference min sum raptor first: " << resultFractionsRaptorFirst[2] << endl;
         cout << "Fraction of less than 10% relative difference min max raptor first: " << resultFractionsRaptorFirst[3] << endl;
+
+        cout << "\nAverage lower bound smaller counter raptor pq min sum: " << avgLowerBoundSmallerCounterRaptorPQMinSum << endl;
+        cout << "Average lower bound smaller counter raptor pq min max: " << avgLowerBoundSmallerCounterRaptorPQMinMax << endl;
+        cout << "Average lower bound smaller counter raptor bound min sum: " << avgLowerBoundSmallerCounterRaptorBoundMinSum << endl;
+        cout << "Average lower bound smaller counter raptor bound min max: " << avgLowerBoundSmallerCounterRaptorBoundMinMax << endl;
+        cout << "Average lower bound greater counter raptor pq min sum: " << avgLowerBoundGreaterCounterRaptorPQMinSum << endl;
+        cout << "Average lower bound greater counter raptor pq min max: " << avgLowerBoundGreaterCounterRaptorPQMinMax << endl;
+        cout << "Average lower bound greater counter raptor bound min sum: " << avgLowerBoundGreaterCounterRaptorBoundMinSum << endl;
+        cout << "Average lower bound greater counter raptor bound min max: " << avgLowerBoundGreaterCounterRaptorBoundMinMax << endl;
+        cout << "Average lower bound smaller fraction raptor pq min sum: " << avgLowerBoundSmallerFractionRaptorPQMinSum << endl;
+        cout << "Average lower bound smaller fraction raptor pq min max: " << avgLowerBoundSmallerFractionRaptorPQMinMax << endl;
+        cout << "Average lower bound smaller fraction raptor bound min sum: " << avgLowerBoundSmallerFractionRaptorBoundMinSum << endl;
+        cout << "Average lower bound smaller fraction raptor bound min max: " << avgLowerBoundSmallerFractionRaptorBoundMinMax << endl;
+        cout << "Average lower bound absolute difference raptor pq min sum: " << avgLowerBoundAbsDiffRaptorPQMinSum << endl;
+        cout << "Average lower bound absolute difference raptor pq min max: " << avgLowerBoundAbsDiffRaptorPQMinMax << endl;
+        cout << "Average lower bound absolute difference raptor bound min sum: " << avgLowerBoundAbsDiffRaptorBoundMinSum << endl;
+        cout << "Average lower bound absolute difference raptor bound min max: " << avgLowerBoundAbsDiffRaptorBoundMinMax << endl;
+        cout << "Average lower bound relative difference raptor pq min sum: " << avgLowerBoundRelDiffRaptorPQMinSum << endl;
+        cout << "Average lower bound relative difference raptor pq min max: " << avgLowerBoundRelDiffRaptorPQMinMax << endl;
+        cout << "Average lower bound relative difference raptor bound min sum: " << avgLowerBoundRelDiffRaptorBoundMinSum << endl;
+        cout << "Average lower bound relative difference raptor bound min max: " << avgLowerBoundRelDiffRaptorBoundMinMax << endl;
         cout << "\n\n";
     }  
 }

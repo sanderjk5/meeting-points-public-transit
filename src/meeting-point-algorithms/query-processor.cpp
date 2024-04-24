@@ -1060,6 +1060,11 @@ vector<Journey> RaptorQueryProcessor::getJourneys(Optimization optimization) {
 }
 
 void RaptorBoundQueryProcessor::processRaptorBoundQuery(Optimization optimization) {
+    // if (optimization == min_sum) {
+    //     cout << "min sum" << endl;
+    // } else {
+    //     cout << "min max" << endl;
+    // }
     map<int, vector<int>> sourceStopIdToAllStops;
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -1082,12 +1087,12 @@ void RaptorBoundQueryProcessor::processRaptorBoundQuery(Optimization optimizatio
     auto endInitRaptorBounds = std::chrono::high_resolution_clock::now();
     durationInitRaptorBounds = std::chrono::duration_cast<std::chrono::milliseconds>(endInitRaptorBounds - startInitRaptorBounds).count();
 
-
     auto startRaptorBound = std::chrono::high_resolution_clock::now();
 
     int currentBest = INT_MAX;
 
     while (true) {
+        // cout << "current best: " << currentBest << endl;
         bool allFinished = true;
         #pragma omp parallel for
         for (int i = 0; i < raptorBounds.size(); i++) {
@@ -1206,10 +1211,23 @@ void RaptorBoundQueryProcessor::processRaptorBoundQuery(Optimization optimizatio
     meetingPointQueryResult.queryTime = duration;
 
     numberOfExpandedRoutes = 0;
+    lowerBoundSmallerCounter = 0;
+    lowerBoundGreaterCounter = 0;
+    lowerBoundAbsDiff = 0;
+    lowerBoundRelDiff = 0;
     for (int i = 0; i < raptorBounds.size(); i++) {
         numberOfExpandedRoutes += raptorBounds[i]->numberOfExpandedRoutes;
+        lowerBoundSmallerCounter += raptorBounds[i]->lowerBoundSmallerCounter;
+        lowerBoundGreaterCounter += raptorBounds[i]->lowerBoundGreaterCounter;
+        lowerBoundAbsDiff += raptorBounds[i]->lowerBoundAbsDifference;
+        lowerBoundRelDiff += raptorBounds[i]->lowerBoundRelDifference;
     }
     numberOfExpandedRoutes = numberOfExpandedRoutes / raptorBounds.size();
+    lowerBoundAbsDiff = lowerBoundAbsDiff / lowerBoundSmallerCounter;
+    lowerBoundRelDiff = lowerBoundRelDiff / lowerBoundSmallerCounter;
+    lowerBoundSmallerCounter = lowerBoundSmallerCounter / raptorBounds.size();
+    lowerBoundGreaterCounter = lowerBoundGreaterCounter / raptorBounds.size();
+    lowerBoundSmallerFraction = (double) lowerBoundSmallerCounter / (lowerBoundSmallerCounter + lowerBoundGreaterCounter);
 }
 
 MeetingPointQueryResult RaptorBoundQueryProcessor::getMeetingPointQueryResult() {
@@ -1355,6 +1373,11 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
     meetingPointQueryResult.queryTime = duration;
 
     numberOfExpandedRoutes = 0;
+    lowerBoundSmallerCounter = 0;
+    lowerBoundGreaterCounter = 0;
+    lowerBoundAbsDiff = 0;
+    lowerBoundRelDiff = 0;
+
     durationInitHeuristic = 0;
     durationTransformRaptorToRaptorPQ = 0;
     durationAddRoutesToQueue = 0;
@@ -1364,6 +1387,12 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
     noHeuristicImprovementCounter = 0;
     for (int i = 0; i < raptorPQs.size(); i++) {
         numberOfExpandedRoutes += raptorPQs[i]->numberOfExpandedRoutes;
+
+        lowerBoundSmallerCounter += raptorPQs[i]->lowerBoundSmallerCounter;
+        lowerBoundGreaterCounter += raptorPQs[i]->lowerBoundGreaterCounter;
+        lowerBoundAbsDiff += raptorPQs[i]->lowerBoundAbsDifference;
+        lowerBoundRelDiff += raptorPQs[i]->lowerBoundRelDifference;
+
         durationInitHeuristic += raptorPQs[i]->durationInitHeuristic;
         durationTransformRaptorToRaptorPQ += raptorPQs[i]->durationTransformRaptorToRaptorPQ;
         durationAddRoutesToQueue += raptorPQs[i]->durationAddRoutesToQueue;
@@ -1375,6 +1404,13 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
         }
     }
     numberOfExpandedRoutes = numberOfExpandedRoutes / raptorPQs.size();
+
+    lowerBoundAbsDiff = lowerBoundAbsDiff / lowerBoundSmallerCounter;
+    lowerBoundRelDiff = lowerBoundRelDiff / lowerBoundSmallerCounter;
+    lowerBoundSmallerCounter = lowerBoundSmallerCounter / raptorPQs.size();
+    lowerBoundGreaterCounter = lowerBoundGreaterCounter / raptorPQs.size();
+    lowerBoundSmallerFraction = (double) lowerBoundSmallerCounter / (lowerBoundSmallerCounter + lowerBoundGreaterCounter);
+
     durationInitHeuristic = durationInitHeuristic / (raptorPQs.size() * 1000);
     durationTransformRaptorToRaptorPQ = durationTransformRaptorToRaptorPQ / (raptorPQs.size() * 1000);
     durationAddRoutesToQueue = durationAddRoutesToQueue / (raptorPQs.size() * 1000);

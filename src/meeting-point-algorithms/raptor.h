@@ -114,6 +114,10 @@ class RaptorBound {
         vector<bool> currentMarkedStops;
 
         double numberOfExpandedRoutes;
+        double lowerBoundSmallerCounter;
+        double lowerBoundGreaterCounter;
+        double lowerBoundAbsDifference;
+        double lowerBoundRelDifference;
 
     private:
         RaptorQuery query;
@@ -152,6 +156,10 @@ class RaptorPQ {
             this->durationTraverseRoute = 0;
             this->altHeuristicImprovementCounter = 0;
             this->noHeuristicImprovementCounter = 0;
+            this->lowerBoundSmallerCounter = 0;
+            this->lowerBoundGreaterCounter = 0;
+            this->lowerBoundAbsDifference = 0;
+            this->lowerBoundRelDifference = 0;
         };
         ~RaptorPQ(){};
 
@@ -167,6 +175,10 @@ class RaptorPQ {
         Journey createJourney(int targetStopId);
 
         double numberOfExpandedRoutes;
+        double lowerBoundSmallerCounter;
+        double lowerBoundGreaterCounter;
+        double lowerBoundAbsDifference;
+        double lowerBoundRelDifference;
 
         double durationInitHeuristic;
         double durationTransformRaptorToRaptorPQ;

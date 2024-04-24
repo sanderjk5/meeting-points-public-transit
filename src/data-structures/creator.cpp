@@ -77,26 +77,6 @@ void Creator::createNetworkGraph() {
         if (addEdge) {
             networkGraph.adjacencyList[connection.departureStopId].push_back(edge);
         }
-
-        // Edge backEdge;
-        // backEdge.targetStopId = connection.departureStopId;
-        // backEdge.ewgt = connectionArrivalTime - connection.departureTime;
-
-        // bool addBackEdge = true;
-
-        // for (int j = 0; j < networkGraph.adjacencyList[connection.arrivalStopId].size(); j++) {
-        //     if (networkGraph.adjacencyList[connection.arrivalStopId][j].targetStopId == backEdge.targetStopId) {
-        //         if (networkGraph.adjacencyList[connection.arrivalStopId][j].ewgt > backEdge.ewgt) {
-        //             networkGraph.adjacencyList[connection.arrivalStopId][j].ewgt = backEdge.ewgt;
-        //         }
-        //         addBackEdge = false;
-        //         break;
-        //     }
-        // }
-
-        // if (addBackEdge) {
-        //     networkGraph.adjacencyList[connection.arrivalStopId].push_back(backEdge);
-        // }
     }
 
     for (int i = 0; i < Importer::footPaths.size(); i++) {
@@ -127,6 +107,7 @@ void Creator::createNetworkGraph() {
         }
     }
 
+    int numberOfEdgeUpdates = 0;
     int numberOfBackEdges = 0;
 
     for (int i = 0; i < networkGraph.adjacencyList.size(); i++) {
@@ -153,6 +134,7 @@ void Creator::createNetworkGraph() {
                 if (networkGraph.adjacencyList[edge.targetStopId][k].targetStopId == backEdge.targetStopId) {
                     if (networkGraph.adjacencyList[edge.targetStopId][k].ewgt > backEdge.ewgt) {
                         networkGraph.adjacencyList[edge.targetStopId][k].ewgt = backEdge.ewgt;
+                        numberOfEdgeUpdates++;
                     }
                     addBackEdge = false;
                     break;
@@ -168,6 +150,7 @@ void Creator::createNetworkGraph() {
         networkGraph.vertices.push_back(vertex);
     }
 
+    cout << "Number of edge updates: " << numberOfEdgeUpdates << endl;
     cout << "Number of back edges: " << numberOfBackEdges << endl;
 
     // Get the number of vertices and edges

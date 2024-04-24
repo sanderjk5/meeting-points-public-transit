@@ -157,6 +157,12 @@ class RaptorBoundQueryProcessor {
         double durationRaptorBounds;
         double durationCreateResult;
 
+        double lowerBoundSmallerCounter;
+        double lowerBoundGreaterCounter;
+        double lowerBoundSmallerFraction;
+        double lowerBoundAbsDiff;
+        double lowerBoundRelDiff;
+
     private:
         MeetingPointQuery meetingPointQuery;
         MeetingPointQueryResult meetingPointQueryResult;
@@ -190,6 +196,12 @@ class RaptorPQQueryProcessor {
         int altHeuristicImprovementCounter;
         int noHeuristicImprovementCounter;
         double altHeuristicImprovementFraction;
+
+        double lowerBoundSmallerCounter;
+        double lowerBoundGreaterCounter;
+        double lowerBoundSmallerFraction;
+        double lowerBoundAbsDiff;
+        double lowerBoundRelDiff;
 
     private:
         MeetingPointQuery meetingPointQuery;

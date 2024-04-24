@@ -279,6 +279,11 @@ void RaptorBound::initializeRaptorBound() {
     currentBest = INT_MAX;
 
     heuristicPerStopId = vector<int>(Importer::stops.size(), -1);
+
+    lowerBoundSmallerCounter = 0;
+    lowerBoundGreaterCounter = 0;
+    lowerBoundAbsDifference = 0;
+    lowerBoundRelDifference = 0;
 }
 
 void RaptorBound::processRaptorRound() {
@@ -344,7 +349,14 @@ void RaptorBound::fillQ() {
             }
 
             if (lowerBound > currentBest) {
+                lowerBoundGreaterCounter++;
                 continue;
+            } else if (currentBest != INT_MAX) {
+                lowerBoundSmallerCounter++;
+                double absDifference = (double) currentBest - lowerBound;
+                lowerBoundAbsDifference += absDifference;
+                double relDifference = (double) absDifference / currentBest;
+                lowerBoundRelDifference += relDifference;
             }
 
             vector<RouteSequencePair>* routes = &Importer::routesOfAStop[stopId];
@@ -678,7 +690,14 @@ void RaptorPQ::addRoutesToQueue(set<int> stopIds, int excludeRouteId) {
         }
 
         if (lowerBound > currentBest) {
+            lowerBoundGreaterCounter++;
             continue;
+        } else if (currentBest != INT_MAX) {
+            lowerBoundSmallerCounter++;
+            double absDifference = (double) currentBest - lowerBound;
+            lowerBoundAbsDifference += absDifference;
+            double relDifference = (double) absDifference / currentBest;
+            lowerBoundRelDifference += relDifference;
         }
 
         vector<RouteSequencePair>* routes = &Importer::routesOfAStop[stopId];
