@@ -993,193 +993,198 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
         vector<double> lowerBoundRelDiffRaptorBoundMinMax;
 
         while(successfulQueryCounter < numberOfSuccessfulQueries) {
-            queryCounter++;
+            try { 
+                queryCounter++;
 
-            MeetingPointQuery meetingPointQuery;
-            if (loadOrStoreQueries && meetingPointQueries.size() > 0) {
-                meetingPointQuery = meetingPointQueries[successfulQueryCounter];
-            } else {
-                meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSourceStops);
-            }
-
-            unique_ptr<RaptorQueryProcessor> raptorQueryProcessorOptimal = unique_ptr<RaptorQueryProcessor> (new RaptorQueryProcessor(meetingPointQuery));
-            raptorQueryProcessorOptimal->processRaptorQuery();
-            MeetingPointQueryResult meetingPointQueryResultRaptorOptimal = raptorQueryProcessorOptimal->getMeetingPointQueryResult();
-
-            if (meetingPointQueryResultRaptorOptimal.meetingPointMinSum == "" || meetingPointQueryResultRaptorOptimal.meetingPointMinMax == "") {
-                continue;
-            }
-
-            successfulQueryCounter++;
-
-            unique_ptr<RaptorQueryProcessor> raptorQueryProcessorFirst = unique_ptr<RaptorQueryProcessor> (new RaptorQueryProcessor(meetingPointQuery));
-            raptorQueryProcessorFirst->processRaptorQueryUntilFirstResult();
-            MeetingPointQueryResult meetingPointQueryResultRaptorFirst = raptorQueryProcessorFirst->getMeetingPointQueryResult();
-
-            unique_ptr<RaptorPQQueryProcessor> raptorPQMinSumQueryProcessor = unique_ptr<RaptorPQQueryProcessor> (new RaptorPQQueryProcessor(meetingPointQuery));
-            raptorPQMinSumQueryProcessor->processRaptorPQQuery(min_sum);
-            MeetingPointQueryResult meetingPointQueryResultRaptorPQMinSum = raptorPQMinSumQueryProcessor->getMeetingPointQueryResult();
-
-            unique_ptr<RaptorPQQueryProcessor> raptorPQMinMaxQueryProcessor = unique_ptr<RaptorPQQueryProcessor> (new RaptorPQQueryProcessor(meetingPointQuery));
-            raptorPQMinMaxQueryProcessor->processRaptorPQQuery(min_max);
-            MeetingPointQueryResult meetingPointQueryResultRaptorPQMinMax = raptorPQMinMaxQueryProcessor->getMeetingPointQueryResult();
-
-            // unique_ptr<RaptorPQParallelQueryProcessor> raptorPQParallelMinSumQueryProcessor = unique_ptr<RaptorPQParallelQueryProcessor> (new RaptorPQParallelQueryProcessor(meetingPointQuery));
-            // raptorPQParallelMinSumQueryProcessor->processRaptorPQParallelQuery(min_sum);
-            // MeetingPointQueryResult meetingPointQueryResultRaptorPQParallelMinSum = raptorPQParallelMinSumQueryProcessor->getMeetingPointQueryResult();
-
-            // unique_ptr<RaptorPQParallelQueryProcessor> raptorPQParallelMinMaxQueryProcessor = unique_ptr<RaptorPQParallelQueryProcessor> (new RaptorPQParallelQueryProcessor(meetingPointQuery));
-            // raptorPQParallelMinMaxQueryProcessor->processRaptorPQParallelQuery(min_max);
-            // MeetingPointQueryResult meetingPointQueryResultRaptorPQParallelMinMax = raptorPQParallelMinMaxQueryProcessor->getMeetingPointQueryResult();
-
-            unique_ptr<RaptorBoundQueryProcessor> raptorBoundMinSumQueryProcessor = unique_ptr<RaptorBoundQueryProcessor> (new RaptorBoundQueryProcessor(meetingPointQuery));
-            raptorBoundMinSumQueryProcessor->processRaptorBoundQuery(min_sum);
-            MeetingPointQueryResult meetingPointQueryResultRaptorBoundMinSum = raptorBoundMinSumQueryProcessor->getMeetingPointQueryResult();
-
-            unique_ptr<RaptorBoundQueryProcessor> raptorBoundMinMaxQueryProcessor = unique_ptr<RaptorBoundQueryProcessor> (new RaptorBoundQueryProcessor(meetingPointQuery));
-            raptorBoundMinMaxQueryProcessor->processRaptorBoundQuery(min_max);
-            MeetingPointQueryResult meetingPointQueryResultRaptorBoundMinMax = raptorBoundMinMaxQueryProcessor->getMeetingPointQueryResult();
-
-            minSumDurations.push_back((double) meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds);
-            minMaxDurations.push_back((double) meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds);
-
-            queryTimesRaptorFirst.push_back((double) meetingPointQueryResultRaptorFirst.queryTime);
-            queryTimesRaptorOptimalResult.push_back((double) meetingPointQueryResultRaptorOptimal.queryTime);
-            queryTimesRaptorPQMinSum.push_back((double) meetingPointQueryResultRaptorPQMinSum.queryTime);
-            queryTimesRaptorPQMinMax.push_back((double) meetingPointQueryResultRaptorPQMinMax.queryTime);
-            // queryTimesRaptorPQParallelMinSum.push_back((double) meetingPointQueryResultRaptorPQParallelMinSum.queryTime);
-            // queryTimesRaptorPQParallelMinMax.push_back((double) meetingPointQueryResultRaptorPQParallelMinMax.queryTime);
-            queryTimesRaptorBoundMinSum.push_back((double) meetingPointQueryResultRaptorBoundMinSum.queryTime);
-            queryTimesRaptorBoundMinMax.push_back((double) meetingPointQueryResultRaptorBoundMinMax.queryTime);
-
-            numberOfExpandedRoutesRaptorFirst.push_back((double) raptorQueryProcessorFirst->numberOfExpandedRoutes);
-            numberOfExpandedRoutesRaptorOptimalResult.push_back((double) raptorQueryProcessorOptimal->numberOfExpandedRoutes);
-            numberOfExpandedRoutesRaptorPQMinSum.push_back((double) raptorPQMinSumQueryProcessor->numberOfExpandedRoutes);
-            numberOfExpandedRoutesRaptorPQMinMax.push_back((double) raptorPQMinMaxQueryProcessor->numberOfExpandedRoutes);
-            // numberOfExpandedRoutesRaptorPQParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->numberOfExpandedRoutes);
-            // numberOfExpandedRoutesRaptorPQParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->numberOfExpandedRoutes);
-            numberOfExpandedRoutesRaptorBoundMinSum.push_back((double) raptorBoundMinSumQueryProcessor->numberOfExpandedRoutes);
-            numberOfExpandedRoutesRaptorBoundMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->numberOfExpandedRoutes);
-
-            durationPhastMinSum.push_back((double) raptorPQMinSumQueryProcessor->durationPhast);
-            durationPhastMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationPhast);
-            // durationPhastParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationPhast);
-            // durationPhastParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->durationPhast);
-            durationPhastBoundMinSum.push_back((double) raptorBoundMinSumQueryProcessor->durationPhast);
-            durationPhastBoundMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->durationPhast);
-            durationRaptorFirstResultMinSum.push_back((double) raptorPQMinSumQueryProcessor->durationRaptorFirstResult);
-            durationRaptorFirstResultMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationRaptorFirstResult);
-            // durationRaptorFirstResultParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationRaptorFirstResult);
-            // durationRaptorFirstResultParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->durationRaptorFirstResult);
-            durationInitRaptorPQsMinSum.push_back((double) raptorPQMinSumQueryProcessor->durationInitRaptorPQs);
-            durationInitRaptorPQsMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationInitRaptorPQs);
-            // durationInitRaptorPQsParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationInitRaptorPQs);
-            // durationInitRaptorPQsParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->durationInitRaptorPQs);
-            durationInitRaptorBoundsMinSum.push_back((double) raptorBoundMinSumQueryProcessor->durationInitRaptorBounds);
-            durationInitRaptorBoundsMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->durationInitRaptorBounds);
-            durationRaptorPQsMinSum.push_back((double) raptorPQMinSumQueryProcessor->durationRaptorPQs);
-            durationRaptorPQsMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationRaptorPQs);
-            // durationRaptorPQsParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationRaptorPQs);
-            // durationRaptorPQsParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->durationRaptorPQs);
-            durationRaptorBoundsMinSum.push_back((double) raptorBoundMinSumQueryProcessor->durationRaptorBounds);
-            durationRaptorBoundsMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->durationRaptorBounds);
-            durationCreateResultMinSum.push_back((double) raptorPQMinSumQueryProcessor->durationCreateResult);
-            durationCreateResultMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationCreateResult);
-            // durationCreateResultParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationCreateResult);
-            // durationCreateResultParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->durationCreateResult);
-            durationCreateResultBoundMinSum.push_back((double) raptorBoundMinSumQueryProcessor->durationCreateResult);
-            durationCreateResultBoundMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->durationCreateResult);
-
-            durationInitHeuristicMinSum.push_back((double) raptorPQMinSumQueryProcessor->durationInitHeuristic);
-            durationInitHeuristicMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationInitHeuristic);
-            // durationInitHeuristicParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationInitHeuristic);
-            // durationInitHeuristicParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->durationInitHeuristic);
-            durationTransformRaptorToRaptorPQMinSum.push_back((double) raptorPQMinSumQueryProcessor->durationTransformRaptorToRaptorPQ);
-            durationTransformRaptorToRaptorPQMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationTransformRaptorToRaptorPQ);
-            // durationTransformRaptorToRaptorPQParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationTransformRaptorToRaptorPQ);
-            // durationTransformRaptorToRaptorPQParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->durationTransformRaptorToRaptorPQ);
-            durationAddRoutesToQueueMinSum.push_back((double) raptorPQMinSumQueryProcessor->durationAddRoutesToQueue);
-            durationAddRoutesToQueueMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationAddRoutesToQueue);
-            // durationAddRoutesToQueueParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationAddRoutesToQueue);
-            // durationAddRoutesToQueueParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->durationAddRoutesToQueue);
-            durationGetEarliestTripWithDayOffsetMinSum.push_back((double) raptorPQMinSumQueryProcessor->durationGetEarliestTripWithDayOffset);
-            durationGetEarliestTripWithDayOffsetMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationGetEarliestTripWithDayOffset);
-            // durationGetEarliestTripWithDayOffsetParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationGetEarliestTripWithDayOffset);
-            // durationGetEarliestTripWithDayOffsetParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->durationGetEarliestTripWithDayOffset);
-            durationTraverseRouteMinSum.push_back((double) raptorPQMinSumQueryProcessor->durationTraverseRoute);
-            durationTraverseRouteMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationTraverseRoute);
-            // durationTraverseRouteParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationTraverseRoute);
-            // durationTraverseRouteParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->durationTraverseRoute);
-
-            alternativeHeuristicImprovementCounter.push_back((double) raptorPQMinMaxQueryProcessor->altHeuristicImprovementCounter);
-            alternativeHeuristicNoImprovementCounter.push_back((double) raptorPQMinMaxQueryProcessor->noHeuristicImprovementCounter);
-            alternativeHeuristicImprovementFraction.push_back((double) raptorPQMinMaxQueryProcessor->altHeuristicImprovementFraction);
-            // alternativeHeuristicImprovementCounterParallel.push_back((double) raptorPQParallelMinMaxQueryProcessor->altHeuristicImprovementCounter);
-            // alternativeHeuristicNoImprovementCounterParallel.push_back((double) raptorPQParallelMinMaxQueryProcessor->noHeuristicImprovementCounter);
-            // alternativeHeuristicImprovementFractionParallel.push_back((double) raptorPQParallelMinMaxQueryProcessor->altHeuristicImprovementFraction);
-
-            int differenceMinSumRaptorFirst = meetingPointQueryResultRaptorFirst.minSumDurationInSeconds - meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds;
-            int differenceMinMaxRaptorFirst = meetingPointQueryResultRaptorFirst.minMaxDurationInSeconds - meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds;
-
-            double relativeDifferenceMinSumRaptorFirst = (double) differenceMinSumRaptorFirst / meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds;
-            double relativeDifferenceMinMaxRaptorFirst = (double) differenceMinMaxRaptorFirst / meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds;
-
-            if (differenceMinSumRaptorFirst == 0) {
-                resultsCounterRaptorFirst[0]++;
-            } 
-
-            if (differenceMinMaxRaptorFirst == 0) {
-                resultsCounterRaptorFirst[1]++;
-            } 
-            
-            if (relativeDifferenceMinSumRaptorFirst < 0.1) {
-                resultsCounterRaptorFirst[2]++;
-            }
-            
-            if (relativeDifferenceMinMaxRaptorFirst < 0.1) {
-                resultsCounterRaptorFirst[3]++;
-            }
-
-            lowerBoundSmallerCounterRaptorPQMinSum.push_back((double) raptorPQMinSumQueryProcessor->lowerBoundSmallerCounter);
-            lowerBoundGreaterCounterRaptorPQMinSum.push_back((double) raptorPQMinSumQueryProcessor->lowerBoundGreaterCounter);
-            lowerBoundSmallerFractionRaptorPQMinSum.push_back((double) raptorPQMinSumQueryProcessor->lowerBoundSmallerFraction);
-            lowerBoundAbsDiffRaptorPQMinSum.push_back((double) raptorPQMinSumQueryProcessor->lowerBoundAbsDiff);
-            lowerBoundRelDiffRaptorPQMinSum.push_back((double) raptorPQMinSumQueryProcessor->lowerBoundRelDiff);
-
-            lowerBoundSmallerCounterRaptorPQMinMax.push_back((double) raptorPQMinMaxQueryProcessor->lowerBoundSmallerCounter);
-            lowerBoundGreaterCounterRaptorPQMinMax.push_back((double) raptorPQMinMaxQueryProcessor->lowerBoundGreaterCounter);
-            lowerBoundSmallerFractionRaptorPQMinMax.push_back((double) raptorPQMinMaxQueryProcessor->lowerBoundSmallerFraction);
-            lowerBoundAbsDiffRaptorPQMinMax.push_back((double) raptorPQMinMaxQueryProcessor->lowerBoundAbsDiff);
-            lowerBoundRelDiffRaptorPQMinMax.push_back((double) raptorPQMinMaxQueryProcessor->lowerBoundRelDiff);
-
-            lowerBoundSmallerCounterRaptorBoundMinSum.push_back((double) raptorBoundMinSumQueryProcessor->lowerBoundSmallerCounter);
-            lowerBoundGreaterCounterRaptorBoundMinSum.push_back((double) raptorBoundMinSumQueryProcessor->lowerBoundGreaterCounter);
-            lowerBoundSmallerFractionRaptorBoundMinSum.push_back((double) raptorBoundMinSumQueryProcessor->lowerBoundSmallerFraction);
-            lowerBoundAbsDiffRaptorBoundMinSum.push_back((double) raptorBoundMinSumQueryProcessor->lowerBoundAbsDiff);
-            lowerBoundRelDiffRaptorBoundMinSum.push_back((double) raptorBoundMinSumQueryProcessor->lowerBoundRelDiff);
-
-            lowerBoundSmallerCounterRaptorBoundMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->lowerBoundSmallerCounter);
-            lowerBoundGreaterCounterRaptorBoundMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->lowerBoundGreaterCounter);
-            lowerBoundSmallerFractionRaptorBoundMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->lowerBoundSmallerFraction);
-            lowerBoundAbsDiffRaptorBoundMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->lowerBoundAbsDiff);
-            lowerBoundRelDiffRaptorBoundMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->lowerBoundRelDiff);
-
-            string sourceStopNames = "";
-            for (int j = 0; j < meetingPointQuery.sourceStopIds.size()-1; j++) {
-                sourceStopNames += Importer::getStopName(meetingPointQuery.sourceStopIds[j]) + "-";
-            }
-            sourceStopNames += Importer::getStopName(meetingPointQuery.sourceStopIds[meetingPointQuery.sourceStopIds.size()-1]);
-
-            if (loadOrStoreQueries && meetingPointQueries.size() == 0) {
-                for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
-                    queriesInfoFile << meetingPointQuery.sourceStopIds[i] << ",";
+                MeetingPointQuery meetingPointQuery;
+                if (loadOrStoreQueries && meetingPointQueries.size() > 0) {
+                    meetingPointQuery = meetingPointQueries[successfulQueryCounter];
+                } else {
+                    meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSourceStops);
                 }
-                queriesInfoFile << meetingPointQuery.sourceTime << "," << meetingPointQuery.weekday << "\n";
-            }
 
-            // Print progress every 20% of the queries
-            if (successfulQueryCounter % (numberOfSuccessfulQueries / 5) == 0) {
-                cout << "Progress: " << successfulQueryCounter << " / " << numberOfSuccessfulQueries << endl;
+                unique_ptr<RaptorQueryProcessor> raptorQueryProcessorOptimal = unique_ptr<RaptorQueryProcessor> (new RaptorQueryProcessor(meetingPointQuery));
+                raptorQueryProcessorOptimal->processRaptorQuery();
+                MeetingPointQueryResult meetingPointQueryResultRaptorOptimal = raptorQueryProcessorOptimal->getMeetingPointQueryResult();
+
+                if (meetingPointQueryResultRaptorOptimal.meetingPointMinSum == "" || meetingPointQueryResultRaptorOptimal.meetingPointMinMax == "") {
+                    continue;
+                }
+
+                successfulQueryCounter++;
+
+                unique_ptr<RaptorQueryProcessor> raptorQueryProcessorFirst = unique_ptr<RaptorQueryProcessor> (new RaptorQueryProcessor(meetingPointQuery));
+                raptorQueryProcessorFirst->processRaptorQueryUntilFirstResult();
+                MeetingPointQueryResult meetingPointQueryResultRaptorFirst = raptorQueryProcessorFirst->getMeetingPointQueryResult();
+
+                unique_ptr<RaptorPQQueryProcessor> raptorPQMinSumQueryProcessor = unique_ptr<RaptorPQQueryProcessor> (new RaptorPQQueryProcessor(meetingPointQuery));
+                raptorPQMinSumQueryProcessor->processRaptorPQQuery(min_sum);
+                MeetingPointQueryResult meetingPointQueryResultRaptorPQMinSum = raptorPQMinSumQueryProcessor->getMeetingPointQueryResult();
+
+                unique_ptr<RaptorPQQueryProcessor> raptorPQMinMaxQueryProcessor = unique_ptr<RaptorPQQueryProcessor> (new RaptorPQQueryProcessor(meetingPointQuery));
+                raptorPQMinMaxQueryProcessor->processRaptorPQQuery(min_max);
+                MeetingPointQueryResult meetingPointQueryResultRaptorPQMinMax = raptorPQMinMaxQueryProcessor->getMeetingPointQueryResult();
+
+                // unique_ptr<RaptorPQParallelQueryProcessor> raptorPQParallelMinSumQueryProcessor = unique_ptr<RaptorPQParallelQueryProcessor> (new RaptorPQParallelQueryProcessor(meetingPointQuery));
+                // raptorPQParallelMinSumQueryProcessor->processRaptorPQParallelQuery(min_sum);
+                // MeetingPointQueryResult meetingPointQueryResultRaptorPQParallelMinSum = raptorPQParallelMinSumQueryProcessor->getMeetingPointQueryResult();
+
+                // unique_ptr<RaptorPQParallelQueryProcessor> raptorPQParallelMinMaxQueryProcessor = unique_ptr<RaptorPQParallelQueryProcessor> (new RaptorPQParallelQueryProcessor(meetingPointQuery));
+                // raptorPQParallelMinMaxQueryProcessor->processRaptorPQParallelQuery(min_max);
+                // MeetingPointQueryResult meetingPointQueryResultRaptorPQParallelMinMax = raptorPQParallelMinMaxQueryProcessor->getMeetingPointQueryResult();
+
+                unique_ptr<RaptorBoundQueryProcessor> raptorBoundMinSumQueryProcessor = unique_ptr<RaptorBoundQueryProcessor> (new RaptorBoundQueryProcessor(meetingPointQuery));
+                raptorBoundMinSumQueryProcessor->processRaptorBoundQuery(min_sum);
+                MeetingPointQueryResult meetingPointQueryResultRaptorBoundMinSum = raptorBoundMinSumQueryProcessor->getMeetingPointQueryResult();
+
+                unique_ptr<RaptorBoundQueryProcessor> raptorBoundMinMaxQueryProcessor = unique_ptr<RaptorBoundQueryProcessor> (new RaptorBoundQueryProcessor(meetingPointQuery));
+                raptorBoundMinMaxQueryProcessor->processRaptorBoundQuery(min_max);
+                MeetingPointQueryResult meetingPointQueryResultRaptorBoundMinMax = raptorBoundMinMaxQueryProcessor->getMeetingPointQueryResult();
+
+                minSumDurations.push_back((double) meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds);
+                minMaxDurations.push_back((double) meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds);
+
+                queryTimesRaptorFirst.push_back((double) meetingPointQueryResultRaptorFirst.queryTime);
+                queryTimesRaptorOptimalResult.push_back((double) meetingPointQueryResultRaptorOptimal.queryTime);
+                queryTimesRaptorPQMinSum.push_back((double) meetingPointQueryResultRaptorPQMinSum.queryTime);
+                queryTimesRaptorPQMinMax.push_back((double) meetingPointQueryResultRaptorPQMinMax.queryTime);
+                // queryTimesRaptorPQParallelMinSum.push_back((double) meetingPointQueryResultRaptorPQParallelMinSum.queryTime);
+                // queryTimesRaptorPQParallelMinMax.push_back((double) meetingPointQueryResultRaptorPQParallelMinMax.queryTime);
+                queryTimesRaptorBoundMinSum.push_back((double) meetingPointQueryResultRaptorBoundMinSum.queryTime);
+                queryTimesRaptorBoundMinMax.push_back((double) meetingPointQueryResultRaptorBoundMinMax.queryTime);
+
+                numberOfExpandedRoutesRaptorFirst.push_back((double) raptorQueryProcessorFirst->numberOfExpandedRoutes);
+                numberOfExpandedRoutesRaptorOptimalResult.push_back((double) raptorQueryProcessorOptimal->numberOfExpandedRoutes);
+                numberOfExpandedRoutesRaptorPQMinSum.push_back((double) raptorPQMinSumQueryProcessor->numberOfExpandedRoutes);
+                numberOfExpandedRoutesRaptorPQMinMax.push_back((double) raptorPQMinMaxQueryProcessor->numberOfExpandedRoutes);
+                // numberOfExpandedRoutesRaptorPQParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->numberOfExpandedRoutes);
+                // numberOfExpandedRoutesRaptorPQParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->numberOfExpandedRoutes);
+                numberOfExpandedRoutesRaptorBoundMinSum.push_back((double) raptorBoundMinSumQueryProcessor->numberOfExpandedRoutes);
+                numberOfExpandedRoutesRaptorBoundMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->numberOfExpandedRoutes);
+
+                durationPhastMinSum.push_back((double) raptorPQMinSumQueryProcessor->durationPhast);
+                durationPhastMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationPhast);
+                // durationPhastParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationPhast);
+                // durationPhastParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->durationPhast);
+                durationPhastBoundMinSum.push_back((double) raptorBoundMinSumQueryProcessor->durationPhast);
+                durationPhastBoundMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->durationPhast);
+                durationRaptorFirstResultMinSum.push_back((double) raptorPQMinSumQueryProcessor->durationRaptorFirstResult);
+                durationRaptorFirstResultMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationRaptorFirstResult);
+                // durationRaptorFirstResultParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationRaptorFirstResult);
+                // durationRaptorFirstResultParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->durationRaptorFirstResult);
+                durationInitRaptorPQsMinSum.push_back((double) raptorPQMinSumQueryProcessor->durationInitRaptorPQs);
+                durationInitRaptorPQsMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationInitRaptorPQs);
+                // durationInitRaptorPQsParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationInitRaptorPQs);
+                // durationInitRaptorPQsParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->durationInitRaptorPQs);
+                durationInitRaptorBoundsMinSum.push_back((double) raptorBoundMinSumQueryProcessor->durationInitRaptorBounds);
+                durationInitRaptorBoundsMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->durationInitRaptorBounds);
+                durationRaptorPQsMinSum.push_back((double) raptorPQMinSumQueryProcessor->durationRaptorPQs);
+                durationRaptorPQsMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationRaptorPQs);
+                // durationRaptorPQsParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationRaptorPQs);
+                // durationRaptorPQsParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->durationRaptorPQs);
+                durationRaptorBoundsMinSum.push_back((double) raptorBoundMinSumQueryProcessor->durationRaptorBounds);
+                durationRaptorBoundsMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->durationRaptorBounds);
+                durationCreateResultMinSum.push_back((double) raptorPQMinSumQueryProcessor->durationCreateResult);
+                durationCreateResultMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationCreateResult);
+                // durationCreateResultParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationCreateResult);
+                // durationCreateResultParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->durationCreateResult);
+                durationCreateResultBoundMinSum.push_back((double) raptorBoundMinSumQueryProcessor->durationCreateResult);
+                durationCreateResultBoundMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->durationCreateResult);
+
+                durationInitHeuristicMinSum.push_back((double) raptorPQMinSumQueryProcessor->durationInitHeuristic);
+                durationInitHeuristicMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationInitHeuristic);
+                // durationInitHeuristicParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationInitHeuristic);
+                // durationInitHeuristicParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->durationInitHeuristic);
+                durationTransformRaptorToRaptorPQMinSum.push_back((double) raptorPQMinSumQueryProcessor->durationTransformRaptorToRaptorPQ);
+                durationTransformRaptorToRaptorPQMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationTransformRaptorToRaptorPQ);
+                // durationTransformRaptorToRaptorPQParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationTransformRaptorToRaptorPQ);
+                // durationTransformRaptorToRaptorPQParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->durationTransformRaptorToRaptorPQ);
+                durationAddRoutesToQueueMinSum.push_back((double) raptorPQMinSumQueryProcessor->durationAddRoutesToQueue);
+                durationAddRoutesToQueueMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationAddRoutesToQueue);
+                // durationAddRoutesToQueueParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationAddRoutesToQueue);
+                // durationAddRoutesToQueueParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->durationAddRoutesToQueue);
+                durationGetEarliestTripWithDayOffsetMinSum.push_back((double) raptorPQMinSumQueryProcessor->durationGetEarliestTripWithDayOffset);
+                durationGetEarliestTripWithDayOffsetMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationGetEarliestTripWithDayOffset);
+                // durationGetEarliestTripWithDayOffsetParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationGetEarliestTripWithDayOffset);
+                // durationGetEarliestTripWithDayOffsetParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->durationGetEarliestTripWithDayOffset);
+                durationTraverseRouteMinSum.push_back((double) raptorPQMinSumQueryProcessor->durationTraverseRoute);
+                durationTraverseRouteMinMax.push_back((double) raptorPQMinMaxQueryProcessor->durationTraverseRoute);
+                // durationTraverseRouteParallelMinSum.push_back((double) raptorPQParallelMinSumQueryProcessor->durationTraverseRoute);
+                // durationTraverseRouteParallelMinMax.push_back((double) raptorPQParallelMinMaxQueryProcessor->durationTraverseRoute);
+
+                alternativeHeuristicImprovementCounter.push_back((double) raptorPQMinMaxQueryProcessor->altHeuristicImprovementCounter);
+                alternativeHeuristicNoImprovementCounter.push_back((double) raptorPQMinMaxQueryProcessor->noHeuristicImprovementCounter);
+                alternativeHeuristicImprovementFraction.push_back((double) raptorPQMinMaxQueryProcessor->altHeuristicImprovementFraction);
+                // alternativeHeuristicImprovementCounterParallel.push_back((double) raptorPQParallelMinMaxQueryProcessor->altHeuristicImprovementCounter);
+                // alternativeHeuristicNoImprovementCounterParallel.push_back((double) raptorPQParallelMinMaxQueryProcessor->noHeuristicImprovementCounter);
+                // alternativeHeuristicImprovementFractionParallel.push_back((double) raptorPQParallelMinMaxQueryProcessor->altHeuristicImprovementFraction);
+
+                int differenceMinSumRaptorFirst = meetingPointQueryResultRaptorFirst.minSumDurationInSeconds - meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds;
+                int differenceMinMaxRaptorFirst = meetingPointQueryResultRaptorFirst.minMaxDurationInSeconds - meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds;
+
+                double relativeDifferenceMinSumRaptorFirst = (double) differenceMinSumRaptorFirst / meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds;
+                double relativeDifferenceMinMaxRaptorFirst = (double) differenceMinMaxRaptorFirst / meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds;
+
+                if (differenceMinSumRaptorFirst == 0) {
+                    resultsCounterRaptorFirst[0]++;
+                } 
+
+                if (differenceMinMaxRaptorFirst == 0) {
+                    resultsCounterRaptorFirst[1]++;
+                } 
+                
+                if (relativeDifferenceMinSumRaptorFirst < 0.1) {
+                    resultsCounterRaptorFirst[2]++;
+                }
+                
+                if (relativeDifferenceMinMaxRaptorFirst < 0.1) {
+                    resultsCounterRaptorFirst[3]++;
+                }
+
+                lowerBoundSmallerCounterRaptorPQMinSum.push_back((double) raptorPQMinSumQueryProcessor->lowerBoundSmallerCounter);
+                lowerBoundGreaterCounterRaptorPQMinSum.push_back((double) raptorPQMinSumQueryProcessor->lowerBoundGreaterCounter);
+                lowerBoundSmallerFractionRaptorPQMinSum.push_back((double) raptorPQMinSumQueryProcessor->lowerBoundSmallerFraction);
+                lowerBoundAbsDiffRaptorPQMinSum.push_back((double) raptorPQMinSumQueryProcessor->lowerBoundAbsDiff);
+                lowerBoundRelDiffRaptorPQMinSum.push_back((double) raptorPQMinSumQueryProcessor->lowerBoundRelDiff);
+
+                lowerBoundSmallerCounterRaptorPQMinMax.push_back((double) raptorPQMinMaxQueryProcessor->lowerBoundSmallerCounter);
+                lowerBoundGreaterCounterRaptorPQMinMax.push_back((double) raptorPQMinMaxQueryProcessor->lowerBoundGreaterCounter);
+                lowerBoundSmallerFractionRaptorPQMinMax.push_back((double) raptorPQMinMaxQueryProcessor->lowerBoundSmallerFraction);
+                lowerBoundAbsDiffRaptorPQMinMax.push_back((double) raptorPQMinMaxQueryProcessor->lowerBoundAbsDiff);
+                lowerBoundRelDiffRaptorPQMinMax.push_back((double) raptorPQMinMaxQueryProcessor->lowerBoundRelDiff);
+
+                lowerBoundSmallerCounterRaptorBoundMinSum.push_back((double) raptorBoundMinSumQueryProcessor->lowerBoundSmallerCounter);
+                lowerBoundGreaterCounterRaptorBoundMinSum.push_back((double) raptorBoundMinSumQueryProcessor->lowerBoundGreaterCounter);
+                lowerBoundSmallerFractionRaptorBoundMinSum.push_back((double) raptorBoundMinSumQueryProcessor->lowerBoundSmallerFraction);
+                lowerBoundAbsDiffRaptorBoundMinSum.push_back((double) raptorBoundMinSumQueryProcessor->lowerBoundAbsDiff);
+                lowerBoundRelDiffRaptorBoundMinSum.push_back((double) raptorBoundMinSumQueryProcessor->lowerBoundRelDiff);
+
+                lowerBoundSmallerCounterRaptorBoundMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->lowerBoundSmallerCounter);
+                lowerBoundGreaterCounterRaptorBoundMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->lowerBoundGreaterCounter);
+                lowerBoundSmallerFractionRaptorBoundMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->lowerBoundSmallerFraction);
+                lowerBoundAbsDiffRaptorBoundMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->lowerBoundAbsDiff);
+                lowerBoundRelDiffRaptorBoundMinMax.push_back((double) raptorBoundMinMaxQueryProcessor->lowerBoundRelDiff);
+
+                string sourceStopNames = "";
+                for (int j = 0; j < meetingPointQuery.sourceStopIds.size()-1; j++) {
+                    sourceStopNames += Importer::getStopName(meetingPointQuery.sourceStopIds[j]) + "-";
+                }
+                sourceStopNames += Importer::getStopName(meetingPointQuery.sourceStopIds[meetingPointQuery.sourceStopIds.size()-1]);
+
+                if (loadOrStoreQueries && meetingPointQueries.size() == 0) {
+                    for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
+                        queriesInfoFile << meetingPointQuery.sourceStopIds[i] << ",";
+                    }
+                    queriesInfoFile << meetingPointQuery.sourceTime << "," << meetingPointQuery.weekday << "\n";
+                }
+
+                // Print progress every 20% of the queries
+                if (successfulQueryCounter % (numberOfSuccessfulQueries / 5) == 0) {
+                    cout << "Progress: " << successfulQueryCounter << " / " << numberOfSuccessfulQueries << endl;
+                } 
+            } catch (...) {
+                cout << "Exception caught" << endl;
+                continue;
             }
         }
 
