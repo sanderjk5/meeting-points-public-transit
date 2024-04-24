@@ -178,9 +178,11 @@ void Importer::importRoutes(string folderPathResults, DataType dataType) {
             routeIdOldToNew[fields[0]] = id;
         }
 
-        int routeType = std::stoi(fields[3]);
-        routeTypesCounter[routeType]++;
-
+        if (dataType != vvs_j24) {
+            int routeType = std::stoi(fields[3]);
+            routeTypesCounter[routeType]++;
+        }
+        
         routes.push_back(route);
         id++;
     }
