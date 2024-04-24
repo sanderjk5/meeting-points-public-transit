@@ -1223,7 +1223,7 @@ void RaptorBoundQueryProcessor::processRaptorBoundQuery(Optimization optimizatio
         lowerBoundRelDiff += raptorBounds[i]->lowerBoundRelDifference;
     }
     numberOfExpandedRoutes = numberOfExpandedRoutes / raptorBounds.size();
-    lowerBoundAbsDiff = lowerBoundAbsDiff / lowerBoundSmallerCounter;
+    lowerBoundAbsDiff = lowerBoundAbsDiff / (lowerBoundSmallerCounter * 3600);
     lowerBoundRelDiff = lowerBoundRelDiff / lowerBoundSmallerCounter;
     lowerBoundSmallerCounter = lowerBoundSmallerCounter / raptorBounds.size();
     lowerBoundGreaterCounter = lowerBoundGreaterCounter / raptorBounds.size();
@@ -1405,7 +1405,7 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
     }
     numberOfExpandedRoutes = numberOfExpandedRoutes / raptorPQs.size();
 
-    lowerBoundAbsDiff = lowerBoundAbsDiff / lowerBoundSmallerCounter;
+    lowerBoundAbsDiff = lowerBoundAbsDiff / (lowerBoundSmallerCounter * 3600);
     lowerBoundRelDiff = lowerBoundRelDiff / lowerBoundSmallerCounter;
     lowerBoundSmallerCounter = lowerBoundSmallerCounter / raptorPQs.size();
     lowerBoundGreaterCounter = lowerBoundGreaterCounter / raptorPQs.size();
