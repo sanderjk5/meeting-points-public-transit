@@ -58,6 +58,11 @@ void LowerBoundTester::getLowerBoundDiffs(int numberOfSources, int numberOfTarge
                 lowerBoundGreaterCounter++;
             }
         }
+
+        // print the progress
+        if (i % 20 == 0) {
+            cout << "Progress: " << i << " / " << numberOfSources << endl;
+        }
     }
 
     double avgAbsoluteDiff = (Calculator::getAverage(absoluteDiffs) / 3600);

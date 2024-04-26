@@ -495,6 +495,11 @@ map<int, vector<int>> Graph::getDistancesWithPhast(vector<int> sourceStopIds) {
         }
     }
 
+    #pragma omp parallel for
+    for (int i = 0; i < distances.size(); i++) {
+        distances[i] = distances[i] * LOWER_BOUND_FACTOR;
+    }
+
     auto end = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
     // cout << "Phast completed in " << duration.count() << "ms.\n" << endl;
