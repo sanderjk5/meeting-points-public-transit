@@ -149,6 +149,8 @@ void Importer::importRoutes(string folderPathResults, DataType dataType) {
     // combine folder path with file name
     std::string filePath = folderPathResults + "routes.txt";
 
+    vector<string> longDistanceShortNames = {"EC", "EN", "RJ", "IC", "ICE"};
+
     std::ifstream file(filePath);
     if (!file.is_open()) {
         std::cerr << "Failed to open file: " << filePath << std::endl;
@@ -178,9 +180,10 @@ void Importer::importRoutes(string folderPathResults, DataType dataType) {
             routeIdOldToNew[fields[0]] = id;
         }
 
-        if (dataType != vvs_j24) {
-            int routeType = std::stoi(fields[3]);
-            routeTypesCounter[routeType]++;
+        if (dataType != vvs_j24 && find(longDistanceShortNames.begin(), longDistanceShortNames.end(), fields[1]) != longDistanceShortNames.end()) {
+            route.isLongDistance = true;
+        } else {
+            route.isLongDistance = false;
         }
         
         routes.push_back(route);
@@ -188,12 +191,6 @@ void Importer::importRoutes(string folderPathResults, DataType dataType) {
     }
 
     file.close();
-
-    for (int i = 0; i < routeTypesCounter.size(); i++) {
-        if (routeTypesCounter[i] > 0) {
-            cout << "Route type " << i << ": " << routeTypesCounter[i] << endl;
-        }
-    }
 
     cout << "Imported " << routes.size() << " routes." << endl;
 }
@@ -434,6 +431,7 @@ void Importer::generateValidRoutes() {
                 Route newRoute;
                 int newRouteId = newRoutes.size();
                 newRoute.id = newRouteId;
+                newRoute.isLongDistance = routes[trips[lastTripId].routeId].isLongDistance;
                 routeIdMapping[stopIdString] = newRouteId;
                 newRoutes.push_back(newRoute);
                 stopsOfARoute.push_back(stopIds);

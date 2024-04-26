@@ -6,6 +6,7 @@
 #include"data-handling/importer.h"
 #include<string>
 #include"meeting-point-algorithms/algorithm-tester.h"
+#include"meeting-point-algorithms/lower-bound-tester.h"
 #include"meeting-point-algorithms/query-processor.h"
 #include"data-structures/g-tree.h"
 #include"data-structures/creator.h"
@@ -107,4 +108,8 @@ void ExperimentController::compareRaptorAlgorithms(DataType dataType, int number
 
 void ExperimentController::compareRaptorPQAlgorithms(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSourceStops) {
     RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(dataType, numberOfSuccessfulQueries, numberOfSourceStops, true);
+}
+
+void ExperimentController::evaluateLowerBounds(int numberOfSources, int numberOfTargetsPerSource) {
+    LowerBoundTester::getLowerBoundDiffs(numberOfSources, numberOfTargetsPerSource);
 }

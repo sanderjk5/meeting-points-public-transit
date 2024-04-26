@@ -19,6 +19,7 @@ struct Calendar
 struct Route
 {
     int id;
+    bool isLongDistance;
 };
 
 struct Stop
