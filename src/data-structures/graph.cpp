@@ -496,8 +496,11 @@ map<int, vector<int>> Graph::getDistancesWithPhast(vector<int> sourceStopIds) {
     }
 
     #pragma omp parallel for
-    for (int i = 0; i < distances.size(); i++) {
-        distances[i] = distances[i] * LOWER_BOUND_FACTOR;
+    for (int i = 0; i < sourceStopIds.size(); i++) {
+        int sourceStopId = sourceStopIds[i];
+        for (int j = 0; j < distances[sourceStopId].size(); j++) {
+            distances[sourceStopId][j] = (int) distances[sourceStopId][j] * LOWER_BOUND_FACTOR;
+        }
     }
 
     auto end = chrono::high_resolution_clock::now();
