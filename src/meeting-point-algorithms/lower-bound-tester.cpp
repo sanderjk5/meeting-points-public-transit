@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include <memory>
 
 #include "csa.h"
 #include "../data-structures/graph.h"
@@ -37,11 +38,11 @@ void LowerBoundTester::getLowerBoundDiffs(int numberOfSources, int numberOfTarge
         csaQuery.sourceTime = rand() % SECONDS_PER_DAY;
         csaQuery.weekday = rand() % 7;
 
-        CSA csa = CSA(csaQuery);
-        csa.processCSA();
+        unique_ptr<CSA> csa = unique_ptr<CSA>(new CSA(csaQuery));
+        csa->processCSA();
 
         for (int j = 0; j < numberOfTargetsPerSource; j++) {
-            int earliestArrivalTime = csa.getEarliestArrivalTime(targets[j]);
+            int earliestArrivalTime = csa->getEarliestArrivalTime(targets[j]);
             if (earliestArrivalTime == INT_MAX) {
                 continue;
             }
