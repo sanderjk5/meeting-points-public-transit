@@ -2603,7 +2603,9 @@ double Calculator::getAverage(vector<double> numbers) {
     for (int i = 0; i < numbers.size(); i++) {
         sum += numbers[i];
     }
-    return sum / numbers.size();
+    double numberCounter = double (numbers.size());
+    double average = (double) sum / numberCounter;
+    return average;
 }
 
 double Calculator::getMedian(vector<double> numbers) {

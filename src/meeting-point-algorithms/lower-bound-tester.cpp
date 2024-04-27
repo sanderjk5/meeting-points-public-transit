@@ -51,16 +51,16 @@ void LowerBoundTester::getLowerBoundDiffs(int numberOfSources, int numberOfTarge
 
             double absoluteDiff = (double) (duration - lowerBound);
             double relativeDiff = absoluteDiff / (double) duration;
-            absoluteDiffs.push_back(absoluteDiff);
-            relativeDiffs.push_back(relativeDiff);
-
-            if (duration < lowerBound) {
+            if (absoluteDiff < 0) {
+                relativeDiff = 0;
                 lowerBoundGreaterCounter++;
             }
+            absoluteDiffs.push_back(absoluteDiff);
+            relativeDiffs.push_back(relativeDiff);
         }
 
         // print the progress
-        if (i % 20 == 0) {
+        if (i % (numberOfSources / 5) == 0) {
             cout << "Progress: " << i << " / " << numberOfSources << endl;
         }
     }
@@ -74,6 +74,8 @@ void LowerBoundTester::getLowerBoundDiffs(int numberOfSources, int numberOfTarge
     double minAbsoluteDiff = (Calculator::getMinimum(absoluteDiffs) / 3600);
     double minRelativeDiff = Calculator::getMinimum(relativeDiffs);
 
+    double lowerBoundGreaterFraction = (double) lowerBoundGreaterCounter / absoluteDiffs.size();
+
     cout << "Average absolute diff (in hours): " << avgAbsoluteDiff << endl;
     cout << "Average relative diff: " << avgRelativeDiff << endl;
     cout << "Median absolute diff (in hours): " << medianAbsoluteDiff << endl;
@@ -83,5 +85,5 @@ void LowerBoundTester::getLowerBoundDiffs(int numberOfSources, int numberOfTarge
     cout << "Min absolute diff (in hours): " << minAbsoluteDiff << endl;
     cout << "Min relative diff: " << minRelativeDiff << endl;
 
-    cout << "Lower bound greater counter: " << lowerBoundGreaterCounter << endl;
+    cout << "Lower bound greater fraction: " << lowerBoundGreaterFraction << endl;
 }
