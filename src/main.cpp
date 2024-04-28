@@ -33,7 +33,7 @@ int main(int argc, const char *argv[]) {
   // DataType dataType = schienenfern_und_regionalverkehr_de;
   // DataType dataType = gesamt_de;
 
-  bool startExperiments = false;
+  bool startExperiments = true;
 
   if (argc > 1){
     if (strcmp(argv[1], "vvs") == 0){
@@ -91,7 +91,7 @@ int main(int argc, const char *argv[]) {
   cout << "Number of edges: " << edgeCount << "\n" << endl;
 
   if (startExperiments){
-    ExperimentController::evaluateLowerBounds(1000, 20);
+    // ExperimentController::evaluateLowerBounds(1000, 20);
 
     // Real experiments
     // vector<int> numberOfSourceStops = {2, 3, 5, 10, 25};
@@ -107,7 +107,7 @@ int main(int argc, const char *argv[]) {
 
     // ExperimentController::compareRaptorAlgorithms(dataType, 100, numberOfSourceStops);
 
-    // ExperimentController::compareRaptorPQAlgorithms(dataType, 50, numberOfSourceStops);
+    ExperimentController::compareRaptorPQAlgorithms(dataType, 50, numberOfSourceStops);
 
     // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 10, 30, 0.90);
 
