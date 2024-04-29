@@ -962,6 +962,8 @@ bool RaptorQueryProcessor::processRaptorRound() {
     auto start = std::chrono::high_resolution_clock::now();
 
     bool allFinished = true;
+    omp_set_dynamic(0);
+    omp_set_num_threads(4);
     #pragma omp parallel for
     for (int i = 0; i < raptors.size(); i++) {
         if(!raptors[i]->isFinished()) {
