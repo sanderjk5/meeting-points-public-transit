@@ -109,7 +109,9 @@ class Importer {
         static vector<vector<RouteSequencePair>> routesOfAStop;
 
         static vector<FootPath> footPaths;
+        static vector<FootPath> footPathsBackward;
         static vector<int> indexOfFirstFootPathOfAStop;
+        static vector<int> indexOfFirstFootPathOfAStopBackward;
 
         static void import(string folderName, bool prepareData, DataType dataType);
         static vector<StopTime> getStopTimesOfATrip(int tripId);

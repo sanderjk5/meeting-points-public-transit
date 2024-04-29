@@ -215,8 +215,8 @@ void NaiveKeyStopQueryProcessor::findKeyStops(DataType dataType, vector<int> num
 
         while(successfulQueries < numberOfQueries) {
             MeetingPointQuery randomMeetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSourceStops);
-            NaiveQueryProcessor naiveQueryProcessor = NaiveQueryProcessor(randomMeetingPointQuery);
-            naiveQueryProcessor.processNaiveQuery();
+            RaptorQueryProcessor naiveQueryProcessor = RaptorQueryProcessor(randomMeetingPointQuery);
+            naiveQueryProcessor.processRaptorQuery();
             MeetingPointQueryResult meetingPointQueryResult = naiveQueryProcessor.getMeetingPointQueryResult();
 
             if (meetingPointQueryResult.meetingPointMinSum != "" && meetingPointQueryResult.meetingPointMinMax != "") {
@@ -1059,6 +1059,46 @@ vector<Journey> RaptorQueryProcessor::getJourneys(Optimization optimization) {
     return journeys;
 }
 
+vector<int> RaptorQueryProcessor::getStopsWithGivenAccuracy(double accuracyBound) {
+    vector<int> meetingPointsOverAccuracy = vector<int>(0);
+    for (int i = 0; i < Importer::stops.size(); i++) {
+        int sum = 0;
+        int max = 0;
+        for (int j = 0; j < meetingPointQuery.sourceStopIds.size(); j++) {
+            int earliestArrivalTime = raptors[j]->getEarliestArrivalTime(i);
+            if (earliestArrivalTime == INT_MAX) {
+                sum = INT_MAX;
+                max = INT_MAX;
+                break;
+            }
+
+            int duration = earliestArrivalTime - meetingPointQuery.sourceTime;
+            sum += duration;
+            if (duration > max) {
+                max = duration;
+            }            
+        }
+        if (sum == INT_MAX || max == INT_MAX) {
+            continue;
+        }
+
+        int differenceMinSum = sum - meetingPointQueryResult.minSumDurationInSeconds;
+        int differenceMinMax = max - meetingPointQueryResult.minMaxDurationInSeconds;
+
+        double relativeDifferenceMinSum = (double) differenceMinSum / sum;
+        double relativeDifferenceMinMax = (double) differenceMinMax / max;
+
+        double accuracyMinSum = 1 - relativeDifferenceMinSum;
+        double accuracyMinMax = 1 - relativeDifferenceMinMax;
+
+        if (accuracyMinSum > accuracyBound && accuracyMinMax > accuracyBound) {
+            meetingPointsOverAccuracy.push_back(Importer::stops[i].id);
+        }
+    }
+
+    return meetingPointsOverAccuracy;
+}
+
 void RaptorBoundQueryProcessor::processRaptorBoundQuery(Optimization optimization) {
     // if (optimization == min_sum) {
     //     cout << "min sum" << endl;
@@ -1068,7 +1108,9 @@ void RaptorBoundQueryProcessor::processRaptorBoundQuery(Optimization optimizatio
     map<int, vector<int>> sourceStopIdToAllStops;
 
     auto start = std::chrono::high_resolution_clock::now();
-    sourceStopIdToAllStops = Creator::networkGraph.getDistancesWithPhast(meetingPointQuery.sourceStopIds);
+    if (!USE_LANDMARKS) {
+        sourceStopIdToAllStops = Creator::networkGraph.getDistancesWithPhast(meetingPointQuery.sourceStopIds);
+    }
     auto endPhast = std::chrono::high_resolution_clock::now();
     durationPhast = std::chrono::duration_cast<std::chrono::milliseconds>(endPhast - start).count();
 
@@ -1253,8 +1295,9 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
     map<int, vector<int>> sourceStopIdToAllStops;
 
     auto start = std::chrono::high_resolution_clock::now();
-    
-    sourceStopIdToAllStops = Creator::networkGraph.getDistancesWithPhast(meetingPointQuery.sourceStopIds);
+    if (!USE_LANDMARKS) {
+        sourceStopIdToAllStops = Creator::networkGraph.getDistancesWithPhast(meetingPointQuery.sourceStopIds);
+    }
     auto endPhast = std::chrono::high_resolution_clock::now();
     durationPhast = std::chrono::duration_cast<std::chrono::milliseconds>(endPhast - start).count();
     

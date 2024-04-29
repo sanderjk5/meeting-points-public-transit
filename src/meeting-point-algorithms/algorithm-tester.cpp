@@ -2639,7 +2639,7 @@ double Calculator::getAverage(vector<double> numbers) {
     for (int i = 0; i < numbers.size(); i++) {
         sum += numbers[i];
     }
-    double numberCounter = double (numbers.size());
+    double numberCounter = (double) numbers.size();
     double average = (double) sum / numberCounter;
     return average;
 }

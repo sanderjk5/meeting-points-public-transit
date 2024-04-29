@@ -3,6 +3,7 @@
 #include<string>
 #include"meeting-point-algorithms/algorithm-tester.h"
 #include"meeting-point-algorithms/query-processor.h"
+#include"meeting-point-algorithms/landmark-processor.h"
 #include"data-structures/g-tree.h"
 #include"data-structures/creator.h"
 #include"data-handling/converter.h"
@@ -33,7 +34,7 @@ int main(int argc, const char *argv[]) {
   // DataType dataType = schienenfern_und_regionalverkehr_de;
   // DataType dataType = gesamt_de;
 
-  bool startExperiments = true;
+  bool startExperiments = false;
 
   if (argc > 1){
     if (strcmp(argv[1], "vvs") == 0){
@@ -81,6 +82,7 @@ int main(int argc, const char *argv[]) {
   }
 
   Creator::loadOrCreateNetworkGraph(dataType);
+  // LandmarkProcessor::loadOrCalculateLandmarkDurations(dataType);
 
   // print number of vertices and edges
   cout << "Number of vertices: " << Creator::networkGraph.vertices.size() << endl;
@@ -91,7 +93,7 @@ int main(int argc, const char *argv[]) {
   cout << "Number of edges: " << edgeCount << "\n" << endl;
 
   if (startExperiments){
-    // ExperimentController::evaluateLowerBounds(1000, 20);
+    // ExperimentController::evaluateLowerBounds(100, 20);
 
     // Real experiments
     // vector<int> numberOfSourceStops = {2, 3, 5, 10, 25};
@@ -102,14 +104,14 @@ int main(int argc, const char *argv[]) {
     // ExperimentController::testAndCompareAlgorithmsRandom(dataType, 1000, numberOfSourceStops);
 
     // Test experiments
-    vector<int> numberOfSourceStops = {2, 5, 10, 50};
-    // vector<int> numberOfSourceStops = {5, 10};
+    // vector<int> numberOfSourceStops = {2, 5, 10, 50};
+    vector<int> numberOfSourceStops = {5};
 
     // ExperimentController::compareRaptorAlgorithms(dataType, 100, numberOfSourceStops);
 
-    ExperimentController::compareRaptorPQAlgorithms(dataType, 50, numberOfSourceStops);
+    // ExperimentController::compareRaptorPQAlgorithms(dataType, 50, numberOfSourceStops);
 
-    // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 10, 30, 0.90);
+    NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 1000, 40, 0.95);
 
     // ExperimentController::findBestGTreeParameters(dataType, 2, 10);
     // ExperimentController::testAndCompareAlgorithmsRandom(dataType, 10, numberOfSourceStops);

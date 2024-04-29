@@ -7,6 +7,7 @@
 #include "csa.h"
 #include "../data-structures/graph.h"
 #include "algorithm-tester.h"
+#include "landmark-processor.h"
 #include "../data-structures/creator.h"
 #include "../constants.h"
 
@@ -16,6 +17,10 @@ void LowerBoundTester::getLowerBoundDiffs(int numberOfSources, int numberOfTarge
     vector<double> absoluteDiffs = vector<double>();
     vector<double> relativeDiffs = vector<double>();
     int lowerBoundGreaterCounter = 0;
+
+    vector<double> absoluteDiffsLandmarks = vector<double>();
+    vector<double> relativeDiffsLandmarks = vector<double>();
+    int lowerBoundGreaterCounterLandmarks = 0;
 
     vector<int> sources = vector<int>();
 
@@ -51,13 +56,30 @@ void LowerBoundTester::getLowerBoundDiffs(int numberOfSources, int numberOfTarge
             int lowerBound = sourceStopIdToAllStops[csaQuery.sourceStopId][targets[j]];
 
             double absoluteDiff = (double) (duration - lowerBound);
-            double relativeDiff = absoluteDiff / (double) duration;
-            if (absoluteDiff < 0) {
-                relativeDiff = 0;
-                lowerBoundGreaterCounter++;
+            double relativeDiff = 1;
+            if (duration > 0) {
+                relativeDiff = absoluteDiff / (double) duration;
+                if (absoluteDiff < 0) {
+                    relativeDiff = 0;
+                    lowerBoundGreaterCounter++;
+                }
             }
             absoluteDiffs.push_back(absoluteDiff);
             relativeDiffs.push_back(relativeDiff);
+
+            // Landmarks
+            double lowerBoundLandmark = LandmarkProcessor::getLowerBound(sources[i], targets[j]);
+            double absoluteDiffLandmark = (double) (duration - lowerBoundLandmark);
+            double relativeDiffLandmark = 1;
+            if (duration > 0) {
+                relativeDiffLandmark = absoluteDiffLandmark / (double) duration;
+                if (absoluteDiffLandmark < 0) {
+                    relativeDiffLandmark = 0;
+                    lowerBoundGreaterCounterLandmarks++;
+                }
+            }
+            absoluteDiffsLandmarks.push_back(absoluteDiffLandmark);
+            relativeDiffsLandmarks.push_back(relativeDiffLandmark);
         }
 
         // print the progress
@@ -77,7 +99,18 @@ void LowerBoundTester::getLowerBoundDiffs(int numberOfSources, int numberOfTarge
 
     double lowerBoundGreaterFraction = (double) lowerBoundGreaterCounter / absoluteDiffs.size();
 
-    cout << "Average absolute diff (in hours): " << avgAbsoluteDiff << endl;
+    double avgAbsoluteDiffLandmarks = (Calculator::getAverage(absoluteDiffsLandmarks) / 3600);
+    double avgRelativeDiffLandmarks = Calculator::getAverage(relativeDiffsLandmarks);
+    double medianAbsoluteDiffLandmarks = (Calculator::getMedian(absoluteDiffsLandmarks) / 3600);
+    double medianRelativeDiffLandmarks = Calculator::getMedian(relativeDiffsLandmarks);
+    double maxAbsoluteDiffLandmarks = (Calculator::getMaximum(absoluteDiffsLandmarks) / 3600);
+    double maxRelativeDiffLandmarks = Calculator::getMaximum(relativeDiffsLandmarks);
+    double minAbsoluteDiffLandmarks = (Calculator::getMinimum(absoluteDiffsLandmarks) / 3600);
+    double minRelativeDiffLandmarks = Calculator::getMinimum(relativeDiffsLandmarks);
+
+    double lowerBoundGreaterFractionLandmarks = (double) lowerBoundGreaterCounterLandmarks / absoluteDiffsLandmarks.size();
+
+    cout << "\nAverage absolute diff (in hours): " << avgAbsoluteDiff << endl;
     cout << "Average relative diff: " << avgRelativeDiff << endl;
     cout << "Median absolute diff (in hours): " << medianAbsoluteDiff << endl;
     cout << "Median relative diff: " << medianRelativeDiff << endl;
@@ -87,4 +120,15 @@ void LowerBoundTester::getLowerBoundDiffs(int numberOfSources, int numberOfTarge
     cout << "Min relative diff: " << minRelativeDiff << endl;
 
     cout << "Lower bound greater fraction: " << lowerBoundGreaterFraction << endl;
+
+    cout << "\nAverage absolute diff landmarks (in hours): " << avgAbsoluteDiffLandmarks << endl;
+    cout << "Average relative diff landmarks: " << avgRelativeDiffLandmarks << endl;
+    cout << "Median absolute diff landmarks (in hours): " << medianAbsoluteDiffLandmarks << endl;
+    cout << "Median relative diff landmarks: " << medianRelativeDiffLandmarks << endl;
+    cout << "Max absolute diff landmarks (in hours): " << maxAbsoluteDiffLandmarks << endl;
+    cout << "Max relative diff landmarks: " << maxRelativeDiffLandmarks << endl;
+    cout << "Min absolute diff landmarks (in hours): " << minAbsoluteDiffLandmarks << endl;
+    cout << "Min relative diff landmarks: " << minRelativeDiffLandmarks << endl;
+
+    cout << "Lower bound greater fraction landmarks: " << lowerBoundGreaterFractionLandmarks << endl;
 }

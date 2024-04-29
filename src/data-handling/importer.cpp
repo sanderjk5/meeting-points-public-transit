@@ -38,7 +38,9 @@ vector<vector<int>> Importer::stopsOfARoute = vector<vector<int>>(0);
 vector<vector<RouteSequencePair>> Importer::routesOfAStop = vector<vector<RouteSequencePair>>(0);
 vector<Connection> Importer::connections = vector<Connection>(0);
 vector<FootPath> Importer::footPaths = vector<FootPath>(0);
+vector<FootPath> Importer::footPathsBackward = vector<FootPath>(0);
 vector<int> Importer::indexOfFirstFootPathOfAStop = vector<int>(0);
+vector<int> Importer::indexOfFirstFootPathOfAStopBackward = vector<int>(0);
 
 /*
     Import the data from the GTFS files and prepare it for the algorithms.
@@ -595,7 +597,9 @@ void Importer::loadOrGenerateFootPaths(DataType dataType) {
 void Importer::generateFootPaths() {
     cout << "Generating foot paths..." << endl;
     footPaths = vector<FootPath>(0);
+    footPathsBackward = vector<FootPath>(0);
     indexOfFirstFootPathOfAStop = vector<int>(stops.size());
+    indexOfFirstFootPathOfAStopBackward = vector<int>(stops.size());
     for (int i = 0; i < stops.size(); i++){
         indexOfFirstFootPathOfAStop[i] = footPaths.size();
         if (USE_FOOTPATHS) {
@@ -608,6 +612,7 @@ void Importer::generateFootPaths() {
                     // assume 4km/h walking speed
                     footPath.duration = distance * 900;
                     footPaths.push_back(footPath);
+                    footPathsBackward.push_back(footPath);
                 }
             }
         } else {
@@ -616,8 +621,22 @@ void Importer::generateFootPaths() {
             footPath.arrivalStopId = i;
             footPath.duration = 0;
             footPaths.push_back(footPath);
+            footPathsBackward.push_back(footPath);
         }
     }
+
+    // sort the backward foot paths by arrival stop id
+    sort(footPathsBackward.begin(), footPathsBackward.end(), FootPathComparator::compareByArrivalStop);
+
+    // fill the indexOfFirstFootPathOfAStopBackward vector
+    int lastStopId = -1;
+    for (int i = 0; i < footPathsBackward.size(); i++){
+        if (footPathsBackward[i].arrivalStopId != lastStopId){
+            indexOfFirstFootPathOfAStopBackward[footPathsBackward[i].arrivalStopId] = i;
+            lastStopId = footPathsBackward[i].arrivalStopId;
+        }
+    }
+
     cout << "Generated " << footPaths.size() << " foot paths." << endl;
 }
 
@@ -633,7 +652,9 @@ void Importer::importFootPaths(DataType dataType) {
     }
 
     footPaths = vector<FootPath>(0);
+    footPathsBackward = vector<FootPath>(0);
     indexOfFirstFootPathOfAStop = vector<int>(stops.size());
+    indexOfFirstFootPathOfAStopBackward = vector<int>(stops.size());
 
     string line;
     getline(file, line); // Skip the header line
@@ -654,10 +675,23 @@ void Importer::importFootPaths(DataType dataType) {
         }
 
         footPaths.push_back(footPath);
+        footPathsBackward.push_back(footPath);
         id++;
     }
 
     file.close();
+
+    // sort the backward foot paths by arrival stop id
+    sort(footPathsBackward.begin(), footPathsBackward.end(), FootPathComparator::compareByArrivalStop);
+
+    // fill the indexOfFirstFootPathOfAStopBackward vector
+    lastStopId = -1;
+    for (int i = 0; i < footPathsBackward.size(); i++){
+        if (footPathsBackward[i].arrivalStopId != lastStopId){
+            indexOfFirstFootPathOfAStopBackward[footPathsBackward[i].arrivalStopId] = i;
+            lastStopId = footPathsBackward[i].arrivalStopId;
+        }
+    }
 
     cout << "Imported " << footPaths.size() << " foot paths." << endl;
 }

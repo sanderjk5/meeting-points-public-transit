@@ -17,6 +17,13 @@ struct RaptorQuery {
     int weekday;
 };
 
+struct RaptorBackwardQuery {
+    int targetStopId;
+    vector<int> sourceStopIds;
+    int sourceTime;
+    int weekday;
+};
+
 struct JourneyPointerRaptor {
     int enterTripAtStop;
     int leaveTripAtStop;
@@ -29,6 +36,12 @@ struct TripInfo {
     int tripId;
     int dayOffset;
     int tripDepartureTime;
+};
+
+struct TripInfoBackward {
+    int tripId;
+    int dayOffset;
+    int tripArrivalTime;
 };
 
 struct PQEntry {
@@ -87,6 +100,48 @@ class Raptor {
         void fillQ();
         void traverseRoutes();
         TripInfo getEarliestTripWithDayOffset(int routeId, int stopId, int stopSequence);
+};
+
+class RaptorBackward {
+    public:
+        explicit RaptorBackward(RaptorBackwardQuery query){
+            this->query = query;
+            this->initializeRaptorBackward();
+        };
+        ~RaptorBackward(){};
+
+        void setSourceStopIds(vector<int> sourceStopIds);
+        void processRaptorBackward();
+        void processRaptorBackwardRound();
+
+        bool isFinished();
+
+        vector<int>* getLatestDepartureTimes();
+        int getLatestDepartureTime(int stopId);
+
+        Journey createJourney(int targetStopId);
+
+        vector<JourneyPointerRaptor> journeyPointers;
+        vector<int> extendedTargetStopIds;
+        vector<int> currentLatestDepartureTimes;
+        vector<bool> currentMarkedStops;
+
+        double numberOfExpandedRoutes;
+
+    private:
+        RaptorBackwardQuery query;
+        int currentRound;
+        vector<int> previousLatestDepartureTimes;
+        vector<bool> previousMarkedStops;
+        
+        vector<int> maxStopSequencePerRoute;
+        vector<pair<int, int>> q;
+        bool isFinishedFlag;
+
+        void initializeRaptorBackward();
+        void fillQ();
+        void traverseRoutes();
+        TripInfoBackward getLatestTripWithDayOffset(int routeId, int stopId, int stopSequence);
 };
 
 class RaptorBound {

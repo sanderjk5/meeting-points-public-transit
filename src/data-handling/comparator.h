@@ -31,5 +31,14 @@ class TripDepartureTimePairComparator {
         static bool compareByDepartureTime(TripDepartureTimePair tripDepartureTimePair1, TripDepartureTimePair tripDepartureTimePair2);
 };
 
+class FootPathComparator {
+    public:
+        explicit FootPathComparator(){};
+        ~FootPathComparator(){};
+
+        static bool compareByArrivalStop(FootPath footPath1, FootPath footPath2);
+};
+
+
 
 #endif //CMAKE_COMPARATOR_H

@@ -23,3 +23,7 @@ bool ConnectionComparator::compareByDepartureTime(Connection connection1, Connec
 bool TripDepartureTimePairComparator::compareByDepartureTime(TripDepartureTimePair tripDepartureTimePair1, TripDepartureTimePair tripDepartureTimePair2) {
     return tripDepartureTimePair1.departureTime < tripDepartureTimePair2.departureTime;
 }
+
+bool FootPathComparator::compareByArrivalStop(FootPath footPath1, FootPath footPath2) {
+    return footPath1.arrivalStopId < footPath2.arrivalStopId;
+}

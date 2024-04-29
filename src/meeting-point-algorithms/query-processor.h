@@ -127,6 +127,8 @@ class RaptorQueryProcessor {
         bool processRaptorRound();
         MeetingPointQueryResult getMeetingPointQueryResult();
         vector<Journey> getJourneys(Optimization optimization);
+        vector<int> getStopsWithGivenAccuracy(double accuracyBound);
+
         double durationOfLastRound;
         int transfers;
         vector<shared_ptr<Raptor>> raptors;
