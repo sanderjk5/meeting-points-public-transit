@@ -84,7 +84,7 @@ int main(int argc, const char *argv[]) {
   Creator::loadOrCreateNetworkGraph(dataType);
   if (USE_LANDMARKS) {
     LandmarkProcessor::loadOrCalculateLandmarkDurations(dataType);
-    LandmarkProcessor::getAllArrivalTimesOfStop(133225);
+    // LandmarkProcessor::getAllArrivalTimesOfStop(133225);
   }
 
   // print number of vertices and edges
@@ -107,14 +107,15 @@ int main(int argc, const char *argv[]) {
     // ExperimentController::testAndCompareAlgorithmsRandom(dataType, 1000, numberOfSourceStops);
 
     // Test experiments
-    vector<int> numberOfSourceStops = {2, 5, 10, 50};
+    // vector<int> numberOfSourceStops = {2, 5, 10, 50};
+    vector<int> numberOfSourceStops = {2, 3, 5, 7, 10};
     // vector<int> numberOfSourceStops = {5};
 
     // ExperimentController::compareRaptorAlgorithms(dataType, 100, numberOfSourceStops);
 
-    ExperimentController::compareRaptorPQAlgorithms(dataType, 50, numberOfSourceStops);
+    // ExperimentController::compareRaptorPQAlgorithms(dataType, 50, numberOfSourceStops);
 
-    // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 1000, 40, 0.95);
+    NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 2000, 100, 0.95);
 
     // ExperimentController::findBestGTreeParameters(dataType, 2, 10);
     // ExperimentController::testAndCompareAlgorithmsRandom(dataType, 10, numberOfSourceStops);

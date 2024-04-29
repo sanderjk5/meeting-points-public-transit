@@ -247,7 +247,6 @@ void RaptorBackward::initializeRaptorBackward() {
             break;
         }
         currentLatestDepartureTimes[Importer::footPathsBackward[i].departureStopId] = query.sourceTime + dayOffset - Importer::footPathsBackward[i].duration;
-        cout << currentLatestDepartureTimes[Importer::footPathsBackward[i].departureStopId] << endl;
         currentMarkedStops[Importer::footPathsBackward[i].departureStopId] = true;
         extendedTargetStopIds.push_back(Importer::footPathsBackward[i].departureStopId);
     }
