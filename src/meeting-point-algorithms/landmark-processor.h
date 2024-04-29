@@ -4,6 +4,7 @@
 #include "../data-handling/importer.h"
 
 #include <vector>
+#include <set>
 
 
 class LandmarkProcessor {
@@ -13,6 +14,8 @@ class LandmarkProcessor {
 
     	static void loadOrCalculateLandmarkDurations(DataType dataType);
         static int getLowerBound(int stopId1, int stopId2);
+
+        static vector<set<int>> getAllArrivalTimesOfStop(int stopId);
         
 
     private:

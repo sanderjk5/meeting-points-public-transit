@@ -11,6 +11,7 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
+#include <set>
 
 using namespace std;
 
@@ -125,28 +126,33 @@ void LandmarkProcessor::calculateLandmarkDurations(DataType dataType) {
         return;
     }
 
-    landmarkDurations = vector<vector<int>>(landmarkIds.size(), vector<int>(Importer::stops.size(), 0));
+    landmarkDurations = vector<vector<int>>(landmarkIds.size(), vector<int>(Importer::stops.size(), INT_MAX));
 
     #pragma omp parallel for
     for (int i = 0; i < landmarkIds.size(); i++) {
-        RaptorBackwardQuery raptorBackwardQuery;
-        raptorBackwardQuery.targetStopId = landmarkIds[i];
-        raptorBackwardQuery.sourceTime = 64800;
-        raptorBackwardQuery.weekday = 5;
+        for (int j = 0; j < 10; j++) {
+            RaptorBackwardQuery raptorBackwardQuery;
+            raptorBackwardQuery.targetStopId = landmarkIds[i];
+            raptorBackwardQuery.sourceTime = rand() % SECONDS_PER_DAY;
+            raptorBackwardQuery.weekday = rand() % 7;
 
-        RaptorBackward raptorBackward = RaptorBackward(raptorBackwardQuery);
-        raptorBackward.processRaptorBackward();
+            RaptorBackward raptorBackward = RaptorBackward(raptorBackwardQuery);
+            raptorBackward.processRaptorBackward();
 
-        int sourceTime = raptorBackwardQuery.sourceTime + (NUMBER_OF_DAYS * SECONDS_PER_DAY);
+            int sourceTime = raptorBackwardQuery.sourceTime + (NUMBER_OF_DAYS * SECONDS_PER_DAY);
 
-        for (int j = 0; j < Importer::stops.size(); j++) {
-            int latestDepartureTime = raptorBackward.getLatestDepartureTime(j);
-            if (latestDepartureTime == -1) {
-                landmarkDurations[i][j] = INT_MAX;
-                continue;
+            for (int j = 0; j < Importer::stops.size(); j++) {
+                int latestDepartureTime = raptorBackward.getLatestDepartureTime(j);
+                if (latestDepartureTime == -1) {
+                    continue;
+                }
+                int duration = sourceTime - latestDepartureTime;
+                if (duration < landmarkDurations[i][j]) {
+                    landmarkDurations[i][j] = duration;
+                }
             }
-            landmarkDurations[i][j] = sourceTime - latestDepartureTime;
         }
+        
     }
 
     cout << "Calculated landmark durations." << endl;
@@ -172,5 +178,42 @@ int LandmarkProcessor::getLowerBound(int stopId1, int stopId2) {
     }
 
     return lowerBound;
+}
+
+vector<set<int>> LandmarkProcessor::getAllArrivalTimesOfStop(int stopId) {
+    vector<set<int>> arrivalTimesPerWeekday = vector<set<int>>(7, set<int>());
+    vector<int> reachableStopIds = vector<int>(0);
+
+    int indexOfFirstFootpathOfTargetStop = Importer::indexOfFirstFootPathOfAStopBackward[stopId];
+    for (int i = indexOfFirstFootpathOfTargetStop; i < Importer::footPathsBackward.size(); i++) {
+        if (Importer::footPathsBackward[i].arrivalStopId != stopId) {
+            break;
+        }
+        reachableStopIds.push_back(Importer::footPathsBackward[i].departureStopId);
+    }
+
+    for (int i = 0; i < reachableStopIds.size(); i++) {
+        vector<RouteSequencePair>* routes = &Importer::routesOfAStop[stopId];
+        for (int j = 0; j < routes->size(); j++) {
+            int routeId = (*routes)[j].routeId;
+            int stopSequence = (*routes)[j].stopSequence;
+            vector<int>* trips = &Importer::tripsOfARoute[routeId];
+            for (int k = 0; k < trips->size(); k++) {
+                int tripId = (*trips)[k];
+                StopTime stopTime = Importer::stopTimes[Importer::indexOfFirstStopTimeOfATrip[tripId] + stopSequence];
+                for (int weekday = 0; weekday < 7; weekday++) {
+                    if (Importer::isTripAvailable(tripId, weekday)) {
+                        arrivalTimesPerWeekday[weekday].insert(stopTime.arrivalTime);
+                    }
+                }
+            }
+        }
+    }
+
+    for (int weekday = 0; weekday < 7; weekday++) {
+        cout << "Weekday: " << weekday << ", nof arrival times: " << arrivalTimesPerWeekday[weekday].size() << endl;
+    }
+
+    return arrivalTimesPerWeekday;
 }
 
