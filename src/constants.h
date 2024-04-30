@@ -12,7 +12,7 @@ constexpr int KL_ITERATIONS = 100;
 constexpr int KL_MAX_UNUSED_SWAPS = 300;
 
 constexpr int LOWER_BOUND_FACTOR = 1;
-constexpr bool USE_LANDMARKS = true;
+constexpr bool USE_LANDMARKS = false;
 
 constexpr double GTREE_APPROXIMATION_ALPHA = 1;
 
