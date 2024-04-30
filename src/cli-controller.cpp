@@ -4,6 +4,7 @@
 #include"data-handling/converter.h"
 #include"meeting-point-algorithms/query-processor.h"
 #include"meeting-point-algorithms/algorithm-tester.h"
+#include"meeting-point-algorithms/algorithm-tester-raptor.h"
 #include "constants.h"
 #include <iostream>
 #include <regex>
@@ -128,6 +129,93 @@ void CliController::runCli(DataType dataType, GTree* gTree) {
         getline(cin, runAgain);
         if (runAgain != "y") {
             stop = true;
+        }
+    }
+}
+
+void CliController::runCliRaptor(DataType dataType) {
+    bool stop = false;
+
+    while(!stop) {
+        RaptorQuery query;
+
+        // Ask if the user wants to run a random or a specific query
+        cout << "Do you want to run a random query? (y/N)" << endl;
+        bool randomQuery = false;
+        string input;
+        getline(cin, input);
+        if (input == "y") {
+            randomQuery = true;
+        }
+
+        if (randomQuery) {
+            query = QueryGenerator::generateRandomRaptorQuery();
+        } else {
+            string sourceStopName;
+            bool validStop = false;
+            while(!validStop) {
+                cout << "Enter the name of the source stop:" << endl;
+                getline(cin, sourceStopName);
+                int sourceStopId = Importer::getStopId(sourceStopName);
+                if (sourceStopId == -1) {
+                    cout << "The stop " << sourceStopName << " does not exist. Please enter a valid stop name." << endl;
+                    continue;
+                }
+                validStop = true;
+            }
+            
+            string targetStopName;
+            bool validTargetStop = false;
+            while(!validTargetStop) {
+                cout << "Enter the name of the target stop:" << endl;
+                getline(cin, targetStopName);
+                int targetStopId = Importer::getStopId(targetStopName);
+                if (targetStopId == -1) {
+                    cout << "The stop " << targetStopName << " does not exist. Please enter a valid stop name." << endl;
+                    continue;
+                }
+                validTargetStop = true;
+            }
+
+            string sourceTime;
+            bool validTime = false;
+            while (!validTime) {
+                cout << "Enter the source time (format: HH:MM:SS):" << endl;
+                getline(cin, sourceTime);
+
+                // Validate the format of the sourceTime using a regular expression
+                regex timeRegex("^([0-1][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$");
+                validTime = regex_match(sourceTime, timeRegex);
+
+                if (!validTime) {
+                    cout << "Invalid time. Please enter the time in the format HH:MM:SS." << endl;
+                }
+            }
+
+            string weekday;
+            bool validWeekday = false;
+            while(!validWeekday) {
+                cout << "Enter the weekday (format: Monday, Tuesday, ...):" << endl;
+                getline(cin, weekday);
+                validWeekday = WeekdayConverter::convertWeekdayToInt(weekday) != -1;
+                if (!validWeekday) {
+                    cout << "Invalid weekday. Please enter a valid weekday." << endl;
+                }
+            }
+
+            query = QueryGenerator::generateRaptorQuery(sourceStopName, targetStopName, sourceTime, weekday);
+        }
+
+        cout << "\nRunning the query..." << endl;
+        RaptorEATAlgorithmTester::testRaptorAlgorithms(query);
+
+        cout << "\nDo you want to run another query? (y/N)" << endl;
+        string runAgain;
+        getline(cin, runAgain);
+        if (runAgain != "y") {
+            stop = true;
+        } else {
+            cout << endl;
         }
     }
 }

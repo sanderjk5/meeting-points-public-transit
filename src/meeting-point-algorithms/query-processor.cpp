@@ -518,6 +518,24 @@ MeetingPointQuery QueryGenerator::parseMeetingPointQuery(string line, int number
     return meetingPointQuery;
 }
 
+RaptorQuery QueryGenerator::generateRandomRaptorQuery() {
+    RaptorQuery raptorQuery;
+    raptorQuery.sourceStopId = rand() % Importer::stops.size();
+    raptorQuery.targetStopIds.push_back(rand() % Importer::stops.size());
+    raptorQuery.sourceTime = rand() % SECONDS_PER_DAY;
+    raptorQuery.weekday = rand() % 7;
+    return raptorQuery;
+}
+
+RaptorQuery QueryGenerator::generateRaptorQuery(string sourceStopName, string targetStopName, string sourceTime, string weekday) {
+    RaptorQuery raptorQuery;
+    raptorQuery.sourceStopId = Importer::getStopId(sourceStopName);
+    raptorQuery.targetStopIds.push_back(Importer::getStopId(targetStopName));
+    raptorQuery.sourceTime = TimeConverter::convertTimeToSeconds(sourceTime);
+    raptorQuery.weekday = WeekdayConverter::convertWeekdayToInt(weekday);
+    return raptorQuery;
+}
+
 /*
     Process a G-tree query. If useCSA is true, the CSA algorithm is used to calculate the real durations during the algorithm. 
     Otherwise, approximate durations are calculated. In this case are the real durations calculated after the algorithm.

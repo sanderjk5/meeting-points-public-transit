@@ -139,7 +139,8 @@ int main(int argc, const char *argv[]) {
 
     // GTree* networkGTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
 
-    CliController::runCli(dataType, nullptr);
+    // CliController::runCli(dataType, nullptr);
+    CliController::runCliRaptor(dataType);
   }
   
   return 0;

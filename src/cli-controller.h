@@ -10,6 +10,7 @@ class CliController {
         ~CliController(){};
 
         static void runCli(DataType dataType, GTree* gTree);
+        static void runCliRaptor(DataType dataType);
 };
 
 #endif //CMAKE_CLI_CONTROLLER_H

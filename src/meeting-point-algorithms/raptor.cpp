@@ -130,7 +130,14 @@ void Raptor::traverseRoutes() {
                         break;
                     }
                     int newArrivalTime = arrivalTime + Importer::footPaths[k].duration;
-                    if (newArrivalTime < currentEarliestArrivalTimes[Importer::footPaths[k].arrivalStopId]) {
+                    bool pruneTarget = true;
+                    for (int l = 0; l < query.targetStopIds.size(); l++) {
+                        if (newArrivalTime < currentEarliestArrivalTimes[query.targetStopIds[l]]) {
+                            pruneTarget = false;
+                            break;
+                        }
+                    }
+                    if (newArrivalTime < currentEarliestArrivalTimes[Importer::footPaths[k].arrivalStopId] && !pruneTarget) {
                         currentEarliestArrivalTimes[Importer::footPaths[k].arrivalStopId] = newArrivalTime;
                         currentMarkedStops[Importer::footPaths[k].arrivalStopId] = true;
                         isFinishedFlag = false;
@@ -542,7 +549,6 @@ void RaptorBound::fillQ() {
                         lowerBoundToStop = LandmarkProcessor::getLowerBound(s1, stopId);
                     } else {
                         lowerBoundToStop = sourceStopIdsToAllStops[s1][stopId];
-                    
                     }
                     if (lowerBoundToStop == INT_MAX) {
                         continue;
@@ -1453,3 +1459,469 @@ void RaptorPQParallel::updateCurrentBest(set<int> stopIds) {
         }
     }
 }
+
+void RaptorBoundStar::initializeRaptorBound() {
+    currentRound = 0;
+
+    previousEarliestArrivalTimes = vector<int>(Importer::stops.size(), INT_MAX);
+    currentEarliestArrivalTimes = vector<int>(Importer::stops.size(), INT_MAX);
+    previousMarkedStops = vector<bool>(Importer::stops.size(), false);
+    currentMarkedStops = vector<bool>(Importer::stops.size(), false);
+
+    extendedSourceStopIds = vector<int>();
+    journeyPointers = vector<JourneyPointerRaptor>(Importer::stops.size(), JourneyPointerRaptor());
+
+    int indexOfFirstFootpathOfSourceStop = Importer::indexOfFirstFootPathOfAStop[query.sourceStopId];
+    for (int i = indexOfFirstFootpathOfSourceStop; i < Importer::footPaths.size(); i++) {
+        if (Importer::footPaths[i].departureStopId != query.sourceStopId) {
+            break;
+        }
+        currentEarliestArrivalTimes[Importer::footPaths[i].arrivalStopId] = query.sourceTime + Importer::footPaths[i].duration;
+        currentMarkedStops[Importer::footPaths[i].arrivalStopId] = true;
+        extendedSourceStopIds.push_back(Importer::footPaths[i].arrivalStopId);
+    }
+
+    q = vector<pair<int, int>>();
+
+    isFinishedFlag = false;
+    numberOfExpandedRoutes = 0;
+
+    lowerBoundSmallerCounter = 0;
+    lowerBoundGreaterCounter = 0;
+    lowerBoundAbsDifference = 0;
+    lowerBoundRelDifference = 0;
+}
+
+void RaptorBoundStar::processRaptorBoundStar() {
+    while (!isFinishedFlag) {
+        isFinishedFlag = true;
+        currentRound++;
+        previousEarliestArrivalTimes = currentEarliestArrivalTimes;
+        previousMarkedStops = currentMarkedStops;
+        currentMarkedStops = vector<bool>(Importer::stops.size(), false);
+
+        fillQ();
+        traverseRoutes();
+    }
+}
+
+void RaptorBoundStar::fillQ() {
+    q.clear();
+    minStopSequencePerRoute = vector<int>(Importer::routes.size(), INT_MAX);
+    vector<pair<int, int>> qTemp = vector<pair<int, int>>();
+    for (int stopId = 0; stopId < currentMarkedStops.size(); stopId++) {
+        if (previousMarkedStops[stopId]) {
+            double lowerBound = currentEarliestArrivalTimes[stopId];
+            double heuristic;
+
+            if (USE_LANDMARKS) {
+                heuristic = LandmarkProcessor::getLowerBound(stopId, targetStopId);
+            } else {
+                heuristic = targetStopIdToAllStops[stopId];
+            }
+
+            if (heuristic == INT_MAX) {
+                lowerBound = INT_MAX;
+            } else {
+                lowerBound += heuristic;
+            }
+
+            double currentBest = currentEarliestArrivalTimes[targetStopId];
+
+            if (lowerBound > currentBest) {
+                lowerBoundGreaterCounter++;
+                continue;
+            } else if (currentBest != INT_MAX) {
+                lowerBoundSmallerCounter++;
+                double absDifference = (double) currentBest - lowerBound;
+                lowerBoundAbsDifference += absDifference;
+                double relDifference = (double) absDifference / currentBest;
+                lowerBoundRelDifference += relDifference;
+            }
+
+            vector<RouteSequencePair>* routes = &Importer::routesOfAStop[stopId];
+            for (int i = 0; i < routes->size(); i++) {
+                int routeId = (*routes)[i].routeId;
+                int stopSequence = (*routes)[i].stopSequence;
+                if (stopSequence < minStopSequencePerRoute[routeId]) {
+                    minStopSequencePerRoute[routeId] = stopSequence;
+                    qTemp.push_back(make_pair(routeId, stopSequence));
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < qTemp.size(); i++) {
+        if (qTemp[i].second == minStopSequencePerRoute[qTemp[i].first]) {
+            q.push_back(qTemp[i]);
+        }
+    }
+}
+
+void RaptorBoundStar::traverseRoutes() {
+    for (int i = 0; i < q.size(); i++) {
+        numberOfExpandedRoutes++;
+
+        int routeId = q[i].first;
+        int stopSequence = q[i].second;
+
+        vector<int>* stops = &Importer::stopsOfARoute[routeId];
+        int currentTripId = -1;
+        int currentDayOffset = 0;
+
+        int enterTripAtStop = (*stops)[stopSequence];
+        int currentTripDepartureTime = 0;
+        for (int j = stopSequence; j < stops->size(); j++) {
+            int stopId = (*stops)[j];
+            StopTime stopTime;
+
+            if (currentTripId != -1) {
+                stopTime = Importer::stopTimes[Importer::indexOfFirstStopTimeOfATrip[currentTripId] + j];
+                int arrivalTime = stopTime.arrivalTime + currentDayOffset;
+                if (stopTime.arrivalTime > stopTime.departureTime) {
+                    arrivalTime -= SECONDS_PER_DAY;
+                }
+
+                int indexOfFirstFootpathOfArrivalStop = Importer::indexOfFirstFootPathOfAStop[stopId];
+                for (int k = indexOfFirstFootpathOfArrivalStop; k < Importer::footPaths.size(); k++) {
+                    if (Importer::footPaths[k].departureStopId != stopId) {
+                        break;
+                    }
+
+                    int newArrivalTime = arrivalTime + Importer::footPaths[k].duration;
+                    if (newArrivalTime < currentEarliestArrivalTimes[Importer::footPaths[k].arrivalStopId] && newArrivalTime < currentEarliestArrivalTimes[targetStopId]) {
+                        currentEarliestArrivalTimes[Importer::footPaths[k].arrivalStopId] = newArrivalTime;
+                        currentMarkedStops[Importer::footPaths[k].arrivalStopId] = true;
+                        isFinishedFlag = false;
+                        journeyPointers[Importer::footPaths[k].arrivalStopId] = JourneyPointerRaptor{enterTripAtStop, stopId, currentTripDepartureTime, newArrivalTime, currentTripId};
+                    }
+                }
+            }
+
+            if (previousMarkedStops[stopId] && (currentTripId == -1 || previousEarliestArrivalTimes[stopId] < stopTime.departureTime + currentDayOffset)) {
+                TripInfo tripInfo = getEarliestTripWithDayOffset(routeId, stopId, j);
+                if (tripInfo.tripId != -1) {
+                    currentTripId = tripInfo.tripId;
+                    currentDayOffset = tripInfo.dayOffset;
+                    currentTripDepartureTime = tripInfo.tripDepartureTime;
+                    enterTripAtStop = stopId;
+                }
+            }
+        }
+    }
+}
+
+TripInfo RaptorBoundStar::getEarliestTripWithDayOffset(int routeId, int stopId, int stopSequence) {
+    vector<int>* trips = &Importer::tripsOfARoute[routeId];
+
+    int earliestDepartureTime = previousEarliestArrivalTimes[stopId];
+    int dayOffset = TimeConverter::getDayOffset(earliestDepartureTime);
+    int weekday = (query.weekday + TimeConverter::getDayDifference(earliestDepartureTime)) % 7;
+
+    StopTime stopTime;
+
+    while (dayOffset <= NUMBER_OF_DAYS * SECONDS_PER_DAY) {
+        for (int i = 0; i < trips->size(); i++) {
+            int tripId = (*trips)[i];
+            stopTime = Importer::stopTimes[Importer::indexOfFirstStopTimeOfATrip[tripId] + stopSequence];
+
+            // check if trip is available
+            int weekdayOfTrip = weekday;
+            int firstDepartureTimeOfTrip = Importer::stopTimes[Importer::indexOfFirstStopTimeOfATrip[tripId]].departureTime;
+            if (firstDepartureTimeOfTrip > stopTime.departureTime) {
+                weekdayOfTrip = (weekdayOfTrip + 6) % 7;
+            }
+            if (!Importer::isTripAvailable(tripId, weekdayOfTrip)) {
+                continue;
+            }
+
+            if (stopTime.departureTime + dayOffset > earliestDepartureTime) {
+                TripInfo tripInfo = {tripId, dayOffset, stopTime.departureTime + dayOffset};
+                return tripInfo;
+            }
+        }
+        dayOffset += SECONDS_PER_DAY;
+        weekday = (weekday + 1) % 7;
+    }
+
+    return {-1, -1, -1};
+}
+
+vector<int>* RaptorBoundStar::getEarliestArrivalTimes() {
+    return &currentEarliestArrivalTimes;
+}
+
+int RaptorBoundStar::getEarliestArrivalTime(int stopId) {
+    return currentEarliestArrivalTimes[stopId];
+}
+
+Journey RaptorBoundStar::createJourney(int targetStopId) {
+    Journey journey;
+    journey.duration = currentEarliestArrivalTimes[targetStopId] - query.sourceTime;
+
+    vector<Leg> legs;
+
+    int currentStopId = targetStopId;
+    while (find(extendedSourceStopIds.begin(), extendedSourceStopIds.end(), currentStopId) == extendedSourceStopIds.end()) {
+        JourneyPointerRaptor journeyPointer = journeyPointers[currentStopId];
+
+        Leg leg;
+        leg.departureStopName = Importer::stops[journeyPointer.enterTripAtStop].name;
+        leg.arrivalStopName = Importer::stops[journeyPointer.leaveTripAtStop].name;
+        leg.departureTime = journeyPointer.departureTime;
+        leg.arrivalTime = journeyPointer.arrivalTime;
+
+        legs.push_back(leg);
+
+        currentStopId = journeyPointer.enterTripAtStop;
+    }
+
+    for (int i = legs.size() - 1; i >= 0; i--) {
+        journey.legs.push_back(legs[i]);
+    }
+
+    return journey;
+}
+
+void RaptorPQStar::processRaptorPQStar() {
+    while (!pq.empty() && !isFinishedFlag) {
+        traverseRoute();
+    }
+}
+
+vector<int>* RaptorPQStar::getEarliestArrivalTimes() {
+    return &earliestArrivalTimes;
+}
+
+int RaptorPQStar::getEarliestArrivalTime(int stopId) {
+    return earliestArrivalTimes[stopId];
+}
+
+Journey RaptorPQStar::createJourney(int targetStopId) {
+    Journey journey;
+    journey.duration = earliestArrivalTimes[targetStopId] - query.sourceTime;
+
+    vector<Leg> legs;
+
+    int currentStopId = targetStopId;
+    while (find(extendedSourceStopIds.begin(), extendedSourceStopIds.end(), currentStopId) == extendedSourceStopIds.end()) {
+        JourneyPointerRaptor journeyPointer = journeyPointers[currentStopId];
+
+        Leg leg;
+        leg.departureStopName = Importer::stops[journeyPointer.enterTripAtStop].name;
+        leg.arrivalStopName = Importer::stops[journeyPointer.leaveTripAtStop].name;
+        leg.departureTime = journeyPointer.departureTime;
+        leg.arrivalTime = journeyPointer.arrivalTime;
+
+        legs.push_back(leg);
+
+        currentStopId = journeyPointer.enterTripAtStop;
+    }
+
+    for (int i = legs.size() - 1; i >= 0; i--) {
+        journey.legs.push_back(legs[i]);
+    }
+
+    return journey;
+}
+
+void RaptorPQStar::initializeRaptorPQStar() {
+    earliestArrivalTimes = vector<int>(Importer::stops.size(), INT_MAX);
+
+    firstStopSequencePerRoute = vector<int>(Importer::routes.size(), INT_MAX);
+    lowestLowerBoundPerRoute = vector<double>(Importer::routes.size(), DBL_MAX);
+
+    extendedSourceStopIds = vector<int>();
+    journeyPointers = vector<JourneyPointerRaptor>(Importer::stops.size(), JourneyPointerRaptor());
+
+    set<int> arrivalStops;
+
+    int indexOfFirstFootpathOfSourceStop = Importer::indexOfFirstFootPathOfAStop[query.sourceStopId];
+    for (int i = indexOfFirstFootpathOfSourceStop; i < Importer::footPaths.size(); i++) {
+        if (Importer::footPaths[i].departureStopId != query.sourceStopId) {
+            break;
+        }
+        earliestArrivalTimes[Importer::footPaths[i].arrivalStopId] = query.sourceTime + Importer::footPaths[i].duration;
+        extendedSourceStopIds.push_back(Importer::footPaths[i].arrivalStopId);
+        arrivalStops.insert(Importer::footPaths[i].arrivalStopId);
+    }
+
+    addRoutesToQueue(arrivalStops, -1);
+
+    isFinishedFlag = false;
+    numberOfExpandedRoutes = 0;
+
+    lowerBoundSmallerCounter = 0;
+    lowerBoundGreaterCounter = 0;
+    lowerBoundAbsDifference = 0;
+    lowerBoundRelDifference = 0;
+}
+
+void RaptorPQStar::addRoutesToQueue(set<int> stopIds, int excludeRouteId) {
+    set<int> newRoutes;
+
+    for (set<int>::iterator it = stopIds.begin(); it != stopIds.end(); it++) {
+        int stopId = *it;
+        double lowerBound = earliestArrivalTimes[stopId];
+        double heuristic;
+
+        if (USE_LANDMARKS) {
+            heuristic = LandmarkProcessor::getLowerBound(stopId, targetStopId);
+        } else {
+            heuristic = targetStopIdToAllStops[stopId];
+        }
+
+        if (heuristic == INT_MAX) {
+            lowerBound = INT_MAX;
+        } else {
+            lowerBound += heuristic;
+        }
+
+        double currentBest = earliestArrivalTimes[targetStopId];
+
+        if (lowerBound > currentBest) {
+            lowerBoundGreaterCounter++;
+            continue;
+        } else if (currentBest != INT_MAX) {
+            lowerBoundSmallerCounter++;
+            double absDifference = (double) currentBest - lowerBound;
+            lowerBoundAbsDifference += absDifference;
+            double relDifference = (double) absDifference / currentBest;
+            lowerBoundRelDifference += relDifference;
+        }
+
+        vector<RouteSequencePair>* routes = &Importer::routesOfAStop[stopId];
+        for (int j = 0; j < routes->size(); j++) {
+            int routeId = (*routes)[j].routeId;
+            if (routeId == excludeRouteId) {
+                continue;
+            }
+            int stopSequence = (*routes)[j].stopSequence;
+
+            if (lowerBound < lowestLowerBoundPerRoute[routeId]) {
+                lowestLowerBoundPerRoute[routeId] = lowerBound;
+                newRoutes.insert(routeId);
+            }
+
+            if (stopSequence < firstStopSequencePerRoute[routeId]) {
+                firstStopSequencePerRoute[routeId] = stopSequence;
+            }          
+        }
+    }
+
+    for (set<int>::iterator it = newRoutes.begin(); it != newRoutes.end(); it++) {
+        pq.push(make_pair(lowestLowerBoundPerRoute[*it], *it));
+    }
+}
+
+void RaptorPQStar::traverseRoute() {
+    double lowerBound = pq.top().first;
+
+    double currentBest = earliestArrivalTimes[targetStopId];
+
+    if (lowerBound > currentBest) {
+        isFinishedFlag = true;
+        return;
+    }
+
+    int routeId = pq.top().second;
+    pq.pop();
+
+    if (lowerBound != lowestLowerBoundPerRoute[routeId] || firstStopSequencePerRoute[routeId] == INT_MAX) {
+        return;
+    }
+
+    numberOfExpandedRoutes++;
+
+    vector<int>* stops = &Importer::stopsOfARoute[routeId];
+    int currentTripId = -1;
+    int currentDayOffset = 0;
+
+    int enterTripAtStop = (*stops)[firstStopSequencePerRoute[routeId]];
+    int currentTripDepartureTime = 0;
+
+    set<int> arrivalStops;
+
+    for (int i = firstStopSequencePerRoute[routeId]; i < stops->size(); i++) {
+        int stopId = (*stops)[i];
+        StopTime stopTime;
+
+        int previousEarliestArrivalTime = earliestArrivalTimes[stopId];
+
+        if (currentTripId != -1) {
+            stopTime = Importer::stopTimes[Importer::indexOfFirstStopTimeOfATrip[currentTripId] + i];
+            int arrivalTime = stopTime.arrivalTime + currentDayOffset;
+            if (stopTime.arrivalTime > stopTime.departureTime) {
+                arrivalTime -= SECONDS_PER_DAY;
+            }
+
+            int indexOfFirstFootpathOfArrivalStop = Importer::indexOfFirstFootPathOfAStop[stopId];
+            for (int j = indexOfFirstFootpathOfArrivalStop; j < Importer::footPaths.size(); j++) {
+                if (Importer::footPaths[j].departureStopId != stopId) {
+                    break;
+                }
+
+                int arrivalStopId = Importer::footPaths[j].arrivalStopId;
+                int newArrivalTime = arrivalTime + Importer::footPaths[j].duration;
+
+                if (newArrivalTime < earliestArrivalTimes[arrivalStopId] && newArrivalTime < earliestArrivalTimes[targetStopId]) {
+                    earliestArrivalTimes[arrivalStopId] = newArrivalTime;
+                    journeyPointers[arrivalStopId] = JourneyPointerRaptor{enterTripAtStop, stopId, currentTripDepartureTime, newArrivalTime, currentTripId};
+                    arrivalStops.insert(arrivalStopId);
+                }
+            }
+        }
+
+        if (currentTripId == -1 || previousEarliestArrivalTime < stopTime.departureTime + currentDayOffset) {
+            TripInfo tripInfo = getEarliestTripWithDayOffset(routeId, stopId, i, previousEarliestArrivalTime);
+            if (tripInfo.tripId != -1) {
+                currentTripId = tripInfo.tripId;
+                currentDayOffset = tripInfo.dayOffset;
+                currentTripDepartureTime = tripInfo.tripDepartureTime;
+                enterTripAtStop = stopId;
+            }
+        }
+    }
+
+    addRoutesToQueue(arrivalStops, routeId);
+
+    firstStopSequencePerRoute[routeId] = INT_MAX;
+    lowestLowerBoundPerRoute[routeId] = INT_MAX;
+}
+
+TripInfo RaptorPQStar::getEarliestTripWithDayOffset(int routeId, int stopId, int stopSequence, int previousEarliestArrivalTime) {
+    vector<int>* trips = &Importer::tripsOfARoute[routeId];
+
+    int earliestDepartureTime = previousEarliestArrivalTime;
+    int dayOffset = TimeConverter::getDayOffset(earliestDepartureTime);
+    int weekday = (query.weekday + TimeConverter::getDayDifference(earliestDepartureTime)) % 7;
+
+    StopTime stopTime;
+
+    while (dayOffset <= NUMBER_OF_DAYS * SECONDS_PER_DAY) {
+        for (int i = 0; i < trips->size(); i++) {
+            int tripId = (*trips)[i];
+            stopTime = Importer::stopTimes[Importer::indexOfFirstStopTimeOfATrip[tripId] + stopSequence];
+
+            // check if trip is available
+            int weekdayOfTrip = weekday;
+            int firstDepartureTimeOfTrip = Importer::stopTimes[Importer::indexOfFirstStopTimeOfATrip[tripId]].departureTime;
+            if (firstDepartureTimeOfTrip > stopTime.departureTime) {
+                weekdayOfTrip = (weekdayOfTrip + 6) % 7;
+            }
+            if (!Importer::isTripAvailable(tripId, weekdayOfTrip)) {
+                continue;
+            }
+
+            if (stopTime.departureTime + dayOffset > earliestDepartureTime) {
+                TripInfo tripInfo = {tripId, dayOffset, stopTime.departureTime + dayOffset};
+                auto end = chrono::high_resolution_clock::now();
+                return tripInfo;
+            }
+        }
+        dayOffset += SECONDS_PER_DAY;
+        weekday = (weekday + 1) % 7;
+    }
+
+    return {-1, -1, -1};
+} 

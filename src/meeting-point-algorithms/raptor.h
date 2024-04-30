@@ -338,4 +338,97 @@ class RaptorPQParallel {
         void updateCurrentBest(set<int> stopIds);
 };
 
+class RaptorBoundStar {
+    public:
+        explicit RaptorBoundStar(RaptorQuery query, vector<int> targetStopIdToAllStops){
+            this->query = query;
+            this->targetStopId = query.targetStopIds[0];  
+            this->targetStopIdToAllStops = targetStopIdToAllStops;
+            this->initializeRaptorBound();
+        };
+        ~RaptorBoundStar(){};
+
+        void processRaptorBoundStar();
+
+        vector<int>* getEarliestArrivalTimes();
+        int getEarliestArrivalTime(int stopId);
+        Journey createJourney(int targetStopId);
+
+        vector<JourneyPointerRaptor> journeyPointers;
+        vector<int> extendedSourceStopIds;
+        vector<int> currentEarliestArrivalTimes;
+        vector<bool> currentMarkedStops;
+
+        double numberOfExpandedRoutes;
+        double lowerBoundSmallerCounter;
+        double lowerBoundGreaterCounter;
+        double lowerBoundAbsDifference;
+        double lowerBoundRelDifference;
+
+    private:
+        RaptorQuery query;
+        int targetStopId;
+        int currentRound;
+        vector<int> previousEarliestArrivalTimes;
+        vector<bool> previousMarkedStops;
+        
+        vector<int> minStopSequencePerRoute;
+        vector<pair<int, int>> q;
+        bool isFinishedFlag;
+
+        vector<int> targetStopIdToAllStops;
+
+        vector<int> heuristicPerStopId;
+
+        void initializeRaptorBound();
+        void fillQ();
+        void traverseRoutes();
+        TripInfo getEarliestTripWithDayOffset(int routeId, int stopId, int stopSequence);
+};
+
+class RaptorPQStar {
+    public:
+        explicit RaptorPQStar(RaptorQuery query, vector<int> targetStopIdToAllStops){
+            this->query = query;
+            this->targetStopId = query.targetStopIds[0];
+            this->targetStopIdToAllStops = targetStopIdToAllStops;
+            this->initializeRaptorPQStar();
+        };
+        ~RaptorPQStar(){};
+
+        void initializeRaptorPQStar();
+        void processRaptorPQStar();
+
+        vector<int>* getEarliestArrivalTimes();
+        int getEarliestArrivalTime(int stopId);
+        Journey createJourney(int targetStopId);
+
+        double numberOfExpandedRoutes;
+        double lowerBoundSmallerCounter;
+        double lowerBoundGreaterCounter;
+        double lowerBoundAbsDifference;
+        double lowerBoundRelDifference;
+
+    private:
+        RaptorQuery query;
+        int targetStopId;
+
+        priority_queue<pair<double, int>, vector<pair<double, int>>, greater<pair<double, int>>> pq;
+        vector<int> firstStopSequencePerRoute;
+        vector<double> lowestLowerBoundPerRoute;
+
+        vector<int> earliestArrivalTimes;
+
+        bool isFinishedFlag;
+
+        vector<JourneyPointerRaptor> journeyPointers;
+        vector<int> extendedSourceStopIds;
+
+        vector<int> targetStopIdToAllStops;
+        
+        void traverseRoute();
+        void addRoutesToQueue(set<int> stopIds, int excludeRouteId);
+        TripInfo getEarliestTripWithDayOffset(int routeId, int stopId, int stopSequence, int previousEarliestArrivalTime);
+};
+
 #endif //CMAKE_RAPTOR_H

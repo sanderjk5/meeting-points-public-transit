@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <climits>
 
 using namespace std;
 
@@ -16,6 +17,10 @@ int TimeConverter::convertTimeToSeconds(string time) {
 }
 
 string TimeConverter::convertSecondsToTime(int seconds, bool removeDays) {
+    if (seconds == INT_MAX) {
+        return "";
+    }
+
     if (removeDays) {
         seconds = seconds % SECONDS_PER_DAY;
     }
