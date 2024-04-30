@@ -962,8 +962,8 @@ bool RaptorQueryProcessor::processRaptorRound() {
     auto start = std::chrono::high_resolution_clock::now();
 
     bool allFinished = true;
-    omp_set_dynamic(0);
-    omp_set_num_threads(4);
+    // omp_set_dynamic(0);
+    // omp_set_num_threads(4);
     #pragma omp parallel for
     for (int i = 0; i < raptors.size(); i++) {
         if(!raptors[i]->isFinished()) {
@@ -1118,8 +1118,8 @@ void RaptorBoundQueryProcessor::processRaptorBoundQuery(Optimization optimizatio
 
     auto startInitRaptorBounds = std::chrono::high_resolution_clock::now();
     raptorBounds = vector<shared_ptr<RaptorBound>>(meetingPointQuery.sourceStopIds.size());
-    omp_set_dynamic(0);
-    omp_set_num_threads(4);
+    // omp_set_dynamic(0);
+    // omp_set_num_threads(4);
     #pragma omp parallel for
     for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
         RaptorQuery query;
@@ -1140,8 +1140,8 @@ void RaptorBoundQueryProcessor::processRaptorBoundQuery(Optimization optimizatio
     while (true) {
         // cout << "current best: " << currentBest << endl;
         bool allFinished = true;
-        omp_set_dynamic(0);
-        omp_set_num_threads(4);
+        // omp_set_dynamic(0);
+        // omp_set_num_threads(4);
         #pragma omp parallel for
         for (int i = 0; i < raptorBounds.size(); i++) {
             if(!raptorBounds[i]->isFinished()) {
@@ -1329,8 +1329,8 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
     // cout << "upper bound min sum: " << meetingPointQueryResultRaptor.minSumDurationInSeconds << ", upper bound min max: " << meetingPointQueryResultRaptor.minMaxDurationInSeconds << endl;
 
     auto startRaptorPQ = std::chrono::high_resolution_clock::now();
-    omp_set_dynamic(0);
-    omp_set_num_threads(4);
+    // omp_set_dynamic(0);
+    // omp_set_num_threads(4);
     #pragma omp parallel for
     for (int i = 0; i < raptorPQs.size(); i++) {
         raptorPQs[i]->initializeHeuristic(sourceStopIdToAllStops, meetingPointQuery.sourceStopIds);

@@ -81,8 +81,8 @@ int main(int argc, const char *argv[]) {
     Importer::import(folderName, true, gesamt_de);
   }
 
-  cout << Importer::getStopId("Stuttgart Hbf");
-  cout << Importer::getStopId("München Hbf");
+  cout << Importer::getStopId("Stuttgart Hbf") << endl;
+  cout << Importer::getStopId("München Hbf") << endl;
 
   Creator::loadOrCreateNetworkGraph(dataType);
   if (USE_LANDMARKS) {
