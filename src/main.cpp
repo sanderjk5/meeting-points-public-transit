@@ -81,6 +81,9 @@ int main(int argc, const char *argv[]) {
     Importer::import(folderName, true, gesamt_de);
   }
 
+  cout << Importer::getStopId("Stuttgart Hbf");
+  cout << Importer::getStopId("München Hbf");
+
   Creator::loadOrCreateNetworkGraph(dataType);
   if (USE_LANDMARKS) {
     LandmarkProcessor::loadOrCalculateLandmarkDurations(dataType);
@@ -108,7 +111,7 @@ int main(int argc, const char *argv[]) {
 
     // Test experiments
     // vector<int> numberOfSourceStops = {2, 5, 10, 50};
-    vector<int> numberOfSourceStops = {2, 3, 5, 7, 10};
+    vector<int> numberOfSourceStops = {7, 10};
     // vector<int> numberOfSourceStops = {5};
 
     // ExperimentController::compareRaptorAlgorithms(dataType, 100, numberOfSourceStops);
