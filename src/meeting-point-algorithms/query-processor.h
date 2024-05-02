@@ -256,6 +256,7 @@ class QueryGenerator {
         static MeetingPointQuery generateRandomMeetingPointQuery(int numberOfSources);
         static MeetingPointQuery generateMeetingPointQuery(vector<string> sourceStopNames, string sourceTime, string weekday);
         static MeetingPointQuery parseMeetingPointQuery(string line, int numberOfSourceStops);
+        static RaptorQuery parseRaptorQuery(string line);
         static CSAQuery createCSAQuery(string sourceStopName, string sourceTime, string weekday);
         static CSAQuery createCSAQueryWithTargetStops(string sourceStopName, vector<string> targetStopNames, string sourceTime, string weekday);
         static RaptorQuery generateRandomRaptorQuery();

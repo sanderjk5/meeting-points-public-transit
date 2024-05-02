@@ -34,7 +34,7 @@ int main(int argc, const char *argv[]) {
   // DataType dataType = schienenfern_und_regionalverkehr_de;
   // DataType dataType = gesamt_de;
 
-  bool startExperiments = false;
+  bool startExperiments = true;
 
   if (argc > 1){
     if (strcmp(argv[1], "vvs") == 0){
@@ -113,7 +113,9 @@ int main(int argc, const char *argv[]) {
 
     // ExperimentController::compareRaptorAlgorithms(dataType, 100, numberOfSourceStops);
 
-    ExperimentController::compareRaptorPQAlgorithms(dataType, 50, numberOfSourceStops);
+    // ExperimentController::compareRaptorPQAlgorithms(dataType, 50, numberOfSourceStops);
+
+    ExperimentController::compareRaptorEATAlgorithms(dataType, 1000);
 
     // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 2000, 100, 0.95);
 

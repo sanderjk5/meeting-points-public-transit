@@ -15,8 +15,7 @@ class RaptorEATAlgorithmTester {
         ~RaptorEATAlgorithmTester(){};
 
         static void testRaptorAlgorithms(RaptorQuery raptorQuery);
-
-        static void compareRaptorAlgorithms(DataType dataType, int numberOfSuccessfulQueries, bool loadOrStoreQueries);
+        static void compareRaptorEATAlgorithms(DataType dataType, int numberOfSuccessfulQueries, bool loadOrStoreQueries);
 };
 
 class PrintHelperRaptor {

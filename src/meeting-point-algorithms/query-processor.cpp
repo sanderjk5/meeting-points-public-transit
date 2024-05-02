@@ -518,6 +518,23 @@ MeetingPointQuery QueryGenerator::parseMeetingPointQuery(string line, int number
     return meetingPointQuery;
 }
 
+RaptorQuery QueryGenerator::parseRaptorQuery(string line) {
+    RaptorQuery raptorQuery;
+    vector<string> parts;
+
+    // Split the line into substrings
+    std::stringstream ss(line);
+    std::string substring;
+    while (std::getline(ss, substring, ',')) {
+        parts.push_back(substring);
+    }
+    raptorQuery.sourceStopId = stoi(parts[0]);
+    raptorQuery.targetStopIds.push_back(stoi(parts[1]));
+    raptorQuery.sourceTime = stoi(parts[2]);
+    raptorQuery.weekday = stoi(parts[3]);
+    return raptorQuery;
+}
+
 RaptorQuery QueryGenerator::generateRandomRaptorQuery() {
     RaptorQuery raptorQuery;
     raptorQuery.sourceStopId = rand() % Importer::stops.size();
