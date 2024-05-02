@@ -43,6 +43,8 @@ void RaptorEATAlgorithmTester::testRaptorAlgorithms(RaptorQuery raptorQuery) {
 }
 
 void RaptorEATAlgorithmTester::compareRaptorEATAlgorithms(DataType dataType, int numberOfSuccessfulQueries, bool loadOrStoreQueries) {
+    cout << "Processing raptor eat algorithms..." << endl;
+    
     string dataTypeString = Importer::getDataTypeString(dataType);
     string folderPathResults = FOLDER_PREFIX + "tests/" + dataTypeString + "/results-eat/";
     string folderPathQueries = FOLDER_PREFIX + "tests/" + dataTypeString + "/queries-eat/";
