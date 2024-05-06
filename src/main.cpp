@@ -34,7 +34,7 @@ int main(int argc, const char *argv[]) {
   // DataType dataType = schienenfern_und_regionalverkehr_de;
   // DataType dataType = gesamt_de;
 
-  bool startExperiments = true;
+  bool startExperiments = false;
 
   if (argc > 1){
     if (strcmp(argv[1], "vvs") == 0){
@@ -81,6 +81,19 @@ int main(int argc, const char *argv[]) {
     Importer::import(folderName, true, gesamt_de);
   }
 
+  cout << "Id of Düsseldorf Hbf " << Importer::getStopId("Düsseldorf Hbf") << endl;
+  cout << "Id of Leipzig Hbf " << Importer::getStopId("Leipzig Hbf") << endl;
+  cout << "Id of Dortmund Hbf " << Importer::getStopId("Dortmund Hbf") << endl;
+  cout << "Id of Essen Hbf " << Importer::getStopId("Essen Hbf") << endl;
+  cout << "Id of Bremen Hbf " << Importer::getStopId("Bremen Hbf") << endl;
+  cout << "Id of Dresden Hbf " << Importer::getStopId("Dresden Hbf") << endl;
+  cout << "Id of Duisburg Hbf " << Importer::getStopId("Duisburg Hbf") << endl;
+  cout << "Id of Mannheim Hbf " << Importer::getStopId("Mannheim Hbf") << endl;
+  cout << "Id of Augsburg Hbf " << Importer::getStopId("Augsburg Hbf") << endl;
+  cout << "Id of Kiel Hbf " << Importer::getStopId("Kiel Hbf") << endl;
+  cout << "Id of Halle (Saale), ZOB " << Importer::getStopId("Halle (Saale), ZOB") << endl;
+  cout << "Id of Lübeck Hbf " << Importer::getStopId("Lübeck Hbf") << endl;
+
   Creator::loadOrCreateNetworkGraph(dataType);
   if (USE_LANDMARKS) {
     LandmarkProcessor::loadOrCalculateLandmarkDurations(dataType);
@@ -96,7 +109,7 @@ int main(int argc, const char *argv[]) {
   cout << "Number of edges: " << edgeCount << "\n" << endl;
 
   if (startExperiments){
-    // ExperimentController::evaluateLowerBounds(100, 20);
+    ExperimentController::evaluateLowerBounds(200, 20);
 
     // Real experiments
     // vector<int> numberOfSourceStops = {2, 3, 5, 10, 25};
@@ -115,7 +128,7 @@ int main(int argc, const char *argv[]) {
 
     // ExperimentController::compareRaptorPQAlgorithms(dataType, 50, numberOfSourceStops);
 
-    ExperimentController::compareRaptorEATAlgorithms(dataType, 1000);
+    // ExperimentController::compareRaptorEATAlgorithms(dataType, 1000);
 
     // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 2000, 100, 0.95);
 

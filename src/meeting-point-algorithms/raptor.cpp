@@ -465,7 +465,7 @@ void RaptorBound::initializeHeuristic(map<int, vector<int>> sourceStopIdsToAllSt
             }
             int lowerBound = 0;
             if (USE_LANDMARKS) {
-                lowerBound = LandmarkProcessor::getLowerBound(s1, s2);
+                lowerBound = LandmarkProcessor::getLowerBound(s1, s2, query.weekday);
             } else {
                 lowerBound = sourceStopIdsToAllStops[s1][s2];
             }
@@ -546,7 +546,7 @@ void RaptorBound::fillQ() {
                     }
                     double lowerBoundToStop = 0;
                     if (USE_LANDMARKS) {
-                        lowerBoundToStop = LandmarkProcessor::getLowerBound(s1, stopId);
+                        lowerBoundToStop = LandmarkProcessor::getLowerBound(s1, stopId, query.weekday);
                     } else {
                         lowerBoundToStop = sourceStopIdsToAllStops[s1][stopId];
                     }
@@ -772,7 +772,7 @@ void RaptorPQ::initializeHeuristic(map<int, vector<int>> sourceStopIdsToAllStops
             }
             int lowerBound = 0;
             if (USE_LANDMARKS) {
-                lowerBound = LandmarkProcessor::getLowerBound(s1, s2);
+                lowerBound = LandmarkProcessor::getLowerBound(s1, s2, query.weekday);
             } else {
                 lowerBound = sourceStopIdsToAllStops[s1][s2];
             }
@@ -903,7 +903,7 @@ void RaptorPQ::addRoutesToQueue(set<int> stopIds, int excludeRouteId) {
                 }
                 double lowerBoundToStop = 0;
                 if (USE_LANDMARKS) {
-                    lowerBoundToStop = LandmarkProcessor::getLowerBound(s1, stopId);
+                    lowerBoundToStop = LandmarkProcessor::getLowerBound(s1, stopId, query.weekday);
                 } else {
                     lowerBoundToStop = sourceStopIdsToAllStops[s1][stopId];
                 
@@ -1515,7 +1515,7 @@ void RaptorBoundStar::fillQ() {
             double heuristic;
 
             if (USE_LANDMARKS) {
-                heuristic = LandmarkProcessor::getLowerBound(stopId, targetStopId);
+                heuristic = LandmarkProcessor::getLowerBound(stopId, targetStopId, query.weekday);
             } else {
                 heuristic = targetStopIdToAllStops[stopId];
             }
@@ -1766,7 +1766,7 @@ void RaptorPQStar::addRoutesToQueue(set<int> stopIds, int excludeRouteId) {
         double heuristic;
 
         if (USE_LANDMARKS) {
-            heuristic = LandmarkProcessor::getLowerBound(stopId, targetStopId);
+            heuristic = LandmarkProcessor::getLowerBound(stopId, targetStopId, query.weekday);
         } else {
             heuristic = targetStopIdToAllStops[stopId];
         }

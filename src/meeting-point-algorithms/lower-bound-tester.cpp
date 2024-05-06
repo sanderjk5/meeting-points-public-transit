@@ -68,7 +68,7 @@ void LowerBoundTester::getLowerBoundDiffs(int numberOfSources, int numberOfTarge
             relativeDiffs.push_back(relativeDiff);
 
             // Landmarks
-            double lowerBoundLandmark = LandmarkProcessor::getLowerBound(sources[i], targets[j]);
+            double lowerBoundLandmark = LandmarkProcessor::getLowerBound(sources[i], targets[j], csaQuery.weekday);
             double absoluteDiffLandmark = (double) (duration - lowerBoundLandmark);
             double relativeDiffLandmark = 1;
             if (duration > 0) {

@@ -13,7 +13,7 @@ class LandmarkProcessor {
         ~LandmarkProcessor(){};
 
     	static void loadOrCalculateLandmarkDurations(DataType dataType);
-        static int getLowerBound(int stopId1, int stopId2);
+        static int getLowerBound(int stopId1, int stopId2, int weekday);
 
         static vector<set<int>> getAllArrivalTimesOfStop(int stopId);
         
@@ -23,7 +23,7 @@ class LandmarkProcessor {
         static void exportLandmarkDurations(DataType dataType);
         static void calculateLandmarkDurations(DataType dataType);  
 
-        static vector<vector<int>> landmarkDurations;
+        static vector<vector<vector<int>>> landmarkDurations;
 };
 
 #endif //CMAKE_LANDMARK_PROCESSOR_H

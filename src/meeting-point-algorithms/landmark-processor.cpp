@@ -15,7 +15,7 @@
 
 using namespace std;
 
-vector<vector<int>> LandmarkProcessor::landmarkDurations = vector<vector<int>>(0);
+vector<vector<vector<int>>> LandmarkProcessor::landmarkDurations = vector<vector<vector<int>>>(0);
 
 void LandmarkProcessor::loadOrCalculateLandmarkDurations(DataType dataType) {
     string dataTypeString = Importer::getDataTypeString(dataType);
@@ -54,15 +54,18 @@ void LandmarkProcessor::importLandmarkDurations(DataType dataType) {
     ss >> nofLandmarksString;
     int numberOfLandmarks = stoi(nofLandmarksString);
 
-    landmarkDurations = vector<vector<int>>(numberOfLandmarks, vector<int>(Importer::stops.size(), 0));
+    landmarkDurations = vector<vector<vector<int>>>(7, vector<vector<int>>(numberOfLandmarks, vector<int>(Importer::stops.size(), 0)));
 
     for (int i = 0; i < numberOfLandmarks; i++) {
         for (int j = 0; j < Importer::stops.size(); j++) {
             getline(file, line);
-            string durationString;
-            stringstream ss(line);
-            ss >> durationString;
-            landmarkDurations[i][j] = stoi(durationString);
+            // Split the line into substrings
+            std::stringstream ss(line);
+            std::string substring;
+            for (int k = 0; k < 7; k++) {
+                std::getline(ss, substring, ',');
+                landmarkDurations[k][i][j] = stoi(substring);
+            }
         }
     }
 
@@ -85,9 +88,9 @@ void LandmarkProcessor::exportLandmarkDurations(DataType dataType) {
 
     file << landmarkDurations.size() << endl;
 
-    for (int i = 0; i < landmarkDurations.size(); i++) {
-        for (int j = 0; j < landmarkDurations[i].size(); j++) {
-            file << landmarkDurations[i][j] << endl;
+    for (int i = 0; i < landmarkDurations[0].size(); i++) {
+        for (int j = 0; j < landmarkDurations[0][i].size(); j++) {
+            file << landmarkDurations[0][i][j] << "," << landmarkDurations[1][i][j] << "," << landmarkDurations[2][i][j] << "," << landmarkDurations[3][i][j] << "," << landmarkDurations[4][i][j] << "," << landmarkDurations[5][i][j] << "," << landmarkDurations[6][i][j] << endl;
         }
     }
 
@@ -126,44 +129,46 @@ void LandmarkProcessor::calculateLandmarkDurations(DataType dataType) {
         return;
     }
 
-    landmarkDurations = vector<vector<int>>(landmarkIds.size(), vector<int>(Importer::stops.size(), INT_MAX));
+    landmarkDurations = vector<vector<vector<int>>>(7, vector<vector<int>>(landmarkIds.size(), vector<int>(Importer::stops.size(), INT_MAX)));
 
     #pragma omp parallel for
-    for (int i = 0; i < landmarkIds.size(); i++) {
-        for (int j = 0; j < 10; j++) {
-            RaptorBackwardQuery raptorBackwardQuery;
-            raptorBackwardQuery.targetStopId = landmarkIds[i];
-            raptorBackwardQuery.sourceTime = rand() % SECONDS_PER_DAY;
-            raptorBackwardQuery.weekday = rand() % 7;
+    for (int weekday = 0; weekday < 7; weekday++) {
+        for (int i = 0; i < landmarkIds.size(); i++) {
+            for (int j = 4; j < 24; j++) {
+                RaptorBackwardQuery raptorBackwardQuery;
+                raptorBackwardQuery.targetStopId = landmarkIds[i];
+                raptorBackwardQuery.sourceTime = j * 3600;
+                raptorBackwardQuery.weekday = weekday;
 
-            RaptorBackward raptorBackward = RaptorBackward(raptorBackwardQuery);
-            raptorBackward.processRaptorBackward();
+                RaptorBackward raptorBackward = RaptorBackward(raptorBackwardQuery);
+                raptorBackward.processRaptorBackward();
 
-            int sourceTime = raptorBackwardQuery.sourceTime + (NUMBER_OF_DAYS * SECONDS_PER_DAY);
+                int sourceTime = raptorBackwardQuery.sourceTime + (NUMBER_OF_DAYS * SECONDS_PER_DAY);
 
-            for (int j = 0; j < Importer::stops.size(); j++) {
-                int latestDepartureTime = raptorBackward.getLatestDepartureTime(j);
-                if (latestDepartureTime == -1) {
-                    continue;
-                }
-                int duration = sourceTime - latestDepartureTime;
-                if (duration < landmarkDurations[i][j]) {
-                    landmarkDurations[i][j] = duration;
+                for (int j = 0; j < Importer::stops.size(); j++) {
+                    int latestDepartureTime = raptorBackward.getLatestDepartureTime(j);
+                    if (latestDepartureTime == -1) {
+                        continue;
+                    }
+                    int duration = sourceTime - latestDepartureTime;
+                    if (duration < landmarkDurations[weekday][i][j]) {
+                        landmarkDurations[weekday][i][j] = duration;
+                    }
                 }
             }
         }
-        
     }
+    
 
     cout << "Calculated landmark durations." << endl;
 }
 
-int LandmarkProcessor::getLowerBound(int stopId1, int stopId2) {
+int LandmarkProcessor::getLowerBound(int stopId1, int stopId2, int weekday) {
     int lowerBound = 0;
 
-    for (int i = 0; i < landmarkDurations.size(); i++) {
-        int duration1 = landmarkDurations[i][stopId1];
-        int duration2 = landmarkDurations[i][stopId2];
+    for (int i = 0; i < landmarkDurations[weekday].size(); i++) {
+        int duration1 = landmarkDurations[weekday][i][stopId1];
+        int duration2 = landmarkDurations[weekday][i][stopId2];
         if (duration1 == INT_MAX || duration2 == INT_MAX) {
             continue;
         }
