@@ -81,19 +81,6 @@ int main(int argc, const char *argv[]) {
     Importer::import(folderName, true, gesamt_de);
   }
 
-  cout << "Id of Düsseldorf Hbf " << Importer::getStopId("Düsseldorf Hbf") << endl;
-  cout << "Id of Leipzig Hbf " << Importer::getStopId("Leipzig Hbf") << endl;
-  cout << "Id of Dortmund Hbf " << Importer::getStopId("Dortmund Hbf") << endl;
-  cout << "Id of Essen Hbf " << Importer::getStopId("Essen Hbf") << endl;
-  cout << "Id of Bremen Hbf " << Importer::getStopId("Bremen Hbf") << endl;
-  cout << "Id of Dresden Hbf " << Importer::getStopId("Dresden Hbf") << endl;
-  cout << "Id of Duisburg Hbf " << Importer::getStopId("Duisburg Hbf") << endl;
-  cout << "Id of Mannheim Hbf " << Importer::getStopId("Mannheim Hbf") << endl;
-  cout << "Id of Augsburg Hbf " << Importer::getStopId("Augsburg Hbf") << endl;
-  cout << "Id of Kiel Hbf " << Importer::getStopId("Kiel Hbf") << endl;
-  cout << "Id of Halle (Saale), ZOB " << Importer::getStopId("Halle (Saale), ZOB") << endl;
-  cout << "Id of Lübeck Hbf " << Importer::getStopId("Lübeck Hbf") << endl;
-
   Creator::loadOrCreateNetworkGraph(dataType);
   if (USE_LANDMARKS) {
     LandmarkProcessor::loadOrCalculateLandmarkDurations(dataType);
