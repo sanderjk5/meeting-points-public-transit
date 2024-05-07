@@ -96,7 +96,7 @@ int main(int argc, const char *argv[]) {
   cout << "Number of edges: " << edgeCount << "\n" << endl;
 
   if (startExperiments){
-    ExperimentController::evaluateLowerBounds(200, 20);
+    // ExperimentController::evaluateLowerBounds(200, 20);
 
     // Real experiments
     // vector<int> numberOfSourceStops = {2, 3, 5, 10, 25};
