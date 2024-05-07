@@ -81,6 +81,7 @@ class PrintHelper {
 
         static void printMeetingPointQuery(MeetingPointQuery meetingPointQuery);
         static void printMeetingPointQueryResult(MeetingPointQueryResult meetingPointQueryResult);
+        static void printMeetingPointQueryResultOfOptimization(MeetingPointQueryResult meetingPointQueryResult, Optimization optimization);
         static void printGTreeCSAInfo(MeetingPointQueryGTreeCSAInfo meetingPointQueryGTreeCSAInfo);
         static void printGTreeApproxInfo(GTreeQueryProcessor gTreeQueryProcessor);
         static void printJourney(Journey journey);

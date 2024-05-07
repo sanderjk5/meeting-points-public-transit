@@ -3,6 +3,7 @@
 #include "csa.h"
 #include "raptor.h"
 #include "optimization.h"
+#include "landmark-processor.h"
 #include <../data-structures/creator.h>
 #include <../data-structures/g-tree.h>
 #include <../constants.h>
@@ -1332,6 +1333,46 @@ vector<Journey> RaptorBoundQueryProcessor::getJourneys(Optimization optimization
     return journeys;
 }
 
+vector<pair<int, int>> RaptorBoundQueryProcessor::getStopsAndResultsWithSmallerRelativeDifference(double relativeDifference, Optimization optimization) {
+    vector<pair<int, int>> meetingPointsWithSmallerRelativeDifference = vector<pair<int, int>>(0);
+    int bestResult;
+    if (optimization == min_sum) {
+        bestResult = meetingPointQueryResult.minSumDurationInSeconds;
+    } else {
+        bestResult = meetingPointQueryResult.minMaxDurationInSeconds;
+    }
+    for (int i = 0; i < Importer::stops.size(); i++) {
+        int currentResult = 0;
+        for (int j = 0; j < meetingPointQuery.sourceStopIds.size(); j++) {
+            int earliestArrivalTime = raptorBounds[j]->getEarliestArrivalTime(i);
+            if (earliestArrivalTime == INT_MAX) {
+                currentResult = INT_MAX;
+                break;
+            }
+
+            int duration = earliestArrivalTime - meetingPointQuery.sourceTime;
+            if (optimization == min_sum) {
+                currentResult += duration;
+            } else {
+                if (duration > currentResult) {
+                    currentResult = duration;
+                }
+            }       
+        }
+        if (currentResult == INT_MAX) {
+            continue;
+        }
+
+        int difference = currentResult - bestResult;
+        double relativeDifference = (double) difference / currentResult;
+        if (relativeDifference < relativeDifference) {
+            meetingPointsWithSmallerRelativeDifference.push_back(make_pair(i, currentResult));
+        }
+    }
+
+    return meetingPointsWithSmallerRelativeDifference;
+}
+
 void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
     map<int, vector<int>> sourceStopIdToAllStops;
 
@@ -1675,4 +1716,152 @@ vector<Journey> RaptorPQParallelQueryProcessor::getJourneys(Optimization optimiz
     }
     vector<Journey> journeys = raptorPQParallel->createJourneys(targetStopId);
     return journeys;
+}
+
+void RaptorApproximationQueryProcessor::processRaptorApproximationQuery(Optimization optimization) {
+    auto start = std::chrono::high_resolution_clock::now();
+    
+    if (!USE_LANDMARKS) {
+        sourceStopIdToAllStops = Creator::networkGraph.getDistancesWithPhast(meetingPointQuery.sourceStopIds);
+    }
+
+    int numberOfSources = meetingPointQuery.sourceStopIds.size();
+    int numberOfExactSources = 2;
+    if (numberOfSources < 2) {
+        numberOfExactSources = numberOfSources;
+    } else if (numberOfSources < 10) {
+        numberOfExactSources = 3;
+    } else if (numberOfSources < 25) {
+        numberOfExactSources = 4;
+    } else {
+        numberOfExactSources = 5;
+    }
+
+    // find the best exact sources (the sources which are the furthest apart using the lower bounds)
+    vector<int> exactSources = RaptorApproximationQueryProcessor::getExactSources(numberOfExactSources);
+
+    MeetingPointQuery meetingPointQueryExact = meetingPointQuery;
+    meetingPointQueryExact.sourceStopIds = exactSources;
+
+    unique_ptr<RaptorBoundQueryProcessor> raptorBoundQueryProcessor = unique_ptr<RaptorBoundQueryProcessor> (new RaptorBoundQueryProcessor(meetingPointQueryExact));
+    raptorBoundQueryProcessor->processRaptorBoundQuery(optimization);
+    vector<pair<int, int>> meetingPointsWithSmallerRelativeDifference = raptorBoundQueryProcessor->getStopsAndResultsWithSmallerRelativeDifference(0.1, optimization);
+
+    vector<int> targetStopIds = vector<int>(0);
+    for (int i = 0; i < meetingPointsWithSmallerRelativeDifference.size(); i++) {
+        targetStopIds.push_back(meetingPointsWithSmallerRelativeDifference[i].first);
+    }
+
+    for (int i = 0; i < numberOfSources; i++) {
+        // skip the exact sources
+        if (find(exactSources.begin(), exactSources.end(), meetingPointQuery.sourceStopIds[i]) != exactSources.end()) {
+            continue;
+        }
+        RaptorQuery query;
+        query.sourceStopId = meetingPointQuery.sourceStopIds[i];
+        query.sourceTime = meetingPointQuery.sourceTime;
+        query.weekday = meetingPointQuery.weekday;
+        query.targetStopIds = targetStopIds;
+
+        shared_ptr<Raptor> raptor = shared_ptr<Raptor> (new Raptor(query));
+        raptors.push_back(raptor);
+    }
+
+    #pragma omp parallel for
+    for (int i = 0; i < raptors.size(); i++) {
+        raptors[i]->processRaptor();
+    }
+
+    // calculate the best result
+    int bestMeetingPoint = -1;
+    int bestResult = INT_MAX;
+
+    for (int i = 0; i < meetingPointsWithSmallerRelativeDifference.size(); i++) {
+        int currentMeetingPoint = meetingPointsWithSmallerRelativeDifference[i].first;
+        int currentResult = meetingPointsWithSmallerRelativeDifference[i].second;
+        
+        for (int j = 0; j < raptors.size(); j++) {
+            int earliestArrivalTime = raptors[j]->getEarliestArrivalTime(currentMeetingPoint);
+            if (earliestArrivalTime == INT_MAX) {
+                currentResult = INT_MAX;
+                break;
+            }
+
+            int duration = earliestArrivalTime - meetingPointQuery.sourceTime;
+            if (optimization == min_sum) {
+                currentResult += duration;
+            } else {
+                if (duration > currentResult) {
+                    currentResult = duration;
+                }
+            }
+        }
+
+        if (currentResult < bestResult) {
+            bestMeetingPoint = currentMeetingPoint;
+            bestResult = currentResult;
+        }
+    }
+
+    if (bestMeetingPoint != -1) {
+        if (optimization == min_sum) {
+            meetingPointQueryResult.meetingPointMinSumStopId = bestMeetingPoint;
+            meetingPointQueryResult.meetingPointMinSum = Importer::getStopName(bestMeetingPoint);
+            meetingPointQueryResult.minSumDuration = TimeConverter::convertSecondsToTime(bestResult, false);
+            meetingPointQueryResult.minSumDurationInSeconds = bestResult;
+        } else {
+            meetingPointQueryResult.meetingPointMinMaxStopId = bestMeetingPoint;
+            meetingPointQueryResult.meetingPointMinMax = Importer::getStopName(bestMeetingPoint);
+            meetingPointQueryResult.minMaxDuration = TimeConverter::convertSecondsToTime(bestResult, false);
+            meetingPointQueryResult.minMaxDurationInSeconds = bestResult;
+        }
+    }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    meetingPointQueryResult.queryTime = duration;
+}
+
+MeetingPointQueryResult RaptorApproximationQueryProcessor::getMeetingPointQueryResult() {
+    return meetingPointQueryResult;
+}
+
+vector<int> RaptorApproximationQueryProcessor::getExactSources(int numberOfExactSourceStops) {
+    vector<int> exactSources = vector<int>(0);
+
+    // calculate the average distance of each source to all other sources
+    vector<pair<int, double>> sourceIdToAverageDistance = vector<pair<int, double>>(meetingPointQuery.sourceStopIds.size());
+    for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
+        int sourceId = meetingPointQuery.sourceStopIds[i];
+        double averageDistance = 0;
+        for (int j = 0; j < meetingPointQuery.sourceStopIds.size(); j++) {
+            if (i == j) {
+                continue;
+            }
+            int otherSourceId = meetingPointQuery.sourceStopIds[j];
+            int distance;
+            if (USE_LANDMARKS) {
+                distance = LandmarkProcessor::getLowerBound(sourceId, otherSourceId, meetingPointQuery.weekday);
+            } else {
+                distance = sourceStopIdToAllStops[sourceId][otherSourceId];
+            }
+            averageDistance += distance;
+        }
+        averageDistance = averageDistance / (meetingPointQuery.sourceStopIds.size() - 1);
+        sourceIdToAverageDistance[i] = make_pair(sourceId, averageDistance);
+    }    
+
+    // sort the sources by average distance
+    sort(sourceIdToAverageDistance.begin(), sourceIdToAverageDistance.end(), 
+        [](const pair<int, double> &left, const pair<int, double> &right) {
+            return left.second > right.second;
+        }
+    );
+
+    // add the sources with the highest average distance to the exact sources
+    for (int i = 0; i < numberOfExactSourceStops; i++) {
+        exactSources.push_back(sourceIdToAverageDistance[i].first);
+    }
+
+    return exactSources;
 }

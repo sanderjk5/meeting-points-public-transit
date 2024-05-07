@@ -2547,6 +2547,15 @@ void AlgorithmComparer::compareAlgorithmsWithoutGTree(DataType dataType, Meeting
     raptorPQQueryProcessorMinMax.processRaptorPQQuery(min_max);
     MeetingPointQueryResult meetingPointQueryResultRaptorPQMinMax = raptorPQQueryProcessorMinMax.getMeetingPointQueryResult();
 
+
+    RaptorApproximationQueryProcessor raptorApproximationQueryProcessorMinSum = RaptorApproximationQueryProcessor(meetingPointQuery);
+    raptorApproximationQueryProcessorMinSum.processRaptorApproximationQuery(min_sum);
+    MeetingPointQueryResult meetingPointQueryResultRaptorApproximationMinSum = raptorApproximationQueryProcessorMinSum.getMeetingPointQueryResult();
+
+    RaptorApproximationQueryProcessor raptorApproximationQueryProcessorMinMax = RaptorApproximationQueryProcessor(meetingPointQuery);
+    raptorApproximationQueryProcessorMinSum.processRaptorApproximationQuery(min_max);
+    MeetingPointQueryResult meetingPointQueryResultRaptorApproximationMinMax = raptorApproximationQueryProcessorMinMax.getMeetingPointQueryResult();
+
     // RaptorPQParallelQueryProcessor raptorPQParallelQueryProcessorMinSum = RaptorPQParallelQueryProcessor(meetingPointQuery);
     // raptorPQParallelQueryProcessorMinSum.processRaptorPQParallelQuery(min_sum);
     // MeetingPointQueryResult meetingPointQueryResultRaptorPQParallelMinSum = raptorPQParallelQueryProcessorMinSum.getMeetingPointQueryResult();
@@ -2587,6 +2596,12 @@ void AlgorithmComparer::compareAlgorithmsWithoutGTree(DataType dataType, Meeting
     cout << "Raptor PQ - Min Max: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultRaptorPQMinMax);
     cout << "Average number of expanded routes: " << raptorPQQueryProcessorMinMax.numberOfExpandedRoutes << endl;
+
+    cout << "Raptor Approximation - Min Sum: " << endl;
+    PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorApproximationMinSum, min_sum);
+
+    cout << "Raptor Approximation - Min Max: " << endl;
+    PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorApproximationMinMax, min_max);
 
     // cout << "Raptor PQ Parallel - Min Sum: " << endl;
     // PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultRaptorPQParallelMinSum);
@@ -2708,6 +2723,23 @@ void PrintHelper::printMeetingPointQueryResult(MeetingPointQueryResult meetingPo
     }
     cout << "Min sum - meeting point: " << meetingPointQueryResult.meetingPointMinSum << ", meeting time: " << meetingPointQueryResult.meetingTimeMinSum << ",  travel time sum: " << meetingPointQueryResult.minSumDuration << ", max transfers: " << meetingPointQueryResult.maxTransfersMinSum << endl;
     cout << "Min max - meeting point: " << meetingPointQueryResult.meetingPointMinMax << ", meeting time: " << meetingPointQueryResult.meetingTimeMinMax << ", travel time max: " << meetingPointQueryResult.minMaxDuration << ", max transfers: " << meetingPointQueryResult.maxTransfersMinMax << endl;
+    cout << "Query time: " << meetingPointQueryResult.queryTime << " milliseconds \n" << endl;
+}
+
+void PrintHelper::printMeetingPointQueryResultOfOptimization(MeetingPointQueryResult meetingPointQueryResult, Optimization optimization) {
+    if (optimization == min_sum) {
+        if (meetingPointQueryResult.meetingPointMinSum == "") {
+            cout << "No meeting point found" << endl;
+        } else {
+            cout << "Min sum - meeting point: " << meetingPointQueryResult.meetingPointMinSum << ", meeting time: " << meetingPointQueryResult.meetingTimeMinSum << ",  travel time sum: " << meetingPointQueryResult.minSumDuration << endl;
+        }
+    } else {
+        if (meetingPointQueryResult.meetingPointMinMax == "") {
+            cout << "No meeting point found" << endl;
+        } else {
+            cout << "Min max - meeting point: " << meetingPointQueryResult.meetingPointMinMax << ", meeting time: " << meetingPointQueryResult.meetingTimeMinMax << ", travel time max: " << meetingPointQueryResult.minMaxDuration << endl;
+        }
+    }
     cout << "Query time: " << meetingPointQueryResult.queryTime << " milliseconds \n" << endl;
 }
 

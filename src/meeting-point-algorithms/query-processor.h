@@ -150,6 +150,7 @@ class RaptorBoundQueryProcessor {
         ~RaptorBoundQueryProcessor(){};
 
         void processRaptorBoundQuery(Optimization optimization);
+        vector<pair<int, int>> getStopsAndResultsWithSmallerRelativeDifference(double relativeDifference, Optimization optimization);
         MeetingPointQueryResult getMeetingPointQueryResult();
         vector<Journey> getJourneys(Optimization optimization);
 
@@ -243,6 +244,30 @@ class RaptorPQParallelQueryProcessor {
         MeetingPointQuery meetingPointQuery;
         MeetingPointQueryResult meetingPointQueryResult;
         shared_ptr<RaptorPQParallel> raptorPQParallel;
+};
+
+class RaptorApproximationQueryProcessor {
+    public:
+        explicit RaptorApproximationQueryProcessor(MeetingPointQuery meetingPointQuery){
+            this->meetingPointQuery = meetingPointQuery;
+        };
+        ~RaptorApproximationQueryProcessor(){};
+
+        void processRaptorApproximationQuery(Optimization optimization);
+        MeetingPointQueryResult getMeetingPointQueryResult();
+
+        double durationExactCalculation;
+        double durationRemainingCalculations;
+
+    private:
+        MeetingPointQuery meetingPointQuery;
+        MeetingPointQueryResult meetingPointQueryResult;
+        vector<shared_ptr<RaptorBound>> raptorBounds;
+        vector<shared_ptr<Raptor>> raptors;
+
+        map<int, vector<int>> sourceStopIdToAllStops;
+
+        vector<int> getExactSources(int numberOfExactSourceStops);
 };
 
 /*
