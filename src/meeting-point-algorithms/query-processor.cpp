@@ -1747,6 +1747,8 @@ void RaptorApproximationQueryProcessor::processRaptorApproximationQuery(Optimiza
     raptorBoundQueryProcessor->processRaptorBoundQuery(optimization);
     vector<pair<int, int>> meetingPointsWithSmallerRelativeDifference = raptorBoundQueryProcessor->getStopsAndResultsWithSmallerRelativeDifference(0.1, optimization);
 
+    cout << "Found " << meetingPointsWithSmallerRelativeDifference.size() << " candidates." << endl;
+
     vector<int> targetStopIds = vector<int>(0);
     for (int i = 0; i < meetingPointsWithSmallerRelativeDifference.size(); i++) {
         targetStopIds.push_back(meetingPointsWithSmallerRelativeDifference[i].first);
