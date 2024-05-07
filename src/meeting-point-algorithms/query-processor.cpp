@@ -1815,8 +1815,6 @@ void RaptorApproximationQueryProcessor::calculateExactSources(int numberOfExactS
 void RaptorApproximationQueryProcessor::calculateResultWithCandidates() {
     vector<CandidateInfo> meetingPointsWithSmallerRelativeDifference = raptorBoundQueryProcessor->getStopsAndResultsWithSmallerRelativeDifference(0.1, optimization);
 
-    cout << "Number of candidates: " << meetingPointsWithSmallerRelativeDifference.size() << endl;
-
     vector<int> targetStopIds = vector<int>(0);
     for (int i = 0; i < meetingPointsWithSmallerRelativeDifference.size(); i++) {
         targetStopIds.push_back(meetingPointsWithSmallerRelativeDifference[i].stopId);
@@ -1904,7 +1902,6 @@ void RaptorApproximationQueryProcessor::calculateResultWithOneCandidate() {
 
     vector<int> targetStopIds = vector<int>(0);
     if (optimization == min_sum) {
-        cout << "test123" << endl;
         targetStopIds.push_back(exactResult.meetingPointMinSumStopId);
     } else {
         targetStopIds.push_back(exactResult.meetingPointMinMaxStopId);
