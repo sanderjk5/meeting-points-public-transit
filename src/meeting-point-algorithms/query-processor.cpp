@@ -1252,6 +1252,7 @@ void RaptorBoundQueryProcessor::processRaptorBoundQuery(Optimization optimizatio
             meetingPointQueryResult.meetingPointMinSumStopId = i;
             meetingPointQueryResult.meetingPointMinSum = Importer::getStopName(i);
             meetingPointQueryResult.meetingTimeMinSum = TimeConverter::convertSecondsToTime(arrivalTime, true);
+            meetingPointQueryResult.minSumMeetingTimeInSeconds = arrivalTime;
             meetingPointQueryResult.minSumDuration = TimeConverter::convertSecondsToTime(sum, false);
             meetingPointQueryResult.minSumDurationInSeconds = sum;
             stopIdMinSum = i;
@@ -1261,6 +1262,7 @@ void RaptorBoundQueryProcessor::processRaptorBoundQuery(Optimization optimizatio
             meetingPointQueryResult.meetingPointMinMaxStopId = i;
             meetingPointQueryResult.meetingPointMinMax = Importer::getStopName(i);
             meetingPointQueryResult.meetingTimeMinMax = TimeConverter::convertSecondsToTime(arrivalTime, true);
+            meetingPointQueryResult.minMaxMeetingTimeInSeconds = arrivalTime;
             meetingPointQueryResult.minMaxDuration = TimeConverter::convertSecondsToTime(max, false);
             meetingPointQueryResult.minMaxDurationInSeconds = max;
             stopIdMinMax = i;
@@ -1333,8 +1335,8 @@ vector<Journey> RaptorBoundQueryProcessor::getJourneys(Optimization optimization
     return journeys;
 }
 
-vector<pair<int, int>> RaptorBoundQueryProcessor::getStopsAndResultsWithSmallerRelativeDifference(double relativeDifference, Optimization optimization) {
-    vector<pair<int, int>> meetingPointsWithSmallerRelativeDifference = vector<pair<int, int>>(0);
+vector<CandidateInfo> RaptorBoundQueryProcessor::getStopsAndResultsWithSmallerRelativeDifference(double relativeDifference, Optimization optimization) {
+    vector<CandidateInfo> meetingPointsWithSmallerRelativeDifference = vector<CandidateInfo>(0);
     int bestResult;
     if (optimization == min_sum) {
         bestResult = meetingPointQueryResult.minSumDurationInSeconds;
@@ -1343,6 +1345,7 @@ vector<pair<int, int>> RaptorBoundQueryProcessor::getStopsAndResultsWithSmallerR
     }
     for (int i = 0; i < Importer::stops.size(); i++) {
         int currentResult = 0;
+        int arrivalTime = 0;
         for (int j = 0; j < meetingPointQuery.sourceStopIds.size(); j++) {
             int earliestArrivalTime = raptorBounds[j]->getEarliestArrivalTime(i);
             if (earliestArrivalTime == INT_MAX) {
@@ -1357,16 +1360,24 @@ vector<pair<int, int>> RaptorBoundQueryProcessor::getStopsAndResultsWithSmallerR
                 if (duration > currentResult) {
                     currentResult = duration;
                 }
-            }       
+            } 
+
+            if (earliestArrivalTime > arrivalTime) {
+                arrivalTime = earliestArrivalTime;
+            }
         }
         if (currentResult == INT_MAX) {
             continue;
         }
 
         int difference = currentResult - bestResult;
-        double relativeDifference = (double) difference / currentResult;
-        if (relativeDifference < relativeDifference) {
-            meetingPointsWithSmallerRelativeDifference.push_back(make_pair(i, currentResult));
+        double currentRelativeDifference = (double) difference / currentResult;
+        if (currentRelativeDifference < relativeDifference) {
+            CandidateInfo candidateInfo;
+            candidateInfo.stopId = i;
+            candidateInfo.duration = currentResult;
+            candidateInfo.meetingTime = arrivalTime;
+            meetingPointsWithSmallerRelativeDifference.push_back(candidateInfo);
         }
     }
 
@@ -1718,8 +1729,10 @@ vector<Journey> RaptorPQParallelQueryProcessor::getJourneys(Optimization optimiz
     return journeys;
 }
 
-void RaptorApproximationQueryProcessor::processRaptorApproximationQuery(Optimization optimization) {
+void RaptorApproximationQueryProcessor::processRaptorApproximationQuery(Optimization optimization, bool multipleCandidates) {
     auto start = std::chrono::high_resolution_clock::now();
+
+    this->optimization = optimization;
     
     if (!USE_LANDMARKS) {
         sourceStopIdToAllStops = Creator::networkGraph.getDistancesWithPhast(meetingPointQuery.sourceStopIds);
@@ -1738,85 +1751,18 @@ void RaptorApproximationQueryProcessor::processRaptorApproximationQuery(Optimiza
     }
 
     // find the best exact sources (the sources which are the furthest apart using the lower bounds)
-    vector<int> exactSources = RaptorApproximationQueryProcessor::getExactSources(numberOfExactSources);
+    RaptorApproximationQueryProcessor::calculateExactSources(numberOfExactSources);
 
     MeetingPointQuery meetingPointQueryExact = meetingPointQuery;
     meetingPointQueryExact.sourceStopIds = exactSources;
 
-    unique_ptr<RaptorBoundQueryProcessor> raptorBoundQueryProcessor = unique_ptr<RaptorBoundQueryProcessor> (new RaptorBoundQueryProcessor(meetingPointQueryExact));
+    raptorBoundQueryProcessor = shared_ptr<RaptorBoundQueryProcessor> (new RaptorBoundQueryProcessor(meetingPointQueryExact));
     raptorBoundQueryProcessor->processRaptorBoundQuery(optimization);
-    vector<pair<int, int>> meetingPointsWithSmallerRelativeDifference = raptorBoundQueryProcessor->getStopsAndResultsWithSmallerRelativeDifference(0.1, optimization);
 
-    cout << "Found " << meetingPointsWithSmallerRelativeDifference.size() << " candidates." << endl;
-
-    vector<int> targetStopIds = vector<int>(0);
-    for (int i = 0; i < meetingPointsWithSmallerRelativeDifference.size(); i++) {
-        targetStopIds.push_back(meetingPointsWithSmallerRelativeDifference[i].first);
-    }
-
-    for (int i = 0; i < numberOfSources; i++) {
-        // skip the exact sources
-        if (find(exactSources.begin(), exactSources.end(), meetingPointQuery.sourceStopIds[i]) != exactSources.end()) {
-            continue;
-        }
-        RaptorQuery query;
-        query.sourceStopId = meetingPointQuery.sourceStopIds[i];
-        query.sourceTime = meetingPointQuery.sourceTime;
-        query.weekday = meetingPointQuery.weekday;
-        query.targetStopIds = targetStopIds;
-
-        shared_ptr<Raptor> raptor = shared_ptr<Raptor> (new Raptor(query));
-        raptors.push_back(raptor);
-    }
-
-    #pragma omp parallel for
-    for (int i = 0; i < raptors.size(); i++) {
-        raptors[i]->processRaptor();
-    }
-
-    // calculate the best result
-    int bestMeetingPoint = -1;
-    int bestResult = INT_MAX;
-
-    for (int i = 0; i < meetingPointsWithSmallerRelativeDifference.size(); i++) {
-        int currentMeetingPoint = meetingPointsWithSmallerRelativeDifference[i].first;
-        int currentResult = meetingPointsWithSmallerRelativeDifference[i].second;
-        
-        for (int j = 0; j < raptors.size(); j++) {
-            int earliestArrivalTime = raptors[j]->getEarliestArrivalTime(currentMeetingPoint);
-            if (earliestArrivalTime == INT_MAX) {
-                currentResult = INT_MAX;
-                break;
-            }
-
-            int duration = earliestArrivalTime - meetingPointQuery.sourceTime;
-            if (optimization == min_sum) {
-                currentResult += duration;
-            } else {
-                if (duration > currentResult) {
-                    currentResult = duration;
-                }
-            }
-        }
-
-        if (currentResult < bestResult) {
-            bestMeetingPoint = currentMeetingPoint;
-            bestResult = currentResult;
-        }
-    }
-
-    if (bestMeetingPoint != -1) {
-        if (optimization == min_sum) {
-            meetingPointQueryResult.meetingPointMinSumStopId = bestMeetingPoint;
-            meetingPointQueryResult.meetingPointMinSum = Importer::getStopName(bestMeetingPoint);
-            meetingPointQueryResult.minSumDuration = TimeConverter::convertSecondsToTime(bestResult, false);
-            meetingPointQueryResult.minSumDurationInSeconds = bestResult;
-        } else {
-            meetingPointQueryResult.meetingPointMinMaxStopId = bestMeetingPoint;
-            meetingPointQueryResult.meetingPointMinMax = Importer::getStopName(bestMeetingPoint);
-            meetingPointQueryResult.minMaxDuration = TimeConverter::convertSecondsToTime(bestResult, false);
-            meetingPointQueryResult.minMaxDurationInSeconds = bestResult;
-        }
+    if (multipleCandidates) {
+        calculateResultWithCandidates();
+    } else {
+        calculateResultWithOneCandidate();
     }
 
     auto end = std::chrono::high_resolution_clock::now();
@@ -1828,8 +1774,8 @@ MeetingPointQueryResult RaptorApproximationQueryProcessor::getMeetingPointQueryR
     return meetingPointQueryResult;
 }
 
-vector<int> RaptorApproximationQueryProcessor::getExactSources(int numberOfExactSourceStops) {
-    vector<int> exactSources = vector<int>(0);
+void RaptorApproximationQueryProcessor::calculateExactSources(int numberOfExactSourceStops) {
+    exactSources = vector<int>(0);
 
     // calculate the average distance of each source to all other sources
     vector<pair<int, double>> sourceIdToAverageDistance = vector<pair<int, double>>(meetingPointQuery.sourceStopIds.size());
@@ -1864,6 +1810,171 @@ vector<int> RaptorApproximationQueryProcessor::getExactSources(int numberOfExact
     for (int i = 0; i < numberOfExactSourceStops; i++) {
         exactSources.push_back(sourceIdToAverageDistance[i].first);
     }
+}
 
-    return exactSources;
+void RaptorApproximationQueryProcessor::calculateResultWithCandidates() {
+    vector<CandidateInfo> meetingPointsWithSmallerRelativeDifference = raptorBoundQueryProcessor->getStopsAndResultsWithSmallerRelativeDifference(0.1, optimization);
+
+    cout << "Number of candidates: " << meetingPointsWithSmallerRelativeDifference.size() << endl;
+
+    vector<int> targetStopIds = vector<int>(0);
+    for (int i = 0; i < meetingPointsWithSmallerRelativeDifference.size(); i++) {
+        targetStopIds.push_back(meetingPointsWithSmallerRelativeDifference[i].stopId);
+    }
+
+    int numberOfSources = meetingPointQuery.sourceStopIds.size();
+
+    for (int i = 0; i < numberOfSources; i++) {
+        // skip the exact sources
+        if (find(exactSources.begin(), exactSources.end(), meetingPointQuery.sourceStopIds[i]) != exactSources.end()) {
+            continue;
+        }
+        RaptorQuery query;
+        query.sourceStopId = meetingPointQuery.sourceStopIds[i];
+        query.sourceTime = meetingPointQuery.sourceTime;
+        query.weekday = meetingPointQuery.weekday;
+        query.targetStopIds = targetStopIds;
+
+        shared_ptr<Raptor> raptor = shared_ptr<Raptor> (new Raptor(query));
+        raptors.push_back(raptor);
+    }
+
+    #pragma omp parallel for
+    for (int i = 0; i < raptors.size(); i++) {
+        raptors[i]->processRaptor();
+    }
+
+    // calculate the best result
+    int bestMeetingPoint = -1;
+    int bestResult = INT_MAX;
+    int bestArrivalTime = 0;
+
+    for (int i = 0; i < meetingPointsWithSmallerRelativeDifference.size(); i++) {
+        int currentMeetingPoint = meetingPointsWithSmallerRelativeDifference[i].stopId;
+        int currentResult = meetingPointsWithSmallerRelativeDifference[i].duration;
+        int arrivalTime = meetingPointsWithSmallerRelativeDifference[i].meetingTime;
+        
+        for (int j = 0; j < raptors.size(); j++) {
+            int earliestArrivalTime = raptors[j]->getEarliestArrivalTime(currentMeetingPoint);
+            if (earliestArrivalTime == INT_MAX) {
+                currentResult = INT_MAX;
+                break;
+            }
+
+            int duration = earliestArrivalTime - meetingPointQuery.sourceTime;
+            if (optimization == min_sum) {
+                currentResult += duration;
+            } else {
+                if (duration > currentResult) {
+                    currentResult = duration;
+                }
+            }
+
+            if (earliestArrivalTime > arrivalTime) {
+                arrivalTime = earliestArrivalTime;
+            }
+        }
+
+        if (currentResult < bestResult) {
+            bestMeetingPoint = currentMeetingPoint;
+            bestResult = currentResult;
+            bestArrivalTime = arrivalTime;
+        }
+    }
+
+    if (bestMeetingPoint != -1) {
+        if (optimization == min_sum) {
+            meetingPointQueryResult.meetingPointMinSumStopId = bestMeetingPoint;
+            meetingPointQueryResult.meetingPointMinSum = Importer::getStopName(bestMeetingPoint);
+            meetingPointQueryResult.meetingTimeMinSum = TimeConverter::convertSecondsToTime(bestArrivalTime, true);
+            meetingPointQueryResult.minSumDuration = TimeConverter::convertSecondsToTime(bestResult, false);
+            meetingPointQueryResult.minSumDurationInSeconds = bestResult;
+        } else {
+            meetingPointQueryResult.meetingPointMinMaxStopId = bestMeetingPoint;
+            meetingPointQueryResult.meetingPointMinMax = Importer::getStopName(bestMeetingPoint);
+            meetingPointQueryResult.meetingTimeMinMax = TimeConverter::convertSecondsToTime(bestArrivalTime, true);
+            meetingPointQueryResult.minMaxDuration = TimeConverter::convertSecondsToTime(bestResult, false);
+            meetingPointQueryResult.minMaxDurationInSeconds = bestResult;
+        }
+    }
+}
+
+void RaptorApproximationQueryProcessor::calculateResultWithOneCandidate() {
+    MeetingPointQueryResult exactResult = raptorBoundQueryProcessor->getMeetingPointQueryResult();
+
+    vector<int> targetStopIds = vector<int>(0);
+    if (optimization == min_sum) {
+        cout << "test123" << endl;
+        targetStopIds.push_back(exactResult.meetingPointMinSumStopId);
+    } else {
+        targetStopIds.push_back(exactResult.meetingPointMinMaxStopId);
+    }
+
+    int numberOfSources = meetingPointQuery.sourceStopIds.size();
+
+    for (int i = 0; i < numberOfSources; i++) {
+        // skip the exact sources
+        if (find(exactSources.begin(), exactSources.end(), meetingPointQuery.sourceStopIds[i]) != exactSources.end()) {
+            continue;
+        }
+        RaptorQuery query;
+        query.sourceStopId = meetingPointQuery.sourceStopIds[i];
+        query.sourceTime = meetingPointQuery.sourceTime;
+        query.weekday = meetingPointQuery.weekday;
+        query.targetStopIds = targetStopIds;
+
+        shared_ptr<RaptorPQStar> raptorPQStar = shared_ptr<RaptorPQStar> (new RaptorPQStar(query, sourceStopIdToAllStops[targetStopIds[0]]));
+        raptorPQStars.push_back(raptorPQStar);
+    }
+    
+    #pragma omp parallel for
+    for (int i = 0; i < raptorPQStars.size(); i++) {
+        raptorPQStars[i]->processRaptorPQStar();
+    }
+
+    int bestResult;
+    int meetingTime;
+    if (optimization == min_sum) {
+        bestResult = exactResult.minSumDurationInSeconds;
+        meetingTime = exactResult.minSumMeetingTimeInSeconds;
+    } else {
+        bestResult = exactResult.minMaxDurationInSeconds;
+        meetingTime = exactResult.minMaxMeetingTimeInSeconds;
+    }
+
+    for (int i = 0; i < raptorPQStars.size(); i++) {
+        int earliestArrivalTime = raptorPQStars[i]->getEarliestArrivalTime(targetStopIds[0]);
+        if (earliestArrivalTime == INT_MAX) {
+            bestResult = INT_MAX;
+            break;
+        }
+        if (earliestArrivalTime > meetingTime) {
+            meetingTime = earliestArrivalTime;
+        }
+
+        int duration = earliestArrivalTime - meetingPointQuery.sourceTime;
+        if (optimization == min_sum) {
+            bestResult += duration;
+        } else {
+            if (duration > bestResult) {
+                bestResult = duration;
+            }
+        }
+    }
+
+    if (bestResult != INT_MAX) {
+        if (optimization == min_sum) {
+            meetingPointQueryResult.meetingPointMinSumStopId = targetStopIds[0];
+            meetingPointQueryResult.meetingPointMinSum = Importer::getStopName(targetStopIds[0]);
+            meetingPointQueryResult.meetingTimeMinSum = TimeConverter::convertSecondsToTime(meetingTime, true);
+            meetingPointQueryResult.minSumDuration = TimeConverter::convertSecondsToTime(bestResult, false);
+            meetingPointQueryResult.minSumDurationInSeconds = bestResult;
+        } else {
+            meetingPointQueryResult.meetingPointMinMaxStopId = targetStopIds[0];
+            meetingPointQueryResult.meetingPointMinMax = Importer::getStopName(targetStopIds[0]);
+            meetingPointQueryResult.meetingTimeMinMax = TimeConverter::convertSecondsToTime(meetingTime, true);
+            meetingPointQueryResult.minMaxDuration = TimeConverter::convertSecondsToTime(bestResult, false);
+            meetingPointQueryResult.minMaxDurationInSeconds = bestResult;
+        }
+    }
 }

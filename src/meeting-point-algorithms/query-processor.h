@@ -25,12 +25,14 @@ struct MeetingPointQueryResult {
     string meetingTimeMinSum;
     string minSumDuration;
     int minSumDurationInSeconds;
+    int minSumMeetingTimeInSeconds;
     int maxTransfersMinSum;
     int meetingPointMinMaxStopId;
     string meetingPointMinMax;
     string meetingTimeMinMax;
     string minMaxDuration;
     int minMaxDurationInSeconds;
+    int minMaxMeetingTimeInSeconds;
     int maxTransfersMinMax;
     double queryTime;
 };
@@ -39,6 +41,12 @@ struct MeetingPointQueryGTreeCSAInfo {
     double csaTargetStopFractionMinSum;
     double csaTargetStopFractionMinMax;
     double csaVisitedConnectionsFraction;
+};
+
+struct CandidateInfo {
+    int stopId;
+    int duration;
+    int meetingTime;
 };
 
 /*
@@ -150,7 +158,7 @@ class RaptorBoundQueryProcessor {
         ~RaptorBoundQueryProcessor(){};
 
         void processRaptorBoundQuery(Optimization optimization);
-        vector<pair<int, int>> getStopsAndResultsWithSmallerRelativeDifference(double relativeDifference, Optimization optimization);
+        vector<CandidateInfo> getStopsAndResultsWithSmallerRelativeDifference(double relativeDifference, Optimization optimization);
         MeetingPointQueryResult getMeetingPointQueryResult();
         vector<Journey> getJourneys(Optimization optimization);
 
@@ -253,7 +261,7 @@ class RaptorApproximationQueryProcessor {
         };
         ~RaptorApproximationQueryProcessor(){};
 
-        void processRaptorApproximationQuery(Optimization optimization);
+        void processRaptorApproximationQuery(Optimization optimization, bool multipleCandidates = false);
         MeetingPointQueryResult getMeetingPointQueryResult();
 
         double durationExactCalculation;
@@ -262,12 +270,19 @@ class RaptorApproximationQueryProcessor {
     private:
         MeetingPointQuery meetingPointQuery;
         MeetingPointQueryResult meetingPointQueryResult;
+        shared_ptr<RaptorBoundQueryProcessor> raptorBoundQueryProcessor;
         vector<shared_ptr<RaptorBound>> raptorBounds;
         vector<shared_ptr<Raptor>> raptors;
+        vector<shared_ptr<RaptorPQStar>> raptorPQStars;
 
         map<int, vector<int>> sourceStopIdToAllStops;
 
-        vector<int> getExactSources(int numberOfExactSourceStops);
+        Optimization optimization;
+        vector<int> exactSources;
+
+        void calculateExactSources(int numberOfExactSourceStops);
+        void calculateResultWithCandidates();
+        void calculateResultWithOneCandidate();
 };
 
 /*
