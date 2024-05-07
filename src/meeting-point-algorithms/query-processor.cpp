@@ -1381,6 +1381,15 @@ vector<CandidateInfo> RaptorBoundQueryProcessor::getStopsAndResultsWithSmallerRe
         }
     }
 
+    // sort candidate infos by result and select the top 25 results
+    sort(meetingPointsWithSmallerRelativeDifference.begin(), meetingPointsWithSmallerRelativeDifference.end(), [](const CandidateInfo &a, const CandidateInfo &b) {
+        return a.duration < b.duration;
+    });
+
+    if (meetingPointsWithSmallerRelativeDifference.size() > 25) {
+        meetingPointsWithSmallerRelativeDifference.resize(25);
+    }
+
     return meetingPointsWithSmallerRelativeDifference;
 }
 
