@@ -113,7 +113,7 @@ int main(int argc, const char *argv[]) {
 
     // ExperimentController::compareRaptorAlgorithms(dataType, 100, numberOfSourceStops);
 
-    // ExperimentController::compareRaptorPQAlgorithms(dataType, 50, numberOfSourceStops);
+    ExperimentController::compareRaptorPQAlgorithms(dataType, 50, numberOfSourceStops);
 
     // ExperimentController::compareRaptorEATAlgorithms(dataType, 1000);
 
@@ -141,8 +141,8 @@ int main(int argc, const char *argv[]) {
 
     // GTree* networkGTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
 
-    // CliController::runCli(dataType, nullptr);
-    CliController::runCliRaptor(dataType);
+    CliController::runCli(dataType, nullptr);
+    // CliController::runCliRaptor(dataType);
   }
   
   return 0;
