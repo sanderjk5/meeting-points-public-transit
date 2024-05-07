@@ -130,11 +130,14 @@ void Raptor::traverseRoutes() {
                         break;
                     }
                     int newArrivalTime = arrivalTime + Importer::footPaths[k].duration;
-                    bool pruneTarget = true;
-                    for (int l = 0; l < query.targetStopIds.size(); l++) {
-                        if (newArrivalTime < currentEarliestArrivalTimes[query.targetStopIds[l]]) {
-                            pruneTarget = false;
-                            break;
+                    bool pruneTarget = false;
+                    if (query.targetStopIds.size() > 0) {
+                        pruneTarget = true;
+                        for (int l = 0; l < query.targetStopIds.size(); l++) {
+                            if (newArrivalTime < currentEarliestArrivalTimes[query.targetStopIds[l]]) {
+                                pruneTarget = false;
+                                break;
+                            }
                         }
                     }
                     if (newArrivalTime < currentEarliestArrivalTimes[Importer::footPaths[k].arrivalStopId] && !pruneTarget) {
