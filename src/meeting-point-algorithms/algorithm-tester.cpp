@@ -2606,15 +2606,27 @@ void AlgorithmComparer::compareAlgorithmsWithoutGTree(DataType dataType, Meeting
 
     cout << "Raptor Approximation - Min Sum: " << endl;
     PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorApproximationMinSum, min_sum);
+    cout << "Duration exact sources: " << raptorApproximationQueryProcessorMinSum.durationExactSources << endl;
+    cout << "Duration exact calculation: " << raptorApproximationQueryProcessorMinSum.durationExactCalculation << endl;
+    cout << "Duration candidates: " << raptorApproximationQueryProcessorMinSum.durationCandidates << endl;
 
     cout << "Raptor Approximation - Min Max: " << endl;
     PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorApproximationMinMax, min_max);
+    cout << "Duration exact sources: " << raptorApproximationQueryProcessorMinMax.durationExactSources << endl;
+    cout << "Duration exact calculation: " << raptorApproximationQueryProcessorMinMax.durationExactCalculation << endl;
+    cout << "Duration candidates: " << raptorApproximationQueryProcessorMinMax.durationCandidates << endl;
 
     cout << "Raptor Approximation - Min Sum (Candidates): " << endl;
     PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorApproximationMinSumCandidates, min_sum);
+    cout << "Duration exact sources: " << raptorApproximationQueryProcessorMinSumCandidates.durationExactSources << endl;
+    cout << "Duration exact calculation: " << raptorApproximationQueryProcessorMinSumCandidates.durationExactCalculation << endl;
+    cout << "Duration candidates: " << raptorApproximationQueryProcessorMinSumCandidates.durationCandidates << endl;
 
     cout << "Raptor Approximation - Min Max (Candidates): " << endl;
     PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorApproximationMinMaxCandidates, min_max);
+    cout << "Duration exact sources: " << raptorApproximationQueryProcessorMinMaxCandidates.durationExactSources << endl;
+    cout << "Duration exact calculation: " << raptorApproximationQueryProcessorMinMaxCandidates.durationExactCalculation << endl;
+    cout << "Duration candidates: " << raptorApproximationQueryProcessorMinMaxCandidates.durationCandidates << endl;
     
     // cout << "Raptor PQ Parallel - Min Sum: " << endl;
     // PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultRaptorPQParallelMinSum);

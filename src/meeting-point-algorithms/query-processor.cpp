@@ -1758,21 +1758,30 @@ void RaptorApproximationQueryProcessor::processRaptorApproximationQuery(Optimiza
     } else {
         numberOfExactSources = 5;
     }
-
+    
+    auto startExactSources = std::chrono::high_resolution_clock::now();
     // find the best exact sources (the sources which are the furthest apart using the lower bounds)
     RaptorApproximationQueryProcessor::calculateExactSources(numberOfExactSources);
+    auto endExactSources = std::chrono::high_resolution_clock::now();
+    durationExactSources = std::chrono::duration_cast<std::chrono::milliseconds>(endExactSources - startExactSources).count();
 
     MeetingPointQuery meetingPointQueryExact = meetingPointQuery;
     meetingPointQueryExact.sourceStopIds = exactSources;
 
+    auto startExactCalculation = std::chrono::high_resolution_clock::now();
     raptorBoundQueryProcessor = shared_ptr<RaptorBoundQueryProcessor> (new RaptorBoundQueryProcessor(meetingPointQueryExact));
     raptorBoundQueryProcessor->processRaptorBoundQuery(optimization);
+    auto endExactCalculation = std::chrono::high_resolution_clock::now();
+    durationExactCalculation = std::chrono::duration_cast<std::chrono::milliseconds>(endExactCalculation - startExactCalculation).count();
 
+    auto startCandidates = std::chrono::high_resolution_clock::now();
     if (multipleCandidates) {
         calculateResultWithCandidates();
     } else {
         calculateResultWithOneCandidate();
     }
+    auto endCandidates = std::chrono::high_resolution_clock::now();
+    durationCandidates = std::chrono::duration_cast<std::chrono::milliseconds>(endCandidates - startCandidates).count();
 
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();

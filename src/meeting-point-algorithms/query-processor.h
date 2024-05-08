@@ -264,8 +264,9 @@ class RaptorApproximationQueryProcessor {
         void processRaptorApproximationQuery(Optimization optimization, bool multipleCandidates = false);
         MeetingPointQueryResult getMeetingPointQueryResult();
 
+        double durationExactSources;
         double durationExactCalculation;
-        double durationRemainingCalculations;
+        double durationCandidates;
 
     private:
         MeetingPointQuery meetingPointQuery;
