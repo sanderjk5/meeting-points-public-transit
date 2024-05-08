@@ -61,6 +61,7 @@ class RaptorPQAlgorithmTester {
 
         static void testRaptorPQAlgorithm(MeetingPointQuery meetingPointQuery, bool printJourneys = true);
         static void compareRaptorPQAlgorithms(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSources, bool loadOrStoreQueries);
+        static void compareRaptorApproximationAlgorithms(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSources, bool loadOrStoreQueries);
 };
 
 class AlgorithmComparer {
