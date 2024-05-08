@@ -1658,10 +1658,10 @@ void RaptorPQAlgorithmTester::compareRaptorApproximationAlgorithms(DataType data
         vector<double> queryTimesRaptorApproxCandMinSum;
         vector<double> queryTimesRaptorApproxCandMinMax;
 
-        double raptorApproxMinSumErrorCounter;
-        double raptorApproxMinMaxErrorCounter;
-        double raptorApproxCandMinSumErrorCounter;
-        double raptorApproxCandMinMaxErrorCounter;
+        double raptorApproxMinSumCorrectCounter = 0;
+        double raptorApproxMinMaxCorrectCounter = 0;
+        double raptorApproxCandMinSumCorrectCounter = 0;
+        double raptorApproxCandMinMaxCorrectCounter = 0;
 
         vector<double> absDiffsRaptorApproxMinSum;
         vector<double> absDiffsRaptorApproxMinMax;
@@ -1702,23 +1702,39 @@ void RaptorPQAlgorithmTester::compareRaptorApproximationAlgorithms(DataType data
                     continue;
                 }
 
-                successfulQueryCounter++;
-
                 unique_ptr<RaptorApproximationQueryProcessor> raptorApproximationQueryProcessorMinSum = unique_ptr<RaptorApproximationQueryProcessor> (new RaptorApproximationQueryProcessor(meetingPointQuery));
                 raptorApproximationQueryProcessorMinSum->processRaptorApproximationQuery(min_sum, false);
                 MeetingPointQueryResult meetingPointQueryResultRaptorApproxMinSum = raptorApproximationQueryProcessorMinSum->getMeetingPointQueryResult();
+
+                if (meetingPointQueryResultRaptorApproxMinSum.meetingPointMinSum == "") {
+                    continue;
+                }
 
                 unique_ptr<RaptorApproximationQueryProcessor> raptorApproximationQueryProcessorMinMax = unique_ptr<RaptorApproximationQueryProcessor> (new RaptorApproximationQueryProcessor(meetingPointQuery));
                 raptorApproximationQueryProcessorMinMax->processRaptorApproximationQuery(min_max, false);
                 MeetingPointQueryResult meetingPointQueryResultRaptorApproxMinMax = raptorApproximationQueryProcessorMinMax->getMeetingPointQueryResult();
 
+                if (meetingPointQueryResultRaptorApproxMinMax.meetingPointMinMax == "") {
+                    continue;
+                }
+
                 unique_ptr<RaptorApproximationQueryProcessor> raptorApproximationQueryProcessorApproxCandMinSum = unique_ptr<RaptorApproximationQueryProcessor> (new RaptorApproximationQueryProcessor(meetingPointQuery));
                 raptorApproximationQueryProcessorApproxCandMinSum->processRaptorApproximationQuery(min_sum, true);
                 MeetingPointQueryResult meetingPointQueryResultRaptorApproxCandMinSum = raptorApproximationQueryProcessorApproxCandMinSum->getMeetingPointQueryResult();
 
+                if (meetingPointQueryResultRaptorApproxCandMinSum.meetingPointMinSum == "") {
+                    continue;
+                }
+
                 unique_ptr<RaptorApproximationQueryProcessor> raptorApproximationQueryProcessorApproxCandMinMax = unique_ptr<RaptorApproximationQueryProcessor> (new RaptorApproximationQueryProcessor(meetingPointQuery));
                 raptorApproximationQueryProcessorApproxCandMinMax->processRaptorApproximationQuery(min_max, true);
                 MeetingPointQueryResult meetingPointQueryResultRaptorApproxCandMinMax = raptorApproximationQueryProcessorApproxCandMinMax->getMeetingPointQueryResult();
+
+                if (meetingPointQueryResultRaptorApproxCandMinMax.meetingPointMinMax == "") {
+                    continue;
+                }
+
+                successfulQueryCounter++;
 
                 minSumDurations.push_back((double) meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds);
                 minMaxDurations.push_back((double) meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds);
@@ -1729,26 +1745,26 @@ void RaptorPQAlgorithmTester::compareRaptorApproximationAlgorithms(DataType data
                 queryTimesRaptorApproxCandMinSum.push_back((double) meetingPointQueryResultRaptorApproxCandMinSum.queryTime);
                 queryTimesRaptorApproxCandMinMax.push_back((double) meetingPointQueryResultRaptorApproxCandMinMax.queryTime);
 
-                if (meetingPointQueryResultRaptorApproxMinSum.minSumDurationInSeconds != meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds) {
-                    raptorApproxMinSumErrorCounter++;
+                if (meetingPointQueryResultRaptorApproxMinSum.minSumDurationInSeconds == meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds) {
+                    raptorApproxMinSumCorrectCounter++;
                 }
 
-                if (meetingPointQueryResultRaptorApproxMinMax.minMaxDurationInSeconds != meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds) {
-                    raptorApproxMinMaxErrorCounter++;
+                if (meetingPointQueryResultRaptorApproxMinMax.minMaxDurationInSeconds == meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds) {
+                    raptorApproxMinMaxCorrectCounter++;
                 }
 
-                if (meetingPointQueryResultRaptorApproxCandMinSum.minSumDurationInSeconds != meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds) {
-                    raptorApproxCandMinSumErrorCounter++;
+                if (meetingPointQueryResultRaptorApproxCandMinSum.minSumDurationInSeconds == meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds) {
+                    raptorApproxCandMinSumCorrectCounter++;
                 }
 
-                if (meetingPointQueryResultRaptorApproxCandMinMax.minMaxDurationInSeconds != meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds) {
-                    raptorApproxCandMinMaxErrorCounter++;
+                if (meetingPointQueryResultRaptorApproxCandMinMax.minMaxDurationInSeconds == meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds) {
+                    raptorApproxCandMinMaxCorrectCounter++;
                 }
 
-                double absDiffRaptorApproxMinSum = (double) meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds - (double) meetingPointQueryResultRaptorApproxMinSum.minSumDurationInSeconds;
-                double absDiffRaptorApproxMinMax = (double) meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds - (double) meetingPointQueryResultRaptorApproxMinMax.minMaxDurationInSeconds;
-                double absDiffRaptorApproxCandMinSum = (double) meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds - (double) meetingPointQueryResultRaptorApproxCandMinSum.minSumDurationInSeconds;
-                double absDiffRaptorApproxCandMinMax = (double) meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds - (double) meetingPointQueryResultRaptorApproxCandMinMax.minMaxDurationInSeconds;
+                double absDiffRaptorApproxMinSum = (double) meetingPointQueryResultRaptorApproxMinSum.minSumDurationInSeconds - (double) meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds;
+                double absDiffRaptorApproxMinMax = (double) meetingPointQueryResultRaptorApproxMinMax.minMaxDurationInSeconds - (double) meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds;
+                double absDiffRaptorApproxCandMinSum = (double) meetingPointQueryResultRaptorApproxCandMinSum.minSumDurationInSeconds - (double) meetingPointQueryResultRaptorOptimal.minSumDurationInSeconds;
+                double absDiffRaptorApproxCandMinMax = (double) meetingPointQueryResultRaptorApproxCandMinMax.minMaxDurationInSeconds - (double) meetingPointQueryResultRaptorOptimal.minMaxDurationInSeconds;
 
                 absDiffsRaptorApproxMinSum.push_back(absDiffRaptorApproxMinSum);
                 absDiffsRaptorApproxMinMax.push_back(absDiffRaptorApproxMinMax);
@@ -1832,10 +1848,10 @@ void RaptorPQAlgorithmTester::compareRaptorApproximationAlgorithms(DataType data
         double minQueryTimeRaptorApproxCandMinSum = Calculator::getMinimum(queryTimesRaptorApproxCandMinSum);
         double minQueryTimeRaptorApproxCandMinMax = Calculator::getMinimum(queryTimesRaptorApproxCandMinMax);
 
-        double accuracyRaptorApproxMinSum = 1 - raptorApproxMinSumErrorCounter / (double) numberOfSuccessfulQueries;
-        double accuracyRaptorApproxMinMax = 1 - raptorApproxMinMaxErrorCounter / (double) numberOfSuccessfulQueries;
-        double accuracyRaptorApproxCandMinSum = 1 - raptorApproxCandMinSumErrorCounter / (double) numberOfSuccessfulQueries;
-        double accuracyRaptorApproxCandMinMax = 1 - raptorApproxCandMinMaxErrorCounter / (double) numberOfSuccessfulQueries;
+        double accuracyRaptorApproxMinSum = raptorApproxMinSumCorrectCounter / (double) numberOfSuccessfulQueries;
+        double accuracyRaptorApproxMinMax = raptorApproxMinMaxCorrectCounter / (double) numberOfSuccessfulQueries;
+        double accuracyRaptorApproxCandMinSum = raptorApproxCandMinSumCorrectCounter / (double) numberOfSuccessfulQueries;
+        double accuracyRaptorApproxCandMinMax = raptorApproxCandMinMaxCorrectCounter / (double) numberOfSuccessfulQueries;
 
         double avgAbsDiffRaptorApproxMinSum = Calculator::getAverage(absDiffsRaptorApproxMinSum) / 60;
         double avgAbsDiffRaptorApproxMinMax = Calculator::getAverage(absDiffsRaptorApproxMinMax) / 60;
