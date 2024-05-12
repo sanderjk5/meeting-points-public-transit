@@ -107,7 +107,7 @@ int main(int argc, const char *argv[]) {
     // ExperimentController::testAndCompareAlgorithmsRandom(dataType, 1000, numberOfSourceStops);
 
     // Test experiments
-    vector<int> numberOfSourceStops = {5, 10, 25, 50};
+    vector<int> numberOfSourceStops = {75, 100, 150};
     // vector<int> numberOfSourceStops = {7, 10};
     // vector<int> numberOfSourceStops = {5};
 
