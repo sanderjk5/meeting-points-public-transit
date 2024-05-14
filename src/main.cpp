@@ -35,6 +35,7 @@ int main(int argc, const char *argv[]) {
   // DataType dataType = gesamt_de;
 
   bool startExperiments = false;
+  bool runEatCli = false;
 
   if (argc > 1){
     if (strcmp(argv[1], "vvs") == 0){
@@ -57,6 +58,8 @@ int main(int argc, const char *argv[]) {
   if (argc > 2){
     if (strcmp(argv[2], "exp") == 0){
       startExperiments = true;
+    } else if (strcmp(argv[2], "eat") == 0){
+      runEatCli = true;
     }
   }
 
@@ -143,8 +146,12 @@ int main(int argc, const char *argv[]) {
 
     // GTree* networkGTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
 
-    CliController::runCli(dataType, nullptr);
-    // CliController::runCliRaptor(dataType);
+    if (!runEatCli) {
+      CliController::runCli(dataType, nullptr);
+    } else {
+      CliController::runCliEat(dataType);
+    }
+    
   }
   
   return 0;
