@@ -1596,24 +1596,24 @@ void RaptorPQAlgorithmTester::compareRaptorApproximationAlgorithms(DataType data
     resultsFile << ",maxMinMaxDuration,minMinSumDuration,minMinMaxDuration";
 
     resultsFile << "avgQueryTimeRaptorOptimal,avgQueryTimeRaptorApproxMinSum,avgQueryTimeRaptorApproxMinMax,avgQueryTimeRaptorApproxCandMinSum,avgQueryTimeRaptorApproxCandMinMax";
-    resultsFile << "medianQueryTimeRaptorOptimal,medianQueryTimeRaptorApproxMinSum,medianQueryTimeRaptorApproxMinMax,medianQueryTimeRaptorApproxCandMinSum,medianQueryTimeRaptorApproxCandMinMax";    
-    resultsFile << "maxQueryTimeRaptorOptimal,maxQueryTimeRaptorApproxMinSum,maxQueryTimeRaptorApproxMinMax,maxQueryTimeRaptorApproxCandMinSum,maxQueryTimeRaptorApproxCandMinMax";
-    resultsFile << "minQueryTimeRaptorOptimal,minQueryTimeRaptorApproxMinSum,minQueryTimeRaptorApproxMinMax,minQueryTimeRaptorApproxCandMinSum,minQueryTimeRaptorApproxCandMinMax";
+    resultsFile << ",medianQueryTimeRaptorOptimal,medianQueryTimeRaptorApproxMinSum,medianQueryTimeRaptorApproxMinMax,medianQueryTimeRaptorApproxCandMinSum,medianQueryTimeRaptorApproxCandMinMax";    
+    resultsFile << ",maxQueryTimeRaptorOptimal,maxQueryTimeRaptorApproxMinSum,maxQueryTimeRaptorApproxMinMax,maxQueryTimeRaptorApproxCandMinSum,maxQueryTimeRaptorApproxCandMinMax";
+    resultsFile << ",minQueryTimeRaptorOptimal,minQueryTimeRaptorApproxMinSum,minQueryTimeRaptorApproxMinMax,minQueryTimeRaptorApproxCandMinSum,minQueryTimeRaptorApproxCandMinMax";
 
-    resultsFile << "accuracyRaptorApproxMinSum,accuracyRaptorApproxMinMax,accuracyRaptorApproxCandMinSum,accuracyRaptorApproxCandMinMax";
+    resultsFile << ",accuracyRaptorApproxMinSum,accuracyRaptorApproxMinMax,accuracyRaptorApproxCandMinSum,accuracyRaptorApproxCandMinMax";
     
-    resultsFile << "avgAbsDiffRaptorApproxMinSum,avgAbsDiffRaptorApproxMinMax,avgAbsDiffRaptorApproxCandMinSum,avgAbsDiffRaptorApproxCandMinMax";
-    resultsFile << "medianAbsDiffRaptorApproxMinSum,medianAbsDiffRaptorApproxMinMax,medianAbsDiffRaptorApproxCandMinSum,medianAbsDiffRaptorApproxCandMinMax";
-    resultsFile << "maxAbsDiffRaptorApproxMinSum,maxAbsDiffRaptorApproxMinMax,maxAbsDiffRaptorApproxCandMinSum,maxAbsDiffRaptorApproxCandMinMax";
-    resultsFile << "minAbsDiffRaptorApproxMinSum,minAbsDiffRaptorApproxMinMax,minAbsDiffRaptorApproxCandMinSum,minAbsDiffRaptorApproxCandMinMax";
+    resultsFile << ",avgAbsDiffRaptorApproxMinSum,avgAbsDiffRaptorApproxMinMax,avgAbsDiffRaptorApproxCandMinSum,avgAbsDiffRaptorApproxCandMinMax";
+    resultsFile << ",medianAbsDiffRaptorApproxMinSum,medianAbsDiffRaptorApproxMinMax,medianAbsDiffRaptorApproxCandMinSum,medianAbsDiffRaptorApproxCandMinMax";
+    resultsFile << ",maxAbsDiffRaptorApproxMinSum,maxAbsDiffRaptorApproxMinMax,maxAbsDiffRaptorApproxCandMinSum,maxAbsDiffRaptorApproxCandMinMax";
+    resultsFile << ",minAbsDiffRaptorApproxMinSum,minAbsDiffRaptorApproxMinMax,minAbsDiffRaptorApproxCandMinSum,minAbsDiffRaptorApproxCandMinMax";
     
-    resultsFile << "avgRelDiffRaptorApproxMinSum,avgRelDiffRaptorApproxMinMax,avgRelDiffRaptorApproxCandMinSum,avgRelDiffRaptorApproxCandMinMax";
-    resultsFile << "medianRelDiffRaptorApproxMinSum,medianRelDiffRaptorApproxMinMax,medianRelDiffRaptorApproxCandMinSum,medianRelDiffRaptorApproxCandMinMax";
-    resultsFile << "maxRelDiffRaptorApproxMinSum,maxRelDiffRaptorApproxMinMax,maxRelDiffRaptorApproxCandMinSum,maxRelDiffRaptorApproxCandMinMax";
-    resultsFile << "minRelDiffRaptorApproxMinSum,minRelDiffRaptorApproxMinMax,minRelDiffRaptorApproxCandMinSum,minRelDiffRaptorApproxCandMinMax";
+    resultsFile << ",avgRelDiffRaptorApproxMinSum,avgRelDiffRaptorApproxMinMax,avgRelDiffRaptorApproxCandMinSum,avgRelDiffRaptorApproxCandMinMax";
+    resultsFile << ",medianRelDiffRaptorApproxMinSum,medianRelDiffRaptorApproxMinMax,medianRelDiffRaptorApproxCandMinSum,medianRelDiffRaptorApproxCandMinMax";
+    resultsFile << ",maxRelDiffRaptorApproxMinSum,maxRelDiffRaptorApproxMinMax,maxRelDiffRaptorApproxCandMinSum,maxRelDiffRaptorApproxCandMinMax";
+    resultsFile << ",minRelDiffRaptorApproxMinSum,minRelDiffRaptorApproxMinMax,minRelDiffRaptorApproxCandMinSum,minRelDiffRaptorApproxCandMinMax";
 
-    resultsFile << "avgExactCalcRaptorApproxMinSum,avgExactCalcRaptorApproxMinMax,avgExactCalcRaptorApproxCandMinSum,avgExactCalcRaptorApproxCandMinMax";
-    resultsFile << "avgRemCalcRaptorApproxMinSum,avgRemCalcRaptorApproxMinMax,avgRemCalcRaptorApproxCandMinSum,avgRemCalcRaptorApproxCandMinMax";
+    resultsFile << ",avgExactCalcRaptorApproxMinSum,avgExactCalcRaptorApproxMinMax,avgExactCalcRaptorApproxCandMinSum,avgExactCalcRaptorApproxCandMinMax";
+    resultsFile << ",avgRemCalcRaptorApproxMinSum,avgRemCalcRaptorApproxMinMax,avgRemCalcRaptorApproxCandMinSum,avgRemCalcRaptorApproxCandMinMax";
 
     resultsFile << "\n";
 
