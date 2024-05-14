@@ -1595,7 +1595,7 @@ void RaptorPQAlgorithmTester::compareRaptorApproximationAlgorithms(DataType data
     resultsFile << "numberOfSourceStops,avgMinSumDuration,avgMinMaxDuration,medianMinSumDuration,medianMinMaxDuration,maxMinSumDuration";
     resultsFile << ",maxMinMaxDuration,minMinSumDuration,minMinMaxDuration";
 
-    resultsFile << "avgQueryTimeRaptorOptimal,avgQueryTimeRaptorApproxMinSum,avgQueryTimeRaptorApproxMinMax,avgQueryTimeRaptorApproxCandMinSum,avgQueryTimeRaptorApproxCandMinMax";
+    resultsFile << ",avgQueryTimeRaptorOptimal,avgQueryTimeRaptorApproxMinSum,avgQueryTimeRaptorApproxMinMax,avgQueryTimeRaptorApproxCandMinSum,avgQueryTimeRaptorApproxCandMinMax";
     resultsFile << ",medianQueryTimeRaptorOptimal,medianQueryTimeRaptorApproxMinSum,medianQueryTimeRaptorApproxMinMax,medianQueryTimeRaptorApproxCandMinSum,medianQueryTimeRaptorApproxCandMinMax";    
     resultsFile << ",maxQueryTimeRaptorOptimal,maxQueryTimeRaptorApproxMinSum,maxQueryTimeRaptorApproxMinMax,maxQueryTimeRaptorApproxCandMinSum,maxQueryTimeRaptorApproxCandMinMax";
     resultsFile << ",minQueryTimeRaptorOptimal,minQueryTimeRaptorApproxMinSum,minQueryTimeRaptorApproxMinMax,minQueryTimeRaptorApproxCandMinSum,minQueryTimeRaptorApproxCandMinMax";
