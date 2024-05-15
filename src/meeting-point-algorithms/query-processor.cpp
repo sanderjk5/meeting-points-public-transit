@@ -456,7 +456,7 @@ MeetingPointQuery QueryGenerator::generateRandomMeetingPointQuery(int numberOfSo
     for (int i = 0; i < numberOfSources; i++) {
         meetingPointQuery.sourceStopIds.push_back(Importer::connections[rand() % Importer::connections.size()].departureStopId);
     }
-    meetingPointQuery.sourceTime = rand() % SECONDS_PER_DAY;
+    meetingPointQuery.sourceTime = (rand() % 36000) + 21600;
     meetingPointQuery.weekday = rand() % 7;
     return meetingPointQuery;
 }
@@ -540,7 +540,7 @@ RaptorQuery QueryGenerator::generateRandomRaptorQuery() {
     RaptorQuery raptorQuery;
     raptorQuery.sourceStopId = Importer::connections[rand() % Importer::connections.size()].departureStopId;
     raptorQuery.targetStopIds.push_back(Importer::connections[rand() % Importer::connections.size()].departureStopId);
-    raptorQuery.sourceTime = rand() % SECONDS_PER_DAY;
+    raptorQuery.sourceTime = (rand() % 36000) + 21600;
     raptorQuery.weekday = rand() % 7;
     return raptorQuery;
 }

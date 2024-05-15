@@ -244,10 +244,10 @@ void RaptorEATAlgorithmTester::compareRaptorEATAlgorithms(DataType dataType, int
         queriesInfoFile.close();
     }
 
-    double avgDuration = Calculator::getAverage(durationsRaptor);
-    double medianDuration = Calculator::getMedian(durationsRaptor);
-    double maxDuration = Calculator::getMaximum(durationsRaptor);
-    double minDuration = Calculator::getMinimum(durationsRaptor);
+    double avgDuration = Calculator::getAverage(durationsRaptor) / 60;
+    double medianDuration = Calculator::getMedian(durationsRaptor) / 60;
+    double maxDuration = Calculator::getMaximum(durationsRaptor) / 60;
+    double minDuration = Calculator::getMinimum(durationsRaptor) / 60;
 
     double avgQueryTimeRaptor = Calculator::getAverage(queryTimesRaptor);
     double avgQueryTimeRaptorBoundStar = Calculator::getAverage(queryTimesRaptorBoundStar);
@@ -313,10 +313,10 @@ void RaptorEATAlgorithmTester::compareRaptorEATAlgorithms(DataType dataType, int
 
     cout << "Rate of successful queries: " << (double) successfulQueryCounter / (double) queryCounter << endl;
 
-    cout << "\nAverage duration: " << avgDuration << " s" << endl;
-    cout << "Median duration: " << medianDuration << " s" << endl;
-    cout << "Max duration: " << maxDuration << " s" << endl;
-    cout << "Min duration: " << minDuration << " s" << endl;
+    cout << "\nAverage duration: " << avgDuration << " min" << endl;
+    cout << "Median duration: " << medianDuration << " min" << endl;
+    cout << "Max duration: " << maxDuration << " min" << endl;
+    cout << "Min duration: " << minDuration << " min" << endl;
 
     cout << "\nAverage query time Raptor: " << avgQueryTimeRaptor << " ms" << endl;
     cout << "Average query time Raptor bound star: " << avgQueryTimeRaptorBoundStar << " ms" << endl;
