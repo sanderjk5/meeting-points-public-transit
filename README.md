@@ -25,11 +25,11 @@ bin/meeting-points-public-transit dataType mode
 The program can be started with two additional arguments dataType and experiment:
 1. The dataType argument specifies which public transit network should be used and can take the following values:
 
-  * vvs: The whole public transit network of Stuttgart (default value).
-  * de: The whole public transit network of germany.
+* vvs: The whole public transit network of Stuttgart (default value).
+* de: The whole public transit network of germany.
 
 2. The mode argument specifies what is executed. It can take the following values:
 
-   * <none>: The meeting point cli is executed. The user can question meeting point queries.
-   * eat: The earliest arrival time cli is executed. The user can question earliest arrival time queries.
-   * exp: The experiments are executed.
+* \<none\>: The meeting point cli is executed. The user can question meeting point queries.
+* eat: The earliest arrival time cli is executed. The user can question earliest arrival time queries.
+* exp: The experiments are executed.
