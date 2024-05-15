@@ -204,8 +204,29 @@ void CliController::runCliEat(DataType dataType) {
             query = QueryGenerator::generateRaptorQuery(sourceStopName, targetStopName, sourceTime, weekday);
         }
 
+        bool validAlgorithm = false;
+        string algorithm;
+        while(!validAlgorithm) {
+            cout << "Which algorithm do you want to use? \nThe options are (enter the abbrevation): compare all algorithms (a), basic raptor algorithm (r), raptor bound star algorithm (b), raptor pq star algorithm (q)." << endl;
+            getline(cin, algorithm);
+            if (algorithm == "a" || algorithm == "r" || algorithm == "q" || algorithm == "b") {
+                validAlgorithm = true;
+            } else {
+                cout << "Invalid algorithm. Please enter the abbrevation of a valid algorithm." << endl;
+            }
+        }
+
         cout << "\nRunning the query..." << endl;
-        RaptorEATAlgorithmTester::testRaptorAlgorithms(query);
+
+        if (algorithm == "a") {
+            RaptorEATAlgorithmTester::testRaptorAlgorithms(query);
+        } else if (algorithm == "r") {
+            RaptorEATAlgorithmTester::testRaptorEatAlgorithm(query, true);
+        } else if (algorithm == "q") {
+            RaptorEATAlgorithmTester::testRaptorStarPQAlgorithm(query, true);
+        } else if (algorithm == "b") {
+            RaptorEATAlgorithmTester::testRaptorStarBoundAlgorithm(query, true);
+        }
 
         cout << "\nDo you want to run another query? (y/N)" << endl;
         string runAgain;

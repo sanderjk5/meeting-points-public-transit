@@ -33,13 +33,58 @@ void RaptorEATAlgorithmTester::testRaptorAlgorithms(RaptorQuery raptorQuery) {
     PrintHelperRaptor::printRaptorQuery(raptorQuery);
     cout << "\nRaptor query result: " << endl;
     PrintHelperRaptor::printRaptorQueryResult(raptorQueryResult);
-    cout << "Number of expanded routes: " << raptorQueryProcessor->numberOfExpandedRoutes << endl;
     cout << "\nRaptor star bound query result: " << endl;
     PrintHelperRaptor::printRaptorQueryResult(raptorStarBoundQueryResult);
-    cout << "Number of expanded routes: " << raptorStarBoundQueryProcessor->numberOfExpandedRoutes << endl;
     cout << "\nRaptor star PQ query result: " << endl;
     PrintHelperRaptor::printRaptorQueryResult(raptorStarPQQueryResult);
-    cout << "Number of expanded routes: " << raptorStarPQQueryProcessor->numberOfExpandedRoutes << endl;
+}
+
+void RaptorEATAlgorithmTester::testRaptorEatAlgorithm(RaptorQuery raptorQuery, bool printJourney) {
+    unique_ptr<RaptorQueryEATProcessor> raptorQueryProcessor = unique_ptr<RaptorQueryEATProcessor>(new RaptorQueryEATProcessor(raptorQuery));
+    raptorQueryProcessor->processRaptorQuery();
+    RaptorQueryResult raptorQueryResult = raptorQueryProcessor->getRaptorQueryResult();
+
+    PrintHelperRaptor::printRaptorQuery(raptorQuery);
+    cout << "\nRaptor query result: " << endl;
+    PrintHelperRaptor::printRaptorQueryResult(raptorQueryResult);
+
+    if (printJourney) {
+        Journey journey = raptorQueryProcessor->getJourney();
+        cout << "\nJourney: " << endl;
+        PrintHelperRaptor::printJourney(journey);
+    }
+}
+
+void RaptorEATAlgorithmTester::testRaptorStarBoundAlgorithm(RaptorQuery raptorQuery, bool printJourney) {
+    unique_ptr<RaptorStarBoundQueryProcessor> raptorStarBoundQueryProcessor = unique_ptr<RaptorStarBoundQueryProcessor>(new RaptorStarBoundQueryProcessor(raptorQuery));
+    raptorStarBoundQueryProcessor->processRaptorStarBoundQuery();
+    RaptorQueryResult raptorStarBoundQueryResult = raptorStarBoundQueryProcessor->getRaptorStarQueryResult();
+
+    PrintHelperRaptor::printRaptorQuery(raptorQuery);
+    cout << "\nRaptor star bound query result: " << endl;
+    PrintHelperRaptor::printRaptorQueryResult(raptorStarBoundQueryResult);
+
+    if (printJourney) {
+        Journey journey = raptorStarBoundQueryProcessor->getJourney();
+        cout << "\nJourney: " << endl;
+        PrintHelperRaptor::printJourney(journey);
+    }
+}
+
+void RaptorEATAlgorithmTester::testRaptorStarPQAlgorithm(RaptorQuery raptorQuery, bool printJourney) {
+    unique_ptr<RaptorStarPQQueryProcessor> raptorStarPQQueryProcessor = unique_ptr<RaptorStarPQQueryProcessor>(new RaptorStarPQQueryProcessor(raptorQuery));
+    raptorStarPQQueryProcessor->processRaptorStarPQQuery();
+    RaptorQueryResult raptorStarPQQueryResult = raptorStarPQQueryProcessor->getRaptorStarQueryResult();
+
+    PrintHelperRaptor::printRaptorQuery(raptorQuery);
+    cout << "\nRaptor star PQ query result: " << endl;
+    PrintHelperRaptor::printRaptorQueryResult(raptorStarPQQueryResult);
+
+    if (printJourney) {
+        Journey journey = raptorStarPQQueryProcessor->getJourney();
+        cout << "\nJourney: " << endl;
+        PrintHelperRaptor::printJourney(journey);
+    }
 }
 
 void RaptorEATAlgorithmTester::compareRaptorEATAlgorithms(DataType dataType, int numberOfSuccessfulQueries, bool loadOrStoreQueries) {
@@ -331,4 +376,18 @@ void PrintHelperRaptor::printRaptorQueryResult(RaptorQueryResult raptorQueryResu
         cout << "No connection found" << endl;
     }
     cout << "Query time: " << raptorQueryResult.queryTime << " ms" << endl;
+}
+
+/*
+    Print the journey.
+*/
+void PrintHelperRaptor::printJourney(Journey journey) {
+    cout << "Journey duration: " << TimeConverter::convertSecondsToTime(journey.duration, false) << endl;
+    for (int i = 0; i < journey.legs.size(); i++) {
+        cout << "Leg " << i+1 << " - ";
+        cout << "Departure stop: " << journey.legs[i].departureStopName;
+        cout << ", Departure time: " << TimeConverter::convertSecondsToTime(journey.legs[i].departureTime, true);
+        cout << ", Arrival stop: " << journey.legs[i].arrivalStopName;
+        cout << ", Arrival time: " << TimeConverter::convertSecondsToTime(journey.legs[i].arrivalTime, true)<< endl;
+    }
 }
