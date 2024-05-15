@@ -40,8 +40,7 @@ void LowerBoundTester::getLowerBoundDiffs(int numberOfSources, int numberOfTarge
         CSAQuery csaQuery;
         csaQuery.sourceStopId = sources[i];
         csaQuery.targetStopIds = targets;
-        // csaQuery.sourceTime = (rand() % 36000) + 21600;
-        csaQuery.sourceTime = 25200;
+        csaQuery.sourceTime = (rand() % 36000) + 21600;
         csaQuery.weekday = rand() % 7;
 
         unique_ptr<CSA> csa = unique_ptr<CSA>(new CSA(csaQuery));

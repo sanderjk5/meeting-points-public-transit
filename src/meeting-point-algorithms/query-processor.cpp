@@ -541,8 +541,7 @@ RaptorQuery QueryGenerator::generateRandomRaptorQuery() {
     RaptorQuery raptorQuery;
     raptorQuery.sourceStopId = Importer::connections[rand() % Importer::connections.size()].departureStopId;
     raptorQuery.targetStopIds.push_back(Importer::connections[rand() % Importer::connections.size()].departureStopId);
-    // raptorQuery.sourceTime = (rand() % 36000) + 21600;
-    raptorQuery.sourceTime = 25200;
+    raptorQuery.sourceTime = (rand() % 36000) + 21600;
     raptorQuery.weekday = rand() % 7;
     return raptorQuery;
 }
