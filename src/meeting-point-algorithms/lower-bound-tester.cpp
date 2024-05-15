@@ -25,7 +25,7 @@ void LowerBoundTester::getLowerBoundDiffs(int numberOfSources, int numberOfTarge
     vector<int> sources = vector<int>();
 
     for (int i = 0; i < numberOfSources; i++) {
-        sources.push_back(rand() % Creator::networkGraph.vertices.size());
+        sources.push_back(Importer::connections[rand() % Importer::connections.size()].departureStopId);
     }
 
     map<int, vector<int>> sourceStopIdToAllStops = Creator::networkGraph.getDistancesWithPhast(sources);

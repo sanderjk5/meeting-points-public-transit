@@ -454,7 +454,7 @@ vector<Journey> NaiveKeyStopQueryProcessor::getJourneys(Optimization optimizatio
 MeetingPointQuery QueryGenerator::generateRandomMeetingPointQuery(int numberOfSources) {
     MeetingPointQuery meetingPointQuery;
     for (int i = 0; i < numberOfSources; i++) {
-        meetingPointQuery.sourceStopIds.push_back(rand() % Importer::stops.size());
+        meetingPointQuery.sourceStopIds.push_back(Importer::connections[rand() % Importer::connections.size()].departureStopId);
     }
     meetingPointQuery.sourceTime = rand() % SECONDS_PER_DAY;
     meetingPointQuery.weekday = rand() % 7;
@@ -538,8 +538,8 @@ RaptorQuery QueryGenerator::parseRaptorQuery(string line) {
 
 RaptorQuery QueryGenerator::generateRandomRaptorQuery() {
     RaptorQuery raptorQuery;
-    raptorQuery.sourceStopId = rand() % Importer::stops.size();
-    raptorQuery.targetStopIds.push_back(rand() % Importer::stops.size());
+    raptorQuery.sourceStopId = Importer::connections[rand() % Importer::connections.size()].departureStopId;
+    raptorQuery.targetStopIds.push_back(Importer::connections[rand() % Importer::connections.size()].departureStopId);
     raptorQuery.sourceTime = rand() % SECONDS_PER_DAY;
     raptorQuery.weekday = rand() % 7;
     return raptorQuery;
