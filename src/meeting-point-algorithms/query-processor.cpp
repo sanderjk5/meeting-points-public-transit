@@ -1748,8 +1748,8 @@ void RaptorApproximationQueryProcessor::processRaptorApproximationQuery(Optimiza
     }
 
     int numberOfSources = meetingPointQuery.sourceStopIds.size();
-    int numberOfExactSources = 2;
-    if (numberOfSources < 2) {
+    int numberOfExactSources;
+    if (numberOfSources == 2) {
         numberOfExactSources = numberOfSources;
     } else if (numberOfSources < 10) {
         numberOfExactSources = 3;
