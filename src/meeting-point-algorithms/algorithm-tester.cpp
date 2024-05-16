@@ -1653,7 +1653,17 @@ void RaptorApproximationAlgorithmTester::testRaptorApproximationAlgorithm(Meetin
     raptorApproxQueryProcessorMinMax.processRaptorApproximationQuery(min_max, useCandidates);
     MeetingPointQueryResult meetingPointQueryResultMinMax = raptorApproxQueryProcessorMinMax.getMeetingPointQueryResult();
     
+    if (raptorApproxQueryProcessorMinSum.wrongResult) {
+        cout << "Min sum: wrong result!" << endl;
+    } else {
+        cout << "Min sum: the result cannot be verified!" << endl;
+    }
     PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultMinSum, min_sum);
+    if (raptorApproxQueryProcessorMinMax.wrongResult) {
+        cout << "Min max: wrong result!" << endl;
+    } else {
+        cout << "Min max: correct result!" << endl;
+    }
     PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultMinMax, min_max);
 }
 
@@ -3102,15 +3112,35 @@ void AlgorithmComparer::compareAlgorithmsWithoutGTree(DataType dataType, Meeting
     PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorPQMinMax, min_max);
 
     cout << "Raptor Approximation - Min Sum: " << endl;
+    if (raptorApproximationQueryProcessorMinSum.wrongResult) {
+        cout << "Min sum: wrong result!" << endl;
+    } else {
+        cout << "Min sum: the result cannot be verified!" << endl;
+    }
     PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorApproximationMinSum, min_sum);
 
     cout << "Raptor Approximation - Min Max: " << endl;
+    if (raptorApproximationQueryProcessorMinMax.wrongResult) {
+        cout << "Min max: wrong result!" << endl;
+    } else {
+        cout << "Min max: correct result!" << endl;
+    }
     PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorApproximationMinMax, min_max);
 
     cout << "Raptor Approximation - Min Sum (Candidates): " << endl;
+    if (raptorApproximationQueryProcessorMinSumCandidates.wrongResult) {
+        cout << "Min sum: wrong result!" << endl;
+    } else {
+        cout << "Min sum: the result cannot be verified!" << endl;
+    }
     PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorApproximationMinSumCandidates, min_sum);
 
     cout << "Raptor Approximation - Min Max (Candidates): " << endl;
+    if (raptorApproximationQueryProcessorMinMaxCandidates.wrongResult) {
+        cout << "Min max: wrong result!" << endl;
+    } else {
+        cout << "Min max: correct result!" << endl;
+    }
     PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorApproximationMinMaxCandidates, min_max);
     
     // cout << "Raptor PQ Parallel - Min Sum: " << endl;
@@ -3220,6 +3250,7 @@ void PrintHelper::printMeetingPointQuery(MeetingPointQuery meetingPointQuery) {
     cout << endl;
     cout << "Source time: " << TimeConverter::convertSecondsToTime(meetingPointQuery.sourceTime, true) << endl;
     cout << "Weekday: " << WeekdayConverter::convertIntToWeekday(meetingPointQuery.weekday) << endl;
+    cout << endl;
 }
 
 /*

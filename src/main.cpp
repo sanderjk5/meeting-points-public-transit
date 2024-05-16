@@ -110,7 +110,6 @@ int main(int argc, const char *argv[]) {
     // ExperimentController::testAndCompareAlgorithmsRandom(dataType, 1000, numberOfSourceStops);
 
     // Test experiments
-    // vector<int> numberOfSourceStops = {75, 100, 150};
     vector<int> numberOfSourceStops = {2, 3, 5, 7, 9, 10};
     // vector<int> numberOfSourceStops = {2, 5, 10};
     // vector<int> numberOfSourceStops = {5};
@@ -118,6 +117,8 @@ int main(int argc, const char *argv[]) {
     // ExperimentController::compareRaptorAlgorithms(dataType, 100, numberOfSourceStops);
 
     ExperimentController::compareRaptorPQAlgorithms(dataType, 100, numberOfSourceStops);
+
+    // vector<int> numberOfSourceStops = {75, 100, 150};
 
     // ExperimentController::compareRaptorApproxAlgorithms(dataType, 50, numberOfSourceStops);
 

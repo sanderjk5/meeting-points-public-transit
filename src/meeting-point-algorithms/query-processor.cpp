@@ -1784,6 +1784,11 @@ void RaptorApproximationQueryProcessor::processRaptorApproximationQuery(Optimiza
     auto endCandidates = std::chrono::high_resolution_clock::now();
     durationCandidates = std::chrono::duration_cast<std::chrono::milliseconds>(endCandidates - startCandidates).count();
 
+    auto startVerification = std::chrono::high_resolution_clock::now();
+    verifyResult();
+    auto endVerification = std::chrono::high_resolution_clock::now();
+    durationVerification = std::chrono::duration_cast<std::chrono::milliseconds>(endVerification - startVerification).count();
+
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     meetingPointQueryResult.queryTime = duration;
@@ -1904,12 +1909,14 @@ void RaptorApproximationQueryProcessor::calculateResultWithCandidates() {
             meetingPointQueryResult.meetingPointMinSumStopId = bestMeetingPoint;
             meetingPointQueryResult.meetingPointMinSum = Importer::getStopName(bestMeetingPoint);
             meetingPointQueryResult.meetingTimeMinSum = TimeConverter::convertSecondsToTime(bestArrivalTime, true);
+            meetingPointQueryResult.minSumMeetingTimeInSeconds = bestArrivalTime;
             meetingPointQueryResult.minSumDuration = TimeConverter::convertSecondsToTime(bestResult, false);
             meetingPointQueryResult.minSumDurationInSeconds = bestResult;
         } else {
             meetingPointQueryResult.meetingPointMinMaxStopId = bestMeetingPoint;
             meetingPointQueryResult.meetingPointMinMax = Importer::getStopName(bestMeetingPoint);
             meetingPointQueryResult.meetingTimeMinMax = TimeConverter::convertSecondsToTime(bestArrivalTime, true);
+            meetingPointQueryResult.minMaxMeetingTimeInSeconds = bestArrivalTime;
             meetingPointQueryResult.minMaxDuration = TimeConverter::convertSecondsToTime(bestResult, false);
             meetingPointQueryResult.minMaxDurationInSeconds = bestResult;
         }
@@ -1992,5 +1999,50 @@ void RaptorApproximationQueryProcessor::calculateResultWithOneCandidate() {
             meetingPointQueryResult.minMaxDuration = TimeConverter::convertSecondsToTime(bestResult, false);
             meetingPointQueryResult.minMaxDurationInSeconds = bestResult;
         }
+    }
+}
+
+void RaptorApproximationQueryProcessor::verifyResult() {
+    int maxDuration;
+
+    RaptorBackwardQuery raptorBackwardQuery;
+    if (optimization == min_sum) {
+        raptorBackwardQuery.targetStopId = meetingPointQueryResult.meetingPointMinSumStopId;
+        raptorBackwardQuery.sourceTime = meetingPointQueryResult.minSumMeetingTimeInSeconds - TimeConverter::getDayOffset(meetingPointQueryResult.minSumMeetingTimeInSeconds);
+        maxDuration = meetingPointQueryResult.minSumMeetingTimeInSeconds - meetingPointQuery.sourceTime;
+    } else {
+        raptorBackwardQuery.targetStopId = meetingPointQueryResult.meetingPointMinMaxStopId;
+        raptorBackwardQuery.sourceTime = meetingPointQueryResult.minMaxMeetingTimeInSeconds - TimeConverter::getDayOffset(meetingPointQueryResult.minMaxMeetingTimeInSeconds);
+        maxDuration = meetingPointQueryResult.minMaxDurationInSeconds;
+    }
+
+    raptorBackwardQuery.weekday = meetingPointQuery.weekday + TimeConverter::getDayDifference(raptorBackwardQuery.sourceTime);
+    raptorBackwardQuery.sourceStopIds = meetingPointQuery.sourceStopIds;
+
+    RaptorBackward raptorBackward = RaptorBackward(raptorBackwardQuery);
+    raptorBackward.processRaptorBackward();
+
+    int sourceTime = raptorBackwardQuery.sourceTime + (NUMBER_OF_DAYS * SECONDS_PER_DAY);
+
+    for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
+        int sourceStopId = meetingPointQuery.sourceStopIds[i];
+        int latestDepartureTime = raptorBackward.getLatestDepartureTime(sourceStopId);
+
+        if (latestDepartureTime == INT_MAX) {
+            sourceStopsWithErrorAndDuration.push_back(make_pair(sourceStopId, INT_MAX));
+            continue;
+        }
+
+        int duration = sourceTime - latestDepartureTime;
+
+        if (duration > maxDuration) {
+            sourceStopsWithErrorAndDuration.push_back(make_pair(sourceStopId, duration));
+        }
+    }
+    
+    if (sourceStopsWithErrorAndDuration.size() > 0) {
+        wrongResult = true;
+    } else {
+        wrongResult = false;
     }
 }

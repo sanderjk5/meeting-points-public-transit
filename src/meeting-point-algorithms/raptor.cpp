@@ -346,7 +346,17 @@ void RaptorBackward::traverseRoutes() {
                         break;
                     }
                     int newDepartureTime = departureTime - Importer::footPathsBackward[k].duration;
-                    if (newDepartureTime > currentLatestDepartureTimes[Importer::footPathsBackward[k].departureStopId]) {
+                    bool pruneTarget = false;
+                    if (query.sourceStopIds.size() > 0) {
+                        pruneTarget = true;
+                        for (int l = 0; l < query.sourceStopIds.size(); l++) {
+                            if (newDepartureTime > currentLatestDepartureTimes[query.sourceStopIds[l]]) {
+                                pruneTarget = false;
+                                break;
+                            }
+                        }
+                    }
+                    if (newDepartureTime > currentLatestDepartureTimes[Importer::footPathsBackward[k].departureStopId] && !pruneTarget) {
                         currentLatestDepartureTimes[Importer::footPathsBackward[k].departureStopId] = newDepartureTime;
                         currentMarkedStops[Importer::footPathsBackward[k].departureStopId] = true;
                         isFinishedFlag = false;

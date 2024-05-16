@@ -267,6 +267,9 @@ class RaptorApproximationQueryProcessor {
         double durationExactSources;
         double durationExactCalculation;
         double durationCandidates;
+        double durationVerification;
+
+        bool wrongResult;
 
     private:
         MeetingPointQuery meetingPointQuery;
@@ -281,9 +284,12 @@ class RaptorApproximationQueryProcessor {
         Optimization optimization;
         vector<int> exactSources;
 
+        vector<pair<int, int>> sourceStopsWithErrorAndDuration;
+
         void calculateExactSources(int numberOfExactSourceStops);
         void calculateResultWithCandidates();
         void calculateResultWithOneCandidate();
+        void verifyResult();
 };
 
 /*
