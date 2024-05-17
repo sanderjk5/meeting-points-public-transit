@@ -261,13 +261,12 @@ class RaptorApproximationQueryProcessor {
         };
         ~RaptorApproximationQueryProcessor(){};
 
-        void processRaptorApproximationQuery(Optimization optimization, bool multipleCandidates = false);
+        void processRaptorApproximationQuery(Optimization optimization, bool multipleCandidates = false, bool useResultVerification = true);
         MeetingPointQueryResult getMeetingPointQueryResult();
 
         double durationExactSources;
         double durationExactCalculation;
         double durationCandidates;
-        double durationVerification;
 
         bool wrongResult;
 
@@ -287,9 +286,9 @@ class RaptorApproximationQueryProcessor {
         vector<pair<int, int>> sourceStopsWithErrorAndDuration;
 
         void calculateExactSources(int numberOfExactSourceStops);
-        void calculateResultWithCandidates();
+        void calculateResultWithCandidates(bool useResultVerification);
         void calculateResultWithOneCandidate();
-        void verifyResult();
+        bool verifyResult(int targetStopId, int meetingTime);
 };
 
 /*

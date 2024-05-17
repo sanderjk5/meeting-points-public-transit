@@ -3061,20 +3061,28 @@ void AlgorithmComparer::compareAlgorithmsWithoutGTree(DataType dataType, Meeting
     MeetingPointQueryResult meetingPointQueryResultRaptorPQMinMax = raptorPQQueryProcessorMinMax.getMeetingPointQueryResult();
 
     RaptorApproximationQueryProcessor raptorApproximationQueryProcessorMinSum = RaptorApproximationQueryProcessor(meetingPointQuery);
-    raptorApproximationQueryProcessorMinSum.processRaptorApproximationQuery(min_sum, false);
+    raptorApproximationQueryProcessorMinSum.processRaptorApproximationQuery(min_sum, false, true);
     MeetingPointQueryResult meetingPointQueryResultRaptorApproximationMinSum = raptorApproximationQueryProcessorMinSum.getMeetingPointQueryResult();
 
     RaptorApproximationQueryProcessor raptorApproximationQueryProcessorMinMax = RaptorApproximationQueryProcessor(meetingPointQuery);
-    raptorApproximationQueryProcessorMinMax.processRaptorApproximationQuery(min_max, false);
+    raptorApproximationQueryProcessorMinMax.processRaptorApproximationQuery(min_max, false, true);
     MeetingPointQueryResult meetingPointQueryResultRaptorApproximationMinMax = raptorApproximationQueryProcessorMinMax.getMeetingPointQueryResult();
 
     RaptorApproximationQueryProcessor raptorApproximationQueryProcessorMinSumCandidates = RaptorApproximationQueryProcessor(meetingPointQuery);
-    raptorApproximationQueryProcessorMinSumCandidates.processRaptorApproximationQuery(min_sum, true);
+    raptorApproximationQueryProcessorMinSumCandidates.processRaptorApproximationQuery(min_sum, true, true);
     MeetingPointQueryResult meetingPointQueryResultRaptorApproximationMinSumCandidates = raptorApproximationQueryProcessorMinSumCandidates.getMeetingPointQueryResult();
 
     RaptorApproximationQueryProcessor raptorApproximationQueryProcessorMinMaxCandidates = RaptorApproximationQueryProcessor(meetingPointQuery);
-    raptorApproximationQueryProcessorMinMaxCandidates.processRaptorApproximationQuery(min_max, true);
+    raptorApproximationQueryProcessorMinMaxCandidates.processRaptorApproximationQuery(min_max, true, true);
     MeetingPointQueryResult meetingPointQueryResultRaptorApproximationMinMaxCandidates = raptorApproximationQueryProcessorMinMaxCandidates.getMeetingPointQueryResult();
+
+    RaptorApproximationQueryProcessor raptorApproximationQueryProcessorMinSumCandidatesWoVer = RaptorApproximationQueryProcessor(meetingPointQuery);
+    raptorApproximationQueryProcessorMinSumCandidatesWoVer.processRaptorApproximationQuery(min_sum, true, false);
+    MeetingPointQueryResult meetingPointQueryResultRaptorApproximationMinSumCandidatesWoVer = raptorApproximationQueryProcessorMinSumCandidatesWoVer.getMeetingPointQueryResult();
+
+    RaptorApproximationQueryProcessor raptorApproximationQueryProcessorMinMaxCandidatesWoVer = RaptorApproximationQueryProcessor(meetingPointQuery);
+    raptorApproximationQueryProcessorMinMaxCandidatesWoVer.processRaptorApproximationQuery(min_max, true, false);
+    MeetingPointQueryResult meetingPointQueryResultRaptorApproximationMinMaxCandidatesWoVer = raptorApproximationQueryProcessorMinMaxCandidatesWoVer.getMeetingPointQueryResult();
 
     // RaptorPQParallelQueryProcessor raptorPQParallelQueryProcessorMinSum = RaptorPQParallelQueryProcessor(meetingPointQuery);
     // raptorPQParallelQueryProcessorMinSum.processRaptorPQParallelQuery(min_sum);
@@ -3127,7 +3135,7 @@ void AlgorithmComparer::compareAlgorithmsWithoutGTree(DataType dataType, Meeting
     }
     PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorApproximationMinMax, min_max);
 
-    cout << "Raptor Approximation - Min Sum (Candidates): " << endl;
+    cout << "Raptor Approximation - Min Sum (Candidates & Verification): " << endl;
     if (raptorApproximationQueryProcessorMinSumCandidates.wrongResult) {
         cout << "Min sum: wrong result!" << endl;
     } else {
@@ -3135,13 +3143,19 @@ void AlgorithmComparer::compareAlgorithmsWithoutGTree(DataType dataType, Meeting
     }
     PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorApproximationMinSumCandidates, min_sum);
 
-    cout << "Raptor Approximation - Min Max (Candidates): " << endl;
+    cout << "Raptor Approximation - Min Max (Candidates & Verification): " << endl;
     if (raptorApproximationQueryProcessorMinMaxCandidates.wrongResult) {
         cout << "Min max: wrong result!" << endl;
     } else {
         cout << "Min max: correct result!" << endl;
     }
     PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorApproximationMinMaxCandidates, min_max);
+
+    cout << "Raptor Approximation - Min Sum (Candidates): " << endl;
+    PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorApproximationMinSumCandidatesWoVer, min_sum);
+
+    cout << "Raptor Approximation - Min Max (Candidates): " << endl;
+    PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorApproximationMinMaxCandidatesWoVer, min_max);
     
     // cout << "Raptor PQ Parallel - Min Sum: " << endl;
     // PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultRaptorPQParallelMinSum);
