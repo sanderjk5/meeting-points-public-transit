@@ -1909,14 +1909,12 @@ void RaptorApproximationQueryProcessor::calculateResultWithCandidates() {
             meetingPointQueryResult.meetingPointMinSumStopId = bestMeetingPoint;
             meetingPointQueryResult.meetingPointMinSum = Importer::getStopName(bestMeetingPoint);
             meetingPointQueryResult.meetingTimeMinSum = TimeConverter::convertSecondsToTime(bestArrivalTime, true);
-            meetingPointQueryResult.minSumMeetingTimeInSeconds = bestArrivalTime;
             meetingPointQueryResult.minSumDuration = TimeConverter::convertSecondsToTime(bestResult, false);
             meetingPointQueryResult.minSumDurationInSeconds = bestResult;
         } else {
             meetingPointQueryResult.meetingPointMinMaxStopId = bestMeetingPoint;
             meetingPointQueryResult.meetingPointMinMax = Importer::getStopName(bestMeetingPoint);
             meetingPointQueryResult.meetingTimeMinMax = TimeConverter::convertSecondsToTime(bestArrivalTime, true);
-            meetingPointQueryResult.minMaxMeetingTimeInSeconds = bestArrivalTime;
             meetingPointQueryResult.minMaxDuration = TimeConverter::convertSecondsToTime(bestResult, false);
             meetingPointQueryResult.minMaxDurationInSeconds = bestResult;
         }
@@ -2003,25 +2001,26 @@ void RaptorApproximationQueryProcessor::calculateResultWithOneCandidate() {
 }
 
 void RaptorApproximationQueryProcessor::verifyResult() {
-    int maxDuration;
+    MeetingPointQueryResult exactResult = raptorBoundQueryProcessor->getMeetingPointQueryResult();
+    int meetingTime;
 
     RaptorBackwardQuery raptorBackwardQuery;
     if (optimization == min_sum) {
         raptorBackwardQuery.targetStopId = meetingPointQueryResult.meetingPointMinSumStopId;
-        raptorBackwardQuery.sourceTime = meetingPointQueryResult.minSumMeetingTimeInSeconds - TimeConverter::getDayOffset(meetingPointQueryResult.minSumMeetingTimeInSeconds);
-        maxDuration = meetingPointQueryResult.minSumMeetingTimeInSeconds - meetingPointQuery.sourceTime;
+        meetingTime = exactResult.minSumMeetingTimeInSeconds;
     } else {
         raptorBackwardQuery.targetStopId = meetingPointQueryResult.meetingPointMinMaxStopId;
-        raptorBackwardQuery.sourceTime = meetingPointQueryResult.minMaxMeetingTimeInSeconds - TimeConverter::getDayOffset(meetingPointQueryResult.minMaxMeetingTimeInSeconds);
-        maxDuration = meetingPointQueryResult.minMaxDurationInSeconds;
+        meetingTime = exactResult.minMaxMeetingTimeInSeconds;
     }
 
+    raptorBackwardQuery.sourceTime = meetingTime - TimeConverter::getDayOffset(meetingTime);
     raptorBackwardQuery.weekday = meetingPointQuery.weekday + TimeConverter::getDayDifference(raptorBackwardQuery.sourceTime);
     raptorBackwardQuery.sourceStopIds = meetingPointQuery.sourceStopIds;
 
     RaptorBackward raptorBackward = RaptorBackward(raptorBackwardQuery);
     raptorBackward.processRaptorBackward();
 
+    int maxDuration = meetingTime - meetingPointQuery.sourceTime;
     int sourceTime = raptorBackwardQuery.sourceTime + (NUMBER_OF_DAYS * SECONDS_PER_DAY);
 
     for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
