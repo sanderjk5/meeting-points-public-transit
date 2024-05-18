@@ -1863,8 +1863,6 @@ void RaptorApproximationQueryProcessor::calculateResultWithCandidates(bool useRe
         }
     }
 
-    cout << "Number of relevant candidates: " << relevantCandidates.size() << endl;
-
     int numberOfSources = meetingPointQuery.sourceStopIds.size();
 
     // calculate the best result
@@ -2033,6 +2031,8 @@ void RaptorApproximationQueryProcessor::calculateResultWithOneCandidate() {
 }
 
 bool RaptorApproximationQueryProcessor::verifyResult(int targetStopId, int meetingTime) {
+    sourceStopsWithErrorAndDuration = vector<pair<int, int>>(0);
+
     RaptorBackwardQuery raptorBackwardQuery;
     raptorBackwardQuery.targetStopId = targetStopId;
     raptorBackwardQuery.sourceTime = meetingTime - TimeConverter::getDayOffset(meetingTime);
@@ -2066,4 +2066,126 @@ bool RaptorApproximationQueryProcessor::verifyResult(int targetStopId, int meeti
     } else {
         return false;
     }
+}
+
+void RaptorApproximationQueryProcessor::processRaptorApproximationLoopQuery() {
+    auto start = std::chrono::high_resolution_clock::now();
+
+    bool finished = false;
+
+    int numberOfSources = meetingPointQuery.sourceStopIds.size();
+    int maxNumberOfSources = numberOfSources / 2;
+
+    cout << "Max number of sources: " << maxNumberOfSources << endl;
+
+    int numberOfExactSourcesPerRound;
+    if (numberOfSources == 2) {
+        numberOfExactSourcesPerRound = numberOfSources;
+    } else if (numberOfSources < 10) {
+        numberOfExactSourcesPerRound = 3;
+    } else if (numberOfSources < 25) {
+        numberOfExactSourcesPerRound = 4;
+    } else {
+        numberOfExactSourcesPerRound = 5;
+    }
+
+    calculateExactSources(numberOfExactSourcesPerRound);
+
+    while (!finished) {
+        numberOfRounds++;
+
+        cout << "Number of exact sources: " << exactSources.size() << endl;
+
+        vector<shared_ptr<Raptor>> currentRaptors = vector<shared_ptr<Raptor>>(0);
+        for (int i = 0; i < exactSources.size(); i++) {
+            RaptorQuery query;
+            query.sourceStopId = exactSources[i];
+            query.sourceTime = meetingPointQuery.sourceTime;
+            query.weekday = meetingPointQuery.weekday;
+
+            shared_ptr<Raptor> raptor = shared_ptr<Raptor> (new Raptor(query));
+            currentRaptors.push_back(raptor);
+        }
+
+        #pragma omp parallel for
+        for (int i = 0; i < currentRaptors.size(); i++) {
+            currentRaptors[i]->processRaptor();
+        }
+
+        for (int i = 0; i < currentRaptors.size(); i++) {
+            raptors.push_back(currentRaptors[i]);
+        }
+
+        int bestMeetingPoint = -1;
+        int bestResult = INT_MAX;
+        for (int i = 0; i < Importer::stops.size(); i++) {
+            int meetingPoint = i;
+            int result = 0;
+            for (int j = 0; j < raptors.size(); j++) {
+                int earliestArrivalTime = raptors[j]->getEarliestArrivalTime(meetingPoint);
+                if (earliestArrivalTime == INT_MAX) {
+                    result = INT_MAX;
+                    break;
+                }
+
+                if (earliestArrivalTime > result) {
+                    result = earliestArrivalTime;
+                }
+            }
+
+            if (result < bestResult) {
+                bestMeetingPoint = meetingPoint;
+                bestResult = result;
+            }
+        }
+
+        if (bestMeetingPoint != -1) {
+            meetingPointQueryResult.meetingPointMinMaxStopId = bestMeetingPoint;
+            meetingPointQueryResult.meetingPointMinMax = Importer::getStopName(bestMeetingPoint);
+            meetingPointQueryResult.meetingTimeMinMax = TimeConverter::convertSecondsToTime(bestResult, true);
+            int duration = bestResult - meetingPointQuery.sourceTime;
+            meetingPointQueryResult.minMaxDuration = TimeConverter::convertSecondsToTime(duration, false);
+            meetingPointQueryResult.minMaxDurationInSeconds = duration;
+        } else {
+            finished = true;
+            wrongResult = true;
+            break;
+        }
+
+        int wrongResultRound = verifyResult(bestMeetingPoint, bestResult);
+
+        if (wrongResultRound) {
+            int numberOfVisitedSources = raptors.size();
+            int numberOfExactSourcesNextRound = min(numberOfExactSourcesPerRound, maxNumberOfSources - numberOfVisitedSources);
+            int numberOfSourceStopsWithError = sourceStopsWithErrorAndDuration.size();
+            numberOfExactSourcesNextRound = min(numberOfExactSourcesNextRound, numberOfSourceStopsWithError);
+
+            if (numberOfExactSourcesNextRound == 0) {
+                finished = true;
+                wrongResult = true;
+                break;
+            }
+
+            // sort number of sources with error by duration (descending)
+            sort(sourceStopsWithErrorAndDuration.begin(), sourceStopsWithErrorAndDuration.end(), 
+                [](const pair<int, int> &left, const pair<int, int> &right) {
+                    return left.second > right.second;
+                }
+            );
+
+            exactSources = vector<int>(0);
+            for (int i = 0; i < numberOfExactSourcesPerRound; i++) {
+                exactSources.push_back(sourceStopsWithErrorAndDuration[i].first);
+            }
+        } else {
+            finished = true;
+            wrongResult = false;
+        }
+    }
+    
+    cout << "Number of rounds: " << numberOfRounds << endl;
+    
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    meetingPointQueryResult.queryTime = duration;
 }
