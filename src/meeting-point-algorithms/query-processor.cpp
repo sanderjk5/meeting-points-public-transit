@@ -1739,7 +1739,7 @@ vector<Journey> RaptorPQParallelQueryProcessor::getJourneys(Optimization optimiz
     return journeys;
 }
 
-void RaptorApproximationQueryProcessor::processRaptorApproximationQuery(Optimization optimization, bool multipleCandidates, bool useResultVerification) {
+void RaptorApproximationQueryProcessor::processRaptorApproximationQuery(Optimization optimization, bool multipleCandidates, bool useResultVerification, bool calculateExactResult) {
     auto start = std::chrono::high_resolution_clock::now();
 
     this->optimization = optimization;
@@ -1793,6 +1793,10 @@ void RaptorApproximationQueryProcessor::processRaptorApproximationQuery(Optimiza
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     meetingPointQueryResult.queryTime = duration;
+
+    if (!multipleCandidates && calculateExactResult) {
+        calculateResultWithOneCandidate();
+    }
 }
 
 MeetingPointQueryResult RaptorApproximationQueryProcessor::getMeetingPointQueryResult() {
@@ -1876,6 +1880,10 @@ void RaptorApproximationQueryProcessor::calculateResultWithCandidates(bool useRe
             bestResult = relevantCandidates[0].duration;
             bestArrivalTime = relevantCandidates[0].meetingTime;
         } else {
+            bestMeetingPoint = -1;
+            bestResult = INT_MAX;
+            bestArrivalTime = 0;
+
             for (int i = 0; i < numberOfSources; i++) {
                 // skip the exact sources
                 if (find(exactSources.begin(), exactSources.end(), meetingPointQuery.sourceStopIds[i]) != exactSources.end()) {
@@ -2072,11 +2080,10 @@ void RaptorApproximationQueryProcessor::processRaptorApproximationLoopQuery() {
     auto start = std::chrono::high_resolution_clock::now();
 
     bool finished = false;
+    numberOfRounds = 0;
 
     int numberOfSources = meetingPointQuery.sourceStopIds.size();
     int maxNumberOfSources = numberOfSources / 2;
-
-    cout << "Max number of sources: " << maxNumberOfSources << endl;
 
     int numberOfExactSourcesPerRound;
     if (numberOfSources == 2) {
@@ -2093,8 +2100,6 @@ void RaptorApproximationQueryProcessor::processRaptorApproximationLoopQuery() {
 
     while (!finished) {
         numberOfRounds++;
-
-        cout << "Number of exact sources: " << exactSources.size() << endl;
 
         vector<shared_ptr<Raptor>> currentRaptors = vector<shared_ptr<Raptor>>(0);
         for (int i = 0; i < exactSources.size(); i++) {
@@ -2156,7 +2161,8 @@ void RaptorApproximationQueryProcessor::processRaptorApproximationLoopQuery() {
 
         if (wrongResultRound) {
             int numberOfVisitedSources = raptors.size();
-            int numberOfExactSourcesNextRound = min(numberOfExactSourcesPerRound, maxNumberOfSources - numberOfVisitedSources);
+            int remainingSources = max(0, maxNumberOfSources - numberOfVisitedSources);
+            int numberOfExactSourcesNextRound = min(numberOfExactSourcesPerRound, remainingSources);
             int numberOfSourceStopsWithError = sourceStopsWithErrorAndDuration.size();
             numberOfExactSourcesNextRound = min(numberOfExactSourcesNextRound, numberOfSourceStopsWithError);
 
@@ -2174,7 +2180,7 @@ void RaptorApproximationQueryProcessor::processRaptorApproximationLoopQuery() {
             );
 
             exactSources = vector<int>(0);
-            for (int i = 0; i < numberOfExactSourcesPerRound; i++) {
+            for (int i = 0; i < numberOfExactSourcesNextRound; i++) {
                 exactSources.push_back(sourceStopsWithErrorAndDuration[i].first);
             }
         } else {
@@ -2182,8 +2188,6 @@ void RaptorApproximationQueryProcessor::processRaptorApproximationLoopQuery() {
             wrongResult = false;
         }
     }
-    
-    cout << "Number of rounds: " << numberOfRounds << endl;
     
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();

@@ -261,7 +261,7 @@ class RaptorApproximationQueryProcessor {
         };
         ~RaptorApproximationQueryProcessor(){};
 
-        void processRaptorApproximationQuery(Optimization optimization, bool multipleCandidates = false, bool useResultVerification = true);
+        void processRaptorApproximationQuery(Optimization optimization, bool multipleCandidates = false, bool useResultVerification = true, bool calculateExactResult = false);
         void processRaptorApproximationLoopQuery();
         MeetingPointQueryResult getMeetingPointQueryResult();
 
@@ -270,6 +270,7 @@ class RaptorApproximationQueryProcessor {
         double durationCandidates;
 
         bool wrongResult;
+        int numberOfRounds;
 
     private:
         MeetingPointQuery meetingPointQuery;
@@ -286,7 +287,7 @@ class RaptorApproximationQueryProcessor {
 
         vector<pair<int, int>> sourceStopsWithErrorAndDuration;
 
-        int numberOfRounds = 0;
+        
 
         void calculateExactSources(int numberOfExactSourceStops);
         void calculateResultWithCandidates(bool useResultVerification);
