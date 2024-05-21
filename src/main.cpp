@@ -112,7 +112,7 @@ int main(int argc, const char *argv[]) {
     // Test experiments
     // vector<int> numberOfSourceStops = {2, 3, 5, 7, 9, 10};
     // vector<int> numberOfSourceStops = {2, 5, 10};
-    vector<int> numberOfSourceStops = {5, 10, 25, 50, 75};
+    vector<int> numberOfSourceStops = {15, 100, 150};
 
     // ExperimentController::compareRaptorAlgorithms(dataType, 100, numberOfSourceStops);
 
