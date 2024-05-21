@@ -2083,7 +2083,7 @@ void RaptorApproximationQueryProcessor::processRaptorApproximationLoopQuery() {
     numberOfRounds = 0;
 
     int numberOfSources = meetingPointQuery.sourceStopIds.size();
-    int maxNumberOfSources = numberOfSources / 2;
+    int maxNumberOfSources = numberOfSources / 4;
 
     int numberOfExactSourcesPerRound;
     if (numberOfSources == 2) {
