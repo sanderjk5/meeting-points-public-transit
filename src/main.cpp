@@ -99,7 +99,7 @@ int main(int argc, const char *argv[]) {
   cout << "Number of edges: " << edgeCount << "\n" << endl;
 
   if (startExperiments){
-    // ExperimentController::evaluateLowerBounds(2500, 4);
+    ExperimentController::evaluateLowerBounds(2500, 4);
 
     // Real experiments
     // vector<int> numberOfSourceStops = {2, 3, 5, 10, 25};
@@ -116,7 +116,7 @@ int main(int argc, const char *argv[]) {
 
     // ExperimentController::compareRaptorAlgorithms(dataType, 100, numberOfSourceStops);
 
-    //ExperimentController::compareRaptorPQAlgorithms(dataType, 100, numberOfSourceStops);
+    ExperimentController::compareRaptorPQAlgorithms(dataType, 50, numberOfSourceStops);
 
     // vector<int> numberOfSourceStops = {75, 100, 150};
 
