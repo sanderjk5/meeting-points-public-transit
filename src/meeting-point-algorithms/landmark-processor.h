@@ -15,16 +15,20 @@ class LandmarkProcessor {
     	static void loadOrCalculateLandmarkDurations(DataType dataType);
         static int getLowerBound(int stopId1, int stopId2, int weekday);
 
+        
+
         static vector<set<int>> getAllArrivalTimesOfStop(int stopId);
         static vector<set<int>> getAllDepartureTimesOfStop(int stopId);
 
         static void countAllArrivalAndDepartureTimesOfTheLandmarks(DataType dataType);
-        
 
     private:
         static void importLandmarkDurations(DataType dataType);
         static void exportLandmarkDurations(DataType dataType);
         static void calculateLandmarkDurations(DataType dataType);  
+        static void calculateExactLandmarkDurationsForStops(vector<int> landmarkIds);
+
+        static vector<int> getLandmarkIds(DataType dataType);
 
         static vector<vector<vector<int>>> landmarkDurations;
 };

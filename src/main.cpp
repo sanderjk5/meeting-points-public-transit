@@ -87,7 +87,7 @@ int main(int argc, const char *argv[]) {
   Creator::loadOrCreateNetworkGraph(dataType);
   if (USE_LANDMARKS) {
     LandmarkProcessor::loadOrCalculateLandmarkDurations(dataType);
-    // LandmarkProcessor::getAllArrivalTimesOfStop(133225);
+    // LandmarkProcessor::countAllArrivalAndDepartureTimesOfTheLandmarks(dataType);
   }
 
   // print number of vertices and edges
@@ -98,10 +98,8 @@ int main(int argc, const char *argv[]) {
   }
   cout << "Number of edges: " << edgeCount << "\n" << endl;
 
-  LandmarkProcessor::countAllArrivalAndDepartureTimesOfTheLandmarks(dataType);
-
   if (startExperiments){
-    ExperimentController::evaluateLowerBounds(2500, 4);
+    ExperimentController::evaluateLowerBounds(100, 4);
 
     // Real experiments
     // vector<int> numberOfSourceStops = {2, 3, 5, 10, 25};
@@ -118,11 +116,11 @@ int main(int argc, const char *argv[]) {
 
     // ExperimentController::compareRaptorAlgorithms(dataType, 100, numberOfSourceStops);
 
-    ExperimentController::compareRaptorPQAlgorithms(dataType, 50, numberOfSourceStops);
+    // ExperimentController::compareRaptorPQAlgorithms(dataType, 50, numberOfSourceStops);
 
-    numberOfSourceStops = {25, 50, 75};
+    // numberOfSourceStops = {25, 50, 75};
 
-    ExperimentController::compareRaptorApproxAlgorithms(dataType, 50, numberOfSourceStops);
+    // ExperimentController::compareRaptorApproxAlgorithms(dataType, 50, numberOfSourceStops);
 
     //ExperimentController::compareRaptorEATAlgorithms(dataType, 2500);
 
