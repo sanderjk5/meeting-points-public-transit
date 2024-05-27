@@ -214,53 +214,22 @@ int LandmarkProcessor::getLowerBound(int stopId1, int stopId2, int weekday) {
     return lowerBound;
 }
 
-vector<set<int>> LandmarkProcessor::getAllArrivalTimesOfStop(int stopId) {
-    vector<set<int>> arrivalTimesPerWeekday = vector<set<int>>(7, set<int>());
-    vector<int> reachableStopIds = vector<int>(0);
-
-    int indexOfFirstFootpathOfTargetStop = Importer::indexOfFirstFootPathOfAStopBackward[stopId];
-    for (int i = indexOfFirstFootpathOfTargetStop; i < Importer::footPathsBackward.size(); i++) {
-        if (Importer::footPathsBackward[i].arrivalStopId != stopId) {
-            break;
-        }
-        reachableStopIds.push_back(Importer::footPathsBackward[i].departureStopId);
-    }
-
-    for (int i = 0; i < reachableStopIds.size(); i++) {
-        vector<RouteSequencePair>* routes = &Importer::routesOfAStop[stopId];
-        for (int j = 0; j < routes->size(); j++) {
-            int routeId = (*routes)[j].routeId;
-            int stopSequence = (*routes)[j].stopSequence;
-            vector<int>* trips = &Importer::tripsOfARoute[routeId];
-            for (int k = 0; k < trips->size(); k++) {
-                int tripId = (*trips)[k];
-                StopTime stopTime = Importer::stopTimes[Importer::indexOfFirstStopTimeOfATrip[tripId] + stopSequence];
-                for (int weekday = 0; weekday < 7; weekday++) {
-                    if (Importer::isTripAvailable(tripId, weekday)) {
-                        arrivalTimesPerWeekday[weekday].insert(stopTime.arrivalTime);
-                    }
-                }
-            }
-        }
-    }
-
-    return arrivalTimesPerWeekday;
-}
-
 vector<set<int>> LandmarkProcessor::getAllDepartureTimesOfStop(int stopId) {
     vector<set<int>> departureTimesPerWeekday = vector<set<int>>(7, set<int>());
-    vector<int> reachableStopIds = vector<int>(0);
+    vector<pair<int, int>> reachableStopIdsAndFootpathDurations = vector<pair<int, int>>(0);
 
     int indexOfFirstFootpathOfTargetStop = Importer::indexOfFirstFootPathOfAStop[stopId];
     for (int i = indexOfFirstFootpathOfTargetStop; i < Importer::footPaths.size(); i++) {
         if (Importer::footPaths[i].departureStopId != stopId) {
             break;
         }
-        reachableStopIds.push_back(Importer::footPaths[i].arrivalStopId);
+        reachableStopIdsAndFootpathDurations.push_back(make_pair(Importer::footPaths[i].arrivalStopId, Importer::footPaths[i].duration));
     }
 
-    for (int i = 0; i < reachableStopIds.size(); i++) {
-        vector<RouteSequencePair>* routes = &Importer::routesOfAStop[stopId];
+    for (int i = 0; i < reachableStopIdsAndFootpathDurations.size(); i++) {
+        int currentStopId = reachableStopIdsAndFootpathDurations[i].first;
+        int footpathDuration = reachableStopIdsAndFootpathDurations[i].second;
+        vector<RouteSequencePair>* routes = &Importer::routesOfAStop[currentStopId];
         for (int j = 0; j < routes->size(); j++) {
             int routeId = (*routes)[j].routeId;
             int stopSequence = (*routes)[j].stopSequence;
@@ -268,9 +237,27 @@ vector<set<int>> LandmarkProcessor::getAllDepartureTimesOfStop(int stopId) {
             for (int k = 0; k < trips->size(); k++) {
                 int tripId = (*trips)[k];
                 StopTime stopTime = Importer::stopTimes[Importer::indexOfFirstStopTimeOfATrip[tripId] + stopSequence];
+                int departureTime = stopTime.departureTime - footpathDuration;
+
+                bool decreaseWeekday = false;
+                StopTime firstStopTimeOfTrip = Importer::stopTimes[Importer::indexOfFirstStopTimeOfATrip[tripId]];
+                if (firstStopTimeOfTrip.departureTime > stopTime.departureTime) {
+                    decreaseWeekday = true;
+                }
+
                 for (int weekday = 0; weekday < 7; weekday++) {
-                    if (Importer::isTripAvailable(tripId, weekday)) {
-                        departureTimesPerWeekday[weekday].insert(stopTime.departureTime);
+                    int weekdayOfTrip = weekday;
+                    if (decreaseWeekday) {
+                        weekdayOfTrip = (weekday + 6) % 7;
+                    }
+                    if (Importer::isTripAvailable(tripId, weekdayOfTrip)) {
+                        if (departureTime >= 0) {
+                            departureTimesPerWeekday[weekday].insert(departureTime);
+                        } else {
+                            int previousDay = (weekday + 6) % 7;
+                            departureTime = departureTime + SECONDS_PER_DAY;
+                            departureTimesPerWeekday[previousDay].insert(departureTime);
+                        }
                     }
                 }
             }
@@ -278,6 +265,59 @@ vector<set<int>> LandmarkProcessor::getAllDepartureTimesOfStop(int stopId) {
     }
 
     return departureTimesPerWeekday;
+}
+
+vector<set<int>> LandmarkProcessor::getAllArrivalTimesOfStop(int stopId) {
+    vector<set<int>> arrivalTimesPerWeekday = vector<set<int>>(7, set<int>());
+    vector<pair<int, int>> reachableStopIdsAndFootpathDurations = vector<pair<int, int>>(0);
+
+    int indexOfFirstFootpathOfTargetStop = Importer::indexOfFirstFootPathOfAStopBackward[stopId];
+    for (int i = indexOfFirstFootpathOfTargetStop; i < Importer::footPathsBackward.size(); i++) {
+        if (Importer::footPathsBackward[i].arrivalStopId != stopId) {
+            break;
+        }
+        reachableStopIdsAndFootpathDurations.push_back(make_pair(Importer::footPathsBackward[i].departureStopId, Importer::footPathsBackward[i].duration));
+    }
+
+    for (int i = 0; i < reachableStopIdsAndFootpathDurations.size(); i++) {
+        int currentStopId = reachableStopIdsAndFootpathDurations[i].first;
+        int footpathDuration = reachableStopIdsAndFootpathDurations[i].second;
+        vector<RouteSequencePair>* routes = &Importer::routesOfAStop[currentStopId];
+        for (int j = 0; j < routes->size(); j++) {
+            int routeId = (*routes)[j].routeId;
+            int stopSequence = (*routes)[j].stopSequence;
+            vector<int>* trips = &Importer::tripsOfARoute[routeId];
+            for (int k = 0; k < trips->size(); k++) {
+                int tripId = (*trips)[k];
+                StopTime stopTime = Importer::stopTimes[Importer::indexOfFirstStopTimeOfATrip[tripId] + stopSequence];
+                int arrivalTime = stopTime.arrivalTime + footpathDuration;
+
+                bool decreaseWeekday = false;
+                StopTime firstStopTimeOfTrip = Importer::stopTimes[Importer::indexOfFirstStopTimeOfATrip[tripId]];
+                if (firstStopTimeOfTrip.departureTime > stopTime.departureTime) {
+                    decreaseWeekday = true;
+                }
+
+                for (int weekday = 0; weekday < 7; weekday++) {
+                    int weekdayOfTrip = weekday;
+                    if (decreaseWeekday) {
+                        weekdayOfTrip = (weekday + 6) % 7;
+                    }
+                    if (Importer::isTripAvailable(tripId, weekdayOfTrip)) {
+                        if (arrivalTime < SECONDS_PER_DAY) {
+                            arrivalTimesPerWeekday[weekday].insert(arrivalTime);
+                        } else {
+                            int nextDay = (weekday + 1) % 7;
+                            arrivalTime = arrivalTime - SECONDS_PER_DAY;
+                            arrivalTimesPerWeekday[nextDay].insert(arrivalTime);   
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return arrivalTimesPerWeekday;
 }
 
 void LandmarkProcessor::countAllArrivalAndDepartureTimesOfTheLandmarks(DataType dataType) {
@@ -312,6 +352,8 @@ void LandmarkProcessor::countAllArrivalAndDepartureTimesOfTheLandmarks(DataType 
         return;
     }
 
+    int totalArrivalTimes = 0;
+    int totalDepartureTimes = 0;
     for (int i = 0; i < landmarkIds.size(); i++) {
         int landmarkId = landmarkIds[i];
         vector<set<int>> arrivalTimes = getAllArrivalTimesOfStop(landmarkId);
@@ -319,7 +361,9 @@ void LandmarkProcessor::countAllArrivalAndDepartureTimesOfTheLandmarks(DataType 
 
         for (int j = 0; j < 7; j++) {
             arrivalTimesPerWeekday[j] += arrivalTimes[j].size();
+            totalArrivalTimes += arrivalTimes[j].size();
             departureTimesPerWeekday[j] += departureTimes[j].size();
+            totalDepartureTimes += departureTimes[j].size();
         }
     }
 
@@ -327,5 +371,7 @@ void LandmarkProcessor::countAllArrivalAndDepartureTimesOfTheLandmarks(DataType 
         cout << "Arrival times on weekday " << i << ": " << arrivalTimesPerWeekday[i] << endl;
         cout << "Departure times on weekday " << i << ": " << departureTimesPerWeekday[i] << endl;
     }
+    cout << "Total arrival times: " << totalArrivalTimes << endl;
+    cout << "Total departure times: " << totalDepartureTimes << endl;
 }
 
