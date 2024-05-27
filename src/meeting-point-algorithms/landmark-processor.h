@@ -16,6 +16,9 @@ class LandmarkProcessor {
         static int getLowerBound(int stopId1, int stopId2, int weekday);
 
         static vector<set<int>> getAllArrivalTimesOfStop(int stopId);
+        static vector<set<int>> getAllDepartureTimesOfStop(int stopId);
+
+        static void countAllArrivalAndDepartureTimesOfTheLandmarks(DataType dataType);
         
 
     private:

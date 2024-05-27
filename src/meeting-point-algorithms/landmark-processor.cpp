@@ -244,10 +244,88 @@ vector<set<int>> LandmarkProcessor::getAllArrivalTimesOfStop(int stopId) {
         }
     }
 
-    for (int weekday = 0; weekday < 7; weekday++) {
-        cout << "Weekday: " << weekday << ", nof arrival times: " << arrivalTimesPerWeekday[weekday].size() << endl;
+    return arrivalTimesPerWeekday;
+}
+
+vector<set<int>> LandmarkProcessor::getAllDepartureTimesOfStop(int stopId) {
+    vector<set<int>> departureTimesPerWeekday = vector<set<int>>(7, set<int>());
+    vector<int> reachableStopIds = vector<int>(0);
+
+    int indexOfFirstFootpathOfTargetStop = Importer::indexOfFirstFootPathOfAStop[stopId];
+    for (int i = indexOfFirstFootpathOfTargetStop; i < Importer::footPaths.size(); i++) {
+        if (Importer::footPaths[i].departureStopId != stopId) {
+            break;
+        }
+        reachableStopIds.push_back(Importer::footPaths[i].arrivalStopId);
     }
 
-    return arrivalTimesPerWeekday;
+    for (int i = 0; i < reachableStopIds.size(); i++) {
+        vector<RouteSequencePair>* routes = &Importer::routesOfAStop[stopId];
+        for (int j = 0; j < routes->size(); j++) {
+            int routeId = (*routes)[j].routeId;
+            int stopSequence = (*routes)[j].stopSequence;
+            vector<int>* trips = &Importer::tripsOfARoute[routeId];
+            for (int k = 0; k < trips->size(); k++) {
+                int tripId = (*trips)[k];
+                StopTime stopTime = Importer::stopTimes[Importer::indexOfFirstStopTimeOfATrip[tripId] + stopSequence];
+                for (int weekday = 0; weekday < 7; weekday++) {
+                    if (Importer::isTripAvailable(tripId, weekday)) {
+                        departureTimesPerWeekday[weekday].insert(stopTime.departureTime);
+                    }
+                }
+            }
+        }
+    }
+
+    return departureTimesPerWeekday;
+}
+
+void LandmarkProcessor::countAllArrivalAndDepartureTimesOfTheLandmarks(DataType dataType) {
+    vector<int> arrivalTimesPerWeekday = vector<int>(7, 0);
+    vector<int> departureTimesPerWeekday = vector<int>(7, 0);
+
+    // load landmark ids from file
+    vector<int> landmarkIds;
+
+    string dataTypeString = Importer::getDataTypeString(dataType);
+    string folderPathData = FOLDER_PREFIX + "graphs/" + dataTypeString + "/";
+    string filePath = folderPathData + "landmarks.txt";
+
+    ifstream file(filePath);
+
+    if (file.is_open()) {
+        std::string line;
+        while (std::getline(file, line)) {
+            vector<string> parts;
+
+            // Split the line into substrings
+            std::stringstream ss(line);
+            std::string substring;
+            while (std::getline(ss, substring, ',')) {
+                parts.push_back(substring);
+            }
+
+            landmarkIds.push_back(stoi(parts[0]));
+        }
+    } else {
+        cout << "Error: Could not open file " << filePath << endl;
+        return;
+    }
+
+    for (int i = 0; i < landmarkIds.size(); i++) {
+        int landmarkId = landmarkIds[i];
+        vector<set<int>> arrivalTimes = getAllArrivalTimesOfStop(landmarkId);
+        vector<set<int>> departureTimes = getAllDepartureTimesOfStop(landmarkId);
+
+        for (int j = 0; j < 7; j++) {
+            arrivalTimesPerWeekday[j] += arrivalTimes[j].size();
+            departureTimesPerWeekday[j] += departureTimes[j].size();
+        }
+    }
+
+    for (int i = 0; i < 7; i++) {
+        cout << "Arrival times on weekday " << i << ": " << arrivalTimesPerWeekday[i] << endl;
+        cout << "Departure times on weekday " << i << ": " << departureTimesPerWeekday[i] << endl;
+    }
 }
 

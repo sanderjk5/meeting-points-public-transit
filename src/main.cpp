@@ -98,6 +98,8 @@ int main(int argc, const char *argv[]) {
   }
   cout << "Number of edges: " << edgeCount << "\n" << endl;
 
+  LandmarkProcessor::countAllArrivalAndDepartureTimesOfTheLandmarks(dataType);
+
   if (startExperiments){
     ExperimentController::evaluateLowerBounds(2500, 4);
 
