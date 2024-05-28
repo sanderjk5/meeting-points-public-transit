@@ -24,7 +24,7 @@ void LandmarkProcessor::loadOrCalculateLandmarkDurations(DataType dataType, bool
     } else {
         // calculateLandmarkDurations(dataType);
 
-        vector<int> landmarkIds = getLandmarkIds(dataType, 2, 5);
+        vector<int> landmarkIds = getLandmarkIds(dataType, 2, 7);
         calculateExactLandmarkDurationsForStops(landmarkIds);
 
         exportLandmarkDurations(dataType, 2);
