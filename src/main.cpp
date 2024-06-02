@@ -86,7 +86,7 @@ int main(int argc, const char *argv[]) {
 
   Creator::loadOrCreateNetworkGraph(dataType);
   if (USE_LANDMARKS) {
-    LandmarkProcessor::loadOrCalculateLandmarkDurations(dataType, false);
+    LandmarkProcessor::loadOrCalculateLandmarkDurations(dataType, true);
     // LandmarkProcessor::countAllArrivalAndDepartureTimesOfTheLandmarks(dataType);
   }
 
@@ -99,7 +99,7 @@ int main(int argc, const char *argv[]) {
   cout << "Number of edges: " << edgeCount << "\n" << endl;
 
   if (startExperiments){
-    ExperimentController::evaluateLowerBounds(100, 4);
+    ExperimentController::evaluateLowerBounds(2500, 4);
 
     // Real experiments
     // vector<int> numberOfSourceStops = {2, 3, 5, 10, 25};
