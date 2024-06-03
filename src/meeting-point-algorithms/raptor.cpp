@@ -186,7 +186,7 @@ TripInfo Raptor::getEarliestTripWithDayOffset(int routeId, int stopId, int stopS
                 continue;
             }
 
-            if (stopTime.departureTime + dayOffset > earliestDepartureTime) {
+            if (stopTime.departureTime + dayOffset >= earliestDepartureTime) {
                 TripInfo tripInfo = {tripId, dayOffset, stopTime.departureTime + dayOffset};
                 return tripInfo;
             }
@@ -346,7 +346,18 @@ void RaptorBackward::traverseRoutes() {
                         break;
                     }
                     int newDepartureTime = departureTime - Importer::footPathsBackward[k].duration;
-                    if (newDepartureTime > currentLatestDepartureTimes[Importer::footPathsBackward[k].departureStopId]) {
+                    bool pruneTarget = false;
+                    if (query.sourceStopIds.size() > 0) {
+                        pruneTarget = true;
+                        for (int l = 0; l < query.sourceStopIds.size(); l++) {
+                            if (newDepartureTime > currentLatestDepartureTimes[query.sourceStopIds[l]]) {
+                                pruneTarget = false;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (newDepartureTime > currentLatestDepartureTimes[Importer::footPathsBackward[k].departureStopId] && !pruneTarget) {
                         currentLatestDepartureTimes[Importer::footPathsBackward[k].departureStopId] = newDepartureTime;
                         currentMarkedStops[Importer::footPathsBackward[k].departureStopId] = true;
                         isFinishedFlag = false;
@@ -373,7 +384,7 @@ TripInfoBackward RaptorBackward::getLatestTripWithDayOffset(int routeId, int sto
 
     int latestArrivalTime = previousLatestDepartureTimes[stopId];
     int dayOffset = TimeConverter::getDayOffset(latestArrivalTime);
-    int weekday = (query.weekday + 7 - TimeConverter::getDayDifference(latestArrivalTime)) % 7;
+    int weekday = (query.weekday + 7 - (NUMBER_OF_DAYS - TimeConverter::getDayDifference(latestArrivalTime))) % 7;
 
     StopTime stopTime;
 
@@ -398,7 +409,7 @@ TripInfoBackward RaptorBackward::getLatestTripWithDayOffset(int routeId, int sto
             }
             newArrivalTime += dayOffset;
 
-            if (newArrivalTime < latestArrivalTime) {
+            if (newArrivalTime <= latestArrivalTime) {
                 TripInfoBackward tripInfo = {tripId, dayOffset, newArrivalTime};
                 return tripInfo;
             }
@@ -698,7 +709,7 @@ TripInfo RaptorBound::getEarliestTripWithDayOffset(int routeId, int stopId, int 
                 continue;
             }
 
-            if (stopTime.departureTime + dayOffset > earliestDepartureTime) {
+            if (stopTime.departureTime + dayOffset >= earliestDepartureTime) {
                 TripInfo tripInfo = {tripId, dayOffset, stopTime.departureTime + dayOffset};
                 return tripInfo;
             }
@@ -1092,7 +1103,7 @@ TripInfo RaptorPQ::getEarliestTripWithDayOffset(int routeId, int stopId, int sto
                 continue;
             }
 
-            if (stopTime.departureTime + dayOffset > earliestDepartureTime) {
+            if (stopTime.departureTime + dayOffset >= earliestDepartureTime) {
                 TripInfo tripInfo = {tripId, dayOffset, stopTime.departureTime + dayOffset};
                 auto end = chrono::high_resolution_clock::now();
                 durationGetEarliestTripWithDayOffset += chrono::duration_cast<chrono::microseconds>(end - start).count();
@@ -1414,7 +1425,7 @@ TripInfo RaptorPQParallel::getEarliestTripWithDayOffset(int routeId, int stopId,
                 continue;
             }
 
-            if (stopTime.departureTime + dayOffset > earliestDepartureTime) {
+            if (stopTime.departureTime + dayOffset >= earliestDepartureTime) {
                 TripInfo tripInfo = {tripId, dayOffset, stopTime.departureTime + dayOffset};
                 auto end = chrono::high_resolution_clock::now();
                 durationGetEarliestTripWithDayOffset += chrono::duration_cast<chrono::microseconds>(end - start).count();
@@ -1638,7 +1649,7 @@ TripInfo RaptorBoundStar::getEarliestTripWithDayOffset(int routeId, int stopId, 
                 continue;
             }
 
-            if (stopTime.departureTime + dayOffset > earliestDepartureTime) {
+            if (stopTime.departureTime + dayOffset >= earliestDepartureTime) {
                 TripInfo tripInfo = {tripId, dayOffset, stopTime.departureTime + dayOffset};
                 return tripInfo;
             }
@@ -1916,7 +1927,7 @@ TripInfo RaptorPQStar::getEarliestTripWithDayOffset(int routeId, int stopId, int
                 continue;
             }
 
-            if (stopTime.departureTime + dayOffset > earliestDepartureTime) {
+            if (stopTime.departureTime + dayOffset >= earliestDepartureTime) {
                 TripInfo tripInfo = {tripId, dayOffset, stopTime.departureTime + dayOffset};
                 auto end = chrono::high_resolution_clock::now();
                 return tripInfo;

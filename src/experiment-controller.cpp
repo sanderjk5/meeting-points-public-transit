@@ -111,6 +111,10 @@ void ExperimentController::compareRaptorPQAlgorithms(DataType dataType, int numb
     RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(dataType, numberOfSuccessfulQueries, numberOfSourceStops, true);
 }
 
+void ExperimentController::compareRaptorApproxAlgorithms(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSourceStops) {
+    RaptorApproximationAlgorithmTester::compareRaptorApproximationAlgorithms(dataType, numberOfSuccessfulQueries, numberOfSourceStops, true);
+}
+
 void ExperimentController::compareRaptorEATAlgorithms(DataType dataType, int numberOfSuccessfulQueries) {
     RaptorEATAlgorithmTester::compareRaptorEATAlgorithms(dataType, numberOfSuccessfulQueries, true);
 }
