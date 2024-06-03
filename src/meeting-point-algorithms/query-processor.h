@@ -25,12 +25,14 @@ struct MeetingPointQueryResult {
     string meetingTimeMinSum;
     string minSumDuration;
     int minSumDurationInSeconds;
+    int minSumMeetingTimeInSeconds;
     int maxTransfersMinSum;
     int meetingPointMinMaxStopId;
     string meetingPointMinMax;
     string meetingTimeMinMax;
     string minMaxDuration;
     int minMaxDurationInSeconds;
+    int minMaxMeetingTimeInSeconds;
     int maxTransfersMinMax;
     double queryTime;
 };
@@ -39,6 +41,12 @@ struct MeetingPointQueryGTreeCSAInfo {
     double csaTargetStopFractionMinSum;
     double csaTargetStopFractionMinMax;
     double csaVisitedConnectionsFraction;
+};
+
+struct CandidateInfo {
+    int stopId;
+    int duration;
+    int meetingTime;
 };
 
 /*
@@ -150,6 +158,7 @@ class RaptorBoundQueryProcessor {
         ~RaptorBoundQueryProcessor(){};
 
         void processRaptorBoundQuery(Optimization optimization);
+        vector<CandidateInfo> getStopsAndResultsWithSmallerRelativeDifference(double relativeDifference, Optimization optimization);
         MeetingPointQueryResult getMeetingPointQueryResult();
         vector<Journey> getJourneys(Optimization optimization);
 
@@ -243,6 +252,48 @@ class RaptorPQParallelQueryProcessor {
         MeetingPointQuery meetingPointQuery;
         MeetingPointQueryResult meetingPointQueryResult;
         shared_ptr<RaptorPQParallel> raptorPQParallel;
+};
+
+class RaptorApproximationQueryProcessor {
+    public:
+        explicit RaptorApproximationQueryProcessor(MeetingPointQuery meetingPointQuery){
+            this->meetingPointQuery = meetingPointQuery;
+        };
+        ~RaptorApproximationQueryProcessor(){};
+
+        void processRaptorApproximationQuery(Optimization optimization, bool multipleCandidates = false, bool useResultVerification = true, bool calculateExactResult = false);
+        void processRaptorApproximationLoopQuery(int maxNumberOfSources);
+        MeetingPointQueryResult getMeetingPointQueryResult();
+
+        double durationExactSources;
+        double durationExactCalculation;
+        double durationCandidates;
+
+        bool wrongResult;
+        int numberOfRounds;
+        int numberOfQueries;
+
+    private:
+        MeetingPointQuery meetingPointQuery;
+        MeetingPointQueryResult meetingPointQueryResult;
+        shared_ptr<RaptorBoundQueryProcessor> raptorBoundQueryProcessor;
+        vector<shared_ptr<RaptorBound>> raptorBounds;
+        vector<shared_ptr<Raptor>> raptors;
+        vector<shared_ptr<RaptorPQStar>> raptorPQStars;
+
+        map<int, vector<int>> sourceStopIdToAllStops;
+
+        Optimization optimization;
+        vector<int> exactSources;
+
+        vector<pair<int, int>> sourceStopsWithErrorAndDuration;
+
+        
+
+        void calculateExactSources(int numberOfExactSourceStops);
+        void calculateResultWithCandidates(bool useResultVerification);
+        void calculateResultWithOneCandidate();
+        bool verifyResult(int targetStopId, int meetingTime);
 };
 
 /*

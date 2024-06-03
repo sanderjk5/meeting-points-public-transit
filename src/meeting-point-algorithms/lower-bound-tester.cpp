@@ -25,7 +25,7 @@ void LowerBoundTester::getLowerBoundDiffs(int numberOfSources, int numberOfTarge
     vector<int> sources = vector<int>();
 
     for (int i = 0; i < numberOfSources; i++) {
-        sources.push_back(rand() % Creator::networkGraph.vertices.size());
+        sources.push_back(Importer::connections[rand() % Importer::connections.size()].departureStopId);
     }
 
     map<int, vector<int>> sourceStopIdToAllStops = Creator::networkGraph.getDistancesWithPhast(sources);
@@ -40,7 +40,7 @@ void LowerBoundTester::getLowerBoundDiffs(int numberOfSources, int numberOfTarge
         CSAQuery csaQuery;
         csaQuery.sourceStopId = sources[i];
         csaQuery.targetStopIds = targets;
-        csaQuery.sourceTime = rand() % SECONDS_PER_DAY;
+        csaQuery.sourceTime = (rand() % 36000) + 21600;
         csaQuery.weekday = rand() % 7;
 
         unique_ptr<CSA> csa = unique_ptr<CSA>(new CSA(csaQuery));

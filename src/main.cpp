@@ -35,6 +35,7 @@ int main(int argc, const char *argv[]) {
   // DataType dataType = gesamt_de;
 
   bool startExperiments = false;
+  bool runEatCli = false;
 
   if (argc > 1){
     if (strcmp(argv[1], "vvs") == 0){
@@ -57,6 +58,8 @@ int main(int argc, const char *argv[]) {
   if (argc > 2){
     if (strcmp(argv[2], "exp") == 0){
       startExperiments = true;
+    } else if (strcmp(argv[2], "eat") == 0){
+      runEatCli = true;
     }
   }
 
@@ -83,8 +86,8 @@ int main(int argc, const char *argv[]) {
 
   Creator::loadOrCreateNetworkGraph(dataType);
   if (USE_LANDMARKS) {
-    LandmarkProcessor::loadOrCalculateLandmarkDurations(dataType);
-    // LandmarkProcessor::getAllArrivalTimesOfStop(133225);
+    LandmarkProcessor::loadOrCalculateLandmarkDurations(dataType, true);
+    // LandmarkProcessor::countAllArrivalAndDepartureTimesOfTheLandmarks(dataType);
   }
 
   // print number of vertices and edges
@@ -96,7 +99,11 @@ int main(int argc, const char *argv[]) {
   cout << "Number of edges: " << edgeCount << "\n" << endl;
 
   if (startExperiments){
+<<<<<<< HEAD
     // ExperimentController::evaluateLowerBounds(200, 20);
+=======
+    // ExperimentController::evaluateLowerBounds(2500, 4);
+>>>>>>> 248375bc4092d18de229d46fc64fdc24e1a18289
 
     // Real experiments
     // vector<int> numberOfSourceStops = {2, 3, 5, 10, 25};
@@ -107,15 +114,20 @@ int main(int argc, const char *argv[]) {
     // ExperimentController::testAndCompareAlgorithmsRandom(dataType, 1000, numberOfSourceStops);
 
     // Test experiments
-    vector<int> numberOfSourceStops = {2, 3, 5, 7, 10, 50};
-    // vector<int> numberOfSourceStops = {7, 10};
-    // vector<int> numberOfSourceStops = {5};
+    vector<int> numberOfSourceStops = {2, 3, 5};
+    // vector<int> numberOfSourceStops = {7, 9, 10};
+    // vector<int> numberOfSourceStops = {2, 5, 10};
+    // vector<int> numberOfSourceStops = {25, 50, 75};
 
     // ExperimentController::compareRaptorAlgorithms(dataType, 100, numberOfSourceStops);
 
-    ExperimentController::compareRaptorPQAlgorithms(dataType, 50, numberOfSourceStops);
+    ExperimentController::compareRaptorPQAlgorithms(dataType, 1000, numberOfSourceStops);
 
-    // ExperimentController::compareRaptorEATAlgorithms(dataType, 1000);
+    // numberOfSourceStops = {25, 50, 75};
+
+    // ExperimentController::compareRaptorApproxAlgorithms(dataType, 50, numberOfSourceStops);
+
+    //ExperimentController::compareRaptorEATAlgorithms(dataType, 2500);
 
     // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 2000, 100, 0.95);
 
@@ -141,8 +153,12 @@ int main(int argc, const char *argv[]) {
 
     // GTree* networkGTreePointer = GTreeController::createOrLoadNetworkGTree(dataType, numberOfChildrenPerNode, maxNumberOfVerticesPerLeaf);
 
-    CliController::runCli(dataType, nullptr);
-    // CliController::runCliRaptor(dataType);
+    if (!runEatCli) {
+      CliController::runCli(dataType, nullptr);
+    } else {
+      CliController::runCliEat(dataType);
+    }
+    
   }
   
   return 0;

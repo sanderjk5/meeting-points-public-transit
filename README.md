@@ -20,15 +20,16 @@ cd ..
 ```
 3. Start the program:
 ```bash
-bin/meeting-points-public-transit dataType experiment
+bin/meeting-points-public-transit dataType mode
 ```
 The program can be started with two additional arguments dataType and experiment:
 1. The dataType argument specifies which public transit network should be used and can take the following values:
 
-  * vvs: The whole public transit network of Stuttgart (default value).
-  * fern: The long-distance public transit network of germany.
-  * regio: The regional public transit network of germany without busses and underground trains.
-  * fern_regio: The combination of regional and long-distance public transit network of germany.
-  * de: The whole public transit network of germany.
+* vvs: The whole public transit network of Stuttgart (default value).
+* de: The whole public transit network of germany.
 
-2. The experiment argument is a flag that determines if the program should run the experiments or answer queries. It has a single value: exp. If this value is given the flag is set, otherwise it isn't.
+2. The mode argument specifies what is executed. It can take the following values:
+
+* \<none\>: The meeting point cli is executed. The user can question meeting point queries.
+* eat: The earliest arrival time cli is executed. The user can question earliest arrival time queries.
+* exp: The experiments are executed.
