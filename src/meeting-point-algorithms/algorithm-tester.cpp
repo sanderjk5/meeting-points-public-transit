@@ -886,6 +886,11 @@ void RaptorPQAlgorithmTester::compareRaptorPQAlgorithms(DataType dataType, int n
     resultsFile << ",maxAbsDiffMinSumRaptorFirst,maxAbsDiffMinMaxRaptorFirst";
     resultsFile << ",minAbsDiffMinSumRaptorFirst,minAbsDiffMinMaxRaptorFirst";
 
+    resultsFile << ",avgRelDiffMinSumRaptorFirst,avgRelDiffMinMaxRaptorFirst";
+    resultsFile << ",medianRelDiffMinSumRaptorFirst,medianRelDiffMinMaxRaptorFirst";
+    resultsFile << ",maxRelDiffMinSumRaptorFirst,maxRelDiffMinMaxRaptorFirst";
+    resultsFile << ",minRelDiffMinSumRaptorFirst,minRelDiffMinMaxRaptorFirst";
+
     resultsFile << ",avgLowerBoundSmallerCounterRaptorPQMinSum,avgLowerBoundGreaterCounterRaptorPQMinSum,avgLowerBoundSmallerFractionRaptorPQMinSum";
     resultsFile << ",avgLowerBoundAbsDiffRaptorPQMinSum,avgLowerBoundRelDiffRaptorPQMinSum";
     resultsFile << ",avgLowerBoundSmallerCounterRaptorPQMinMax,avgLowerBoundGreaterCounterRaptorPQMinMax,avgLowerBoundSmallerFractionRaptorPQMinMax";
