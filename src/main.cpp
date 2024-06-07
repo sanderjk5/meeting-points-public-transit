@@ -119,7 +119,7 @@ int main(int argc, const char *argv[]) {
 
     // ExperimentController::compareRaptorPQAlgorithms(dataType, 1000, numberOfSourceStops);
 
-    numberOfSourceStops = {75};
+    numberOfSourceStops = {100};
 
     ExperimentController::compareRaptorApproxAlgorithms(dataType, 500, numberOfSourceStops);
 
