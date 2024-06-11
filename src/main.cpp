@@ -121,9 +121,9 @@ int main(int argc, const char *argv[]) {
 
     numberOfSourceStops = {150};
 
-    ExperimentController::compareRaptorApproxAlgorithms(dataType, 500, numberOfSourceStops);
+    // ExperimentController::compareRaptorApproxAlgorithms(dataType, 500, numberOfSourceStops);
 
-    //ExperimentController::compareRaptorEATAlgorithms(dataType, 2500);
+    ExperimentController::compareRaptorEATAlgorithms(dataType, 2500);
 
     // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 2000, 100, 0.95);
 
