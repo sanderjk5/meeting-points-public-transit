@@ -2044,7 +2044,7 @@ bool RaptorApproximationQueryProcessor::verifyResult(int targetStopId, int meeti
     RaptorBackwardQuery raptorBackwardQuery;
     raptorBackwardQuery.targetStopId = targetStopId;
     raptorBackwardQuery.sourceTime = meetingTime - TimeConverter::getDayOffset(meetingTime);
-    raptorBackwardQuery.weekday = meetingPointQuery.weekday + TimeConverter::getDayDifference(raptorBackwardQuery.sourceTime);
+    raptorBackwardQuery.weekday = (meetingPointQuery.weekday + TimeConverter::getDayDifference(raptorBackwardQuery.sourceTime)) % 7;
     raptorBackwardQuery.sourceStopIds = meetingPointQuery.sourceStopIds;
 
     RaptorBackward raptorBackward = RaptorBackward(raptorBackwardQuery);

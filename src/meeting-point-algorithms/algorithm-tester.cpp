@@ -2294,6 +2294,161 @@ void RaptorApproximationAlgorithmTester::compareRaptorApproximationAlgorithms(Da
     }
 }
 
+void RaptorApproximationAlgorithmTester::testRaptorApproximationAlgorithmForLargeNofSources(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSources, bool loadOrStoreQueries) {
+    string dataTypeString = Importer::getDataTypeString(dataType);
+    string folderPathResults = FOLDER_PREFIX + "tests/" + dataTypeString + "/results/";
+    string folderPathQueries = FOLDER_PREFIX + "tests/" + dataTypeString + "/queries/";
+
+    // get the current timestamp
+    time_t now = time(0);
+    tm *ltm = localtime(&now);
+    string timestamp = to_string(1900 + ltm->tm_year) + "-" + to_string(1 + ltm->tm_mon) + "-" + to_string(ltm->tm_mday) + "-" + to_string(ltm->tm_hour) + "-" + to_string(ltm->tm_min) + "-" + to_string(ltm->tm_sec);
+
+    string resultsFileName = folderPathResults + "raptor-approximation-results-large-nof-sources-" + timestamp + ".csv";
+
+    std::ofstream resultsFile (resultsFileName, std::ofstream::out);
+    resultsFile << "numberOfSourceStops";
+    resultsFile << ",avgQueryTimeRaptorApproxMinMaxLoop,medianQueryTimeRaptorApproxMinMaxLoop,maxQueryTimeRaptorApproxMinMaxLoop,minQueryTimeRaptorApproxMinMaxLoop";
+    resultsFile << ",accuracyRaptorApproxMinMaxLoop";
+    resultsFile << ",avgNumberOfRoundsRaptorApproxMinMaxLoop,medianNumberOfRoundsRaptorApproxMinMaxLoop";
+    resultsFile << ",avgNumberOfQueriesRaptorApproxMinMaxLoop,medianNumberOfQueriesRaptorApproxMinMaxLoop";
+
+    resultsFile << "\n";
+
+    for (int i = 0; i < numberOfSources.size(); i++) {
+        int numberOfSourceStops = numberOfSources[i];
+
+        cout << "\nProcess queries for " << numberOfSourceStops << " source stops..." << endl;
+
+        string numberOfSourceStopsString = "";
+        if (numberOfSourceStops < 10) {
+            numberOfSourceStopsString = "00" + to_string(numberOfSourceStops);
+        } else if (numberOfSourceStops < 100) {
+            numberOfSourceStopsString = "0" + to_string(numberOfSourceStops);
+        } else {
+            numberOfSourceStopsString = to_string(numberOfSourceStops);
+        }
+
+        std::ofstream queriesInfoFile;
+        vector<MeetingPointQuery> meetingPointQueries;
+        if (loadOrStoreQueries) {
+            string filePath = folderPathQueries + "meeting-point-query-" + numberOfSourceStopsString + "-" + to_string(numberOfSuccessfulQueries) + ".csv";
+            std::ifstream file(filePath);
+            if (file.is_open()) {
+                std::string line;
+                while (std::getline(file, line)) {
+                    meetingPointQueries.push_back(QueryGenerator::parseMeetingPointQuery(line, numberOfSourceStops));
+                }
+            } else {
+                queriesInfoFile.open(filePath, std::ofstream::out);
+            }
+        }
+
+        int queryCounter = 0;
+        int successfulQueryCounter = 0;
+
+        vector<double> queryTimesRaptorApproxMinMaxLoop;
+
+        int raptorApproxMinMaxLoopCorrectCounter = 0;
+
+        vector<double> numberOfRoundsRaptorApproxMinMaxLoop;
+        vector<double> numberOfQueriesRaptorApproxMinMaxLoop;
+
+        while(successfulQueryCounter < numberOfSuccessfulQueries) {
+            try {
+                queryCounter++;
+
+                MeetingPointQuery meetingPointQuery;
+
+                if (loadOrStoreQueries && meetingPointQueries.size() > 0) {
+                    meetingPointQuery = meetingPointQueries[successfulQueryCounter];
+                } else {
+                    meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSourceStops);
+                }
+
+                int maxNumberOfRoundsRaptorApproxLoopMinMax = 30;
+                unique_ptr<RaptorApproximationQueryProcessor> raptorApproximationQueryProcessorApproxLoopMinMax = unique_ptr<RaptorApproximationQueryProcessor> (new RaptorApproximationQueryProcessor(meetingPointQuery));
+                raptorApproximationQueryProcessorApproxLoopMinMax->processRaptorApproximationLoopQuery(maxNumberOfRoundsRaptorApproxLoopMinMax);
+                MeetingPointQueryResult meetingPointQueryResultRaptorApproxLoopMinMax = raptorApproximationQueryProcessorApproxLoopMinMax->getMeetingPointQueryResult();
+
+                if (meetingPointQueryResultRaptorApproxLoopMinMax.meetingPointMinMax == "") {
+                    continue;
+                }
+
+                successfulQueryCounter++;
+
+                queryTimesRaptorApproxMinMaxLoop.push_back(meetingPointQueryResultRaptorApproxLoopMinMax.queryTime);
+                if (!raptorApproximationQueryProcessorApproxLoopMinMax->wrongResult) {
+                    raptorApproxMinMaxLoopCorrectCounter++;
+                    numberOfRoundsRaptorApproxMinMaxLoop.push_back((double) raptorApproximationQueryProcessorApproxLoopMinMax->numberOfRounds);
+                    numberOfQueriesRaptorApproxMinMaxLoop.push_back((double) raptorApproximationQueryProcessorApproxLoopMinMax->numberOfQueries);
+                }
+
+                string sourceStopNames = "";
+                for (int j = 0; j < meetingPointQuery.sourceStopIds.size()-1; j++) {
+                    sourceStopNames += Importer::getStopName(meetingPointQuery.sourceStopIds[j]) + "-";
+                }
+                sourceStopNames += Importer::getStopName(meetingPointQuery.sourceStopIds[meetingPointQuery.sourceStopIds.size()-1]);
+
+                if (loadOrStoreQueries && meetingPointQueries.size() == 0) {
+                    for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
+                        queriesInfoFile << meetingPointQuery.sourceStopIds[i] << ",";
+                    }
+                    queriesInfoFile << meetingPointQuery.sourceTime << "," << meetingPointQuery.weekday << "\n";
+                }
+
+                // Print progress every 20% of the queries
+                if (successfulQueryCounter % (numberOfSuccessfulQueries / 5) == 0) {
+                    cout << "Progress: " << successfulQueryCounter << " / " << numberOfSuccessfulQueries << endl;
+                } 
+            } catch (...) {
+                cout << "Exception caught" << endl;
+                continue;
+            }
+        }
+
+        if (loadOrStoreQueries && meetingPointQueries.size() == 0) {
+            queriesInfoFile.close();
+        }
+
+        double avgQueryTimeRaptorApproxMinMaxLoop = Calculator::getAverage(queryTimesRaptorApproxMinMaxLoop);
+        double medianQueryTimeRaptorApproxMinMaxLoop = Calculator::getMedian(queryTimesRaptorApproxMinMaxLoop);
+        double maxQueryTimeRaptorApproxMinMaxLoop = Calculator::getMaximum(queryTimesRaptorApproxMinMaxLoop);
+        double minQueryTimeRaptorApproxMinMaxLoop = Calculator::getMinimum(queryTimesRaptorApproxMinMaxLoop);
+
+        double accuracyRaptorApproxMinMaxLoop = (double) raptorApproxMinMaxLoopCorrectCounter / (double) numberOfSuccessfulQueries;
+
+        double avgNumberOfRoundsRaptorApproxMinMaxLoop = Calculator::getAverage(numberOfRoundsRaptorApproxMinMaxLoop);
+        double medianNumberOfRoundsRaptorApproxMinMaxLoop = Calculator::getMedian(numberOfRoundsRaptorApproxMinMaxLoop);
+
+        double avgNumberOfQueriesRaptorApproxMinMaxLoop = Calculator::getAverage(numberOfQueriesRaptorApproxMinMaxLoop);
+        double medianNumberOfQueriesRaptorApproxMinMaxLoop = Calculator::getMedian(numberOfQueriesRaptorApproxMinMaxLoop);
+
+        resultsFile << numberOfSourceStops << "," << avgQueryTimeRaptorApproxMinMaxLoop << "," << medianQueryTimeRaptorApproxMinMaxLoop << "," << maxQueryTimeRaptorApproxMinMaxLoop << "," << minQueryTimeRaptorApproxMinMaxLoop;
+        resultsFile << "," << accuracyRaptorApproxMinMaxLoop;
+        resultsFile << "," << avgNumberOfRoundsRaptorApproxMinMaxLoop << "," << medianNumberOfRoundsRaptorApproxMinMaxLoop;
+        resultsFile << "," << avgNumberOfQueriesRaptorApproxMinMaxLoop << "," << medianNumberOfQueriesRaptorApproxMinMaxLoop;
+
+        resultsFile << "\n";
+
+        cout << "\nResults for " << numberOfSourceStops << " source stops:" << endl;
+        cout << "\nAverage query time raptor approx min max loop (in ms): " << avgQueryTimeRaptorApproxMinMaxLoop << endl;
+        cout << "Median query time raptor approx min max loop (in ms): " << medianQueryTimeRaptorApproxMinMaxLoop << endl;
+        cout << "Maximum query time raptor approx min max loop (in ms): " << maxQueryTimeRaptorApproxMinMaxLoop << endl;
+        cout << "Minimum query time raptor approx min max loop (in ms): " << minQueryTimeRaptorApproxMinMaxLoop << endl;
+
+        cout << "\nAccuracy raptor approx min max loop: " << accuracyRaptorApproxMinMaxLoop << endl;
+
+        cout << "\nAverage number of rounds raptor approx min max loop: " << avgNumberOfRoundsRaptorApproxMinMaxLoop << endl;
+        cout << "Median number of rounds raptor approx min max loop: " << medianNumberOfRoundsRaptorApproxMinMaxLoop << endl;
+
+        cout << "\nAverage number of queries raptor approx min max loop: " << avgNumberOfQueriesRaptorApproxMinMaxLoop << endl;
+        cout << "Median number of queries raptor approx min max loop: " << medianNumberOfQueriesRaptorApproxMinMaxLoop << endl;
+
+        cout << "\n\n";
+    }
+}
+
 /*
     Execute all algorithms for a given number of successful random queries and print the results. Compare the query times and the accuracies of the results.
     Store the queries and results in csv files.

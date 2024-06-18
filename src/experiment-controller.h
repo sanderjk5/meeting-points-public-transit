@@ -13,6 +13,7 @@ class ExperimentController {
         static void compareRaptorAlgorithms(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSourceStops);
         static void compareRaptorPQAlgorithms(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSourceStops);
         static void compareRaptorApproxAlgorithms(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSourceStops);
+        static void testRaptorApproxAlgorithmForLargeNofSources(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSourceStops);
         static void compareRaptorEATAlgorithms(DataType dataType, int numberOfSuccessfulQueries);
         static void evaluateLowerBounds(int numberOfSources, int numberOfTargetsPerSource);
 };

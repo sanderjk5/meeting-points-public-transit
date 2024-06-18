@@ -115,6 +115,10 @@ void ExperimentController::compareRaptorApproxAlgorithms(DataType dataType, int 
     RaptorApproximationAlgorithmTester::compareRaptorApproximationAlgorithms(dataType, numberOfSuccessfulQueries, numberOfSourceStops, true);
 }
 
+void ExperimentController::testRaptorApproxAlgorithmForLargeNofSources(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSourceStops) {
+    RaptorApproximationAlgorithmTester::testRaptorApproximationAlgorithmForLargeNofSources(dataType, numberOfSuccessfulQueries, numberOfSourceStops, true);
+}
+
 void ExperimentController::compareRaptorEATAlgorithms(DataType dataType, int numberOfSuccessfulQueries) {
     RaptorEATAlgorithmTester::compareRaptorEATAlgorithms(dataType, numberOfSuccessfulQueries, true);
 }

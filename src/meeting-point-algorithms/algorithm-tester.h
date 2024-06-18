@@ -79,6 +79,7 @@ class RaptorApproximationAlgorithmTester {
 
         static void testRaptorApproximationAlgorithm(MeetingPointQuery meetingPointQuery, bool useCandidates);
         static void compareRaptorApproximationAlgorithms(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSources, bool loadOrStoreQueries);
+        static void testRaptorApproximationAlgorithmForLargeNofSources(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSources, bool loadOrStoreQueries);
 };
 
 class AlgorithmComparer {
