@@ -297,6 +297,9 @@ void RaptorAlgorithmTester::testRaptorNaiveAlgorithmRandom(int numberOfSuccessfu
         int multipleResultCounterMinSum = 0;
         int multipleResultCounterMinMax = 0;
 
+        int maxMultipleResultMinSum = 0;
+        int maxMultipleResultMinMax = 0;
+
         for (int i = 0; i < numberOfSuccessfulQueries; i++) {
             MeetingPointQuery meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(currentNumberOfSources);
             
@@ -312,8 +315,16 @@ void RaptorAlgorithmTester::testRaptorNaiveAlgorithmRandom(int numberOfSuccessfu
                 multipleResultCounterMinSum++;
             }
 
+            if (raptorQueryProcessorOptimal->multipleResultMinSum > maxMultipleResultMinSum){
+                maxMultipleResultMinSum = raptorQueryProcessorOptimal->multipleResultMinSum;
+            }
+
             if (raptorQueryProcessorOptimal->multipleResultMinMax > 1){
                 multipleResultCounterMinMax++;
+            }
+
+            if (raptorQueryProcessorOptimal->multipleResultMinMax > maxMultipleResultMinMax){
+                maxMultipleResultMinMax = raptorQueryProcessorOptimal->multipleResultMinMax;
             }
         }
 
@@ -322,6 +333,8 @@ void RaptorAlgorithmTester::testRaptorNaiveAlgorithmRandom(int numberOfSuccessfu
 
         cout << "Rate of multiple results min sum: " << rateOfMultipleResultMinSum << endl;
         cout << "Rate of multiple results min max: " << rateOfMultipleResultMinMax << endl;
+        cout << "Max multiple results min sum: " << maxMultipleResultMinSum << endl;
+        cout << "Max multiple results min max: " << maxMultipleResultMinMax << endl;
     }
 }
 
