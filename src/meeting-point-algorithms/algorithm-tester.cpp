@@ -287,6 +287,44 @@ void RaptorAlgorithmTester::testRaptorAlgorithmRandom(int numberOfSuccessfulQuer
     cout << "Rate of successful queries: " << rateOfSuccessfulQueries << endl;
 }
 
+void RaptorAlgorithmTester::testRaptorNaiveAlgorithmRandom(int numberOfSuccessfulQueries, vector<int> numberOfSources) {
+    for (int j = 0; j < numberOfSources.size(); j++) {
+        int currentNumberOfSources = numberOfSources[j];
+
+        cout << "Process queries for " << currentNumberOfSources << " source stops." << endl;
+
+        int successfulQueryCounter = 0;
+        int multipleResultCounterMinSum = 0;
+        int multipleResultCounterMinMax = 0;
+
+        for (int i = 0; i < numberOfSuccessfulQueries; i++) {
+            MeetingPointQuery meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(currentNumberOfSources);
+            
+            unique_ptr<RaptorQueryProcessor> raptorQueryProcessorOptimal = unique_ptr<RaptorQueryProcessor> (new RaptorQueryProcessor(meetingPointQuery));
+            raptorQueryProcessorOptimal->processRaptorQuery();
+            MeetingPointQueryResult meetingPointQueryResultRaptorOptimal = raptorQueryProcessorOptimal->getMeetingPointQueryResult();
+
+            if (meetingPointQueryResultRaptorOptimal.meetingPointMinSum != "" && meetingPointQueryResultRaptorOptimal.meetingPointMinMax != "") {
+                successfulQueryCounter++;
+            }
+
+            if (raptorQueryProcessorOptimal->multipleResultMinSum > 1){
+                multipleResultCounterMinSum++;
+            }
+
+            if (raptorQueryProcessorOptimal->multipleResultMinMax > 1){
+                multipleResultCounterMinMax++;
+            }
+        }
+
+        double rateOfMultipleResultMinSum = (double) multipleResultCounterMinSum / numberOfSuccessfulQueries;
+        double rateOfMultipleResultMinMax = (double) multipleResultCounterMinMax / numberOfSuccessfulQueries;
+
+        cout << "Rate of multiple results min sum: " << rateOfMultipleResultMinSum << endl;
+        cout << "Rate of multiple results min max: " << rateOfMultipleResultMinMax << endl;
+    }
+}
+
 void RaptorAlgorithmTester::testRaptorAlgorithm(MeetingPointQuery meetingPointQuery, bool printJourneys) {
     PrintHelper::printMeetingPointQuery(meetingPointQuery);
 

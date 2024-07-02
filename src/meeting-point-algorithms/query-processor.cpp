@@ -1015,10 +1015,12 @@ bool RaptorQueryProcessor::processRaptorRound() {
     int meetingPointMinSum = -1;
     int minDurationMinSum = INT_MAX;
     int meetingTimeMinSum = INT_MAX;
+    multipleResultMinSum = 0;
 
     int meetingPointMinMax = -1;
     int minDurationMinMax = INT_MAX;
     int meetingTimeMinMax = INT_MAX;
+    multipleResultMinMax = 0;
 
     for (int i = 0; i < Importer::stops.size(); i++) {
         int durationMinSum = 0;
@@ -1042,11 +1044,19 @@ bool RaptorQueryProcessor::processRaptorRound() {
             meetingPointMinSum = i;
             minDurationMinSum = durationMinSum;
             meetingTimeMinSum = meetingTime;
+            multipleResultMinSum = 0;
+        }
+        if (durationMinSum == minDurationMinSum) {
+            multipleResultMinSum += 1;
         }
         if (durationMinMax < minDurationMinMax) {
             meetingPointMinMax = i;
             minDurationMinMax = durationMinMax;
             meetingTimeMinMax = meetingTime;
+            multipleResultMinMax = 0;
+        }
+        if (durationMinMax == minDurationMinMax) {
+            multipleResultMinMax += 1;
         }
     }
 
