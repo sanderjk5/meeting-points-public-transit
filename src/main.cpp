@@ -99,7 +99,7 @@ int main(int argc, const char *argv[]) {
   cout << "Number of edges: " << edgeCount << "\n" << endl;
 
   if (startExperiments){
-    // ExperimentController::evaluateLowerBounds(2500, 4);
+    ExperimentController::evaluateLowerBounds(20, 4);
 
     // Real experiments
     // vector<int> numberOfSourceStops = {2, 3, 5, 10, 25};
@@ -115,9 +115,11 @@ int main(int argc, const char *argv[]) {
     vector<int> numberOfSourceStops = {2, 5, 10};
     // vector<int> numberOfSourceStops = {25, 50, 75};
 
-    ExperimentController::testRaptorNaiveAlgorithmMultipleResult(500, numberOfSourceStops);
+    // ExperimentController::testRaptorNaiveAlgorithmMultipleResult(500, numberOfSourceStops);
 
     // ExperimentController::compareRaptorAlgorithms(dataType, 100, numberOfSourceStops);
+
+    ExperimentController::compareRaptorPQAlgorithms(dataType, 10, numberOfSourceStops);
 
     // ExperimentController::compareRaptorPQAlgorithms(dataType, 1000, numberOfSourceStops);
 
@@ -130,6 +132,8 @@ int main(int argc, const char *argv[]) {
     // ExperimentController::testRaptorApproxAlgorithmForLargeNofSources(dataType, 1000, numberOfSourceStops);
 
     // ExperimentController::compareRaptorEATAlgorithms(dataType, 2500);
+
+    ExperimentController::compareRaptorEATAlgorithms(dataType, 25);
 
     // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 2000, 100, 0.95);
 
