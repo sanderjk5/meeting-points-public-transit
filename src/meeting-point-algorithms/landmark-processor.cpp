@@ -528,18 +528,17 @@ void LandmarkProcessor::findAndCalculateLandmarks(DataType dataType, int numberO
     minimalDurations = distances;
 
     for (int i = 0; i < minimalDurations.size(); i++) {
-        if (minimalDurations[i] > maxDistance) {
+        if (minimalDurations[i] > maxDistance && minimalDurations[j] != INT_MAX) {
             maxDistance = minimalDurations[i];
             maxDistanceStopId = i;
         }
     }
 
-    for (int i = 0; i < numberOfLandmarks; i++) {
-        int nextLandmarkId = maxDistanceStopId;
-        landmarkIds.push_back(nextLandmarkId);
+    landmarkIds.push_back(maxDistanceStopId);
 
+    for (int i = 0; i < numberOfLandmarks; i++) {
         // get the shortest distance from the new landmark to all other stops
-        landmarkDurations[i] = Creator::networkGraph.getDistancesWithPhast({nextLandmarkId})[nextLandmarkId];
+        landmarkDurations[i] = Creator::networkGraph.getDistancesWithPhast({landmarkIds[i]})[landmarkIds[i]];
 
         maxDistanceStopId = -1;
         maxDistance = 0;
@@ -554,6 +553,8 @@ void LandmarkProcessor::findAndCalculateLandmarks(DataType dataType, int numberO
                 maxDistanceStopId = j;
             }
         }
+
+        landmarkIds.push_back(maxDistanceStopId);
     }
 
     // save the landmark ids to a file
