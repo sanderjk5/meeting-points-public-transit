@@ -543,9 +543,9 @@ void LandmarkProcessor::findAndCalculateLandmarks(DataType dataType, int numberO
         maxDistanceStopId = -1;
         maxDistance = 0;
 
-        for (int j = 0; j < distances.size(); j++) {
-            if (distances[j] < minimalDurations[j]) {
-                minimalDurations[j] = distances[j];
+        for (int j = 0; j < landmarkDurations[i].size(); j++) {
+            if (landmarkDurations[i] < minimalDurations[j]) {
+                minimalDurations[j] = landmarkDurations[i];
             }
 
             if (minimalDurations[j] > maxDistance && minimalDurations[j] != INT_MAX) {
