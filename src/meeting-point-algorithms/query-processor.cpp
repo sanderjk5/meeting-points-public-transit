@@ -1164,18 +1164,19 @@ void RaptorBoundQueryProcessor::processRaptorBoundQuery(Optimization optimizatio
 
     if (meetingPointQuery.sourceStopIds.size() > 2) {
         for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
-        int stopId1 = meetingPointQuery.sourceStopIds[i];
-        for (int j = i+1; j < meetingPointQuery.sourceStopIds.size(); j++) {
-            int stopId2 = meetingPointQuery.sourceStopIds[j];
-            int distance;
-            if (USE_LANDMARKS) {
-                distance = LandmarkProcessor::getLowerBound(stopId1, stopId2, meetingPointQuery.weekday);
-            } else {
-                distance = sourceStopIdToAllStops[stopId1][stopId2];
+            int stopId1 = meetingPointQuery.sourceStopIds[i];
+            for (int j = i+1; j < meetingPointQuery.sourceStopIds.size(); j++) {
+                int stopId2 = meetingPointQuery.sourceStopIds[j];
+                int distance;
+                if (USE_LANDMARKS) {
+                    distance = LandmarkProcessor::getLowerBound(stopId1, stopId2, meetingPointQuery.weekday);
+                } else {
+                    distance = sourceStopIdToAllStops[stopId1][stopId2];
+                }
+                basicHeuristic += distance;
+                lowerBoundSumPerStopId[i] += distance;
+                lowerBoundSumPerStopId[j] += distance;
             }
-            basicHeuristic += distance;
-            lowerBoundSumPerStopId[i] += distance;
-            lowerBoundSumPerStopId[j] += distance;
         }
     }
 
@@ -1471,18 +1472,19 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
 
     if (meetingPointQuery.sourceStopIds.size() > 2) {
         for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
-        int stopId1 = meetingPointQuery.sourceStopIds[i];
-        for (int j = i+1; j < meetingPointQuery.sourceStopIds.size(); j++) {
-            int stopId2 = meetingPointQuery.sourceStopIds[j];
-            int distance;
-            if (USE_LANDMARKS) {
-                distance = LandmarkProcessor::getLowerBound(stopId1, stopId2, meetingPointQuery.weekday);
-            } else {
-                distance = sourceStopIdToAllStops[stopId1][stopId2];
+            int stopId1 = meetingPointQuery.sourceStopIds[i];
+            for (int j = i+1; j < meetingPointQuery.sourceStopIds.size(); j++) {
+                int stopId2 = meetingPointQuery.sourceStopIds[j];
+                int distance;
+                if (USE_LANDMARKS) {
+                    distance = LandmarkProcessor::getLowerBound(stopId1, stopId2, meetingPointQuery.weekday);
+                } else {
+                    distance = sourceStopIdToAllStops[stopId1][stopId2];
+                }
+                basicHeuristic += distance;
+                lowerBoundSumPerStopId[i] += distance;
+                lowerBoundSumPerStopId[j] += distance;
             }
-            basicHeuristic += distance;
-            lowerBoundSumPerStopId[i] += distance;
-            lowerBoundSumPerStopId[j] += distance;
         }
     }
 
