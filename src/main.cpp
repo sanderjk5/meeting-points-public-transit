@@ -86,7 +86,7 @@ int main(int argc, const char *argv[]) {
 
   Creator::loadOrCreateNetworkGraph(dataType);
   if (USE_LANDMARKS) {
-    LandmarkProcessor::loadOrCalculateLandmarkDurations(dataType, false);
+    LandmarkProcessor::loadOrCalculateLandmarkDurations(dataType, true);
     // LandmarkProcessor::countAllArrivalAndDepartureTimesOfTheLandmarks(dataType);
   }
 

@@ -20,6 +20,10 @@ class LandmarkProcessor {
 
         static void countAllArrivalAndDepartureTimesOfTheLandmarks(DataType dataType);
 
+        static int getLowerBoundUsingLandmarks(int stopId1, int stopId2, vector<int> landmarkIndices);
+
+        static vector<int> getTopKLandmarks(int k, int stopId1, int stopId2);
+        static int getClosestLandmark(int stopId);
         static void findAndCalculateLandmarks(DataType dataType, int numberOfLandmarks);
 
     private:

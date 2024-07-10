@@ -28,7 +28,7 @@ void LandmarkProcessor::loadOrCalculateLandmarkDurations(DataType dataType, bool
         // vector<int> landmarkIds = getLandmarkIds(dataType, 17, 25);
         // calculateExactLandmarkDurationsForStops(landmarkIds);
 
-        findAndCalculateLandmarks(dataType, 25);
+        findAndCalculateLandmarks(dataType, 100);
 
         exportLandmarkDurations(dataType, 0);
     }
@@ -502,6 +502,86 @@ void LandmarkProcessor::countAllArrivalAndDepartureTimesOfTheLandmarks(DataType 
     cout << "Total departure times: " << totalDepartureTimes << endl;
 }
 
+int LandmarkProcessor::getLowerBoundUsingLandmarks(int stopId1, int stopId2, vector<int> landmarkIndices) {
+    int lowerBound = 0;
+
+    for (int i = 0; i < landmarkIndices.size(); i++) {
+        int duration1 = landmarkDurations[landmarkIndices[i]][stopId1];
+        int duration2 = landmarkDurations[landmarkIndices[i]][stopId2];
+        if (duration1 != INT_MAX && duration2 != INT_MAX) {
+            int duration = duration1 - duration2;
+            if (duration > lowerBound) {
+                lowerBound = duration;
+            }
+        }
+
+        duration1 = landmarkDurations[landmarkIndices[i]][stopId2];
+        duration2 = landmarkDurations[landmarkIndices[i]][stopId1];
+        if (duration1 != INT_MAX && duration2 != INT_MAX) {
+            int duration = duration1 - duration2;
+            if (duration > lowerBound) {
+                lowerBound = duration;
+            }
+        }
+    }
+
+    return lowerBound;
+}
+
+vector<int> LandmarkProcessor::getTopKLandmarks(int k, int stopId1, int stopId2) {
+    vector<int> topKLandmarks = vector<int>(0);
+
+    vector<int> lowerBounds = vector<int>(landmarkDurations.size(), 0);
+
+    for (int i = 0; i < landmarkDurations.size(); i++) {
+        int duration1 = landmarkDurations[i][stopId1];
+        int duration2 = landmarkDurations[i][stopId2];
+        if (duration1 != INT_MAX && duration2 != INT_MAX) {
+            lowerBounds[i] = duration1 - duration2;
+        }
+
+        duration1 = landmarkDurations[i][stopId2];
+        duration2 = landmarkDurations[i][stopId1];
+        if (duration1 != INT_MAX && duration2 != INT_MAX) {
+            int duration = duration1 - duration2;
+            if (duration > lowerBounds[i]) {
+                lowerBounds[i] = duration;
+            }
+        }
+    }
+
+    for (int i = 0; i < k; i++) {
+        int maxLowerBound = 0;
+        int maxLowerBoundIndex = -1;
+
+        for (int j = 0; j < lowerBounds.size(); j++) {
+            if (lowerBounds[j] > maxLowerBound) {
+                maxLowerBound = lowerBounds[j];
+                maxLowerBoundIndex = j;
+            }
+        }
+
+        topKLandmarks.push_back(maxLowerBoundIndex);
+        lowerBounds[maxLowerBoundIndex] = 0;
+    }
+
+    return topKLandmarks;
+}
+
+int LandmarkProcessor::getClosestLandmark(int stopId) {
+    int closestLandmark = -1;
+    int closestLandmarkDuration = INT_MAX;
+
+    for (int i = 0; i < landmarkDurations.size(); i++) {
+        int duration = landmarkDurations[i][stopId];
+        if (duration < closestLandmarkDuration) {
+            closestLandmarkDuration = duration;
+            closestLandmark = i;
+        }
+    }
+
+    return closestLandmark;
+}
 
 void LandmarkProcessor::findAndCalculateLandmarks(DataType dataType, int numberOfLandmarks) {
     auto start = std::chrono::high_resolution_clock::now(); 
@@ -515,9 +595,6 @@ void LandmarkProcessor::findAndCalculateLandmarks(DataType dataType, int numberO
 
     // get random stop id
     int randomStopId = Importer::stops[rand() % Importer::stops.size()].id;
-
-    // create a vector that contains randomStopId
-
 
     // get the shortest distance from the random stop to all other stops
     vector<int> distances = Creator::networkGraph.getDistancesWithPhast({randomStopId})[randomStopId];

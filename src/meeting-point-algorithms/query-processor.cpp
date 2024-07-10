@@ -1149,11 +1149,6 @@ vector<int> RaptorQueryProcessor::getStopsWithGivenAccuracy(double accuracyBound
 }
 
 void RaptorBoundQueryProcessor::processRaptorBoundQuery(Optimization optimization) {
-    // if (optimization == min_sum) {
-    //     cout << "min sum" << endl;
-    // } else {
-    //     cout << "min max" << endl;
-    // }
     map<int, vector<int>> sourceStopIdToAllStops;
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -1162,6 +1157,34 @@ void RaptorBoundQueryProcessor::processRaptorBoundQuery(Optimization optimizatio
     }
     auto endPhast = std::chrono::high_resolution_clock::now();
     durationPhast = std::chrono::duration_cast<std::chrono::milliseconds>(endPhast - start).count();
+
+    // calculate basic heuristic
+    int basicHeuristic = 0;
+    vector<int> lowerBoundSumPerStopId = vector<int>(meetingPointQuery.sourceStopIds.size(), 0);
+
+    for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
+        int stopId1 = meetingPointQuery.sourceStopIds[i];
+        for (int j = i+1; j < meetingPointQuery.sourceStopIds.size(); j++) {
+            int stopId2 = meetingPointQuery.sourceStopIds[j];
+            int distance;
+            if (USE_LANDMARKS) {
+                distance = LandmarkProcessor::getLowerBound(stopId1, stopId2, meetingPointQuery.weekday);
+            } else {
+                distance = sourceStopIdToAllStops[stopId1][stopId2];
+            }
+            basicHeuristic += distance;
+            lowerBoundSumPerStopId[i] += distance;
+            lowerBoundSumPerStopId[j] += distance;
+        }
+    }
+
+    // get closest landmark to each source stop
+    vector<int> closestLandmarkPerStopId = vector<int>(meetingPointQuery.sourceStopIds.size(), -1);
+    for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
+        int stopId = meetingPointQuery.sourceStopIds[i];
+        int closestLandmark = LandmarkProcessor::getClosestLandmark(stopId);
+        closestLandmarkPerStopId[i] = closestLandmark;
+    }
 
     auto startInitRaptorBounds = std::chrono::high_resolution_clock::now();
     raptorBounds = vector<shared_ptr<RaptorBound>>(meetingPointQuery.sourceStopIds.size());
@@ -1174,7 +1197,8 @@ void RaptorBoundQueryProcessor::processRaptorBoundQuery(Optimization optimizatio
         query.sourceTime = meetingPointQuery.sourceTime;
         query.weekday = meetingPointQuery.weekday;
         shared_ptr<RaptorBound> raptorBound = shared_ptr<RaptorBound> (new RaptorBound(query, optimization));
-        raptorBound->initializeHeuristic(sourceStopIdToAllStops, meetingPointQuery.sourceStopIds);
+        int baseHeuristicOfSourceStop = basicHeuristic - lowerBoundSumPerStopId[i];
+        raptorBound->initializeHeuristic(sourceStopIdToAllStops, meetingPointQuery.sourceStopIds, baseHeuristicOfSourceStop, {closestLandmarkPerStopId[i]});
         raptorBounds[i] = raptorBound;
     }
     auto endInitRaptorBounds = std::chrono::high_resolution_clock::now();
@@ -1421,6 +1445,9 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
     auto endRaptorFirstResult = std::chrono::high_resolution_clock::now();
     durationRaptorFirstResult = std::chrono::duration_cast<std::chrono::milliseconds>(endRaptorFirstResult - startRaptorFirstResult).count();
 
+    // get closest landmark to each source stop
+    vector<int> closestLandmarkPerStopId = vector<int>(meetingPointQuery.sourceStopIds.size(), -1);
+
     auto initRaptorPQs = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
         RaptorQuery query;
@@ -1429,9 +1456,33 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
         query.weekday = meetingPointQuery.weekday;
         shared_ptr<RaptorPQ> raptorPQ = shared_ptr<RaptorPQ> (new RaptorPQ(query, optimization));
         raptorPQs.push_back(raptorPQ);
+
+        int stopId = meetingPointQuery.sourceStopIds[i];
+        int closestLandmark = LandmarkProcessor::getClosestLandmark(stopId);
+        closestLandmarkPerStopId[i] = closestLandmark;
     }
     auto endInitRaptorPQs = std::chrono::high_resolution_clock::now();
     durationInitRaptorPQs = std::chrono::duration_cast<std::chrono::milliseconds>(endInitRaptorPQs - initRaptorPQs).count();
+
+    // calculate basic heuristic
+    int basicHeuristic = 0;
+    vector<int> lowerBoundSumPerStopId = vector<int>(meetingPointQuery.sourceStopIds.size(), 0);
+
+    for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
+        int stopId1 = meetingPointQuery.sourceStopIds[i];
+        for (int j = i+1; j < meetingPointQuery.sourceStopIds.size(); j++) {
+            int stopId2 = meetingPointQuery.sourceStopIds[j];
+            int distance;
+            if (USE_LANDMARKS) {
+                distance = LandmarkProcessor::getLowerBound(stopId1, stopId2, meetingPointQuery.weekday);
+            } else {
+                distance = sourceStopIdToAllStops[stopId1][stopId2];
+            }
+            basicHeuristic += distance;
+            lowerBoundSumPerStopId[i] += distance;
+            lowerBoundSumPerStopId[j] += distance;
+        }
+    }
 
     // cout << "upper bound min sum: " << meetingPointQueryResultRaptor.minSumDurationInSeconds << ", upper bound min max: " << meetingPointQueryResultRaptor.minMaxDurationInSeconds << endl;
 
@@ -1440,7 +1491,8 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
     // omp_set_num_threads(4);
     #pragma omp parallel for
     for (int i = 0; i < raptorPQs.size(); i++) {
-        raptorPQs[i]->initializeHeuristic(sourceStopIdToAllStops, meetingPointQuery.sourceStopIds);
+        int baseHeuristicOfSourceStop = basicHeuristic - lowerBoundSumPerStopId[i];
+        raptorPQs[i]->initializeHeuristic(sourceStopIdToAllStops, meetingPointQuery.sourceStopIds, baseHeuristicOfSourceStop, {closestLandmarkPerStopId[i]});
         if (optimization == min_sum) {
             int upperBound = meetingPointQueryResultRaptor.minSumDurationInSeconds;
             raptorPQs[i]->setCurrentBest(upperBound);
@@ -1992,7 +2044,9 @@ void RaptorApproximationQueryProcessor::calculateResultWithOneCandidate() {
         query.weekday = meetingPointQuery.weekday;
         query.targetStopIds = targetStopIds;
 
-        shared_ptr<RaptorPQStar> raptorPQStar = shared_ptr<RaptorPQStar> (new RaptorPQStar(query, sourceStopIdToAllStops[targetStopIds[0]]));
+        vector<int> landmarkIndices = LandmarkProcessor::getTopKLandmarks(NUMBER_OF_LANDMARKS, meetingPointQuery.sourceStopIds[i], targetStopIds[0]);
+
+        shared_ptr<RaptorPQStar> raptorPQStar = shared_ptr<RaptorPQStar> (new RaptorPQStar(query, sourceStopIdToAllStops[targetStopIds[0]], landmarkIndices));
         raptorPQStars.push_back(raptorPQStar);
     }
     
