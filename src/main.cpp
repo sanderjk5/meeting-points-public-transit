@@ -112,7 +112,7 @@ int main(int argc, const char *argv[]) {
     // Test experiments
     // vector<int> numberOfSourceStops = {2, 3, 5};
     // vector<int> numberOfSourceStops = {7, 9, 10};
-    vector<int> numberOfSourceStops = {2, 5, 10};
+    vector<int> numberOfSourceStops = {2, 3, 5, 10};
     // vector<int> numberOfSourceStops = {25, 50, 75};
 
     // ExperimentController::testRaptorNaiveAlgorithmMultipleResult(500, numberOfSourceStops);

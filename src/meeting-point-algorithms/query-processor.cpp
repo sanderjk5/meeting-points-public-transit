@@ -1162,7 +1162,8 @@ void RaptorBoundQueryProcessor::processRaptorBoundQuery(Optimization optimizatio
     int basicHeuristic = 0;
     vector<int> lowerBoundSumPerStopId = vector<int>(meetingPointQuery.sourceStopIds.size(), 0);
 
-    for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
+    if (meetingPointQuery.sourceStopIds.size() > 2) {
+        for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
         int stopId1 = meetingPointQuery.sourceStopIds[i];
         for (int j = i+1; j < meetingPointQuery.sourceStopIds.size(); j++) {
             int stopId2 = meetingPointQuery.sourceStopIds[j];
@@ -1468,7 +1469,8 @@ void RaptorPQQueryProcessor::processRaptorPQQuery(Optimization optimization) {
     int basicHeuristic = 0;
     vector<int> lowerBoundSumPerStopId = vector<int>(meetingPointQuery.sourceStopIds.size(), 0);
 
-    for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
+    if (meetingPointQuery.sourceStopIds.size() > 2) {
+        for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
         int stopId1 = meetingPointQuery.sourceStopIds[i];
         for (int j = i+1; j < meetingPointQuery.sourceStopIds.size(); j++) {
             int stopId2 = meetingPointQuery.sourceStopIds[j];
