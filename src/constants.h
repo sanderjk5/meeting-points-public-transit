@@ -20,6 +20,6 @@ constexpr int NUMBER_OF_DAYS = 4;
 
 constexpr bool USE_FOOTPATHS = true;
 
-constexpr int NUMBER_OF_LANDMARKS = 15;
+constexpr int NUMBER_OF_LANDMARKS = 25;
 
 #endif //CMAKE_HEADER_H
