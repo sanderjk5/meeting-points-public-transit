@@ -99,7 +99,7 @@ int main(int argc, const char *argv[]) {
   cout << "Number of edges: " << edgeCount << "\n" << endl;
 
   if (startExperiments){
-    ExperimentController::evaluateLowerBounds(2500, 4);
+    // ExperimentController::evaluateLowerBounds(2500, 4);
 
     // Real experiments
     // vector<int> numberOfSourceStops = {2, 3, 5, 10, 25};
@@ -110,9 +110,9 @@ int main(int argc, const char *argv[]) {
     // ExperimentController::testAndCompareAlgorithmsRandom(dataType, 1000, numberOfSourceStops);
 
     // Test experiments
-    // vector<int> numberOfSourceStops = {2, 3, 5};
+    vector<int> numberOfSourceStops = {2, 3, 5};
     // vector<int> numberOfSourceStops = {7, 9, 10};
-    vector<int> numberOfSourceStops = {2, 3, 5, 10};
+    // vector<int> numberOfSourceStops = {2, 3, 5, 10};
     // vector<int> numberOfSourceStops = {25, 50, 75};
 
     // ExperimentController::testRaptorNaiveAlgorithmMultipleResult(500, numberOfSourceStops);
@@ -121,7 +121,7 @@ int main(int argc, const char *argv[]) {
 
     // ExperimentController::compareRaptorPQAlgorithms(dataType, 20, numberOfSourceStops);
 
-    // ExperimentController::compareRaptorPQAlgorithms(dataType, 1000, numberOfSourceStops);
+    ExperimentController::compareRaptorPQAlgorithms(dataType, 1000, numberOfSourceStops);
 
     // numberOfSourceStops = {25, 100};
 
