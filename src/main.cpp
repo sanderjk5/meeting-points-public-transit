@@ -99,7 +99,7 @@ int main(int argc, const char *argv[]) {
   cout << "Number of edges: " << edgeCount << "\n" << endl;
 
   if (startExperiments){
-    ExperimentController::evaluateLowerBounds(100, 4);
+    ExperimentController::evaluateLowerBounds(2500, 4);
 
     // Real experiments
     // vector<int> numberOfSourceStops = {2, 3, 5, 10, 25};
@@ -119,7 +119,7 @@ int main(int argc, const char *argv[]) {
 
     // ExperimentController::compareRaptorAlgorithms(dataType, 100, numberOfSourceStops);
 
-    ExperimentController::compareRaptorPQAlgorithms(dataType, 20, numberOfSourceStops);
+    // ExperimentController::compareRaptorPQAlgorithms(dataType, 20, numberOfSourceStops);
 
     // ExperimentController::compareRaptorPQAlgorithms(dataType, 1000, numberOfSourceStops);
 
@@ -133,7 +133,7 @@ int main(int argc, const char *argv[]) {
 
     // ExperimentController::compareRaptorEATAlgorithms(dataType, 2500);
 
-    ExperimentController::compareRaptorEATAlgorithms(dataType, 100);
+    // ExperimentController::compareRaptorEATAlgorithms(dataType, 100);
 
     // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 2000, 100, 0.95);
 
