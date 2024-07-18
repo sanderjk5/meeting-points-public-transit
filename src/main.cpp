@@ -121,7 +121,7 @@ int main(int argc, const char *argv[]) {
 
     // ExperimentController::compareRaptorPQAlgorithms(dataType, 20, numberOfSourceStops);
 
-    ExperimentController::compareRaptorPQAlgorithms(dataType, 1000, numberOfSourceStops);
+    // ExperimentController::compareRaptorPQAlgorithms(dataType, 1000, numberOfSourceStops);
 
     // numberOfSourceStops = {25, 100};
 
@@ -131,7 +131,7 @@ int main(int argc, const char *argv[]) {
 
     // ExperimentController::testRaptorApproxAlgorithmForLargeNofSources(dataType, 1000, numberOfSourceStops);
 
-    // ExperimentController::compareRaptorEATAlgorithms(dataType, 2500);
+    ExperimentController::compareRaptorEATAlgorithms(dataType, 2500);
 
     // ExperimentController::compareRaptorEATAlgorithms(dataType, 200);
 
