@@ -111,7 +111,7 @@ int main(int argc, const char *argv[]) {
 
     // Test experiments
     // vector<int> numberOfSourceStops = {2, 3, 5};
-    vector<int> numberOfSourceStops = {7, 9, 10};
+    vector<int> numberOfSourceStops = {7};
     // vector<int> numberOfSourceStops = {2, 3, 5, 10};
     // vector<int> numberOfSourceStops = {25, 50, 75};
 
@@ -121,7 +121,7 @@ int main(int argc, const char *argv[]) {
 
     // ExperimentController::compareRaptorPQAlgorithms(dataType, 20, numberOfSourceStops);
 
-    // ExperimentController::compareRaptorPQAlgorithms(dataType, 1000, numberOfSourceStops);
+    ExperimentController::compareRaptorPQAlgorithms(dataType, 1000, numberOfSourceStops);
 
     // numberOfSourceStops = {25, 100};
 
