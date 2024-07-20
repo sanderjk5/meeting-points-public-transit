@@ -131,7 +131,7 @@ int main(int argc, const char *argv[]) {
 
     // ExperimentController::testRaptorApproxAlgorithmForLargeNofSources(dataType, 1000, numberOfSourceStops);
 
-    ExperimentController::compareRaptorEATAlgorithms(dataType, 2500);
+    // ExperimentController::compareRaptorEATAlgorithms(dataType, 2500);
 
     // ExperimentController::compareRaptorEATAlgorithms(dataType, 200);
 
