@@ -2183,14 +2183,14 @@ void RaptorApproximationQueryProcessor::processRaptorApproximationLoopQuery(int 
         numberOfExactSourcesPerRound = 6;
     }
 
-    vector<int> copyArr = meetingPointQuery.sourceStopIds;
-    random_shuffle(copyArr.begin(), copyArr.end());
+    // vector<int> copyArr = meetingPointQuery.sourceStopIds;
+    // random_shuffle(copyArr.begin(), copyArr.end());
 
     // calculateExactSources(numberOfExactSourcesPerRound);
 
     exactSources = vector<int>(0);
     for (int i = 0; i < numberOfExactSourcesPerRound; i++){
-        exactSources.push_back(copyArr[i]);
+        exactSources.push_back(meetingPointQuery.sourceStopIds[i]);
     }
 
     while (!finished) {
