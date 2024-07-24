@@ -97,7 +97,7 @@ void CliController::runCli(DataType dataType, GTree* gTree) {
         while(!validAlgorithm) {
             cout << "Which algorithm do you want to use? \nThe options are (enter the abbrevation): compare all algorithms (a), naive algorithm (n), raptor first algorithm (r), raptor pq algorithm (q), raptor bound algorithm (b), raptor approximation algorithm (x), raptor approximation algorithm with candidates (c)." << endl;
             getline(cin, algorithm);
-            if (algorithm == "a" || algorithm == "n" || algorithm == "r" || algorithm == "q" || algorithm == "b" || algorithm == "x" || algorithm == "c") {
+            if (algorithm == "a" || algorithm == "n" || algorithm == "r" || algorithm == "q" || algorithm == "b" || algorithm == "x" || algorithm == "c" || algorithm == "l") {
                 validAlgorithm = true;
             } else {
                 cout << "Invalid algorithm. Please enter the abbrevation of a valid algorithm." << endl;
@@ -120,6 +120,8 @@ void CliController::runCli(DataType dataType, GTree* gTree) {
             RaptorApproximationAlgorithmTester::testRaptorApproximationAlgorithm(query, false);
         } else if (algorithm == "c") {
             RaptorApproximationAlgorithmTester::testRaptorApproximationAlgorithm(query, true);
+        } else if (algorithm == "l") {
+            RaptorApproximationAlgorithmTester::testRaptorLoopAlgorithm(query);
         }
 
         cout << "\nDo you want to run another query? (y/N)" << endl;

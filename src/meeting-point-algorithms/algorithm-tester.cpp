@@ -1778,6 +1778,22 @@ void RaptorApproximationAlgorithmTester::testRaptorApproximationAlgorithm(Meetin
     PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultMinMax, min_max);
 }
 
+void RaptorApproximationAlgorithmTester::testRaptorLoopAlgorithm(MeetingPointQuery meetingPointQuery) {
+    PrintHelper::printMeetingPointQuery(meetingPointQuery);
+
+    int maxNumberOfSourcesRaptorApproxLoopMinMax = meetingPointQuery.sourceStopIds.size();
+    unique_ptr<RaptorApproximationQueryProcessor> raptorApproximationQueryProcessorApproxLoopMinMax = unique_ptr<RaptorApproximationQueryProcessor> (new RaptorApproximationQueryProcessor(meetingPointQuery));
+    raptorApproximationQueryProcessorApproxLoopMinMax->processRaptorApproximationLoopQuery(maxNumberOfSourcesRaptorApproxLoopMinMax);
+    MeetingPointQueryResult meetingPointQueryResultRaptorApproxLoopMinMax = raptorApproximationQueryProcessorApproxLoopMinMax->getMeetingPointQueryResult();
+    if (raptorApproximationQueryProcessorApproxLoopMinMax->wrongResult) {
+        cout << "Min max: wrong result!" << endl;
+    } else {
+        cout << "Min max: correct result!" << endl;
+    }
+    PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorApproxLoopMinMax, min_max);
+
+}
+
 void RaptorApproximationAlgorithmTester::compareRaptorApproximationAlgorithms(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSources, bool loadOrStoreQueries) {
     string dataTypeString = Importer::getDataTypeString(dataType);
     string folderPathResults = FOLDER_PREFIX + "tests/" + dataTypeString + "/results/";

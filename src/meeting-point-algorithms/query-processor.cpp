@@ -2112,7 +2112,7 @@ bool RaptorApproximationQueryProcessor::verifyResult(int targetStopId, int meeti
     RaptorBackwardQuery raptorBackwardQuery;
     raptorBackwardQuery.targetStopId = targetStopId;
     raptorBackwardQuery.sourceTime = meetingTime - TimeConverter::getDayOffset(meetingTime);
-    raptorBackwardQuery.weekday = (meetingPointQuery.weekday + TimeConverter::getDayDifference(raptorBackwardQuery.sourceTime)) % 7;
+    raptorBackwardQuery.weekday = (meetingPointQuery.weekday + TimeConverter::getDayDifference(meetingTime)) % 7;
     raptorBackwardQuery.sourceStopIds = meetingPointQuery.sourceStopIds;
 
     RaptorBackward raptorBackward = RaptorBackward(raptorBackwardQuery);
@@ -2125,7 +2125,7 @@ bool RaptorApproximationQueryProcessor::verifyResult(int targetStopId, int meeti
         int sourceStopId = meetingPointQuery.sourceStopIds[i];
         int latestDepartureTime = raptorBackward.getLatestDepartureTime(sourceStopId);
 
-        if (latestDepartureTime == INT_MAX) {
+        if (latestDepartureTime == -1) {
             sourceStopsWithErrorAndDuration.push_back(make_pair(sourceStopId, INT_MAX));
             continue;
         }
@@ -2152,6 +2152,8 @@ void RaptorApproximationQueryProcessor::processRaptorApproximationLoopQuery(int 
 
     int numberOfSources = meetingPointQuery.sourceStopIds.size();
 
+    vector<int> exactSourcesIds = vector<int>(0);
+
     int numberOfExactSourcesPerRound;
     if (numberOfSources == 2) {
         numberOfExactSourcesPerRound = numberOfSources;
@@ -2174,6 +2176,8 @@ void RaptorApproximationQueryProcessor::processRaptorApproximationLoopQuery(int 
             query.sourceStopId = exactSources[i];
             query.sourceTime = meetingPointQuery.sourceTime;
             query.weekday = meetingPointQuery.weekday;
+
+            exactSourcesIds.push_back(exactSources[i]);
 
             shared_ptr<Raptor> raptor = shared_ptr<Raptor> (new Raptor(query));
             currentRaptors.push_back(raptor);
@@ -2261,4 +2265,12 @@ void RaptorApproximationQueryProcessor::processRaptorApproximationLoopQuery(int 
     meetingPointQueryResult.queryTime = duration;
 
     numberOfQueries = raptors.size();
+
+    cout << "Number of rounds: " << numberOfRounds << endl;
+    cout << "Number of queries: " << numberOfQueries << endl;
+    string sourceStopIdsString = "";
+    for (int i = 0; i < exactSourcesIds.size(); i++) {
+        sourceStopIdsString += to_string(exactSourcesIds[i]) + " ";
+    }
+    cout << "Exact sources: " << sourceStopIdsString << endl;
 }
