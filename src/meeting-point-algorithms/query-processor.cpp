@@ -21,6 +21,7 @@
 #include <map>
 #include <algorithm>
 #include <memory>
+#include <random>
 
 #include <vector>
 #include <string>
@@ -2144,6 +2145,23 @@ bool RaptorApproximationQueryProcessor::verifyResult(int targetStopId, int meeti
     }
 }
 
+// std::vector<int> select_random_k_values(const std::vector<int>& arr, int k) {
+//     // Create a copy of the original array
+//     std::vector<int> copy = arr;
+    
+//     // Initialize random number generator
+//     std::random_device rd;
+//     std::mt19937 gen(rd());
+    
+//     // Shuffle the copy of the array
+//     std::shuffle(copy.begin(), copy.end(), gen);
+    
+//     // Select the first k elements from the shuffled array
+//     std::vector<int> result(copy.begin(), copy.begin() + k);
+    
+//     return result;
+// }
+
 void RaptorApproximationQueryProcessor::processRaptorApproximationLoopQuery(int maxNumberOfSources) {
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -2165,7 +2183,15 @@ void RaptorApproximationQueryProcessor::processRaptorApproximationLoopQuery(int 
         numberOfExactSourcesPerRound = 6;
     }
 
-    calculateExactSources(numberOfExactSourcesPerRound);
+    vector<int> copyArr = meetingPointQuery.sourceStopIds;
+    random_shuffle(copyArr.begin(), copyArr.end());
+
+    // calculateExactSources(numberOfExactSourcesPerRound);
+
+    exactSources = vector<int>(0);
+    for (int i = 0; i < numberOfExactSourcesPerRound; i++){
+        exactSources.push_back(copyArr[i]);
+    }
 
     while (!finished) {
         numberOfRounds++;

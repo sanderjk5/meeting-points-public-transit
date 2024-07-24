@@ -110,10 +110,10 @@ int main(int argc, const char *argv[]) {
     // ExperimentController::testAndCompareAlgorithmsRandom(dataType, 1000, numberOfSourceStops);
 
     // Test experiments
-    vector<int> numberOfSourceStops = {2, 3, 5};
+    // vector<int> numberOfSourceStops = {2, 3, 5};
     // vector<int> numberOfSourceStops = {10};
     // vector<int> numberOfSourceStops = {2, 3, 5, 10};
-    // vector<int> numberOfSourceStops = {25, 50, 75};
+    vector<int> numberOfSourceStops = {25, 50, 100};
 
     // ExperimentController::testRaptorNaiveAlgorithmMultipleResult(500, numberOfSourceStops);
 
@@ -121,15 +121,15 @@ int main(int argc, const char *argv[]) {
 
     // ExperimentController::compareRaptorPQAlgorithms(dataType, 20, numberOfSourceStops);
 
-    ExperimentController::compareRaptorPQAlgorithms(dataType, 1000, numberOfSourceStops);
+    // ExperimentController::compareRaptorPQAlgorithms(dataType, 1000, numberOfSourceStops);
 
     // numberOfSourceStops = {25, 100};
 
-    // ExperimentController::compareRaptorApproxAlgorithms(dataType, 10, numberOfSourceStops);
+    ExperimentController::compareRaptorApproxAlgorithms(dataType, 20, numberOfSourceStops);
 
     numberOfSourceStops = {500, 1000, 2000};
 
-    // ExperimentController::testRaptorApproxAlgorithmForLargeNofSources(dataType, 1000, numberOfSourceStops);
+    ExperimentController::testRaptorApproxAlgorithmForLargeNofSources(dataType, 20, numberOfSourceStops);
 
     // ExperimentController::compareRaptorEATAlgorithms(dataType, 2500);
 
