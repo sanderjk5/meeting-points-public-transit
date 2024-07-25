@@ -2313,11 +2313,11 @@ void RaptorApproximationQueryProcessor::processRaptorApproximationLoopQuery(int 
 
     numberOfQueries = raptors.size();
 
-    cout << "Number of rounds: " << numberOfRounds << endl;
-    cout << "Number of queries: " << numberOfQueries << endl;
-    string sourceStopIdsString = "";
-    for (int i = 0; i < exactSourcesIds.size(); i++) {
-        sourceStopIdsString += to_string(exactSourcesIds[i]) + " ";
-    }
-    cout << "Exact sources: " << sourceStopIdsString << endl;
+    // cout << "Number of rounds: " << numberOfRounds << endl;
+    // cout << "Number of queries: " << numberOfQueries << endl;
+    // string sourceStopIdsString = "";
+    // for (int i = 0; i < exactSourcesIds.size(); i++) {
+    //     sourceStopIdsString += to_string(exactSourcesIds[i]) + " ";
+    // }
+    // cout << "Exact sources: " << sourceStopIdsString << endl;
 }
