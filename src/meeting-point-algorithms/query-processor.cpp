@@ -1874,37 +1874,78 @@ void RaptorApproximationQueryProcessor::calculateExactSources(int numberOfExactS
     exactSources = vector<int>(0);
 
     // calculate the average distance of each source to all other sources
-    vector<pair<int, double>> sourceIdToAverageDistance = vector<pair<int, double>>(meetingPointQuery.sourceStopIds.size());
+    // vector<pair<int, double>> sourceIdToAverageDistance = vector<pair<int, double>>(meetingPointQuery.sourceStopIds.size());
+    // for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
+    //     int sourceId = meetingPointQuery.sourceStopIds[i];
+    //     double averageDistance = 0;
+    //     for (int j = 0; j < meetingPointQuery.sourceStopIds.size(); j++) {
+    //         if (i == j) {
+    //             continue;
+    //         }
+    //         int otherSourceId = meetingPointQuery.sourceStopIds[j];
+    //         int distance;
+    //         if (USE_LANDMARKS) {
+    //             distance = LandmarkProcessor::getLowerBound(sourceId, otherSourceId, meetingPointQuery.weekday);
+    //         } else {
+    //             distance = sourceStopIdToAllStops[sourceId][otherSourceId];
+    //         }
+    //         averageDistance += distance;
+    //     }
+    //     averageDistance = averageDistance / (meetingPointQuery.sourceStopIds.size() - 1);
+    //     sourceIdToAverageDistance[i] = make_pair(sourceId, averageDistance);
+    // }    
+
+    // // sort the sources by average distance
+    // sort(sourceIdToAverageDistance.begin(), sourceIdToAverageDistance.end(), 
+    //     [](const pair<int, double> &left, const pair<int, double> &right) {
+    //         return left.second > right.second;
+    //     }
+    // );
+
+    // // add the sources with the highest average distance to the exact sources
+    // for (int i = 0; i < numberOfExactSourceStops; i++) {
+    //     exactSources.push_back(sourceIdToAverageDistance[i].first);
+    // }
+
+    vector<int> minimalDistances = vector<int>(meetingPointQuery.sourceStopIds.size(), INT_MAX);
+
+    // select a random source
+    int randomSource = meetingPointQuery.sourceStopIds[rand() % meetingPointQuery.sourceStopIds.size()];
+
+    int nextExactSourceStopId = randomSource;
+    int maximumDistance = 0;
+
+    // calculate the distance of the random source to all other sources
+    vector<int> distances = Creator::networkGraph.getDistancesWithPhast({randomSource})[randomSource];
     for (int i = 0; i < meetingPointQuery.sourceStopIds.size(); i++) {
         int sourceId = meetingPointQuery.sourceStopIds[i];
-        double averageDistance = 0;
-        for (int j = 0; j < meetingPointQuery.sourceStopIds.size(); j++) {
-            if (i == j) {
-                continue;
-            }
-            int otherSourceId = meetingPointQuery.sourceStopIds[j];
-            int distance;
-            if (USE_LANDMARKS) {
-                distance = LandmarkProcessor::getLowerBound(sourceId, otherSourceId, meetingPointQuery.weekday);
-            } else {
-                distance = sourceStopIdToAllStops[sourceId][otherSourceId];
-            }
-            averageDistance += distance;
-        }
-        averageDistance = averageDistance / (meetingPointQuery.sourceStopIds.size() - 1);
-        sourceIdToAverageDistance[i] = make_pair(sourceId, averageDistance);
-    }    
+        minimalDistances[i] = distances[sourceId];
 
-    // sort the sources by average distance
-    sort(sourceIdToAverageDistance.begin(), sourceIdToAverageDistance.end(), 
-        [](const pair<int, double> &left, const pair<int, double> &right) {
-            return left.second > right.second;
+        if (distances[sourceId] > maximumDistance) {
+            maximumDistance = distances[sourceId];
+            nextExactSourceStopId = sourceId;
         }
-    );
+    }
 
-    // add the sources with the highest average distance to the exact sources
     for (int i = 0; i < numberOfExactSourceStops; i++) {
-        exactSources.push_back(sourceIdToAverageDistance[i].first);
+        exactSources.push_back(nextExactSourceStopId);
+
+        // calculate the distance of the new exact source to all other sources
+        distances = Creator::networkGraph.getDistancesWithPhast({nextExactSourceStopId})[nextExactSourceStopId];
+        maximumDistance = 0;
+
+        for (int j = 0; j < meetingPointQuery.sourceStopIds.size(); j++) {
+            int sourceId = meetingPointQuery.sourceStopIds[j];
+
+            if (distances[sourceId] < minimalDistances[j]) {
+                minimalDistances[j] = distances[sourceId];
+            }
+
+            if (minimalDistances[j] > maximumDistance) {
+                maximumDistance = distances[sourceId];
+                nextExactSourceStopId = sourceId;
+            }
+        }
     }
 }
 
@@ -2145,23 +2186,6 @@ bool RaptorApproximationQueryProcessor::verifyResult(int targetStopId, int meeti
     }
 }
 
-// std::vector<int> select_random_k_values(const std::vector<int>& arr, int k) {
-//     // Create a copy of the original array
-//     std::vector<int> copy = arr;
-    
-//     // Initialize random number generator
-//     std::random_device rd;
-//     std::mt19937 gen(rd());
-    
-//     // Shuffle the copy of the array
-//     std::shuffle(copy.begin(), copy.end(), gen);
-    
-//     // Select the first k elements from the shuffled array
-//     std::vector<int> result(copy.begin(), copy.begin() + k);
-    
-//     return result;
-// }
-
 void RaptorApproximationQueryProcessor::processRaptorApproximationLoopQuery(int maxNumberOfSources) {
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -2183,15 +2207,12 @@ void RaptorApproximationQueryProcessor::processRaptorApproximationLoopQuery(int 
         numberOfExactSourcesPerRound = 6;
     }
 
-    // vector<int> copyArr = meetingPointQuery.sourceStopIds;
-    // random_shuffle(copyArr.begin(), copyArr.end());
+    calculateExactSources(numberOfExactSourcesPerRound);
 
-    // calculateExactSources(numberOfExactSourcesPerRound);
-
-    exactSources = vector<int>(0);
-    for (int i = 0; i < numberOfExactSourcesPerRound; i++){
-        exactSources.push_back(meetingPointQuery.sourceStopIds[i]);
-    }
+    // exactSources = vector<int>(0);
+    // for (int i = 0; i < numberOfExactSourcesPerRound; i++){
+    //     exactSources.push_back(meetingPointQuery.sourceStopIds[i]);
+    // }
 
     while (!finished) {
         numberOfRounds++;
@@ -2292,11 +2313,11 @@ void RaptorApproximationQueryProcessor::processRaptorApproximationLoopQuery(int 
 
     numberOfQueries = raptors.size();
 
-    // cout << "Number of rounds: " << numberOfRounds << endl;
-    // cout << "Number of queries: " << numberOfQueries << endl;
-    // string sourceStopIdsString = "";
-    // for (int i = 0; i < exactSourcesIds.size(); i++) {
-    //     sourceStopIdsString += to_string(exactSourcesIds[i]) + " ";
-    // }
-    // cout << "Exact sources: " << sourceStopIdsString << endl;
+    cout << "Number of rounds: " << numberOfRounds << endl;
+    cout << "Number of queries: " << numberOfQueries << endl;
+    string sourceStopIdsString = "";
+    for (int i = 0; i < exactSourcesIds.size(); i++) {
+        sourceStopIdsString += to_string(exactSourcesIds[i]) + " ";
+    }
+    cout << "Exact sources: " << sourceStopIdsString << endl;
 }

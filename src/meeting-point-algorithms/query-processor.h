@@ -268,8 +268,6 @@ class RaptorApproximationQueryProcessor {
         void processRaptorApproximationLoopQuery(int maxNumberOfSources);
         MeetingPointQueryResult getMeetingPointQueryResult();
 
-        // std::vector<int> select_random_k_values(const vector<int>& arr, int k);
-
         double durationExactSources;
         double durationExactCalculation;
         double durationCandidates;

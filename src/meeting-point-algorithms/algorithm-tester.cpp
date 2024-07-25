@@ -1833,8 +1833,10 @@ void RaptorApproximationAlgorithmTester::compareRaptorApproximationAlgorithms(Da
 
     resultsFile << ",avgNumberOfRoundsRaptorApproxLoopMinMax,avgNumberOfRoundsRaptorApproxLoopNoLimitMinMax";
     resultsFile << ",medianNumberOfRoundsRaptorApproxLoopMinMax,medianNumberOfRoundsRaptorApproxLoopNoLimitMinMax";
+    resultsFile << ",maxNumberOfRoundsRaptorApproxLoopMinMax,maxNumberOfRoundsRaptorApproxLoopNoLimitMinMax";
     resultsFile << ",avgNumberOfQueriesRaptorApproxLoopMinMax,avgNumberOfQueriesRaptorApproxLoopNoLimitMinMax";
     resultsFile << ",medianNumberOfQueriesRaptorApproxLoopMinMax,medianNumberOfQueriesRaptorApproxLoopNoLimitMinMax";
+    resultsFile << ",maxNumberOfQueriesRaptorApproxLoopMinMax,maxNumberOfQueriesRaptorApproxLoopNoLimitMinMax";
 
     resultsFile << "\n";
 
@@ -2212,11 +2214,15 @@ void RaptorApproximationAlgorithmTester::compareRaptorApproximationAlgorithms(Da
         double avgNumberOfRoundsRaptorApproxLoopNoLimitMinMax = Calculator::getAverage(numberOfRoundsRaptorApproxLoopNoLimitMinMax);
         double medianNumberOfRoundsRaptorApproxLoopMinMax = Calculator::getMedian(numberOfRoundsRaptorApproxLoopMinMax);
         double medianNumberOfRoundsRaptorApproxLoopNoLimitMinMax = Calculator::getMedian(numberOfRoundsRaptorApproxLoopNoLimitMinMax);
+        double maxNumberOfRoundsRaptorApproxLoopMinMax = Calculator::getMaximum(numberOfRoundsRaptorApproxLoopMinMax);
+        double maxNumberOfRoundsRaptorApproxLoopNoLimitMinMax = Calculator::getMaximum(numberOfRoundsRaptorApproxLoopNoLimitMinMax);
 
         double avgNumberOfQueriesRaptorApproxLoopMinMax = Calculator::getAverage(numberOfQueriesRaptorApproxLoopMinMax);
         double avgNumberOfQueriesRaptorApproxLoopNoLimitMinMax = Calculator::getAverage(numberOfQueriesRaptorApproxLoopNoLimitMinMax);
         double medianNumberOfQueriesRaptorApproxLoopMinMax = Calculator::getMedian(numberOfQueriesRaptorApproxLoopMinMax);
         double medianNumberOfQueriesRaptorApproxLoopNoLimitMinMax = Calculator::getMedian(numberOfQueriesRaptorApproxLoopNoLimitMinMax);
+        double maxNumberOfQueriesRaptorApproxLoopMinMax = Calculator::getMaximum(numberOfQueriesRaptorApproxLoopMinMax);
+        double maxNumberOfQueriesRaptorApproxLoopNoLimitMinMax = Calculator::getMaximum(numberOfQueriesRaptorApproxLoopNoLimitMinMax);
 
         resultsFile << numberOfSourceStops << "," << avgMinSumDuration << "," << avgMinMaxDuration << "," << medianMinSumDuration << "," << medianMinMaxDuration << "," << maxMinSumDuration;
         resultsFile << "," << maxMinMaxDuration << "," << minMinSumDuration << "," << minMinMaxDuration;
@@ -2245,9 +2251,11 @@ void RaptorApproximationAlgorithmTester::compareRaptorApproximationAlgorithms(Da
 
         resultsFile << "," << avgNumberOfRoundsRaptorApproxLoopMinMax << "," << avgNumberOfRoundsRaptorApproxLoopNoLimitMinMax;
         resultsFile << "," << medianNumberOfRoundsRaptorApproxLoopMinMax << "," << medianNumberOfRoundsRaptorApproxLoopNoLimitMinMax;
+        resultsFile << "," << maxNumberOfRoundsRaptorApproxLoopMinMax << "," << maxNumberOfRoundsRaptorApproxLoopNoLimitMinMax;
 
         resultsFile << "," << avgNumberOfQueriesRaptorApproxLoopMinMax << "," << avgNumberOfQueriesRaptorApproxLoopNoLimitMinMax;
         resultsFile << "," << medianNumberOfQueriesRaptorApproxLoopMinMax << "," << medianNumberOfQueriesRaptorApproxLoopNoLimitMinMax;
+        resultsFile << "," << maxNumberOfQueriesRaptorApproxLoopMinMax << "," << maxNumberOfQueriesRaptorApproxLoopNoLimitMinMax;
 
         resultsFile << "\n";
 
@@ -2351,11 +2359,15 @@ void RaptorApproximationAlgorithmTester::compareRaptorApproximationAlgorithms(Da
         cout << "Average number of rounds raptor approx loop no limit min max: " << avgNumberOfRoundsRaptorApproxLoopNoLimitMinMax << endl;
         cout << "Median number of rounds raptor approx loop min max: " << medianNumberOfRoundsRaptorApproxLoopMinMax << endl;
         cout << "Median number of rounds raptor approx loop no limit min max: " << medianNumberOfRoundsRaptorApproxLoopNoLimitMinMax << endl;
+        cout << "Maximum number of rounds raptor approx loop min max: " << maxNumberOfRoundsRaptorApproxLoopMinMax << endl;
+        cout << "Maximum number of rounds raptor approx loop no limit min max: " << maxNumberOfRoundsRaptorApproxLoopNoLimitMinMax << endl;
 
         cout << "\nAverage number of queries raptor approx loop min max: " << avgNumberOfQueriesRaptorApproxLoopMinMax << endl;
         cout << "Average number of queries raptor approx loop no limit min max: " << avgNumberOfQueriesRaptorApproxLoopNoLimitMinMax << endl;
         cout << "Median number of queries raptor approx loop min max: " << medianNumberOfQueriesRaptorApproxLoopMinMax << endl;
         cout << "Median number of queries raptor approx loop no limit min max: " << medianNumberOfQueriesRaptorApproxLoopNoLimitMinMax << endl;
+        cout << "Maximum number of queries raptor approx loop min max: " << maxNumberOfQueriesRaptorApproxLoopMinMax << endl;
+        cout << "Maximum number of queries raptor approx loop no limit min max: " << maxNumberOfQueriesRaptorApproxLoopNoLimitMinMax << endl;
 
         cout << "\n\n";
     }
