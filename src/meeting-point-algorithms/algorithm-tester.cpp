@@ -2445,7 +2445,7 @@ void RaptorApproximationAlgorithmTester::testRaptorApproximationAlgorithmForLarg
                     meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(numberOfSourceStops);
                 }
 
-                int maxNumberOfRoundsRaptorApproxLoopMinMax = 50;
+                int maxNumberOfRoundsRaptorApproxLoopMinMax = numberOfSourceStops;
                 unique_ptr<RaptorApproximationQueryProcessor> raptorApproximationQueryProcessorApproxLoopMinMax = unique_ptr<RaptorApproximationQueryProcessor> (new RaptorApproximationQueryProcessor(meetingPointQuery));
                 raptorApproximationQueryProcessorApproxLoopMinMax->processRaptorApproximationLoopQuery(maxNumberOfRoundsRaptorApproxLoopMinMax);
                 MeetingPointQueryResult meetingPointQueryResultRaptorApproxLoopMinMax = raptorApproximationQueryProcessorApproxLoopMinMax->getMeetingPointQueryResult();
