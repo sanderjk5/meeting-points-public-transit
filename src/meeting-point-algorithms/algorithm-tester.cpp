@@ -1972,7 +1972,7 @@ void RaptorApproximationAlgorithmTester::compareRaptorApproximationAlgorithms(Da
                     continue;
                 }
 
-                int maxNumberOfRoundsRaptorApproxLoopMinMax = numberOfSourceStops / 4;
+                int maxNumberOfRoundsRaptorApproxLoopMinMax = numberOfSourceStops / 2;
                 unique_ptr<RaptorApproximationQueryProcessor> raptorApproximationQueryProcessorApproxLoopMinMax = unique_ptr<RaptorApproximationQueryProcessor> (new RaptorApproximationQueryProcessor(meetingPointQuery));
                 raptorApproximationQueryProcessorApproxLoopMinMax->processRaptorApproximationLoopQuery(maxNumberOfRoundsRaptorApproxLoopMinMax);
                 MeetingPointQueryResult meetingPointQueryResultRaptorApproxLoopMinMax = raptorApproximationQueryProcessorApproxLoopMinMax->getMeetingPointQueryResult();
