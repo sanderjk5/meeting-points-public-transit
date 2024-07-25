@@ -127,7 +127,7 @@ int main(int argc, const char *argv[]) {
 
     // ExperimentController::compareRaptorApproxAlgorithms(dataType, 20, numberOfSourceStops);
 
-    numberOfSourceStops = {500, 1000};
+    numberOfSourceStops = {500, 1000, 2000};
 
     ExperimentController::testRaptorApproxAlgorithmForLargeNofSources(dataType, 20, numberOfSourceStops);
 
