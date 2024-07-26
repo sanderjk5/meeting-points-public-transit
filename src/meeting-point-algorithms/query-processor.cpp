@@ -2305,6 +2305,12 @@ void RaptorApproximationQueryProcessor::processRaptorApproximationLoopQuery(int 
                     exactSources.push_back(stopId);
                 }
             }
+
+            if (exactSources.size() == 0) {
+                finished = true;
+                wrongResult = true;
+                break;
+            }
         } else {
             finished = true;
             wrongResult = false;
