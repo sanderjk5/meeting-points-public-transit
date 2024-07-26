@@ -2299,7 +2299,11 @@ void RaptorApproximationQueryProcessor::processRaptorApproximationLoopQuery(int 
 
             exactSources = vector<int>(0);
             for (int i = 0; i < numberOfExactSourcesNextRound; i++) {
-                exactSources.push_back(sourceStopsWithErrorAndDuration[i].first);
+                int stopId = sourceStopsWithErrorAndDuration[i].first;
+                // check if stopId is already in exactSourcesIds
+                if (find(exactSourcesIds.begin(), exactSourcesIds.end(), stopId) == exactSourcesIds.end()) {
+                    exactSources.push_back(stopId);
+                }
             }
         } else {
             finished = true;
