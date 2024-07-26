@@ -113,7 +113,7 @@ int main(int argc, const char *argv[]) {
     // vector<int> numberOfSourceStops = {2, 3, 5};
     // vector<int> numberOfSourceStops = {10};
     // vector<int> numberOfSourceStops = {2, 3, 5, 10};
-    vector<int> numberOfSourceStops = {75, 100};
+    vector<int> numberOfSourceStops = {25, 150};
 
     // ExperimentController::testRaptorNaiveAlgorithmMultipleResult(500, numberOfSourceStops);
 
@@ -129,7 +129,7 @@ int main(int argc, const char *argv[]) {
 
     numberOfSourceStops = {500, 1000};
 
-    // ExperimentController::testRaptorApproxAlgorithmForLargeNofSources(dataType, 20, numberOfSourceStops);
+    ExperimentController::testRaptorApproxAlgorithmForLargeNofSources(dataType, 100, numberOfSourceStops);
 
     // ExperimentController::compareRaptorEATAlgorithms(dataType, 2500);
 
