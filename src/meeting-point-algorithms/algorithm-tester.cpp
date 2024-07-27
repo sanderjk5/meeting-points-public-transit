@@ -2456,9 +2456,10 @@ void RaptorApproximationAlgorithmTester::testRaptorApproximationAlgorithmForLarg
 
                 successfulQueryCounter++;
 
-                queryTimesRaptorApproxMinMaxLoop.push_back(meetingPointQueryResultRaptorApproxLoopMinMax.queryTime);
+                // queryTimesRaptorApproxMinMaxLoop.push_back(meetingPointQueryResultRaptorApproxLoopMinMax.queryTime);
                 if (!raptorApproximationQueryProcessorApproxLoopMinMax->wrongResult) {
                     raptorApproxMinMaxLoopCorrectCounter++;
+                    queryTimesRaptorApproxMinMaxLoop.push_back(meetingPointQueryResultRaptorApproxLoopMinMax.queryTime);
                     numberOfRoundsRaptorApproxMinMaxLoop.push_back((double) raptorApproximationQueryProcessorApproxLoopMinMax->numberOfRounds);
                     numberOfQueriesRaptorApproxMinMaxLoop.push_back((double) raptorApproximationQueryProcessorApproxLoopMinMax->numberOfQueries);
                 }
