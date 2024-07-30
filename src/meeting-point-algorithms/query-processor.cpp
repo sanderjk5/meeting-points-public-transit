@@ -1907,6 +1907,11 @@ void RaptorApproximationQueryProcessor::calculateExactSources(int numberOfExactS
     //     exactSources.push_back(sourceIdToAverageDistance[i].first);
     // }
 
+    if (numberOfExactSourceStops == meetingPointQuery.sourceStopIds.size()){
+        exactSources = meetingPointQuery.sourceStopIds;
+        return;
+    }
+
     vector<int> minimalDistances = vector<int>(meetingPointQuery.sourceStopIds.size(), INT_MAX);
 
     // select a random source
