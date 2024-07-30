@@ -3524,7 +3524,7 @@ void AlgorithmComparer::compareAlgorithmsWithoutGTree(DataType dataType, Meeting
     raptorApproximationQueryProcessorMinMaxCandidatesWoVer.processRaptorApproximationQuery(min_max, true, false);
     MeetingPointQueryResult meetingPointQueryResultRaptorApproximationMinMaxCandidatesWoVer = raptorApproximationQueryProcessorMinMaxCandidatesWoVer.getMeetingPointQueryResult();
 
-    int maxNumberOfQueries = meetingPointQuery.sourceStopIds.size() / 4;
+    int maxNumberOfQueries = meetingPointQuery.sourceStopIds.size();
     RaptorApproximationQueryProcessor raptorApproximationQueryProcessorMinMaxLoop = RaptorApproximationQueryProcessor(meetingPointQuery);
     raptorApproximationQueryProcessorMinMaxLoop.processRaptorApproximationLoopQuery(maxNumberOfQueries);
     MeetingPointQueryResult meetingPointQueryResultRaptorApproximationMinMaxLoop = raptorApproximationQueryProcessorMinMaxLoop.getMeetingPointQueryResult();
@@ -3546,10 +3546,10 @@ void AlgorithmComparer::compareAlgorithmsWithoutGTree(DataType dataType, Meeting
     //     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultNaiveKeyStop);
     // }
 
-    cout << "Raptor Until First Result: " << endl;
+    cout << "Raptor First: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultRaptor);
 
-    cout << "Raptor Optimal Result: " << endl;
+    cout << "Naive Raptor: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultRaptorOptimal);
 
     cout << "Raptor Bound - Min Sum: " << endl;
@@ -3564,7 +3564,7 @@ void AlgorithmComparer::compareAlgorithmsWithoutGTree(DataType dataType, Meeting
     cout << "Raptor PQ - Min Max: " << endl;
     PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorPQMinMax, min_max);
 
-    cout << "Raptor Approximation - Min Sum: " << endl;
+    cout << "Raptor Select - Min Sum: " << endl;
     if (raptorApproximationQueryProcessorMinSum.wrongResult) {
         cout << "Min sum: wrong result!" << endl;
     } else {
@@ -3572,7 +3572,7 @@ void AlgorithmComparer::compareAlgorithmsWithoutGTree(DataType dataType, Meeting
     }
     PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorApproximationMinSum, min_sum);
 
-    cout << "Raptor Approximation - Min Max: " << endl;
+    cout << "Raptor Select - Min Max: " << endl;
     if (raptorApproximationQueryProcessorMinMax.wrongResult) {
         cout << "Min max: wrong result!" << endl;
     } else {
@@ -3596,13 +3596,13 @@ void AlgorithmComparer::compareAlgorithmsWithoutGTree(DataType dataType, Meeting
     // }
     // PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorApproximationMinMaxCandidates, min_max);
 
-    cout << "Raptor Approximation - Min Sum (Candidates): " << endl;
+    cout << "Raptor Select - Min Sum (Candidates): " << endl;
     PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorApproximationMinSumCandidatesWoVer, min_sum);
 
     cout << "Raptor Approximation - Min Max (Candidates): " << endl;
     PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorApproximationMinMaxCandidatesWoVer, min_max);
 
-    cout << "Raptor Approximation - Min Max (Loop): " << endl;
+    cout << "Raptor Select - Min Max (Loop): " << endl;
     if (raptorApproximationQueryProcessorMinMaxLoop.wrongResult) {
         cout << "Min max: wrong result!" << endl;
     } else {

@@ -87,7 +87,6 @@ int main(int argc, const char *argv[]) {
   Creator::loadOrCreateNetworkGraph(dataType);
   if (USE_LANDMARKS) {
     LandmarkProcessor::loadOrCalculateLandmarkDurations(dataType, true);
-    // LandmarkProcessor::countAllArrivalAndDepartureTimesOfTheLandmarks(dataType);
   }
 
   // print number of vertices and edges
@@ -99,46 +98,16 @@ int main(int argc, const char *argv[]) {
   cout << "Number of edges: " << edgeCount << "\n" << endl;
 
   if (startExperiments){
-    // ExperimentController::evaluateLowerBounds(2500, 4);
+    ExperimentController::evaluateLowerBounds(2500, 4);
 
-    // Real experiments
-    // vector<int> numberOfSourceStops = {2, 3, 5, 10, 25};
-
-    // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 1000, 25, 0.90);
-
-    // ExperimentController::findBestGTreeParameters(dataType, 10, 100);
-    // ExperimentController::testAndCompareAlgorithmsRandom(dataType, 1000, numberOfSourceStops);
-
-    // Test experiments
-    // vector<int> numberOfSourceStops = {2, 3, 5};
-    // vector<int> numberOfSourceStops = {10};
-    // vector<int> numberOfSourceStops = {2, 3, 5, 10};
-    vector<int> numberOfSourceStops = {25, 150};
-
-    // ExperimentController::testRaptorNaiveAlgorithmMultipleResult(500, numberOfSourceStops);
-
-    // ExperimentController::compareRaptorAlgorithms(dataType, 100, numberOfSourceStops);
-
-    // ExperimentController::compareRaptorPQAlgorithms(dataType, 20, numberOfSourceStops);
-
-    // ExperimentController::compareRaptorPQAlgorithms(dataType, 1000, numberOfSourceStops);
-
-    // numberOfSourceStops = {25, 100};
-
-    // ExperimentController::compareRaptorApproxAlgorithms(dataType, 100, numberOfSourceStops);
+    vector<int> numberOfSourceStops = {2, 3, 5, 7, 9, 10};
+    ExperimentController::compareRaptorPQAlgorithms(dataType, 1000, numberOfSourceStops);
+    
+    numberOfSourceStops = {25, 50, 75, 100, 150};
+    ExperimentController::compareRaptorApproxAlgorithms(dataType, 100, numberOfSourceStops);
 
     numberOfSourceStops = {500, 1000};
-
     ExperimentController::testRaptorApproxAlgorithmForLargeNofSources(dataType, 100, numberOfSourceStops);
-
-    // ExperimentController::compareRaptorEATAlgorithms(dataType, 2500);
-
-    // ExperimentController::compareRaptorEATAlgorithms(dataType, 200);
-
-    // NaiveKeyStopQueryProcessor::findKeyStops(dataType, numberOfSourceStops, 2000, 100, 0.95);
-
-    // ExperimentController::findBestGTreeParameters(dataType, 2, 10);
-    // ExperimentController::testAndCompareAlgorithmsRandom(dataType, 10, numberOfSourceStops);
   } else {
     
     int numberOfChildrenPerNode;

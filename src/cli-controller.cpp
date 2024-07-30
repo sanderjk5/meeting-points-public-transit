@@ -95,7 +95,7 @@ void CliController::runCli(DataType dataType, GTree* gTree) {
         bool validAlgorithm = false;
         string algorithm;
         while(!validAlgorithm) {
-            cout << "Which algorithm do you want to use? \nThe options are (enter the abbrevation): compare all algorithms (a), naive algorithm (n), raptor first algorithm (r), raptor pq algorithm (q), raptor bound algorithm (b), raptor approximation algorithm (x), raptor approximation algorithm with candidates (c)." << endl;
+            cout << "Which algorithm do you want to use? \nThe options are (enter the abbrevation): compare all algorithms (a), naive raptor algorithm (n), raptor first algorithm (r), raptor pq algorithm (q), raptor bound algorithm (b), raptor select algorithm (x), raptor select algorithm with candidates (c), raptor select loop algorithm (l)." << endl;
             getline(cin, algorithm);
             if (algorithm == "a" || algorithm == "n" || algorithm == "r" || algorithm == "q" || algorithm == "b" || algorithm == "x" || algorithm == "c" || algorithm == "l") {
                 validAlgorithm = true;
