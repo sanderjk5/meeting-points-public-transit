@@ -143,6 +143,9 @@ class RaptorQueryProcessor {
 
         double numberOfExpandedRoutes;
 
+        int multipleResultMinSum;
+        int multipleResultMinMax;
+
     private:
         MeetingPointQuery meetingPointQuery;
         MeetingPointQueryResult meetingPointQueryResult;

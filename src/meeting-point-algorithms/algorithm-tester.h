@@ -50,6 +50,7 @@ class RaptorAlgorithmTester {
         ~RaptorAlgorithmTester(){};
 
         static void testRaptorAlgorithmRandom(int numberOfSuccessfulQueries, int numberOfSources, bool printOnlySuccessful = false);
+        static void testRaptorNaiveAlgorithmRandom(int numberOfSuccessfulQueries, vector<int> numberOfSources);
         static void testRaptorAlgorithm(MeetingPointQuery meetingPointQuery, bool printJourneys = true);
         static void testRaptorFirstAlgorithm(MeetingPointQuery meetingPointQuery, bool printJourneys = true);
         static void compareRaptorAlgorithms(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSources, bool loadOrStoreQueries);
@@ -78,6 +79,7 @@ class RaptorApproximationAlgorithmTester {
         ~RaptorApproximationAlgorithmTester(){};
 
         static void testRaptorApproximationAlgorithm(MeetingPointQuery meetingPointQuery, bool useCandidates);
+        static void testRaptorLoopAlgorithm(MeetingPointQuery meetingPointQuery);
         static void compareRaptorApproximationAlgorithms(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSources, bool loadOrStoreQueries);
         static void testRaptorApproximationAlgorithmForLargeNofSources(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSources, bool loadOrStoreQueries);
 };

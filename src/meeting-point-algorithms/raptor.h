@@ -155,7 +155,7 @@ class RaptorBound {
 
         void processRaptorRound();
         void setCurrentBest(int currentBest);
-        void initializeHeuristic(map<int, vector<int>> sourceStopIdsToAllStops, vector<int> sourceStopIds);
+        void initializeHeuristic(map<int, vector<int>> sourceStopIdsToAllStops, vector<int> sourceStopIds, int baseHeuristic, vector<int> closestLandmarkIndices);
 
         bool isFinished();
 
@@ -191,6 +191,7 @@ class RaptorBound {
         vector<int> sourceStopIds;
         int numberOfSourceStopIds;
         double baseHeuristic;
+        vector<int> closestLandmarkIndices;
 
         vector<int> heuristicPerStopId;
 
@@ -221,7 +222,7 @@ class RaptorPQ {
         void initializeRaptorPQ();
         void transformRaptorToRaptorPQ(shared_ptr<Raptor> raptor);
         void setCurrentBest(int currentBest);
-        void initializeHeuristic(map<int, vector<int>> sourceStopIdsToAllStops, vector<int> sourceStopIds);
+        void initializeHeuristic(map<int, vector<int>> sourceStopIdsToAllStops, vector<int> sourceStopIds, int baseHeuristic, vector<int> closestLandmarkIndices);
         void processRaptorPQ();
         bool isFinished();
 
@@ -266,6 +267,7 @@ class RaptorPQ {
         vector<int> sourceStopIds;
         int numberOfSourceStopIds;
         double baseHeuristic;
+        vector<int> closestLandmarkIndices;
 
         vector<int> heuristicPerStopId;
         
@@ -340,10 +342,11 @@ class RaptorPQParallel {
 
 class RaptorBoundStar {
     public:
-        explicit RaptorBoundStar(RaptorQuery query, vector<int> targetStopIdToAllStops){
+        explicit RaptorBoundStar(RaptorQuery query, vector<int> targetStopIdToAllStops, vector<int> landmarkIndices){
             this->query = query;
             this->targetStopId = query.targetStopIds[0];  
             this->targetStopIdToAllStops = targetStopIdToAllStops;
+            this->landmarkIndices = landmarkIndices;
             this->initializeRaptorBound();
         };
         ~RaptorBoundStar(){};
@@ -380,6 +383,8 @@ class RaptorBoundStar {
 
         vector<int> heuristicPerStopId;
 
+        vector<int> landmarkIndices;
+
         void initializeRaptorBound();
         void fillQ();
         void traverseRoutes();
@@ -388,7 +393,7 @@ class RaptorBoundStar {
 
 class RaptorPQStar {
     public:
-        explicit RaptorPQStar(RaptorQuery query, vector<int> targetStopIdToAllStops){
+        explicit RaptorPQStar(RaptorQuery query, vector<int> targetStopIdToAllStops, vector<int> landmarkIndices){
             this->query = query;
             this->targetStopId = query.targetStopIds[0];
             this->targetStopIdToAllStops = targetStopIdToAllStops;
@@ -425,6 +430,8 @@ class RaptorPQStar {
         vector<int> extendedSourceStopIds;
 
         vector<int> targetStopIdToAllStops;
+
+        vector<int> landmarkIndices;
         
         void traverseRoute();
         void addRoutesToQueue(set<int> stopIds, int excludeRouteId);

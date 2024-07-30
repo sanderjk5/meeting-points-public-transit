@@ -2,6 +2,7 @@
 
 #include "raptor.h"
 #include "journey.h"
+#include "landmark-processor.h"
 #include "../constants.h"
 #include <../data-handling/importer.h>
 #include <../data-handling/converter.h>
@@ -40,11 +41,14 @@ void RaptorStarBoundQueryProcessor::processRaptorStarBoundQuery() {
     auto start = chrono::high_resolution_clock::now();
     map<int, vector<int>> targetStopIdToAllStops;
 
+    vector<int> landmarkIndices = vector<int>();
+
     if (!USE_LANDMARKS) {
         targetStopIdToAllStops = Creator::networkGraph.getDistancesWithPhast(raptorStarQuery.targetStopIds);
+        landmarkIndices = LandmarkProcessor::getTopKLandmarks(NUMBER_OF_LANDMARKS, raptorStarQuery.sourceStopId, raptorStarQuery.targetStopIds[0]);
     }
 
-    raptorBoundStar = shared_ptr<RaptorBoundStar> (new RaptorBoundStar(raptorStarQuery, targetStopIdToAllStops[raptorStarQuery.targetStopIds[0]]));
+    raptorBoundStar = shared_ptr<RaptorBoundStar> (new RaptorBoundStar(raptorStarQuery, targetStopIdToAllStops[raptorStarQuery.targetStopIds[0]], landmarkIndices));
     raptorBoundStar->processRaptorBoundStar();
 
     auto end = chrono::high_resolution_clock::now();
@@ -76,11 +80,14 @@ void RaptorStarPQQueryProcessor::processRaptorStarPQQuery() {
     auto start = chrono::high_resolution_clock::now();
     map<int, vector<int>> targetStopIdToAllStops;
 
+    vector<int> landmarkIndices = vector<int>();
+
     if (!USE_LANDMARKS) {
         targetStopIdToAllStops = Creator::networkGraph.getDistancesWithPhast(raptorStarQuery.targetStopIds);
+        landmarkIndices = LandmarkProcessor::getTopKLandmarks(NUMBER_OF_LANDMARKS, raptorStarQuery.sourceStopId, raptorStarQuery.targetStopIds[0]);
     }
 
-    raptorPQStar = shared_ptr<RaptorPQStar> (new RaptorPQStar(raptorStarQuery, targetStopIdToAllStops[raptorStarQuery.targetStopIds[0]]));
+    raptorPQStar = shared_ptr<RaptorPQStar> (new RaptorPQStar(raptorStarQuery, targetStopIdToAllStops[raptorStarQuery.targetStopIds[0]], landmarkIndices));
     raptorPQStar->processRaptorPQStar();
 
     auto end = chrono::high_resolution_clock::now();

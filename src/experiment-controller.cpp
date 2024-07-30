@@ -126,3 +126,7 @@ void ExperimentController::compareRaptorEATAlgorithms(DataType dataType, int num
 void ExperimentController::evaluateLowerBounds(int numberOfSources, int numberOfTargetsPerSource) {
     LowerBoundTester::getLowerBoundDiffs(numberOfSources, numberOfTargetsPerSource);
 }
+
+void ExperimentController::testRaptorNaiveAlgorithmMultipleResult(int numberOfSuccessfulQueries, vector<int> numberOfSources) {
+    RaptorAlgorithmTester::testRaptorNaiveAlgorithmRandom(numberOfSuccessfulQueries, numberOfSources);
+}

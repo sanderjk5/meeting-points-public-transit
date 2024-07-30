@@ -287,6 +287,57 @@ void RaptorAlgorithmTester::testRaptorAlgorithmRandom(int numberOfSuccessfulQuer
     cout << "Rate of successful queries: " << rateOfSuccessfulQueries << endl;
 }
 
+void RaptorAlgorithmTester::testRaptorNaiveAlgorithmRandom(int numberOfSuccessfulQueries, vector<int> numberOfSources) {
+    for (int j = 0; j < numberOfSources.size(); j++) {
+        int currentNumberOfSources = numberOfSources[j];
+
+        cout << "Process queries for " << currentNumberOfSources << " source stops." << endl;
+
+        int successfulQueryCounter = 0;
+        int multipleResultCounterMinSum = 0;
+        int multipleResultCounterMinMax = 0;
+
+        int maxMultipleResultMinSum = 0;
+        int maxMultipleResultMinMax = 0;
+
+        for (int i = 0; i < numberOfSuccessfulQueries; i++) {
+            MeetingPointQuery meetingPointQuery = QueryGenerator::generateRandomMeetingPointQuery(currentNumberOfSources);
+            
+            unique_ptr<RaptorQueryProcessor> raptorQueryProcessorOptimal = unique_ptr<RaptorQueryProcessor> (new RaptorQueryProcessor(meetingPointQuery));
+            raptorQueryProcessorOptimal->processRaptorQuery();
+            MeetingPointQueryResult meetingPointQueryResultRaptorOptimal = raptorQueryProcessorOptimal->getMeetingPointQueryResult();
+
+            if (meetingPointQueryResultRaptorOptimal.meetingPointMinSum != "" && meetingPointQueryResultRaptorOptimal.meetingPointMinMax != "") {
+                successfulQueryCounter++;
+            }
+
+            if (raptorQueryProcessorOptimal->multipleResultMinSum > 1){
+                multipleResultCounterMinSum++;
+            }
+
+            if (raptorQueryProcessorOptimal->multipleResultMinSum > maxMultipleResultMinSum){
+                maxMultipleResultMinSum = raptorQueryProcessorOptimal->multipleResultMinSum;
+            }
+
+            if (raptorQueryProcessorOptimal->multipleResultMinMax > 1){
+                multipleResultCounterMinMax++;
+            }
+
+            if (raptorQueryProcessorOptimal->multipleResultMinMax > maxMultipleResultMinMax){
+                maxMultipleResultMinMax = raptorQueryProcessorOptimal->multipleResultMinMax;
+            }
+        }
+
+        double rateOfMultipleResultMinSum = (double) multipleResultCounterMinSum / numberOfSuccessfulQueries;
+        double rateOfMultipleResultMinMax = (double) multipleResultCounterMinMax / numberOfSuccessfulQueries;
+
+        cout << "Rate of multiple results min sum: " << rateOfMultipleResultMinSum << endl;
+        cout << "Rate of multiple results min max: " << rateOfMultipleResultMinMax << endl;
+        cout << "Max multiple results min sum: " << maxMultipleResultMinSum << endl;
+        cout << "Max multiple results min max: " << maxMultipleResultMinMax << endl;
+    }
+}
+
 void RaptorAlgorithmTester::testRaptorAlgorithm(MeetingPointQuery meetingPointQuery, bool printJourneys) {
     PrintHelper::printMeetingPointQuery(meetingPointQuery);
 
@@ -1727,6 +1778,22 @@ void RaptorApproximationAlgorithmTester::testRaptorApproximationAlgorithm(Meetin
     PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultMinMax, min_max);
 }
 
+void RaptorApproximationAlgorithmTester::testRaptorLoopAlgorithm(MeetingPointQuery meetingPointQuery) {
+    PrintHelper::printMeetingPointQuery(meetingPointQuery);
+
+    int maxNumberOfSourcesRaptorApproxLoopMinMax = meetingPointQuery.sourceStopIds.size();
+    unique_ptr<RaptorApproximationQueryProcessor> raptorApproximationQueryProcessorApproxLoopMinMax = unique_ptr<RaptorApproximationQueryProcessor> (new RaptorApproximationQueryProcessor(meetingPointQuery));
+    raptorApproximationQueryProcessorApproxLoopMinMax->processRaptorApproximationLoopQuery(maxNumberOfSourcesRaptorApproxLoopMinMax);
+    MeetingPointQueryResult meetingPointQueryResultRaptorApproxLoopMinMax = raptorApproximationQueryProcessorApproxLoopMinMax->getMeetingPointQueryResult();
+    if (raptorApproximationQueryProcessorApproxLoopMinMax->wrongResult) {
+        cout << "Min max: wrong result!" << endl;
+    } else {
+        cout << "Min max: correct result!" << endl;
+    }
+    PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorApproxLoopMinMax, min_max);
+
+}
+
 void RaptorApproximationAlgorithmTester::compareRaptorApproximationAlgorithms(DataType dataType, int numberOfSuccessfulQueries, vector<int> numberOfSources, bool loadOrStoreQueries) {
     string dataTypeString = Importer::getDataTypeString(dataType);
     string folderPathResults = FOLDER_PREFIX + "tests/" + dataTypeString + "/results/";
@@ -1766,8 +1833,10 @@ void RaptorApproximationAlgorithmTester::compareRaptorApproximationAlgorithms(Da
 
     resultsFile << ",avgNumberOfRoundsRaptorApproxLoopMinMax,avgNumberOfRoundsRaptorApproxLoopNoLimitMinMax";
     resultsFile << ",medianNumberOfRoundsRaptorApproxLoopMinMax,medianNumberOfRoundsRaptorApproxLoopNoLimitMinMax";
+    resultsFile << ",maxNumberOfRoundsRaptorApproxLoopMinMax,maxNumberOfRoundsRaptorApproxLoopNoLimitMinMax";
     resultsFile << ",avgNumberOfQueriesRaptorApproxLoopMinMax,avgNumberOfQueriesRaptorApproxLoopNoLimitMinMax";
     resultsFile << ",medianNumberOfQueriesRaptorApproxLoopMinMax,medianNumberOfQueriesRaptorApproxLoopNoLimitMinMax";
+    resultsFile << ",maxNumberOfQueriesRaptorApproxLoopMinMax,maxNumberOfQueriesRaptorApproxLoopNoLimitMinMax";
 
     resultsFile << "\n";
 
@@ -1903,7 +1972,7 @@ void RaptorApproximationAlgorithmTester::compareRaptorApproximationAlgorithms(Da
                     continue;
                 }
 
-                int maxNumberOfRoundsRaptorApproxLoopMinMax = numberOfSourceStops / 4;
+                int maxNumberOfRoundsRaptorApproxLoopMinMax = numberOfSourceStops / 2;
                 unique_ptr<RaptorApproximationQueryProcessor> raptorApproximationQueryProcessorApproxLoopMinMax = unique_ptr<RaptorApproximationQueryProcessor> (new RaptorApproximationQueryProcessor(meetingPointQuery));
                 raptorApproximationQueryProcessorApproxLoopMinMax->processRaptorApproximationLoopQuery(maxNumberOfRoundsRaptorApproxLoopMinMax);
                 MeetingPointQueryResult meetingPointQueryResultRaptorApproxLoopMinMax = raptorApproximationQueryProcessorApproxLoopMinMax->getMeetingPointQueryResult();
@@ -2145,11 +2214,15 @@ void RaptorApproximationAlgorithmTester::compareRaptorApproximationAlgorithms(Da
         double avgNumberOfRoundsRaptorApproxLoopNoLimitMinMax = Calculator::getAverage(numberOfRoundsRaptorApproxLoopNoLimitMinMax);
         double medianNumberOfRoundsRaptorApproxLoopMinMax = Calculator::getMedian(numberOfRoundsRaptorApproxLoopMinMax);
         double medianNumberOfRoundsRaptorApproxLoopNoLimitMinMax = Calculator::getMedian(numberOfRoundsRaptorApproxLoopNoLimitMinMax);
+        double maxNumberOfRoundsRaptorApproxLoopMinMax = Calculator::getMaximum(numberOfRoundsRaptorApproxLoopMinMax);
+        double maxNumberOfRoundsRaptorApproxLoopNoLimitMinMax = Calculator::getMaximum(numberOfRoundsRaptorApproxLoopNoLimitMinMax);
 
         double avgNumberOfQueriesRaptorApproxLoopMinMax = Calculator::getAverage(numberOfQueriesRaptorApproxLoopMinMax);
         double avgNumberOfQueriesRaptorApproxLoopNoLimitMinMax = Calculator::getAverage(numberOfQueriesRaptorApproxLoopNoLimitMinMax);
         double medianNumberOfQueriesRaptorApproxLoopMinMax = Calculator::getMedian(numberOfQueriesRaptorApproxLoopMinMax);
         double medianNumberOfQueriesRaptorApproxLoopNoLimitMinMax = Calculator::getMedian(numberOfQueriesRaptorApproxLoopNoLimitMinMax);
+        double maxNumberOfQueriesRaptorApproxLoopMinMax = Calculator::getMaximum(numberOfQueriesRaptorApproxLoopMinMax);
+        double maxNumberOfQueriesRaptorApproxLoopNoLimitMinMax = Calculator::getMaximum(numberOfQueriesRaptorApproxLoopNoLimitMinMax);
 
         resultsFile << numberOfSourceStops << "," << avgMinSumDuration << "," << avgMinMaxDuration << "," << medianMinSumDuration << "," << medianMinMaxDuration << "," << maxMinSumDuration;
         resultsFile << "," << maxMinMaxDuration << "," << minMinSumDuration << "," << minMinMaxDuration;
@@ -2178,9 +2251,11 @@ void RaptorApproximationAlgorithmTester::compareRaptorApproximationAlgorithms(Da
 
         resultsFile << "," << avgNumberOfRoundsRaptorApproxLoopMinMax << "," << avgNumberOfRoundsRaptorApproxLoopNoLimitMinMax;
         resultsFile << "," << medianNumberOfRoundsRaptorApproxLoopMinMax << "," << medianNumberOfRoundsRaptorApproxLoopNoLimitMinMax;
+        resultsFile << "," << maxNumberOfRoundsRaptorApproxLoopMinMax << "," << maxNumberOfRoundsRaptorApproxLoopNoLimitMinMax;
 
         resultsFile << "," << avgNumberOfQueriesRaptorApproxLoopMinMax << "," << avgNumberOfQueriesRaptorApproxLoopNoLimitMinMax;
         resultsFile << "," << medianNumberOfQueriesRaptorApproxLoopMinMax << "," << medianNumberOfQueriesRaptorApproxLoopNoLimitMinMax;
+        resultsFile << "," << maxNumberOfQueriesRaptorApproxLoopMinMax << "," << maxNumberOfQueriesRaptorApproxLoopNoLimitMinMax;
 
         resultsFile << "\n";
 
@@ -2284,11 +2359,15 @@ void RaptorApproximationAlgorithmTester::compareRaptorApproximationAlgorithms(Da
         cout << "Average number of rounds raptor approx loop no limit min max: " << avgNumberOfRoundsRaptorApproxLoopNoLimitMinMax << endl;
         cout << "Median number of rounds raptor approx loop min max: " << medianNumberOfRoundsRaptorApproxLoopMinMax << endl;
         cout << "Median number of rounds raptor approx loop no limit min max: " << medianNumberOfRoundsRaptorApproxLoopNoLimitMinMax << endl;
+        cout << "Maximum number of rounds raptor approx loop min max: " << maxNumberOfRoundsRaptorApproxLoopMinMax << endl;
+        cout << "Maximum number of rounds raptor approx loop no limit min max: " << maxNumberOfRoundsRaptorApproxLoopNoLimitMinMax << endl;
 
         cout << "\nAverage number of queries raptor approx loop min max: " << avgNumberOfQueriesRaptorApproxLoopMinMax << endl;
         cout << "Average number of queries raptor approx loop no limit min max: " << avgNumberOfQueriesRaptorApproxLoopNoLimitMinMax << endl;
         cout << "Median number of queries raptor approx loop min max: " << medianNumberOfQueriesRaptorApproxLoopMinMax << endl;
         cout << "Median number of queries raptor approx loop no limit min max: " << medianNumberOfQueriesRaptorApproxLoopNoLimitMinMax << endl;
+        cout << "Maximum number of queries raptor approx loop min max: " << maxNumberOfQueriesRaptorApproxLoopMinMax << endl;
+        cout << "Maximum number of queries raptor approx loop no limit min max: " << maxNumberOfQueriesRaptorApproxLoopNoLimitMinMax << endl;
 
         cout << "\n\n";
     }
@@ -2310,8 +2389,8 @@ void RaptorApproximationAlgorithmTester::testRaptorApproximationAlgorithmForLarg
     resultsFile << "numberOfSourceStops";
     resultsFile << ",avgQueryTimeRaptorApproxMinMaxLoop,medianQueryTimeRaptorApproxMinMaxLoop,maxQueryTimeRaptorApproxMinMaxLoop,minQueryTimeRaptorApproxMinMaxLoop";
     resultsFile << ",accuracyRaptorApproxMinMaxLoop";
-    resultsFile << ",avgNumberOfRoundsRaptorApproxMinMaxLoop,medianNumberOfRoundsRaptorApproxMinMaxLoop";
-    resultsFile << ",avgNumberOfQueriesRaptorApproxMinMaxLoop,medianNumberOfQueriesRaptorApproxMinMaxLoop";
+    resultsFile << ",avgNumberOfRoundsRaptorApproxMinMaxLoop,medianNumberOfRoundsRaptorApproxMinMaxLoop,maxNumberOfRoundsRaptorApproxMinMaxLoop";
+    resultsFile << ",avgNumberOfQueriesRaptorApproxMinMaxLoop,medianNumberOfQueriesRaptorApproxMinMaxLoop,maxNumberOfQueriesRaptorApproxMinMaxLoop";
 
     resultsFile << "\n";
 
@@ -2377,9 +2456,10 @@ void RaptorApproximationAlgorithmTester::testRaptorApproximationAlgorithmForLarg
 
                 successfulQueryCounter++;
 
-                queryTimesRaptorApproxMinMaxLoop.push_back(meetingPointQueryResultRaptorApproxLoopMinMax.queryTime);
+                // queryTimesRaptorApproxMinMaxLoop.push_back(meetingPointQueryResultRaptorApproxLoopMinMax.queryTime);
                 if (!raptorApproximationQueryProcessorApproxLoopMinMax->wrongResult) {
                     raptorApproxMinMaxLoopCorrectCounter++;
+                    queryTimesRaptorApproxMinMaxLoop.push_back(meetingPointQueryResultRaptorApproxLoopMinMax.queryTime);
                     numberOfRoundsRaptorApproxMinMaxLoop.push_back((double) raptorApproximationQueryProcessorApproxLoopMinMax->numberOfRounds);
                     numberOfQueriesRaptorApproxMinMaxLoop.push_back((double) raptorApproximationQueryProcessorApproxLoopMinMax->numberOfQueries);
                 }
@@ -2420,14 +2500,16 @@ void RaptorApproximationAlgorithmTester::testRaptorApproximationAlgorithmForLarg
 
         double avgNumberOfRoundsRaptorApproxMinMaxLoop = Calculator::getAverage(numberOfRoundsRaptorApproxMinMaxLoop);
         double medianNumberOfRoundsRaptorApproxMinMaxLoop = Calculator::getMedian(numberOfRoundsRaptorApproxMinMaxLoop);
+        double maxNumberOfRoundsRaptorApproxMinMaxLoop = Calculator::getMaximum(numberOfRoundsRaptorApproxMinMaxLoop); 
 
         double avgNumberOfQueriesRaptorApproxMinMaxLoop = Calculator::getAverage(numberOfQueriesRaptorApproxMinMaxLoop);
         double medianNumberOfQueriesRaptorApproxMinMaxLoop = Calculator::getMedian(numberOfQueriesRaptorApproxMinMaxLoop);
+        double maxNumberOfQueriesRaptorApproxMinMaxLoop = Calculator::getMaximum(numberOfQueriesRaptorApproxMinMaxLoop);
 
         resultsFile << numberOfSourceStops << "," << avgQueryTimeRaptorApproxMinMaxLoop << "," << medianQueryTimeRaptorApproxMinMaxLoop << "," << maxQueryTimeRaptorApproxMinMaxLoop << "," << minQueryTimeRaptorApproxMinMaxLoop;
         resultsFile << "," << accuracyRaptorApproxMinMaxLoop;
-        resultsFile << "," << avgNumberOfRoundsRaptorApproxMinMaxLoop << "," << medianNumberOfRoundsRaptorApproxMinMaxLoop;
-        resultsFile << "," << avgNumberOfQueriesRaptorApproxMinMaxLoop << "," << medianNumberOfQueriesRaptorApproxMinMaxLoop;
+        resultsFile << "," << avgNumberOfRoundsRaptorApproxMinMaxLoop << "," << medianNumberOfRoundsRaptorApproxMinMaxLoop << "," << maxNumberOfRoundsRaptorApproxMinMaxLoop;
+        resultsFile << "," << avgNumberOfQueriesRaptorApproxMinMaxLoop << "," << medianNumberOfQueriesRaptorApproxMinMaxLoop << "," << maxNumberOfQueriesRaptorApproxMinMaxLoop;
 
         resultsFile << "\n";
 
@@ -2441,9 +2523,11 @@ void RaptorApproximationAlgorithmTester::testRaptorApproximationAlgorithmForLarg
 
         cout << "\nAverage number of rounds raptor approx min max loop: " << avgNumberOfRoundsRaptorApproxMinMaxLoop << endl;
         cout << "Median number of rounds raptor approx min max loop: " << medianNumberOfRoundsRaptorApproxMinMaxLoop << endl;
+        cout << "Max number of rounds raptor approx min max loop: " << maxNumberOfRoundsRaptorApproxMinMaxLoop << endl;
 
         cout << "\nAverage number of queries raptor approx min max loop: " << avgNumberOfQueriesRaptorApproxMinMaxLoop << endl;
         cout << "Median number of queries raptor approx min max loop: " << medianNumberOfQueriesRaptorApproxMinMaxLoop << endl;
+        cout << "Max number of queries raptor approx min max loop: " << maxNumberOfQueriesRaptorApproxMinMaxLoop << endl;
 
         cout << "\n\n";
     }
@@ -3440,7 +3524,7 @@ void AlgorithmComparer::compareAlgorithmsWithoutGTree(DataType dataType, Meeting
     raptorApproximationQueryProcessorMinMaxCandidatesWoVer.processRaptorApproximationQuery(min_max, true, false);
     MeetingPointQueryResult meetingPointQueryResultRaptorApproximationMinMaxCandidatesWoVer = raptorApproximationQueryProcessorMinMaxCandidatesWoVer.getMeetingPointQueryResult();
 
-    int maxNumberOfQueries = meetingPointQuery.sourceStopIds.size() / 4;
+    int maxNumberOfQueries = meetingPointQuery.sourceStopIds.size();
     RaptorApproximationQueryProcessor raptorApproximationQueryProcessorMinMaxLoop = RaptorApproximationQueryProcessor(meetingPointQuery);
     raptorApproximationQueryProcessorMinMaxLoop.processRaptorApproximationLoopQuery(maxNumberOfQueries);
     MeetingPointQueryResult meetingPointQueryResultRaptorApproximationMinMaxLoop = raptorApproximationQueryProcessorMinMaxLoop.getMeetingPointQueryResult();
@@ -3462,10 +3546,10 @@ void AlgorithmComparer::compareAlgorithmsWithoutGTree(DataType dataType, Meeting
     //     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultNaiveKeyStop);
     // }
 
-    cout << "Raptor Until First Result: " << endl;
+    cout << "Raptor First: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultRaptor);
 
-    cout << "Raptor Optimal Result: " << endl;
+    cout << "Naive Raptor: " << endl;
     PrintHelper::printMeetingPointQueryResult(meetingPointQueryResultRaptorOptimal);
 
     cout << "Raptor Bound - Min Sum: " << endl;
@@ -3480,7 +3564,7 @@ void AlgorithmComparer::compareAlgorithmsWithoutGTree(DataType dataType, Meeting
     cout << "Raptor PQ - Min Max: " << endl;
     PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorPQMinMax, min_max);
 
-    cout << "Raptor Approximation - Min Sum: " << endl;
+    cout << "Raptor Select - Min Sum: " << endl;
     if (raptorApproximationQueryProcessorMinSum.wrongResult) {
         cout << "Min sum: wrong result!" << endl;
     } else {
@@ -3488,7 +3572,7 @@ void AlgorithmComparer::compareAlgorithmsWithoutGTree(DataType dataType, Meeting
     }
     PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorApproximationMinSum, min_sum);
 
-    cout << "Raptor Approximation - Min Max: " << endl;
+    cout << "Raptor Select - Min Max: " << endl;
     if (raptorApproximationQueryProcessorMinMax.wrongResult) {
         cout << "Min max: wrong result!" << endl;
     } else {
@@ -3512,13 +3596,13 @@ void AlgorithmComparer::compareAlgorithmsWithoutGTree(DataType dataType, Meeting
     // }
     // PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorApproximationMinMaxCandidates, min_max);
 
-    cout << "Raptor Approximation - Min Sum (Candidates): " << endl;
+    cout << "Raptor Select - Min Sum (Candidates): " << endl;
     PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorApproximationMinSumCandidatesWoVer, min_sum);
 
     cout << "Raptor Approximation - Min Max (Candidates): " << endl;
     PrintHelper::printMeetingPointQueryResultOfOptimization(meetingPointQueryResultRaptorApproximationMinMaxCandidatesWoVer, min_max);
 
-    cout << "Raptor Approximation - Min Max (Loop): " << endl;
+    cout << "Raptor Select - Min Max (Loop): " << endl;
     if (raptorApproximationQueryProcessorMinMaxLoop.wrongResult) {
         cout << "Min max: wrong result!" << endl;
     } else {
